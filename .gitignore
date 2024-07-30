@@ -1,0 +1,19 @@
+# Directories
+.vs/
+Binaries/
+build/
+scenes/*
+x64/
+
+# Files
+*.vcxproj
+*.vcxproj.user
+*.vcxproj.filters
+*.sln
+*.log
+Makefile
+settings.ini
+imgui.ini
+
+# Exclude
+!dependencies/binaries
