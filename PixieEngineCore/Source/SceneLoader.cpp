@@ -1,3 +1,4 @@
+
 #include "SceneLoader.h"
 
 void SceneLoader::SaveScene(const std::string& sceneFileName, const Scene* scene) {

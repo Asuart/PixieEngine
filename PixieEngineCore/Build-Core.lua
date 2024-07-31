@@ -11,12 +11,9 @@ project "PixieEngineCore"
    {
       "Source",
       "Source/shaders",
-      "../Dependencies/glad/include",
       "../Dependencies/glm",
+      "../Dependencies/glad/include",
    }
-
-   pchheader "Source/pch.h"
-   pchsource "Source/pch.cpp"
 
    targetdir ("../Build/" .. OutputDir .. "/%{prj.name}")
    objdir ("../Build/Intermediates/" .. OutputDir .. "/%{prj.name}")

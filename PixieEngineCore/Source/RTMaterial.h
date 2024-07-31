@@ -1,8 +1,7 @@
 #pragma once
-#include "pch.h"
+#include "RTMath.h"
 #include "Ray.h"
 #include "RTTexture.h"
-#include "RTMath.h"
 #include "BSDF.h"
 #include "Material.h"
 

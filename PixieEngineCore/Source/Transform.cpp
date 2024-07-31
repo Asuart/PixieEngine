@@ -1,3 +1,4 @@
+
 #include "Transform.h"
 
 Transform::Transform() {};
@@ -46,7 +47,7 @@ Ray Transform::ApplyRay(const Ray& r, float* tMax) const {
     glm::vec3 o = (*this).ApplyPoint(glm::vec3(r.o));
     glm::vec3 d = (*this).ApplyVector(r.d);
 
-    float lengthSquared = glm::length2(d);
+    float lengthSquared = length2(d);
     if (lengthSquared > 0) {
         o += d * MachineEpsilon;
     }
@@ -58,10 +59,10 @@ RTInteraction Transform::ApplyInteraction(const RTInteraction& in) const {
     RTInteraction ret(in);
     ret.p = (*this).ApplyPoint(in.p);
     ret.n = (*this).ApplyNormal(in.n);
-    if (glm::length2(ret.n) > 0)
+    if (length2(ret.n) > 0)
         ret.n = glm::normalize(ret.n);
     ret.wo = (*this).ApplyVector(in.wo);
-    if (glm::length2(ret.wo) > 0)
+    if (length2(ret.wo) > 0)
         ret.wo = glm::normalize(ret.wo);
     return ret;
 }
@@ -105,7 +106,7 @@ Ray Transform::ApplyInverseRay(const Ray& r, float* tMax) const {
     glm::vec3 o = ApplyInversePoint(r.o);
     glm::vec3 d = ApplyInverseVector(r.d);
 
-    float lengthSquared = glm::length2(d);
+    float lengthSquared = length2(d);
     if (lengthSquared > 0) {
         o -= d * MachineEpsilon;
     }
@@ -118,10 +119,10 @@ RTInteraction Transform::ApplyInverseInteraction(const RTInteraction& in) const 
     Transform t = Inverse(*this);
     ret.p = t.ApplyPoint(in.p);
     ret.n = t.ApplyNormal(in.n);
-    if (glm::length2(ret.n) > 0)
+    if (length2(ret.n) > 0)
         ret.n = glm::normalize(ret.n);
     ret.wo = t.ApplyVector(in.wo);
-    if (glm::length2(ret.wo) > 0)
+    if (length2(ret.wo) > 0)
         ret.wo = glm::normalize(ret.wo);
     return ret;
 }
@@ -162,9 +163,9 @@ bool Transform::IsIdentity() const {
 }
 
 bool Transform::HasScale(float tolerance) const {
-    float la2 = glm::length2((*this).ApplyVector(glm::vec3(1, 0, 0)));
-    float lb2 = glm::length2((*this).ApplyVector(glm::vec3(0, 1, 0)));
-    float lc2 = glm::length2((*this).ApplyVector(glm::vec3(0, 0, 1)));
+    float la2 = length2((*this).ApplyVector(glm::vec3(1, 0, 0)));
+    float lb2 = length2((*this).ApplyVector(glm::vec3(0, 1, 0)));
+    float lc2 = length2((*this).ApplyVector(glm::vec3(0, 0, 1)));
     return (std::abs(la2 - 1) > tolerance || std::abs(lb2 - 1) > tolerance || std::abs(lc2 - 1) > tolerance);
 }
 

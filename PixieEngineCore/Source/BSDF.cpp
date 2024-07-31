@@ -127,7 +127,7 @@ glm::vec3 DielectricBxDF::f(glm::vec3 wo, glm::vec3 wi, TransportMode mode) cons
 	if (!reflect)
 		etap = cosTheta_o > 0 ? eta : (1 / eta);
 	glm::vec3 wm = wi * etap + wo;
-	if (cosTheta_i == 0 || cosTheta_o == 0 || glm::length2(wm) == 0)
+	if (cosTheta_i == 0 || cosTheta_o == 0 || length2(wm) == 0)
 		return {};
 	wm = FaceForward(glm::normalize(wm), glm::vec3(0, 0, 1));
 
@@ -161,7 +161,7 @@ float DielectricBxDF::PDF(glm::vec3 wo, glm::vec3 wi, TransportMode mode, BxDFRe
 	if (!reflect)
 		etap = cosTheta_o > 0 ? eta : (1 / eta);
 	glm::vec3 wm = wi * etap + wo;
-	if (cosTheta_i == 0 || cosTheta_o == 0 || glm::length2(wm) == 0)
+	if (cosTheta_i == 0 || cosTheta_o == 0 || length2(wm) == 0)
 		return {};
 	wm = FaceForward(glm::normalize(wm), glm::vec3(0, 0, 1));
 

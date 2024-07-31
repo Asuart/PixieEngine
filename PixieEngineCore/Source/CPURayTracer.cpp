@@ -1,3 +1,4 @@
+
 #include "CPURayTracer.h"
 
 void clear(std::queue<int>& q) {

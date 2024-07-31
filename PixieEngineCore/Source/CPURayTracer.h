@@ -1,11 +1,9 @@
 #pragma once
-#include "pch.h"
 #include "Time.h"
 #include "Film.h"
 #include "RTScene.h"
 #include "Light.h"
 #include "VisibleSurface.h"
-#include <vector>
 
 enum class CPURayTracerMode {
 	Normals = 0,

@@ -1,5 +1,4 @@
 #pragma once
-#include "pch.h"
 
 const char* const QUAD_VERTEX_SHADER_SOURCE =
 "#version 330 core\n"

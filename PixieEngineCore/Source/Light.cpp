@@ -1,3 +1,4 @@
+
 #include "Light.h"
 
 LightLiSample::LightLiSample(const glm::vec3& L, glm::vec3 wi, float pdf, const RTInteraction& pLight)
@@ -14,7 +15,7 @@ glm::vec3 DiffuseAreaLight::L(glm::vec3 p, glm::vec3 n, glm::vec2 uv, glm::vec3 
 
 std::optional<LightLiSample> DiffuseAreaLight::SampleLi(RTInteraction intr, glm::vec2 u) const {
 	std::optional<ShapeSample> ss = shape->Sample(u);
-	if (!ss || ss->pdf == 0 || glm::length2(ss->intr.p - intr.p) == 0)
+	if (!ss || ss->pdf == 0 || length2(ss->intr.p - intr.p) == 0)
 		return {};
 
 	glm::vec3 wi = glm::normalize(ss->intr.p - intr.p);

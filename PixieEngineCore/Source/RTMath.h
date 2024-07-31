@@ -1,4 +1,5 @@
 #pragma once
+#include "headers.h"
 
 const float Pi = 3.14159265358979323846;
 const float InvPi = 0.31830988618379067154;
@@ -65,3 +66,6 @@ glm::vec3 Reflect(glm::vec3 wo, glm::vec3 n);
 float gamma(int32_t n);
 
 bool isnan(const glm::vec3& v);
+
+double length2(const glm::vec2& v);
+double length2(const glm::vec3& v);

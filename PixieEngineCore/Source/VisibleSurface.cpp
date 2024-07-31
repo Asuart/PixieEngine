@@ -1,3 +1,4 @@
+
 #include "VisibleSurface.h"
 
 VisibleSurface::VisibleSurface(const RTInteraction& si, glm::vec3 albedo)

@@ -1,5 +1,4 @@
 #pragma once
-#include "pch.h"
 #include "Ray.h"
 #include "Bounds.h"
 #include "RTInteraction.h"

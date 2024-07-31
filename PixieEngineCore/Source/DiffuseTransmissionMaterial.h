@@ -1,5 +1,4 @@
 #pragma once
-#include "pch.h"
 #include "RTMaterial.h"
 
 class DiffuseTransmissionMaterial : public RTMaterial {

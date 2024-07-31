@@ -1,3 +1,4 @@
+
 #include "DiffuseMaterial.h"
 
 DiffuseMaterial::DiffuseMaterial(const std::string& name, RTTexture* texture)

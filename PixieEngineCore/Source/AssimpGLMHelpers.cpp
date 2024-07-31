@@ -1,3 +1,4 @@
+
 #include "AssimpGLMHelper.h"
 
 glm::mat4 AssimpGLMHelpers::ConvertMatrixToGLMFormat(const aiMatrix4x4& from) {

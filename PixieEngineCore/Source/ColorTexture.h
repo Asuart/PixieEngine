@@ -1,5 +1,4 @@
 #pragma once
-#include "pch.h"
 #include "RTTexture.h"
 
 class ColorTexture : public RTTexture {

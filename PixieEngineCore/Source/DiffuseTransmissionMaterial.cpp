@@ -1,3 +1,4 @@
+
 #include "DiffuseTransmissionMaterial.h"
 
 DiffuseTransmissionMaterial::DiffuseTransmissionMaterial(const std::string& name, glm::vec3 reflectance, glm::vec3 transmittance, float scale)

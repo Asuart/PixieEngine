@@ -1,6 +1,8 @@
-#pragma once
+#ifndef PIXIE_ENGINE
+#define PIXIE_ENGINE
+
 #include "UID.h"
-#include "RTMath.h"
+#include "Math.h"
 #include "Ray.h"
 #include "Bounds.h"
 #include "Transform.h"
@@ -39,3 +41,5 @@ private:
 	void Update();
 	void FixedUpdate();
 };
+
+#endif // PIXIE_ENGINE

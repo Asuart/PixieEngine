@@ -1,3 +1,4 @@
+
 #include "TrowbridgeReitzDistribution.h"
 
 TrowbridgeReitzDistribution::TrowbridgeReitzDistribution(float alpha_x, float alpha_y)
@@ -51,7 +52,7 @@ glm::vec3 TrowbridgeReitzDistribution::Sample_wm(glm::vec3 w, glm::vec2 u) const
 	float h = std::sqrt(1 - Sqr(p.x));
 	p.y = Lerp((1 + wh.z) / 2, h, p.y);
 
-	float pz = std::sqrt(std::max<float>(0, 1 - glm::length2(glm::vec2(p))));
+	float pz = std::sqrt(std::max<float>(0, 1 - length2(glm::vec2(p))));
 	glm::vec3 nh = p.x * T1 + p.y * T2 + pz * wh;
 	return glm::normalize(glm::vec3(alpha_x * nh.x, alpha_y * nh.y, std::max<float>(1e-6f, nh.z)));
 }

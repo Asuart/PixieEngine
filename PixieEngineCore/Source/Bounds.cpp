@@ -1,3 +1,4 @@
+
 #include "Bounds.h"
 
 Bounds2i::Bounds2i(glm::ivec2 p1, glm::ivec2 p2)

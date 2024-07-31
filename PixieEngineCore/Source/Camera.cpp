@@ -1,3 +1,4 @@
+
 #include "Camera.h"
 
 Camera::Camera(glm::vec3 _lookFrom, glm::vec3 _lookAt, glm::vec3 _up, float _fov, float _aspect, float _aperture, float _focusDistance, float _near, float _far)

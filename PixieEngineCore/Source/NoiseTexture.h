@@ -1,6 +1,6 @@
 #pragma once
-#include "pch.h"
 #include "RTTexture.h"
+#include "PerlinNoise.h"
 
 class NoiseTexture : public RTTexture {
 public:

@@ -1,3 +1,4 @@
+
 #include "SceneObject.h"
 
 SceneObject::SceneObject(const std::string& name, Transform transform)

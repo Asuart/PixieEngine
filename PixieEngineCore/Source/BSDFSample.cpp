@@ -1,3 +1,4 @@
+
 #include "BSDFSample.h"
 
 BSDFSample::BSDFSample(glm::vec3 f, glm::vec3 wi, float pdf, BxDFFlags flags, float eta, bool pdfIsProportional)

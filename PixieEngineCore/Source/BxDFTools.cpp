@@ -1,3 +1,4 @@
+
 #include "BxDFTools.h"
 
 bool IsReflective(BxDFFlags f) {

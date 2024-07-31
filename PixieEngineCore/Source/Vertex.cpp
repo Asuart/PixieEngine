@@ -1,3 +1,4 @@
+
 #include "Vertex.h"
 
 Vertex::Vertex(const glm::vec3& _p, const glm::vec3& _n, const glm::vec2& _uv)

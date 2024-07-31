@@ -1,5 +1,4 @@
 #pragma once
-#include "pch.h"
 #include "Textures.h"
 #include "Materials.h"
 #include "Primitive.h"

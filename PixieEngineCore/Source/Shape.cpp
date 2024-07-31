@@ -1,3 +1,4 @@
+
 #include "Shape.h"
 
 glm::vec3 SampleUniformTriangle(glm::vec2 u) {
@@ -244,9 +245,9 @@ Bounds3f Sphere::Bounds() const {
 
 bool Sphere::Intersect(const Ray& ray, RTInteraction& out_collision, float tMax) const {
 	glm::vec3 oc = ray.o - c;
-	float a = glm::length2(ray.d);
+	float a = length2(ray.d);
 	float half_b = glm::dot(oc, ray.d);
-	float c = glm::length2(oc) - r * r;
+	float c = length2(oc) - r * r;
 
 	float discriminant = half_b * half_b - a * c;
 	if (discriminant < 0) return false;
@@ -274,9 +275,9 @@ bool Sphere::Intersect(const Ray& ray, RTInteraction& out_collision, float tMax)
 
 bool Sphere::IntersectP(const Ray& ray, float tMax) const {
 	glm::vec3 oc = ray.o - c;
-	float a = glm::length2(ray.d);
+	float a = length2(ray.d);
 	float half_b = glm::dot(oc, ray.d);
-	float c = glm::length2(oc) - r * r;
+	float c = length2(oc) - r * r;
 
 	float discriminant = half_b * half_b - a * c;
 	if (discriminant < 0) return false;

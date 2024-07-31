@@ -1,5 +1,4 @@
 #pragma once
-#include "pch.h"
 #include "Scene.h"
 #include "Primitive.h"
 #include "Mesh.h"

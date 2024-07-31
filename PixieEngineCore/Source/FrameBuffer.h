@@ -1,5 +1,5 @@
 #pragma once
-#include "pch.h"
+#include "headers.h"
 
 struct FrameBuffer {
 	FrameBuffer();
@@ -11,5 +11,5 @@ struct FrameBuffer {
 
 	GLuint m_frameBuffer;
 	GLuint m_texture, m_depth;
-	glm::ivec2 m_resolution;
+	glm::ivec2 m_resolution = {1280, 720};
 };

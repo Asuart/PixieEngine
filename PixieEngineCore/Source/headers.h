@@ -1,6 +1,4 @@
-﻿#ifndef PCH_H
-#define PCH_H
-
+#pragma once
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -20,11 +18,10 @@
 #include <thread>
 #include <optional>
 #include <mutex>
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <glad/glad.h>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
@@ -45,5 +42,3 @@ typedef glm::fvec2 Vec2;
 typedef glm::fvec3 Vec3;
 typedef glm::fvec4 Vec4;
 #endif
-
-#endif //PCH_H

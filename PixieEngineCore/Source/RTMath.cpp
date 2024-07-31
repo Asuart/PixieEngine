@@ -182,3 +182,11 @@ float gamma(int32_t n) {
 bool isnan(const glm::vec3& v) {
 	return std::isnan(v.x) || std::isnan(v.y) || std::isnan(v.z);
 }
+
+double length2(const glm::vec2& v) {
+	return v.x * v.x + v.y * v.y;
+}
+
+double length2(const glm::vec3& v) {
+	return v.x * v.x + v.y * v.y + v.z * v.z;
+}

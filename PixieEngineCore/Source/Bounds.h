@@ -1,5 +1,6 @@
 #pragma once
-#include <glm/glm.hpp>
+#include "headers.h"
+#include "Ray.h"
 #include "RTMath.h"
 
 struct Bounds2i {

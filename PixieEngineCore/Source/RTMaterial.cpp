@@ -3,7 +3,7 @@
 glm::vec3 Refract(const glm::vec3& uv, const glm::vec3& n, float etai_over_etat) {
 	float cos_theta = fmin(glm::dot(-uv, n), 1.0f);
 	glm::vec3 r_out_perp = etai_over_etat * (uv + cos_theta * n);
-	glm::vec3 r_out_parallel = -sqrt(fabs(1.0f - glm::length2(r_out_perp))) * n;
+	glm::vec3 r_out_parallel = (float)(-sqrt(fabs(1.0f - length2(r_out_perp)))) * n;
 	return r_out_perp + r_out_parallel;
 }
 

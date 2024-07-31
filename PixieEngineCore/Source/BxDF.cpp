@@ -1,3 +1,4 @@
+
 #include "BxDF.h"
 
 glm::vec3 BxDF::rho(glm::vec3 wo, std::span<const float> uc, std::span<const glm::vec2> u2) const {

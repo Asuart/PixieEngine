@@ -1,5 +1,4 @@
 #pragma once
-#include "pch.h"
 #include "ShaderLibrary.h"
 #include "OGLMesh.h"
 
