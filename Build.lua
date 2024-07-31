@@ -12,4 +12,3 @@ OutputDir = "%{cfg.system}-%{cfg.architecture}/%{cfg.buildcfg}"
 
 include "PixieEngineCore/Build-Core.lua"
 
-include "PixieEngineApp/Build-App.lua"

@@ -1,5 +1,3 @@
-#pragma once
-
 #include "../PixieEngineCore/PixieEngine.h"
 
 #include "imgui.h"
