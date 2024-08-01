@@ -1,6 +1,7 @@
 #pragma once 
 
 // Define precision of some Floating point values and Floating point vectors as 'Float' or 'double'
+// Double mode is not ready
 #ifdef PIXIE_ENGINE_DOUBLE_PRECISION
 typedef double Float;
 typedef glm::dvec2 Vec2;

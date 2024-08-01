@@ -17,7 +17,7 @@ Bounds3f::Bounds3f(Vec3 p)
 Bounds3f::Bounds3f(Vec3 p1, Vec3 p2)
 	: pMin(glm::min(p1, p2)), pMax(glm::max(p1, p2)) {}
 
-Vec3 Bounds3f::Corner(int corner) const {
+Vec3 Bounds3f::Corner(int32_t corner) const {
 	return Vec3((*this)[(corner & 1)].x, (*this)[(corner & 2) ? 1 : 0].y, (*this)[(corner & 4) ? 1 : 0].z);
 }
 
@@ -95,7 +95,7 @@ bool Bounds3f::IntersectP(Vec3 o, Vec3 d, Float tMax, Float* hitt0, Float* hitt1
 	return true;
 }
 
-bool Bounds3f::IntersectP(Vec3 o, Vec3 d, Float raytMax, Vec3 invDir, const int dirIsNeg[3]) const {
+bool Bounds3f::IntersectP(Vec3 o, Vec3 d, Float raytMax, Vec3 invDir, const int32_t dirIsNeg[3]) const {
 	const Bounds3f& bounds = *this;
 	Float tMin = (bounds[dirIsNeg[0]].x - o.x) * invDir.x;
 	Float tMax = (bounds[1 - dirIsNeg[0]].x - o.x) * invDir.x;
@@ -134,11 +134,11 @@ bool Bounds3f::operator!=(const Bounds3f& b) const {
 	return b.pMin != pMin || b.pMax != pMax;
 }
 
-Vec3 Bounds3f::operator[](int i) const {
+Vec3 Bounds3f::operator[](int32_t i) const {
 	return (i == 0) ? pMin : pMax;
 }
 
-Vec3 Bounds3f::operator[](int i) {
+Vec3 Bounds3f::operator[](int32_t i) {
 	return (i == 0) ? pMin : pMax;
 }
 
