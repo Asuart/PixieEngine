@@ -27,7 +27,7 @@ project "PixieEngineApp"
       "../Dependencies",
       "../Dependencies/imgui",
       "../Dependencies/imgui/backends",
-      "../Dependencies/imgui/examples/libs/glfw/include",
+      "../Dependencies/GLFW/include",
    }
 
    links
@@ -36,7 +36,7 @@ project "PixieEngineApp"
 	  "glfw3.lib"
    }
 
-   libdirs { "../Dependencies/imgui/examples/libs/glfw/lib-vc2010-64" }
+   libdirs { "../Dependencies/GLFW/lib-vc2022-64" }
 
    targetdir ("../Build/" .. OutputDir .. "/%{prj.name}")
    objdir ("../Build/Intermediates/" .. OutputDir .. "/%{prj.name}")
