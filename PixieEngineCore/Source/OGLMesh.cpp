@@ -24,7 +24,7 @@ OGLMesh::OGLMesh(const Mesh& mesh) {
 
 	glBindVertexArray(0);
 
-	indicesCount = mesh.indices.size();
+	indicesCount = (uint32_t)mesh.indices.size();
 }
 
 void OGLMesh::Draw() {

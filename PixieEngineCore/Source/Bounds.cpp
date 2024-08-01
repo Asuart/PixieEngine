@@ -5,38 +5,38 @@ Bounds2i::Bounds2i(glm::ivec2 p1, glm::ivec2 p2)
 	: pMin(glm::min(p1, p2)), pMax(glm::max(p1, p2)) {}
 
 Bounds3f::Bounds3f() {
-	constexpr float minNum = std::numeric_limits<float>::lowest();
-	constexpr float maxNum = std::numeric_limits<float>::max();
-	pMin = glm::vec3(maxNum, maxNum, maxNum);
-	pMax = glm::vec3(minNum, minNum, minNum);
+	constexpr Float minNum = std::numeric_limits<Float>::lowest();
+	constexpr Float maxNum = std::numeric_limits<Float>::max();
+	pMin = Vec3(maxNum, maxNum, maxNum);
+	pMax = Vec3(minNum, minNum, minNum);
 }
 
-Bounds3f::Bounds3f(glm::vec3 p)
+Bounds3f::Bounds3f(Vec3 p)
 	: pMin(p), pMax(p) {}
 
-Bounds3f::Bounds3f(glm::vec3 p1, glm::vec3 p2)
+Bounds3f::Bounds3f(Vec3 p1, Vec3 p2)
 	: pMin(glm::min(p1, p2)), pMax(glm::max(p1, p2)) {}
 
-glm::vec3 Bounds3f::Corner(int corner) const {
-	return glm::vec3((*this)[(corner & 1)].x, (*this)[(corner & 2) ? 1 : 0].y, (*this)[(corner & 4) ? 1 : 0].z);
+Vec3 Bounds3f::Corner(int corner) const {
+	return Vec3((*this)[(corner & 1)].x, (*this)[(corner & 2) ? 1 : 0].y, (*this)[(corner & 4) ? 1 : 0].z);
 }
 
-glm::vec3 Bounds3f::Diagonal() const {
+Vec3 Bounds3f::Diagonal() const {
 	return pMax - pMin;
 }
 
-float Bounds3f::SurfaceArea() const {
-	glm::vec3 d = Diagonal();
+Float Bounds3f::SurfaceArea() const {
+	Vec3 d = Diagonal();
 	return 2 * (d.x * d.y + d.x * d.z + d.y * d.z);
 }
 
-float Bounds3f::Volume() const {
-	glm::vec3 d = Diagonal();
+Float Bounds3f::Volume() const {
+	Vec3 d = Diagonal();
 	return d.x * d.y * d.z;
 }
 
 int Bounds3f::MaxDimension() const {
-	glm::vec3 d = Diagonal();
+	Vec3 d = Diagonal();
 	if (d.x > d.y && d.x > d.z)
 		return 0;
 	else if (d.y > d.z)
@@ -45,12 +45,12 @@ int Bounds3f::MaxDimension() const {
 		return 2;
 }
 
-glm::vec3 Bounds3f::Lerp(glm::vec3 t) const {
-	return glm::vec3(::Lerp(t.x, pMin.x, pMax.x), ::Lerp(t.y, pMin.y, pMax.y), ::Lerp(t.z, pMin.z, pMax.z));
+Vec3 Bounds3f::Lerp(Vec3 t) const {
+	return Vec3(::Lerp(t.x, pMin.x, pMax.x), ::Lerp(t.y, pMin.y, pMax.y), ::Lerp(t.z, pMin.z, pMax.z));
 }
 
-glm::vec3 Bounds3f::Offset(glm::vec3 p) const {
-	glm::vec3 o = p - pMin;
+Vec3 Bounds3f::Offset(Vec3 p) const {
+	Vec3 o = p - pMin;
 	if (pMax.x > pMin.x)
 		o.x /= pMax.x - pMin.x;
 	if (pMax.y > pMin.y)
@@ -60,7 +60,7 @@ glm::vec3 Bounds3f::Offset(glm::vec3 p) const {
 	return o;
 }
 
-void Bounds3f::BoundingSphere(glm::vec3* center, float* radius) const {
+void Bounds3f::BoundingSphere(Vec3* center, Float* radius) const {
 	*center = (pMin + pMax) / 2.0f;
 	*radius = Inside(*center, *this) ? glm::distance(*center, pMax) : 0;
 }
@@ -73,12 +73,12 @@ bool Bounds3f::IsDegenerate() const {
 	return pMin.x > pMax.x || pMin.y > pMax.y || pMin.z > pMax.z;
 }
 
-bool Bounds3f::IntersectP(glm::vec3 o, glm::vec3 d, float tMax, float* hitt0, float* hitt1) const {
-	float t0 = 0, t1 = tMax;
+bool Bounds3f::IntersectP(Vec3 o, Vec3 d, Float tMax, Float* hitt0, Float* hitt1) const {
+	Float t0 = 0, t1 = tMax;
 	for (int i = 0; i < 3; ++i) {
-		float invRayDir = 1 / d[i];
-		float tNear = (pMin[i] - o[i]) * invRayDir;
-		float tFar = (pMax[i] - o[i]) * invRayDir;
+		Float invRayDir = 1 / d[i];
+		Float tNear = (pMin[i] - o[i]) * invRayDir;
+		Float tFar = (pMax[i] - o[i]) * invRayDir;
 		if (tNear > tFar)
 			std::swap(tNear, tFar);
 		tFar *= 1 + 2 * gamma(3);
@@ -95,12 +95,12 @@ bool Bounds3f::IntersectP(glm::vec3 o, glm::vec3 d, float tMax, float* hitt0, fl
 	return true;
 }
 
-bool Bounds3f::IntersectP(glm::vec3 o, glm::vec3 d, float raytMax, glm::vec3 invDir, const int dirIsNeg[3]) const {
+bool Bounds3f::IntersectP(Vec3 o, Vec3 d, Float raytMax, Vec3 invDir, const int dirIsNeg[3]) const {
 	const Bounds3f& bounds = *this;
-	float tMin = (bounds[dirIsNeg[0]].x - o.x) * invDir.x;
-	float tMax = (bounds[1 - dirIsNeg[0]].x - o.x) * invDir.x;
-	float tyMin = (bounds[dirIsNeg[1]].y - o.y) * invDir.y;
-	float tyMax = (bounds[1 - dirIsNeg[1]].y - o.y) * invDir.y;
+	Float tMin = (bounds[dirIsNeg[0]].x - o.x) * invDir.x;
+	Float tMax = (bounds[1 - dirIsNeg[0]].x - o.x) * invDir.x;
+	Float tyMin = (bounds[dirIsNeg[1]].y - o.y) * invDir.y;
+	Float tyMax = (bounds[1 - dirIsNeg[1]].y - o.y) * invDir.y;
 
 	tMax *= 1 + 2 * gamma(3);
 	tyMax *= 1 + 2 * gamma(3);
@@ -112,8 +112,8 @@ bool Bounds3f::IntersectP(glm::vec3 o, glm::vec3 d, float raytMax, glm::vec3 inv
 	if (tyMax < tMax)
 		tMax = tyMax;
 
-	float tzMin = (bounds[dirIsNeg[2]].z - o.z) * invDir.z;
-	float tzMax = (bounds[1 - dirIsNeg[2]].z - o.z) * invDir.z;
+	Float tzMin = (bounds[dirIsNeg[2]].z - o.z) * invDir.z;
+	Float tzMax = (bounds[1 - dirIsNeg[2]].z - o.z) * invDir.z;
 	tzMax *= 1 + 2 * gamma(3);
 
 	if (tMin > tzMax || tzMin > tMax)
@@ -134,11 +134,11 @@ bool Bounds3f::operator!=(const Bounds3f& b) const {
 	return b.pMin != pMin || b.pMax != pMax;
 }
 
-glm::vec3 Bounds3f::operator[](int i) const {
+Vec3 Bounds3f::operator[](int i) const {
 	return (i == 0) ? pMin : pMax;
 }
 
-glm::vec3 Bounds3f::operator[](int i) {
+Vec3 Bounds3f::operator[](int i) {
 	return (i == 0) ? pMin : pMax;
 }
 
@@ -149,6 +149,6 @@ Bounds3f Union(const Bounds3f& b1, const Bounds3f& b2) {
 	return ret;
 }
 
-bool Inside(glm::vec3 p, const Bounds3f& b) {
+bool Inside(Vec3 p, const Bounds3f& b) {
 	return (p.x >= b.pMin.x && p.x <= b.pMax.x && p.y >= b.pMin.y && p.y <= b.pMax.y && p.z >= b.pMin.z && p.z <= b.pMax.z);
 }

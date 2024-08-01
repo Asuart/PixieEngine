@@ -11,7 +11,7 @@ struct Texture {
 		: resolution(_resolution), pixels(_resolution.x* _resolution.y) {}
 
 	int32_t ByteSize() {
-		return pixels.size() * sizeof(T);
+		return (int32_t)pixels.size() * sizeof(T);
 	}
 
 	T GetPixel(int32_t x, int32_t y) {

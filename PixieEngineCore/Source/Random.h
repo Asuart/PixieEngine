@@ -2,14 +2,14 @@
 #include "PixieEngineCoreHeaders.h"
 #include "RTMath.h"
 
-float RandomFloat();
-float RandomFloat(float min, float max);
+Float RandomFloat();
+Float RandomFloat(Float min, Float max);
 
-glm::vec3 RandomVector();
-glm::vec3 RandomVector(float min, float max);
-glm::vec3 RandomUnitVector();
+Vec3 RandomVector();
+Vec3 RandomVector(Float min, Float max);
+Vec3 RandomUnitVector();
 
-glm::vec3 RandomInUnitSphere();
-glm::vec3 RandomInHemisphere(const glm::vec3& normal);
-glm::vec3 RandomInUnitDisk();
-glm::vec3 RandomCosineDirection();
+Vec3 RandomInUnitSphere();
+Vec3 RandomInHemisphere(const Vec3& normal);
+Vec3 RandomInUnitDisk();
+Vec3 RandomCosineDirection();

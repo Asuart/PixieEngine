@@ -1,7 +1,7 @@
 
 #include "BSDFSample.h"
 
-BSDFSample::BSDFSample(glm::vec3 f, glm::vec3 wi, float pdf, BxDFFlags flags, float eta, bool pdfIsProportional)
+BSDFSample::BSDFSample(Vec3 f, Vec3 wi, Float pdf, BxDFFlags flags, Float eta, bool pdfIsProportional)
 	: f(f), wi(wi), pdf(pdf), flags(flags), eta(eta), pdfIsProportional(pdfIsProportional) {}
 
 bool BSDFSample::IsReflection() const {

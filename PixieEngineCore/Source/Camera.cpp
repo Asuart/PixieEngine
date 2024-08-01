@@ -1,21 +1,21 @@
 
 #include "Camera.h"
 
-Camera::Camera(glm::vec3 _lookFrom, glm::vec3 _lookAt, glm::vec3 _up, float _fov, float _aspect, float _aperture, float _focusDistance, float _near, float _far)
+Camera::Camera(Vec3 _lookFrom, Vec3 _lookAt, Vec3 _up, Float _fov, Float _aspect, Float _aperture, Float _focusDistance, Float _near, Float _far)
 	: fov(_fov), aspect(_aspect), near(_near), focusDistance(_focusDistance), lensRadius(_aperture / 2.0f), far(_far) {
 	LookAt(_lookFrom, _lookAt, _up);
 }
 
-void Camera::LookAt(const glm::vec3& _lookFrom, const glm::vec3& _lookAt, const glm::vec3& _up) {
+void Camera::LookAt(const Vec3& _lookFrom, const Vec3& _lookAt, const Vec3& _up) {
 	lookAt = _lookAt;
 	lookFrom = _lookFrom;
 	up = _up;
 	transform = ::LookAt(_lookFrom, _lookAt, _up);
 }
 
-Ray Camera::GetRay(const glm::vec2& coord) const {
-	float theta = Lerp(coord.x, (fov * aspect) / 2, -(fov * aspect) / 2);
-	float phi = Lerp(coord.y, -fov / 2, fov / 2);
-	glm::vec3 dir = glm::normalize(glm::vec3(glm::tan(theta), glm::tan(phi), 1));
-	return transform.ApplyInverseRay(Ray(glm::vec3(0), dir));
+Ray Camera::GetRay(const Vec2& coord) const {
+	Float theta = Lerp(coord.x, (fov * aspect) / 2, -(fov * aspect) / 2);
+	Float phi = Lerp(coord.y, -fov / 2, fov / 2);
+	Vec3 dir = glm::normalize(Vec3(glm::tan(theta), glm::tan(phi), 1));
+	return transform.ApplyInverseRay(Ray(Vec3(0), dir));
 }

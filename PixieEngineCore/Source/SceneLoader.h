@@ -18,6 +18,6 @@ private:
 
 	void ProcessNode(aiNode* node, const aiScene* scene);
 	void ProcessMesh(aiMesh* mesh, const aiScene* scene);
-	void SetVertexBoneData(Vertex& vertex, int boneID, float weight);
+	void SetVertexBoneData(Vertex& vertex, int boneID, Float weight);
 	void ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene);
 };

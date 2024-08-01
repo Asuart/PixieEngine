@@ -3,11 +3,11 @@
 
 class DielectricMaterial : public RTMaterial {
 public:
-	DielectricMaterial(const std::string& name, float uRoughness, float vRoughness, float eta, bool remapRoughness);
+	DielectricMaterial(const std::string& name, Float uRoughness, Float vRoughness, Float eta, bool remapRoughness);
 
 	BxDF* GetBxDF(const RTInteraction& intr) const override;
 
 private:
-	float uRoughness, vRoughness;
+	Float uRoughness, vRoughness;
 	bool remapRoughness;
 };

@@ -4,50 +4,50 @@ std::random_device rd;
 std::mt19937 gen(rd());
 std::uniform_real_distribution<> dist(0, 1);
 
-inline float RandomFloat() {
-	return dist(gen);
+inline Float RandomFloat() {
+	return (Float)dist(gen);
 }
 
-inline float RandomFloat(float min, float max) {
+inline Float RandomFloat(Float min, Float max) {
 	return min + (max - min) * RandomFloat();
 }
 
-inline glm::vec3 RandomVector() {
-	return glm::vec3(RandomFloat(), RandomFloat(), RandomFloat());
+inline Vec3 RandomVector() {
+	return Vec3(RandomFloat(), RandomFloat(), RandomFloat());
 }
 
-inline glm::vec3 RandomVector(float min, float max) {
-	return glm::vec3(RandomFloat(min, max), RandomFloat(min, max), RandomFloat(min, max));
+inline Vec3 RandomVector(Float min, Float max) {
+	return Vec3(RandomFloat(min, max), RandomFloat(min, max), RandomFloat(min, max));
 }
 
-inline glm::vec3 RandomUnitVector() {
+inline Vec3 RandomUnitVector() {
 	return glm::normalize(RandomVector(-1.0, 1.0));
 }
 
-glm::vec3 RandomInUnitSphere() {
+Vec3 RandomInUnitSphere() {
 	return glm::normalize(RandomVector(-1.0, 1.0));
 }
 
-glm::vec3 RandomInHemisphere(const glm::vec3& normal) {
-	glm::vec3 uSphere = RandomUnitVector();
+Vec3 RandomInHemisphere(const Vec3& normal) {
+	Vec3 uSphere = RandomUnitVector();
 	if (dot(uSphere, normal) > 0.0) // In the same hemisphere as the normal
 		return uSphere;
 	return -uSphere;
 }
 
-inline glm::vec3 RandomInUnitDisk() {
+inline Vec3 RandomInUnitDisk() {
 	RandomInUnitSphere();
-	return glm::normalize(glm::vec3(RandomFloat(-1, 1), RandomFloat(-1, 1), 0));
+	return glm::normalize(Vec3(RandomFloat(-1, 1), RandomFloat(-1, 1), 0));
 }
 
-glm::vec3 RandomCosineDirection() {
-	float r1 = RandomFloat();
-	float r2 = RandomFloat();
-	float z = sqrt(1 - r2);
+Vec3 RandomCosineDirection() {
+	Float r1 = RandomFloat();
+	Float r2 = RandomFloat();
+	Float z = sqrt(1 - r2);
 
-	float phi = 2 * Pi * r1;
-	float x = cos(phi) * sqrt(r2);
-	float y = sin(phi) * sqrt(r2);
+	Float phi = 2 * Pi * r1;
+	Float x = cos(phi) * sqrt(r2);
+	Float y = sin(phi) * sqrt(r2);
 
-	return glm::vec3(x, y, z);
+	return Vec3(x, y, z);
 }

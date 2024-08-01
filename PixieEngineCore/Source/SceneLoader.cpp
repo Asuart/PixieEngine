@@ -31,12 +31,12 @@ RTScene* SceneLoader::LoadScene(const std::string& filePath) {
 }
 
 void SceneLoader::ProcessNode(aiNode* node, const aiScene* scene) {
-	for (int32_t i = 0; i < node->mNumMeshes; i++) {
+	for (uint32_t i = 0; i < node->mNumMeshes; i++) {
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 		ProcessMesh(mesh, scene);
 	}
 
-	for (int32_t i = 0; i < node->mNumChildren; i++) {
+	for (uint32_t i = 0; i < node->mNumChildren; i++) {
 		//currentObject->AddChild(new SceneObject(node->mChildren[i]->mName.C_Str()));
 		//currentObject = currentObject->children[i];
 		ProcessNode(node->mChildren[i], scene);
@@ -63,7 +63,7 @@ void SceneLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 		if (!mat) {
 
 			aiColor4D color, colorEmissive, emissionIntensity;
-			float emissionInt, roughness;
+			Float emissionInt, roughness;
 			aiGetMaterialColor(scene->mMaterials[mesh->mMaterialIndex], AI_MATKEY_COLOR_DIFFUSE, &color);
 			aiGetMaterialFloat(scene->mMaterials[mesh->mMaterialIndex], AI_MATKEY_EMISSIVE_INTENSITY, &emissionInt);
 			aiGetMaterialColor(scene->mMaterials[mesh->mMaterialIndex], AI_MATKEY_EMISSIVE_INTENSITY, &emissionIntensity);
@@ -71,30 +71,30 @@ void SceneLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 			aiGetMaterialFloat(scene->mMaterials[mesh->mMaterialIndex], AI_MATKEY_ROUGHNESS_FACTOR, &roughness);
 
 			if (std::string(scene->mMaterials[mesh->mMaterialIndex]->GetName().C_Str()) == std::string("Glass")) {
-				mat = new DielectricMaterial(materialName, 0.0, 0.0, 1.7, true);
-				mat->transparency = 1.0;
-				mat->eta = 1.7;
+				mat = new DielectricMaterial(materialName, 0.0f, 0.0f, 1.7f, true);
+				mat->transparency = 1.0f;
+				mat->eta = 1.7f;
 			}
 			else {
-				mat = new DiffuseMaterial(materialName, new ColorTexture(glm::vec3(color.r, color.g, color.b)));
+				mat = new DiffuseMaterial(materialName, new ColorTexture(Vec3(color.r, color.g, color.b)));
 			}
-			mat->albedo = glm::vec3(color.r, color.g, color.b);
-			mat->texture = new ColorTexture(glm::vec3(color.r, color.g, color.b));
-			mat->emission = glm::vec3(colorEmissive.r, colorEmissive.g, colorEmissive.b);
+			mat->albedo = Vec3(color.r, color.g, color.b);
+			mat->texture = new ColorTexture(Vec3(color.r, color.g, color.b));
+			mat->emission = Vec3(colorEmissive.r, colorEmissive.g, colorEmissive.b);
 
 			currentScene->materials.push_back(mat);
 		}
 	}
 
-	for (int32_t i = 0; i < mesh->mNumFaces; i++) {
+	for (uint32_t i = 0; i < mesh->mNumFaces; i++) {
 		aiFace face = mesh->mFaces[i];
 		if (face.mNumIndices != 3) {
 			std::cout << "	ERROR: mesh has not triangulated faces.\n";
 			break;
 		}
-		glm::vec3 p0 = glm::vec3(mesh->mVertices[face.mIndices[0]].x, mesh->mVertices[face.mIndices[0]].y, mesh->mVertices[face.mIndices[0]].z);
-		glm::vec3 p1 = glm::vec3(mesh->mVertices[face.mIndices[1]].x, mesh->mVertices[face.mIndices[1]].y, mesh->mVertices[face.mIndices[1]].z);
-		glm::vec3 p2 = glm::vec3(mesh->mVertices[face.mIndices[2]].x, mesh->mVertices[face.mIndices[2]].y, mesh->mVertices[face.mIndices[2]].z);
+		Vec3 p0 = Vec3(mesh->mVertices[face.mIndices[0]].x, mesh->mVertices[face.mIndices[0]].y, mesh->mVertices[face.mIndices[0]].z);
+		Vec3 p1 = Vec3(mesh->mVertices[face.mIndices[1]].x, mesh->mVertices[face.mIndices[1]].y, mesh->mVertices[face.mIndices[1]].z);
+		Vec3 p2 = Vec3(mesh->mVertices[face.mIndices[2]].x, mesh->mVertices[face.mIndices[2]].y, mesh->mVertices[face.mIndices[2]].z);
 		Shape* triangle = new CachedTriangle(p0, p1, p2);
 		if (!triangle->IsValid()) {
 			delete triangle;
@@ -103,7 +103,7 @@ void SceneLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 		}
 		currentScene->shapes.push_back(triangle);
 		shapePrimitives.push_back(new ShapePrimitive(triangle, mat));
-		if (mat->emission != glm::vec3(0)) {
+		if (mat->emission != Vec3(0)) {
 			currentScene->lights.push_back(DiffuseAreaLight(triangle, mat->emission * 10.0f));
 		}
 		trianglesCount++;
@@ -112,8 +112,8 @@ void SceneLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 	//ExtractBoneWeightForVertices(objectMesh.vertices, mesh, scene);
 }
 
-void SceneLoader::SetVertexBoneData(Vertex& vertex, int boneID, float weight) {
-	for (int i = 0; i < MAX_BONES_PER_VERTEX; i++) {
+void SceneLoader::SetVertexBoneData(Vertex& vertex, int boneID, Float weight) {
+	for (uint32_t i = 0; i < MaxBonesPerVertex; i++) {
 		if (vertex.boneIDs[i] < 0) {
 			vertex.boneWeights[i] = weight;
 			vertex.boneIDs[i] = boneID;
@@ -143,7 +143,7 @@ void SceneLoader::ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, ai
 		int32_t numWeights = mesh->mBones[boneIndex]->mNumWeights;
 		for (int32_t weightIndex = 0; weightIndex < numWeights; weightIndex++) {
 			int32_t vertexId = weights[weightIndex].mVertexId;
-			float weight = weights[weightIndex].mWeight;
+			Float weight = weights[weightIndex].mWeight;
 			assert(vertexId <= vertices.size());
 			SetVertexBoneData(vertices[vertexId], boneID, weight);
 		}

@@ -3,11 +3,11 @@
 
 class DiffuseTransmissionMaterial : public RTMaterial {
 public:
-	DiffuseTransmissionMaterial(const std::string& name, glm::vec3 reflectance, glm::vec3 transmittance, float scale);
+	DiffuseTransmissionMaterial(const std::string& name, Vec3 reflectance, Vec3 transmittance, Float scale);
 
 	BxDF* GetBxDF(const RTInteraction& intr) const override;
 
 private:
-	glm::vec3 reflectance, transmittance;
-	float scale;
+	Vec3 reflectance, transmittance;
+	Float scale;
 };

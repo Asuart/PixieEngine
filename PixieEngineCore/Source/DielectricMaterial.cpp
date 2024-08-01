@@ -1,13 +1,13 @@
 
 #include "DielectricMaterial.h"
 
-DielectricMaterial::DielectricMaterial(const std::string& name, float uRoughness, float vRoughness, float _eta, bool remapRoughness)
+DielectricMaterial::DielectricMaterial(const std::string& name, Float uRoughness, Float vRoughness, Float _eta, bool remapRoughness)
 	: RTMaterial(name), uRoughness(uRoughness), vRoughness(vRoughness), remapRoughness(remapRoughness) {
 	eta = _eta;
 }
 
 BxDF* DielectricMaterial::GetBxDF(const RTInteraction& intr) const {
-	float urough = uRoughness, vrough = vRoughness;
+	Float urough = uRoughness, vrough = vRoughness;
 	if (false) {
 		urough = TrowbridgeReitzDistribution::RoughnessToAlpha(urough);
 		vrough = TrowbridgeReitzDistribution::RoughnessToAlpha(vrough);

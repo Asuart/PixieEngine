@@ -13,9 +13,9 @@ ImageTexture::ImageTexture(const std::string& filePath) {
 		std::cerr << "ERROR: zero size image: '" << filePath << "'.\n";
 		return;
 	}
-	data = new glm::vec3[pixelCount];
+	data = new Vec3[pixelCount];
 	for (int32_t i = 0; i < pixelCount; i++) {
-		data[i] = glm::vec3(d[i * components_per_pixel] / 255.0f, d[i * components_per_pixel] / 255.0f, d[i * components_per_pixel + 2] / 255.0f);
+		data[i] = Vec3(d[i * components_per_pixel] / 255.0f, d[i * components_per_pixel] / 255.0f, d[i * components_per_pixel + 2] / 255.0f);
 	}
 	delete[] d;
 }
@@ -24,12 +24,12 @@ ImageTexture::~ImageTexture() {
 	delete[] data;
 }
 
-glm::vec3 ImageTexture::Sample(const RTInteraction& intr) const {
+Vec3 ImageTexture::Sample(const RTInteraction& intr) const {
 	if (data == nullptr)
-		return glm::vec3(0, 1, 1);
+		return Vec3(0, 1, 1);
 
-	float u = glm::clamp(intr.uv.x, 0.0f, 1.0f);
-	float v = 1.0f - glm::clamp(intr.uv.y, 0.0f, 1.0f);
+	Float u = glm::clamp(intr.uv.x, 0.0f, 1.0f);
+	Float v = 1.0f - glm::clamp(intr.uv.y, 0.0f, 1.0f);
 
 	int32_t i = static_cast<int32_t>(u * resolution.x);
 	int32_t j = static_cast<int32_t>(v * resolution.y);

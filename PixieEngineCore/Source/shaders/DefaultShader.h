@@ -43,6 +43,6 @@ const char* const DEFAULT_FRAGMENT_SHADER_SOURCE =
 "out vec4 color;"
 "void main()"
 "{"
-"	float cos = abs(dot(fNormal, vec3(gl_FragCoord.x / 600.0, gl_FragCoord.y / 600.0, 1)));"
+"	Float cos = abs(dot(fNormal, vec3(gl_FragCoord.x / 600.0, gl_FragCoord.y / 600.0, 1)));"
 "	color = vec4(cos, cos, cos, 1.0) * 0.8 + vec4(1.0, 1.0, 1.0, 1.0) * 0.2;"
 "}";

@@ -4,10 +4,10 @@
 
 class NoiseTexture : public RTTexture {
 public:
-	NoiseTexture(glm::vec3 _scale = glm::vec3(1.0));
-	glm::vec3 Sample(const RTInteraction& intr) const override;
+	NoiseTexture(Vec3 _scale = Vec3(1.0));
+	Vec3 Sample(const RTInteraction& intr) const override;
 
 private:
 	PerlinNoise noise;
-	glm::vec3 scale;
+	Vec3 scale;
 };

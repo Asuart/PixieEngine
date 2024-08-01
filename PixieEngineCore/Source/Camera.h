@@ -5,18 +5,18 @@
 class Camera {
 public:
 	Transform transform;
-	glm::vec3 lookFrom = glm::vec3(0, 0, 0);
-	glm::vec3 lookAt = glm::vec3(0, 1, 0);
-	glm::vec3 up = glm::vec3(0, 0, 1);
-	float fov = Pi;
-	float aspect = 1;
-	float near = ShadowEpsilon;
-	float far = 10000.0;
-	float lensRadius = 0;
-	float focusDistance = 0;
+	Vec3 lookFrom = Vec3(0, 0, 0);
+	Vec3 lookAt = Vec3(0, 1, 0);
+	Vec3 up = Vec3(0, 0, 1);
+	Float fov = Pi;
+	Float aspect = 1;
+	Float near = ShadowEpsilon;
+	Float far = 10000.0;
+	Float lensRadius = 0;
+	Float focusDistance = 0;
 
-	Camera(glm::vec3 _lookFrom, glm::vec3 _lookAt, glm::vec3 _up, float _fov, float _aspect, float _aperture, float _focusDistance, float _near = ShadowEpsilon, float _far = 10000.0);
+	Camera(Vec3 _lookFrom, Vec3 _lookAt, Vec3 _up, Float _fov, Float _aspect, Float _aperture, Float _focusDistance, Float _near = ShadowEpsilon, Float _far = 10000.0);
 
-	void LookAt(const glm::vec3& _lookFrom, const glm::vec3& _lookAt, const glm::vec3& _up);
-	Ray GetRay(const glm::vec2& uv) const;
+	void LookAt(const Vec3& _lookFrom, const Vec3& _lookAt, const Vec3& _up);
+	Ray GetRay(const Vec2& uv) const;
 };

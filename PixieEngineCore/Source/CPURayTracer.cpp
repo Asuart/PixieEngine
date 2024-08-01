@@ -21,6 +21,7 @@ std::string to_string(CPURayTracerMode mode) {
 	case CPURayTracerMode::LiPath:
 		return "LiPath";
 	}
+	return "Undefined Ray Tarcer Mode";
 }
 
 CPURayTracer::CPURayTracer(glm::ivec2 resolution, int32_t _maxDepth)
@@ -34,7 +35,7 @@ CPURayTracer::~CPURayTracer() {
 
 void CPURayTracer::GenerateQuads() {
 	quads.clear();
-	glm::ivec2 tileGridSize = glm::ceil(glm::vec2(resolution) / glm::vec2(tileSize));
+	glm::ivec2 tileGridSize = glm::ceil(Vec2(resolution) / Vec2(tileSize));
 	for (int32_t yTile = 0; yTile < tileGridSize.y; yTile++) {
 		for (int32_t xTile = 0; xTile < tileGridSize.x; xTile++) {
 			int32_t xMax = glm::min(resolution.x, (xTile + 1) * tileSize.x);
@@ -122,15 +123,15 @@ void CPURayTracer::SetScene(RTScene* s) {
 }
 
 bool CPURayTracer::Unoccluded(const RTInteraction& p0, const RTInteraction& p1) const {
-	glm::vec3 dir = p1.p - p0.p;
-	float tMax = glm::length(dir);
+	Vec3 dir = p1.p - p0.p;
+	Float tMax = glm::length(dir);
 	return !scene->IntersectP(Ray(p0.p, glm::normalize(dir)), tMax - ShadowEpsilon);
 }
 
 void CPURayTracer::PerPixel(uint32_t x, uint32_t y) {
-	glm::vec2 uv = film.GetUV(x, y, glm::vec2(RandomFloat(), RandomFloat()));
+	Vec2 uv = film.GetUV(x, y, Vec2(RandomFloat(), RandomFloat()));
 	Ray ray = scene->mainCamera->GetRay(uv);
-	glm::vec3 color;
+	Vec3 color;
 	switch (mode) {
 	case CPURayTracerMode::Normals:
 		color = TraceNormals(ray);
@@ -154,15 +155,15 @@ void CPURayTracer::PerPixel(uint32_t x, uint32_t y) {
 	film.AddPixel(x, y, glm::vec4(color, 1.0));
 }
 
-glm::vec3 CPURayTracer::TraceNormals(Ray ray) const {
+Vec3 CPURayTracer::TraceNormals(Ray ray) const {
 	RTInteraction intr;
 	scene->Intersect(ray, intr);
 	return glm::abs(intr.n);
 }
 
-glm::vec3 CPURayTracer::TraceRay(Ray ray) const {
-	glm::vec3 L = glm::vec3(0);
-	glm::vec3 beta = glm::vec3(1);
+Vec3 CPURayTracer::TraceRay(Ray ray) const {
+	Vec3 L = Vec3(0);
+	Vec3 beta = Vec3(1);
 	int32_t depth = 0;
 	bool specularBounce = true;
 
@@ -183,14 +184,14 @@ glm::vec3 CPURayTracer::TraceRay(Ray ray) const {
 		}
 
 		Ray scatteredRay;
-		glm::vec3 brdfMultiplier = intr.material->Sample(ray, intr, scatteredRay);
+		Vec3 brdfMultiplier = intr.material->Sample(ray, intr, scatteredRay);
 		beta *= brdfMultiplier;
 
-		if (sampleLights && intr.material->emission == glm::vec3(0) && intr.material->transparency == 0) {
+		if (sampleLights && intr.material->emission == Vec3(0) && intr.material->transparency == 0) {
 			std::optional<SampledLight> sampledLight = lightSampler->Sample(RandomFloat());
 			if (sampledLight) {
-				std::optional<LightLiSample> ls = sampledLight->light.SampleLi(intr, glm::vec2(RandomFloat(), RandomFloat()));
-				if (ls && ls->L != glm::vec3(0) && ls->pdf > 0) {
+				std::optional<LightLiSample> ls = sampledLight->light.SampleLi(intr, Vec2(RandomFloat(), RandomFloat()));
+				if (ls && ls->L != Vec3(0) && ls->pdf > 0) {
 					if (Unoccluded(intr, ls->pLight)) {
 						L += beta * ls->L * glm::abs(glm::dot(ls->wi, intr.n)) / (sampledLight->p * ls->pdf);
 					}
@@ -199,7 +200,7 @@ glm::vec3 CPURayTracer::TraceRay(Ray ray) const {
 		}
 
 		if (MaxComponent(beta) < 1 && depth > 1) {
-			float q = std::max<float>(0, 1 - MaxComponent(beta));
+			Float q = std::max<Float>(0, 1 - MaxComponent(beta));
 			if (RandomFloat() < q)
 				break;
 			beta /= 1 - q;
@@ -212,10 +213,10 @@ glm::vec3 CPURayTracer::TraceRay(Ray ray) const {
 	return L;
 }
 
-glm::vec3 CPURayTracer::TracePath(Ray ray) const {
+Vec3 CPURayTracer::TracePath(Ray ray) const {
 	RTInteraction intr;
-	glm::vec3 L = glm::vec3(0);
-	glm::vec3 beta = glm::vec3(1);
+	Vec3 L = Vec3(0);
+	Vec3 beta = Vec3(1);
 
 	for (int32_t depth = 0; depth < maxDepth; depth++) {
 		bool intersected = scene->Intersect(ray, intr);
@@ -230,15 +231,15 @@ glm::vec3 CPURayTracer::TracePath(Ray ray) const {
 		BSDF bsdf = intr.material->GetBSDF(intr);
 		if (!bsdf) break;
 
-		glm::vec2 u = glm::vec2(RandomFloat(), RandomFloat());
-		glm::vec3 wo = -ray.d;
-		glm::vec3 wp = SampleUniformSphere(u);
+		Vec2 u = Vec2(RandomFloat(), RandomFloat());
+		Vec3 wo = -ray.d;
+		Vec3 wp = SampleUniformSphere(u);
 
-		glm::vec3 f = bsdf.f(wo, wp);
-		float dot = glm::abs(glm::dot(wp, intr.n));
-		glm::vec3 fcos = f * dot / UniformSpherePDF();
+		Vec3 f = bsdf.f(wo, wp);
+		Float dot = glm::abs(glm::dot(wp, intr.n));
+		Vec3 fcos = f * dot / UniformSpherePDF();
 		beta *= fcos;
-		if (beta == glm::vec3(0)) break;
+		if (beta == Vec3(0)) break;
 
 		ray = Ray(intr.p, wp);
 	}
@@ -246,15 +247,15 @@ glm::vec3 CPURayTracer::TracePath(Ray ray) const {
 	return L;
 }
 
-glm::vec3 CPURayTracer::LiRandomWalk(Ray ray, int depth) const {
+Vec3 CPURayTracer::LiRandomWalk(Ray ray, int depth) const {
 	RTInteraction isect;
 	if (!scene->Intersect(ray, isect)) {
 		return scene->GetSkyColor(ray);
 	}
 
-	glm::vec3 wo = -ray.d;
+	Vec3 wo = -ray.d;
 
-	glm::vec3 Le = isect.material->emission;
+	Vec3 Le = isect.material->emission;
 
 	if (depth == maxDepth)
 		return Le;
@@ -263,11 +264,11 @@ glm::vec3 CPURayTracer::LiRandomWalk(Ray ray, int depth) const {
 	if (!bsdf)
 		return Le;
 
-	glm::vec2 u = glm::vec2(RandomFloat(), RandomFloat());
-	glm::vec3 wp = SampleUniformSphere(u);
+	Vec2 u = Vec2(RandomFloat(), RandomFloat());
+	Vec3 wp = SampleUniformSphere(u);
 
-	glm::vec3 fcos = bsdf.f(wo, wp) * glm::abs(glm::dot(wp, isect.n));
-	if (fcos == glm::vec3(0)) {
+	Vec3 fcos = bsdf.f(wo, wp) * glm::abs(glm::dot(wp, isect.n));
+	if (fcos == Vec3(0)) {
 		return Le;
 	}
 
@@ -275,11 +276,11 @@ glm::vec3 CPURayTracer::LiRandomWalk(Ray ray, int depth) const {
 	return Le + fcos * LiRandomWalk(ray, depth + 1) / (1 / (4 * Pi));
 }
 
-glm::vec3 CPURayTracer::LiSimplePath(Ray ray) const {
-	glm::vec3 L(0.0f), beta(1.0f);
+Vec3 CPURayTracer::LiSimplePath(Ray ray) const {
+	Vec3 L(0.0f), beta(1.0f);
 	bool specularBounce = true;
 	int depth = 0;
-	while (beta != glm::vec3(0)) {
+	while (beta != Vec3(0)) {
 		RTInteraction isect;
 		if (!scene->Intersect(ray, isect)) {
 			L += beta * scene->GetSkyColor(ray);
@@ -299,16 +300,16 @@ glm::vec3 CPURayTracer::LiSimplePath(Ray ray) const {
 			continue;
 		}
 
-		glm::vec3 wo = -ray.d;
+		Vec3 wo = -ray.d;
 		if (sampleLights) {
 			std::optional<SampledLight> sampledLight = lightSampler->Sample(RandomFloat());
 			if (sampledLight) {
-				glm::vec2 uLight = glm::vec2(RandomFloat(), RandomFloat());
+				Vec2 uLight = Vec2(RandomFloat(), RandomFloat());
 				std::optional<LightLiSample> ls = sampledLight->light.SampleLi(isect, uLight);
-				if (ls && ls->L != glm::vec3(0) && ls->pdf > 0) {
-					glm::vec3 wi = ls->wi;
-					glm::vec3 f = bsdf.f(wo, wi) * glm::abs(glm::dot(wi, isect.n));
-					if ((f != glm::vec3(0)) && Unoccluded(isect, ls->pLight)) {
+				if (ls && ls->L != Vec3(0) && ls->pdf > 0) {
+					Vec3 wi = ls->wi;
+					Vec3 f = bsdf.f(wo, wi) * glm::abs(glm::dot(wi, isect.n));
+					if ((f != Vec3(0)) && Unoccluded(isect, ls->pLight)) {
 						L += beta * f * ls->L / (sampledLight->p * ls->pdf);
 					}
 				}
@@ -316,8 +317,8 @@ glm::vec3 CPURayTracer::LiSimplePath(Ray ray) const {
 		}
 
 		if (sampleBSDF) {
-			float u = RandomFloat();
-			std::optional<BSDFSample> bs = bsdf.Sample_f(wo, u, glm::vec2(RandomFloat(), RandomFloat()));
+			Float u = RandomFloat();
+			std::optional<BSDFSample> bs = bsdf.Sample_f(wo, u, Vec2(RandomFloat(), RandomFloat()));
 			if (!bs)
 				break;
 			beta *= bs->f * glm::abs(glm::dot(bs->wi, isect.n)) / bs->pdf;
@@ -325,15 +326,15 @@ glm::vec3 CPURayTracer::LiSimplePath(Ray ray) const {
 			ray = Ray(isect.p, bs->wi);
 		}
 		else {
-			float pdf;
-			glm::vec3 wi;
+			Float pdf;
+			Vec3 wi;
 			BxDFFlags flags = bsdf.Flags();
 			if (IsReflective(flags) && IsTransmissive(flags)) {
-				wi = SampleUniformSphere(glm::vec2(RandomFloat(), RandomFloat()));
+				wi = SampleUniformSphere(Vec2(RandomFloat(), RandomFloat()));
 				pdf = UniformSpherePDF();
 			}
 			else {
-				wi = SampleUniformHemisphere(glm::vec2(RandomFloat(), RandomFloat()));
+				wi = SampleUniformHemisphere(Vec2(RandomFloat(), RandomFloat()));
 				pdf = UniformHemispherePDF();
 				if (IsReflective(flags) && glm::dot(wo, isect.n) * glm::dot(wi, isect.n) < 0)
 					wi = -wi;
@@ -348,11 +349,11 @@ glm::vec3 CPURayTracer::LiSimplePath(Ray ray) const {
 	return L;
 }
 
-glm::vec3 CPURayTracer::LiPath(Ray ray, VisibleSurface* visibleSurf) const {
-	glm::vec3 L(0.0f), beta(1.0f);
-	int depth = 0;
+Vec3 CPURayTracer::LiPath(Ray ray, VisibleSurface* visibleSurf) const {
+	Vec3 L(0.0f), beta(1.0f);
+	int32_t depth = 0;
 
-	float p_b = 1, etaScale = 1;
+	Float p_b = 1.0f, etaScale = 1.0f;
 	bool specularBounce = false, anyNonSpecularBounces = false;
 	RTInteraction prevIntrCtx;
 
@@ -365,14 +366,14 @@ glm::vec3 CPURayTracer::LiPath(Ray ray, VisibleSurface* visibleSurf) const {
 		}
 
 
-		glm::vec3 Le = isect.material->emission;
-		if (Le != glm::vec3(0)) {
+		Vec3 Le = isect.material->emission;
+		if (Le != Vec3(0.0f)) {
 			if (depth == 0 || specularBounce)
 				L += beta * Le;
 			else {
 				std::optional<SampledLight> sampledLight = lightSampler->Sample(RandomFloat());
-				float p_l = lightSampler->PMF();
-				float w_l = PowerHeuristic(1, p_b, 1, p_l);
+				Float p_l = lightSampler->PMF();
+				Float w_l = PowerHeuristic(1, p_b, 1, p_l);
 
 				L += beta * w_l * Le;
 			}
@@ -387,21 +388,21 @@ glm::vec3 CPURayTracer::LiPath(Ray ray, VisibleSurface* visibleSurf) const {
 
 		if (depth == 0 && visibleSurf) {
 			constexpr int nRhoSamples = 16;
-			const float ucRho[nRhoSamples] = {
-				0.75741637, 0.37870818, 0.7083487, 0.18935409, 0.9149363, 0.35417435,
-				0.5990858,  0.09467703, 0.8578725, 0.45746812, 0.686759,  0.17708716,
-				0.9674518,  0.2995429,  0.5083201, 0.047338516 };
-			const glm::vec2 uRho[nRhoSamples] = {
-				glm::vec2(0.855985, 0.570367), glm::vec2(0.381823, 0.851844),
-				glm::vec2(0.285328, 0.764262), glm::vec2(0.733380, 0.114073),
-				glm::vec2(0.542663, 0.344465), glm::vec2(0.127274, 0.414848),
-				glm::vec2(0.964700, 0.947162), glm::vec2(0.594089, 0.643463),
-				glm::vec2(0.095109, 0.170369), glm::vec2(0.825444, 0.263359),
-				glm::vec2(0.429467, 0.454469), glm::vec2(0.244460, 0.816459),
-				glm::vec2(0.756135, 0.731258), glm::vec2(0.516165, 0.152852),
-				glm::vec2(0.180888, 0.214174), glm::vec2(0.898579, 0.503897) };
+			const Float ucRho[nRhoSamples] = {
+				0.75741637f, 0.37870818f, 0.7083487f, 0.18935409f, 0.9149363f, 0.35417435f,
+				0.5990858f,  0.09467703f, 0.8578725f, 0.45746812f, 0.686759f,  0.17708716f,
+				0.9674518f,  0.2995429f,  0.5083201f, 0.047338516f };
+			const Vec2 uRho[nRhoSamples] = {
+				Vec2(0.855985f, 0.570367f), Vec2(0.381823f, 0.851844f),
+				Vec2(0.285328f, 0.764262f), Vec2(0.733380f, 0.114073f),
+				Vec2(0.542663f, 0.344465f), Vec2(0.127274f, 0.414848f),
+				Vec2(0.964700f, 0.947162f), Vec2(0.594089f, 0.643463f),
+				Vec2(0.095109f, 0.170369f), Vec2(0.825444f, 0.263359f),
+				Vec2(0.429467f, 0.454469f), Vec2(0.244460f, 0.816459f),
+				Vec2(0.756135f, 0.731258f), Vec2(0.516165f, 0.152852f),
+				Vec2(0.180888f, 0.214174f), Vec2(0.898579f, 0.503897f) };
 
-			glm::vec3 albedo = bsdf.rho(isect.wo, ucRho, uRho);
+			Vec3 albedo = bsdf.rho(isect.wo, ucRho, uRho);
 
 			*visibleSurf = VisibleSurface(isect, albedo);
 		}
@@ -414,13 +415,13 @@ glm::vec3 CPURayTracer::LiPath(Ray ray, VisibleSurface* visibleSurf) const {
 			break;
 
 		if (IsNonSpecular(bsdf.Flags())) {
-			glm::vec3 Ld = SampleLd(isect, &bsdf);
+			Vec3 Ld = SampleLd(isect, &bsdf);
 			L += beta * Ld;
 		}
 
-		glm::vec3 wo = -ray.d;
-		float u = RandomFloat();
-		std::optional<BSDFSample> bs = bsdf.Sample_f(wo, u, glm::vec2(RandomFloat(), RandomFloat()));
+		Vec3 wo = -ray.d;
+		Float u = RandomFloat();
+		std::optional<BSDFSample> bs = bsdf.Sample_f(wo, u, Vec2(RandomFloat(), RandomFloat()));
 		if (!bs)
 			break;
 
@@ -434,9 +435,9 @@ glm::vec3 CPURayTracer::LiPath(Ray ray, VisibleSurface* visibleSurf) const {
 
 		ray = Ray(isect.p, bs->wi);
 
-		glm::vec3 rrBeta = beta * etaScale;
+		Vec3 rrBeta = beta * etaScale;
 		if (MaxComponent(rrBeta) < 1 && depth > 1) {
-			float q = std::max<float>(0, 1 - MaxComponent(rrBeta));
+			Float q = std::max<Float>(0, 1 - MaxComponent(rrBeta));
 			if (RandomFloat() < q)
 				break;
 			beta /= 1 - q;
@@ -445,7 +446,7 @@ glm::vec3 CPURayTracer::LiPath(Ray ray, VisibleSurface* visibleSurf) const {
 	return L;
 }
 
-glm::vec3 CPURayTracer::SampleLd(const RTInteraction& intr, const BSDF* bsdf) const {
+Vec3 CPURayTracer::SampleLd(const RTInteraction& intr, const BSDF* bsdf) const {
 	LightSampleContext ctx(intr.p, intr.n);
 
 	BxDFFlags flags = bsdf->Flags();
@@ -454,24 +455,24 @@ glm::vec3 CPURayTracer::SampleLd(const RTInteraction& intr, const BSDF* bsdf) co
 	else if (IsTransmissive(flags) && !IsReflective(flags))
 		ctx.p -= intr.wo * ShadowEpsilon;
 
-	float u = RandomFloat();
+	Float u = RandomFloat();
 	std::optional<SampledLight> sampledLight = lightSampler->Sample(u);
-	glm::vec2 uLight = glm::vec2(RandomFloat(), RandomFloat());
+	Vec2 uLight = Vec2(RandomFloat(), RandomFloat());
 	if (!sampledLight)
 		return {};
 
 	DiffuseAreaLight light = sampledLight->light;
 	std::optional<LightLiSample> ls = light.SampleLi(intr, uLight);
-	if (!ls || ls->L == glm::vec3(0) || ls->pdf == 0)
+	if (!ls || ls->L == Vec3(0) || ls->pdf == 0)
 		return {};
 
-	glm::vec3 wo = intr.wo, wi = ls->wi;
-	glm::vec3 f = bsdf->f(wo, wi) * glm::abs(glm::dot(wi, intr.n));
-	if (f == glm::vec3(0) || !Unoccluded(intr, ls->pLight))
+	Vec3 wo = intr.wo, wi = ls->wi;
+	Vec3 f = bsdf->f(wo, wi) * glm::abs(glm::dot(wi, intr.n));
+	if (f == Vec3(0) || !Unoccluded(intr, ls->pLight))
 		return {};
 
-	float p_l = sampledLight->p * ls->pdf;
-	float p_b = bsdf->PDF(wo, wi);
-	float w_l = PowerHeuristic(1, p_l, 1, p_b);
+	Float p_l = sampledLight->p * ls->pdf;
+	Float p_b = bsdf->PDF(wo, wi);
+	Float w_l = PowerHeuristic(1, p_l, 1, p_b);
 	return w_l * ls->L * f / p_l;
 }

@@ -7,41 +7,41 @@
 #include "RTMath.h"
 
 class DiffuseBxDF : public BxDF {
-	glm::vec3 R;
+	Vec3 R;
 
 public:
-	DiffuseBxDF(glm::vec3 R);
+	DiffuseBxDF(Vec3 R);
 
-	glm::vec3 f(glm::vec3 wo, glm::vec3 wi, TransportMode mode) const override;
-	std::optional<BSDFSample> Sample_f(glm::vec3 wo, float uc, glm::vec2 u, TransportMode mode, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const override;
-	float PDF(glm::vec3 wo, glm::vec3 wi, TransportMode mode, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const override;
+	Vec3 f(Vec3 wo, Vec3 wi, TransportMode mode) const override;
+	std::optional<BSDFSample> Sample_f(Vec3 wo, Float uc, Vec2 u, TransportMode mode, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const override;
+	Float PDF(Vec3 wo, Vec3 wi, TransportMode mode, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const override;
 	void Regularize();
 	BxDFFlags Flags() const override;
 };
 
 class DielectricBxDF : public BxDF {
-	float eta;
+	Float eta;
 	TrowbridgeReitzDistribution mfDistrib;
 
 public:
-	DielectricBxDF(float eta, TrowbridgeReitzDistribution mfDistrib);
+	DielectricBxDF(Float eta, TrowbridgeReitzDistribution mfDistrib);
 
 	BxDFFlags Flags() const override;
-	std::optional<BSDFSample> Sample_f(glm::vec3 wo, float uc, glm::vec2 u, TransportMode mode, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const override;
-	glm::vec3 f(glm::vec3 wo, glm::vec3 wi, TransportMode mode) const override;
-	float PDF(glm::vec3 wo, glm::vec3 wi, TransportMode mode, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const override;
+	std::optional<BSDFSample> Sample_f(Vec3 wo, Float uc, Vec2 u, TransportMode mode, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const override;
+	Vec3 f(Vec3 wo, Vec3 wi, TransportMode mode) const override;
+	Float PDF(Vec3 wo, Vec3 wi, TransportMode mode, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const override;
 	void Regularize();
 };
 
 class DiffuseTransmissionBxDF : public BxDF {
-	glm::vec3 R, T;
+	Vec3 R, T;
 
 public:
-	DiffuseTransmissionBxDF(glm::vec3 R, glm::vec3 T);
+	DiffuseTransmissionBxDF(Vec3 R, Vec3 T);
 
-	glm::vec3 f(glm::vec3 wo, glm::vec3 wi, TransportMode mode) const override;
-	std::optional<BSDFSample> Sample_f(glm::vec3 wo, float uc, glm::vec2 u, TransportMode mode, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const override;
-	float PDF(glm::vec3 wo, glm::vec3 wi, TransportMode mode, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const override;
+	Vec3 f(Vec3 wo, Vec3 wi, TransportMode mode) const override;
+	std::optional<BSDFSample> Sample_f(Vec3 wo, Float uc, Vec2 u, TransportMode mode, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const override;
+	Float PDF(Vec3 wo, Vec3 wi, TransportMode mode, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const override;
 	void Regularize() override;
 	BxDFFlags Flags() const override;
 };
@@ -51,16 +51,16 @@ class BSDF {
 	Frame shadingFrame;
 
 public:
-	BSDF(glm::vec3 ns, glm::vec3 dpdus, BxDF* bxdf);
+	BSDF(Vec3 ns, Vec3 dpdus, BxDF* bxdf);
 	~BSDF();
 
 	BxDFFlags Flags() const;
-	glm::vec3 RenderToLocal(glm::vec3 v) const;
-	glm::vec3 LocalToRender(glm::vec3 v) const;
-	glm::vec3 f(glm::vec3 woRender, glm::vec3 wiRender, TransportMode mode = TransportMode::Radiance) const;
-	std::optional<BSDFSample> Sample_f(glm::vec3 woRender, float u, glm::vec2 u2, TransportMode mode = TransportMode::Radiance, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const;
-	float PDF(glm::vec3 woRender, glm::vec3 wiRender, TransportMode mode = TransportMode::Radiance, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const;
-	glm::vec3 rho(glm::vec3 woRender, std::span<const float> uc, std::span<const glm::vec2> u) const;
+	Vec3 RenderToLocal(Vec3 v) const;
+	Vec3 LocalToRender(Vec3 v) const;
+	Vec3 f(Vec3 woRender, Vec3 wiRender, TransportMode mode = TransportMode::Radiance) const;
+	std::optional<BSDFSample> Sample_f(Vec3 woRender, Float u, Vec2 u2, TransportMode mode = TransportMode::Radiance, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const;
+	Float PDF(Vec3 woRender, Vec3 wiRender, TransportMode mode = TransportMode::Radiance, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const;
+	Vec3 rho(Vec3 woRender, std::span<const Float> uc, std::span<const Vec2> u) const;
 	void Regularize();
 
 	operator bool() const;

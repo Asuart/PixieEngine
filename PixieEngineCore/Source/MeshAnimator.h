@@ -4,37 +4,37 @@
 
 struct BoneInfo {
     int32_t id;
-    glm::mat4 offset;
+    Mat4 offset;
 };
 
 struct KeyPosition {
-    glm::vec3 position;
-    float timeStamp;
+    Vec3 position;
+    Float timeStamp;
 };
 
 struct KeyRotation {
     glm::quat orientation;
-    float timeStamp;
+    Float timeStamp;
 };
 
 struct KeyScale {
-    glm::vec3 scale;
-    float timeStamp;
+    Vec3 scale;
+    Float timeStamp;
 };
 
 class Bone {
 public:
     Bone(const std::string& name, int32_t ID, const aiNodeAnim* channel);
 
-    void Update(float animationTime);
+    void Update(Float animationTime);
 
-    glm::mat4 GetLocalTransform() const;
+    Mat4 GetLocalTransform() const;
     std::string GetBoneName() const;
     int32_t GetBoneID() const;
 
-    int32_t GetPositionIndex(float animationTime) const;
-    int32_t GetRotationIndex(float animationTime) const;
-    int32_t GetScaleIndex(float animationTime) const;
+    int32_t GetPositionIndex(Float animationTime) const;
+    int32_t GetRotationIndex(Float animationTime) const;
+    int32_t GetScaleIndex(Float animationTime) const;
 
 private:
     std::vector<KeyPosition> positions;
@@ -44,14 +44,14 @@ private:
     int32_t numRotations;
     int32_t numScalings;
 
-    glm::mat4 localTransform;
+    Mat4 localTransform;
     std::string name;
     int32_t id;
 
-    float GetScaleFactor(float lastTimeStamp, float nextTimeStamp, float animationTime);
-    glm::mat4 InterpolatePosition(float animationTime);
-    glm::mat4 InterpolateRotation(float animationTime);
-    glm::mat4 InterpolateScaling(float animationTime);
+    Float GetScaleFactor(Float lastTimeStamp, Float nextTimeStamp, Float animationTime);
+    Mat4 InterpolatePosition(Float animationTime);
+    Mat4 InterpolateRotation(Float animationTime);
+    Mat4 InterpolateScaling(Float animationTime);
 };
 
 struct Skeleton {
@@ -68,7 +68,7 @@ struct Skeleton {
 };
 
 struct AssimpNodeData {
-    glm::mat4 transformation;
+    Mat4 transformation;
     std::string name;
     int32_t childrenCount;
     std::vector<AssimpNodeData> children;
@@ -82,13 +82,13 @@ public:
 
     Bone* FindBone(const std::string& name);
 
-    float GetTicksPerSecond() const;
-    float GetDuration() const;
+    int32_t GetTicksPerSecond() const;
+    Float GetDuration() const;
     const AssimpNodeData& GetRootNode() const;
     const std::map<std::string, BoneInfo>& GetBoneIDMap() const;
 
 private:
-    float duration;
+    Float duration;
     int32_t ticksPerSecond;
     std::vector<Bone> bones;
     AssimpNodeData rootNode;
@@ -102,14 +102,14 @@ class Animator {
 public:
     Animator(Animation* Animation);
 
-    void UpdateAnimation(float dt);
+    void UpdateAnimation(Float dt);
     void PlayAnimation(Animation* pAnimation);
-    void CalculateBoneTransform(const AssimpNodeData* node, glm::mat4 parentTransform);
-    std::vector<glm::mat4> GetFinalBoneMatrices();
+    void CalculateBoneTransform(const AssimpNodeData* node, Mat4 parentTransform);
+    std::vector<Mat4> GetFinalBoneMatrices();
 
 private:
-    std::vector<glm::mat4> finalBoneMatrices;
+    std::vector<Mat4> finalBoneMatrices;
     Animation* currentAnimation;
-    float currentTime;
-    float deltaTime;
+    Float currentTime;
+    Float deltaTime;
 };

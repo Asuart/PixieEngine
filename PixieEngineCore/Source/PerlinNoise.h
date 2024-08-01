@@ -6,17 +6,17 @@ public:
     PerlinNoise();
     ~PerlinNoise();
 
-    float Sample(const glm::vec3& p) const;
-    float Turbulence(const glm::vec3& p, int32_t depth = 7) const;
+    Float Sample(const Vec3& p) const;
+    Float Turbulence(const Vec3& p, int32_t depth = 7) const;
 
 private:
     static const int32_t point_count = 256;
-    glm::vec3* ranvec;
+    Vec3* ranvec;
     int32_t* perm_x;
     int32_t* perm_y;
     int32_t* perm_z;
 
     static int32_t* PerlinGeneratePerm();
     static void Permute(int32_t* p, int32_t n);
-    static float TrilinearInterp(glm::vec3 c[2][2][2], float u, float v, float w);
+    static Float TrilinearInterp(Vec3 c[2][2][2], Float u, Float v, Float w);
 };

@@ -39,8 +39,8 @@ public:
 
 	int32_t sample = 0;
 	int32_t threads = 0;
-	float renderTime = 0;
-	float lastSampleTime = 0;
+	Float renderTime = 0;
+	Float lastSampleTime = 0;
 	std::chrono::microseconds startTime;
 	std::chrono::microseconds sampleStartTime;
 
@@ -57,11 +57,11 @@ private:
 	bool Unoccluded(const RTInteraction& p0, const RTInteraction& p1) const;
 	void GenerateQuads();
 	void PerPixel(uint32_t x, uint32_t y);
-	glm::vec3 SampleLd(const RTInteraction& intr, const BSDF* bsdf) const;
-	glm::vec3 TraceNormals(Ray ray) const;
-	glm::vec3 TraceRay(Ray ray) const;
-	glm::vec3 TracePath(Ray ray) const;
-	glm::vec3 LiRandomWalk(Ray ray, int depth = 0) const;
-	glm::vec3 LiSimplePath(Ray ray) const;
-	glm::vec3 LiPath(Ray ray, VisibleSurface* visibleSurf) const;
+	Vec3 SampleLd(const RTInteraction& intr, const BSDF* bsdf) const;
+	Vec3 TraceNormals(Ray ray) const;
+	Vec3 TraceRay(Ray ray) const;
+	Vec3 TracePath(Ray ray) const;
+	Vec3 LiRandomWalk(Ray ray, int depth = 0) const;
+	Vec3 LiSimplePath(Ray ray) const;
+	Vec3 LiPath(Ray ray, VisibleSurface* visibleSurf) const;
 };

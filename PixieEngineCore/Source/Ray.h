@@ -3,10 +3,10 @@
 #include "RTMath.h"
 
 struct Ray {
-	glm::vec3 o;
-	glm::vec3 d;
+	Vec3 o;
+	Vec3 d;
 
-	Ray(const glm::vec3& _o = glm::vec3(0.0), const glm::vec3& _d = glm::vec3(0.0));
+	Ray(const Vec3& _o = Vec3(0.0), const Vec3& _d = Vec3(0.0));
 
-	glm::vec3 At(float t) const;
+	Vec3 At(Float t) const;
 };

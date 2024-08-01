@@ -3,13 +3,13 @@
 
 class VisibleSurface {
 public:
-	glm::vec3 p;
-	glm::vec3 n;
-	glm::vec2 uv;
-	glm::vec3 albedo;
+	Vec3 p;
+	Vec3 n;
+	Vec2 uv;
+	Vec3 albedo;
 	bool set = false;
 
-	VisibleSurface(const RTInteraction& si, glm::vec3 albedo);
+	VisibleSurface(const RTInteraction& si, Vec3 albedo);
 
 	operator bool() const;
 };

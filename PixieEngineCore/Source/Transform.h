@@ -5,31 +5,31 @@
 #include "Bounds.h"
 
 class Transform {
-	glm::mat4 m = glm::mat4(), mInv = glm::mat4();
+	Mat4 m = Mat4(), mInv = Mat4();
 public:
 	Transform();
-	Transform(const glm::mat4& m);
-	Transform(const glm::mat4& m, const glm::mat4& mInv);
+	Transform(const Mat4& m);
+	Transform(const Mat4& m, const Mat4& mInv);
 
-	const glm::mat4& GetMatrix() const;
-	const glm::mat4& GetInverseMatrix() const;
+	const Mat4& GetMatrix() const;
+	const Mat4& GetInverseMatrix() const;
 
-	glm::vec3 ApplyPoint(glm::vec3 p) const;
-	glm::vec3 ApplyVector(glm::vec3 v) const;
-	glm::vec3 ApplyNormal(glm::vec3 n) const;
-	Ray ApplyRay(const Ray& r, float* tMax = nullptr) const;
+	Vec3 ApplyPoint(Vec3 p) const;
+	Vec3 ApplyVector(Vec3 v) const;
+	Vec3 ApplyNormal(Vec3 n) const;
+	Ray ApplyRay(const Ray& r, Float* tMax = nullptr) const;
 	RTInteraction ApplyInteraction(const RTInteraction& in) const;
 	Bounds3f ApplyBounds(const Bounds3f& b) const;
 
-	glm::vec3 ApplyInversePoint(glm::vec3 p) const;
-	glm::vec3 ApplyInverseVector(glm::vec3 v) const;
-	glm::vec3 ApplyInverseNormal(glm::vec3 n) const;
-	Ray ApplyInverseRay(const Ray& r, float* tMax = nullptr) const;
+	Vec3 ApplyInversePoint(Vec3 p) const;
+	Vec3 ApplyInverseVector(Vec3 v) const;
+	Vec3 ApplyInverseNormal(Vec3 n) const;
+	Ray ApplyInverseRay(const Ray& r, Float* tMax = nullptr) const;
 	RTInteraction ApplyInverseInteraction(const RTInteraction& in) const;
 
-	void Decompose(glm::vec3* T, glm::mat4* R, glm::mat4* S) const;
+	void Decompose(Vec3* T, Mat4* R, Mat4* S) const;
 	bool IsIdentity() const;
-	bool HasScale(float tolerance = 1e-3f) const;
+	bool HasScale(Float tolerance = 1e-3f) const;
 	bool SwapsHandedness() const;
 
 	bool operator==(const Transform& t) const;
@@ -39,14 +39,14 @@ public:
 
 Transform Inverse(const Transform& t);
 Transform Transpose(const Transform& t);
-Transform Rotate(float sinTheta, float cosTheta, glm::vec3 axis);
-Transform Rotate(float theta, glm::vec3 axis);
-Transform RotateFromTo(glm::vec3 from, glm::vec3 to);
-Transform Translate(glm::vec3 delta);
-Transform Scale(float x, float y, float z);
-Transform RotateX(float theta);
-Transform RotateY(float theta);
-Transform RotateZ(float theta);
-Transform LookAt(glm::vec3 pos, glm::vec3 look, glm::vec3 up);
-Transform Orthographic(float zNear, float zFar);
-Transform Perspective(float fov, float n, float f);
+Transform Rotate(Float sinTheta, Float cosTheta, Vec3 axis);
+Transform Rotate(Float theta, Vec3 axis);
+Transform RotateFromTo(Vec3 from, Vec3 to);
+Transform Translate(Vec3 delta);
+Transform Scale(Float x, Float y, Float z);
+Transform RotateX(Float theta);
+Transform RotateY(Float theta);
+Transform RotateZ(Float theta);
+Transform LookAt(Vec3 pos, Vec3 look, Vec3 up);
+Transform Orthographic(Float zNear, Float zFar);
+Transform Perspective(Float fov, Float n, Float f);

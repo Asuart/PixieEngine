@@ -4,19 +4,19 @@
 
 class TrowbridgeReitzDistribution {
 public:
-	TrowbridgeReitzDistribution(float alpha_x, float alpha_y);
+	TrowbridgeReitzDistribution(Float alpha_x, Float alpha_y);
 
-	float D(glm::vec3 wm) const;
+	Float D(Vec3 wm) const;
 	bool EffectivelySmooth() const;
-	float G1(glm::vec3 w) const;
-	float Lambda(glm::vec3 w) const;
-	float G(glm::vec3 wo, glm::vec3 wi) const;
-	float D(glm::vec3 w, glm::vec3 wm) const;
-	float PDF(glm::vec3 w, glm::vec3 wm) const;
-	glm::vec3 Sample_wm(glm::vec3 w, glm::vec2 u) const;
-	static float RoughnessToAlpha(float roughness);
+	Float G1(Vec3 w) const;
+	Float Lambda(Vec3 w) const;
+	Float G(Vec3 wo, Vec3 wi) const;
+	Float D(Vec3 w, Vec3 wm) const;
+	Float PDF(Vec3 w, Vec3 wm) const;
+	Vec3 Sample_wm(Vec3 w, Vec2 u) const;
+	static Float RoughnessToAlpha(Float roughness);
 	void Regularize();
 
 private:
-	float alpha_x, alpha_y;
+	Float alpha_x, alpha_y;
 };

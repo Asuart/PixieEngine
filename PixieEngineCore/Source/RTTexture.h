@@ -5,5 +5,5 @@
 
 class RTTexture {
 public:
-	virtual glm::vec3 Sample(const RTInteraction& intr) const = 0;
+	virtual Vec3 Sample(const RTInteraction& intr) const = 0;
 };

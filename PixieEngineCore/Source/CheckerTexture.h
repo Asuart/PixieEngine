@@ -3,10 +3,10 @@
 
 class CheckerTexture : public RTTexture {
 public:
-	CheckerTexture(RTTexture* _even, RTTexture* _odd, float scale = 10);
-	glm::vec3 Sample(const RTInteraction& intr) const override;
+	CheckerTexture(RTTexture* _even, RTTexture* _odd, Float scale = 10);
+	Vec3 Sample(const RTInteraction& intr) const override;
 
 private:
 	RTTexture* even, * odd;
-	float scale;
+	Float scale;
 };

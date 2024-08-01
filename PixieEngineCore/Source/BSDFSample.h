@@ -3,14 +3,14 @@
 #include "BxDFTools.h"
 
 struct BSDFSample {
-	glm::vec3 f;
-	glm::vec3 wi;
-	float pdf = 0;
+	Vec3 f;
+	Vec3 wi;
+	Float pdf = 0;
 	BxDFFlags flags;
-	float eta = 1;
+	Float eta = 1;
 	bool pdfIsProportional = false;
 
-	BSDFSample(glm::vec3 f, glm::vec3 wi, float pdf, BxDFFlags flags, float eta = 1, bool pdfIsProportional = false);
+	BSDFSample(Vec3 f, Vec3 wi, Float pdf, BxDFFlags flags, Float eta = 1, bool pdfIsProportional = false);
 
 	bool IsReflection() const;
 	bool IsTransmission() const;

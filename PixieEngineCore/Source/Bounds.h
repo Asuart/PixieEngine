@@ -10,30 +10,30 @@ struct Bounds2i {
 
 class Bounds3f {
 public:
-	glm::vec3 pMin, pMax;
+	Vec3 pMin, pMax;
 
 	Bounds3f();
-	explicit Bounds3f(glm::vec3 p);
-	Bounds3f(glm::vec3 p1, glm::vec3 p2);
+	explicit Bounds3f(Vec3 p);
+	Bounds3f(Vec3 p1, Vec3 p2);
 
-	glm::vec3 Corner(int corner) const;
-	glm::vec3 Diagonal() const;
-	float SurfaceArea() const;
-	float Volume() const;
+	Vec3 Corner(int corner) const;
+	Vec3 Diagonal() const;
+	Float SurfaceArea() const;
+	Float Volume() const;
 	int MaxDimension() const;
-	glm::vec3 Lerp(glm::vec3 t) const;
-	glm::vec3 Offset(glm::vec3 p) const;
-	void BoundingSphere(glm::vec3* center, float* radius) const;
+	Vec3 Lerp(Vec3 t) const;
+	Vec3 Offset(Vec3 p) const;
+	void BoundingSphere(Vec3* center, Float* radius) const;
 	bool IsEmpty() const;
 	bool IsDegenerate() const;
-	bool IntersectP(glm::vec3 o, glm::vec3 d, float tMax = Infinity, float* hitt0 = nullptr, float* hitt1 = nullptr) const;
-	bool IntersectP(glm::vec3 o, glm::vec3 d, float tMax, glm::vec3 invDir, const int dirIsNeg[3]) const;
+	bool IntersectP(Vec3 o, Vec3 d, Float tMax = Infinity, Float* hitt0 = nullptr, Float* hitt1 = nullptr) const;
+	bool IntersectP(Vec3 o, Vec3 d, Float tMax, Vec3 invDir, const int dirIsNeg[3]) const;
 
-	glm::vec3 operator[](int i) const;
-	glm::vec3 operator[](int i);
+	Vec3 operator[](int i) const;
+	Vec3 operator[](int i);
 	bool operator==(const Bounds3f& b) const;
 	bool operator!=(const Bounds3f& b) const;
 };
 
 Bounds3f Union(const Bounds3f& b1, const Bounds3f& b2);
-bool Inside(glm::vec3 p, const Bounds3f& b);
+bool Inside(Vec3 p, const Bounds3f& b);

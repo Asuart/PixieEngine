@@ -7,9 +7,9 @@
 class BxDF {
 public:
 	virtual BxDFFlags Flags() const = 0;
-	virtual glm::vec3 f(glm::vec3 wo, glm::vec3 wi, TransportMode mode) const = 0;
-	virtual std::optional<BSDFSample> Sample_f(glm::vec3 wo, float uc, glm::vec2 u, TransportMode mode = TransportMode::Radiance, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const = 0;
-	virtual float PDF(glm::vec3 wo, glm::vec3 wi, TransportMode mode, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const = 0;
-	glm::vec3 rho(glm::vec3 wo, std::span<const float> uc, std::span<const glm::vec2> u2) const;
+	virtual Vec3 f(Vec3 wo, Vec3 wi, TransportMode mode) const = 0;
+	virtual std::optional<BSDFSample> Sample_f(Vec3 wo, Float uc, Vec2 u, TransportMode mode = TransportMode::Radiance, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const = 0;
+	virtual Float PDF(Vec3 wo, Vec3 wi, TransportMode mode, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const = 0;
+	Vec3 rho(Vec3 wo, std::span<const Float> uc, std::span<const Vec2> u2) const;
 	virtual void Regularize() = 0;
 };

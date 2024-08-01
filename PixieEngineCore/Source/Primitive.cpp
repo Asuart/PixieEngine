@@ -8,7 +8,7 @@ BoundingPrimitive::BoundingPrimitive(const std::vector<Primitive*>& _children)
 	}
 }
 
-bool BoundingPrimitive::Intersect(const Ray& ray, RTInteraction& outCollision, float tMax) const {
+bool BoundingPrimitive::Intersect(const Ray& ray, RTInteraction& outCollision, Float tMax) const {
 	if (!bounds.IntersectP(ray.o, ray.d, tMax)) return false;
 	bool intersected = false;
 	for (int i = 0; i < children.size(); i++) {
@@ -21,7 +21,7 @@ bool BoundingPrimitive::Intersect(const Ray& ray, RTInteraction& outCollision, f
 	return intersected;
 }
 
-bool BoundingPrimitive::IntersectP(const Ray& ray, float tMax) const {
+bool BoundingPrimitive::IntersectP(const Ray& ray, Float tMax) const {
 	if (!bounds.IntersectP(ray.o, ray.d, tMax)) return false;
 	for (int i = 0; i < children.size(); i++) {
 		if (children[i]->IntersectP(ray, tMax)) return true;
@@ -34,7 +34,7 @@ ShapePrimitive::ShapePrimitive(Shape* _shape, RTMaterial* _material)
 	bounds = shape->Bounds();
 }
 
-bool ShapePrimitive::Intersect(const Ray& ray, RTInteraction& outCollision, float tMax) const {
+bool ShapePrimitive::Intersect(const Ray& ray, RTInteraction& outCollision, Float tMax) const {
 	if (!bounds.IntersectP(ray.o, ray.d, tMax)) return false;
 	bool col = shape->Intersect(ray, outCollision, tMax);
 	if (col) {
@@ -43,7 +43,7 @@ bool ShapePrimitive::Intersect(const Ray& ray, RTInteraction& outCollision, floa
 	return col;
 }
 
-bool ShapePrimitive::IntersectP(const Ray& ray, float tMax) const {
+bool ShapePrimitive::IntersectP(const Ray& ray, Float tMax) const {
 	if (!bounds.IntersectP(ray.o, ray.d, tMax)) return false;
 	return shape->IntersectP(ray, tMax);
 }
@@ -53,7 +53,7 @@ BVHPrimitive::BVHPrimitive() {}
 BVHPrimitive::BVHPrimitive(size_t primitiveIndex, const Bounds3f& bounds)
 	: primitiveIndex(primitiveIndex), bounds(bounds) {}
 
-glm::vec3 BVHPrimitive::Centroid() const { 
+Vec3 BVHPrimitive::Centroid() const { 
 	return .5f * bounds.pMin + .5f * bounds.pMax; 
 }
 
@@ -100,9 +100,9 @@ Bounds3f BVHAggregate::Bounds() const {
 	return nodes[0].bounds;
 }
 
-bool BVHAggregate::Intersect(const Ray& ray, RTInteraction& outCollision, float tMax) const {
+bool BVHAggregate::Intersect(const Ray& ray, RTInteraction& outCollision, Float tMax) const {
 	if (!nodes) return false;
-	glm::vec3 invDir(1 / ray.d.x, 1 / ray.d.y, 1 / ray.d.z);
+	Vec3 invDir(1 / ray.d.x, 1 / ray.d.y, 1 / ray.d.z);
 	int dirIsNeg[3] = { int(invDir.x < 0), int(invDir.y < 0), int(invDir.z < 0) };
 	int toVisitOffset = 0, currentNodeIndex = 0;
 	int nodesToVisit[64];
@@ -143,9 +143,9 @@ bool BVHAggregate::Intersect(const Ray& ray, RTInteraction& outCollision, float 
 	return collided;
 }
 
-bool BVHAggregate::IntersectP(const Ray& ray, float tMax) const {
+bool BVHAggregate::IntersectP(const Ray& ray, Float tMax) const {
 	if (!nodes) return false;
-	glm::vec3 invDir(1.f / ray.d.x, 1.f / ray.d.y, 1.f / ray.d.z);
+	Vec3 invDir(1.f / ray.d.x, 1.f / ray.d.y, 1.f / ray.d.z);
 	int dirIsNeg[3] = { static_cast<int>(invDir.x < 0), static_cast<int>(invDir.y < 0), static_cast<int>(invDir.z < 0) };
 	int nodesToVisit[64];
 	int toVisitOffset = 0, currentNodeIndex = 0;
@@ -194,12 +194,12 @@ BVHBuildNode* BVHAggregate::buildRecursive(std::span<BVHPrimitive> bvhPrimitives
 	}
 
 	if (bounds.SurfaceArea() == 0 || bvhPrimitives.size() == 1) {
-		int firstPrimOffset = orderedPrimsOffset->fetch_add(bvhPrimitives.size());
+		size_t firstPrimOffset = orderedPrimsOffset->fetch_add((int32_t)bvhPrimitives.size());
 		for (size_t i = 0; i < bvhPrimitives.size(); ++i) {
-			int index = bvhPrimitives[i].primitiveIndex;
+			size_t index = bvhPrimitives[i].primitiveIndex;
 			orderedPrims[firstPrimOffset + i] = primitives[index];
 		}
-		node->InitLeaf(firstPrimOffset, bvhPrimitives.size(), bounds);
+		node->InitLeaf((int32_t)firstPrimOffset, (int32_t)bvhPrimitives.size(), bounds);
 		return node;
 	}
 	else {
@@ -207,19 +207,19 @@ BVHBuildNode* BVHAggregate::buildRecursive(std::span<BVHPrimitive> bvhPrimitives
 		for (const auto& prim : bvhPrimitives) {
 			centroidBounds = Union(centroidBounds, Bounds3f(prim.Centroid()));
 		}
-		int dim = centroidBounds.MaxDimension();
+		int32_t dim = centroidBounds.MaxDimension();
 
 		if (centroidBounds.pMax[dim] == centroidBounds.pMin[dim]) {
-			int firstPrimOffset = orderedPrimsOffset->fetch_add(bvhPrimitives.size());
+			size_t firstPrimOffset = orderedPrimsOffset->fetch_add((int32_t)bvhPrimitives.size());
 			for (size_t i = 0; i < bvhPrimitives.size(); ++i) {
-				int index = bvhPrimitives[i].primitiveIndex;
+				size_t index = bvhPrimitives[i].primitiveIndex;
 				orderedPrims[firstPrimOffset + i] = primitives[index];
 			}
-			node->InitLeaf(firstPrimOffset, bvhPrimitives.size(), bounds);
+			node->InitLeaf((int32_t)firstPrimOffset, (int32_t)bvhPrimitives.size(), bounds);
 			return node;
 		}
 		else {
-			int mid = bvhPrimitives.size() / 2;
+			size_t mid = bvhPrimitives.size() / 2;
 
 			if (bvhPrimitives.size() <= 2) {
 				mid = bvhPrimitives.size() / 2;
@@ -229,11 +229,11 @@ BVHBuildNode* BVHAggregate::buildRecursive(std::span<BVHPrimitive> bvhPrimitives
 					});
 			}
 			else {
-				constexpr int nBuckets = 12;
+				constexpr uint32_t nBuckets = 12;
 				BVHSplitBucket buckets[nBuckets];
 
 				for (const auto& prim : bvhPrimitives) {
-					int b = nBuckets * centroidBounds.Offset(prim.Centroid())[dim];
+					int32_t b = (int32_t)(nBuckets * centroidBounds.Offset(prim.Centroid())[dim]);
 					if (b == nBuckets) {
 						b = nBuckets - 1;
 					}
@@ -241,56 +241,54 @@ BVHBuildNode* BVHAggregate::buildRecursive(std::span<BVHPrimitive> bvhPrimitives
 					buckets[b].bounds = Union(buckets[b].bounds, prim.bounds);
 				}
 
-				constexpr int nSplits = nBuckets - 1;
-				float costs[nSplits] = {};
+				constexpr int32_t nSplits = nBuckets - 1;
+				Float costs[nSplits] = {};
 
-				int countBelow = 0;
+				int32_t countBelow = 0;
 				Bounds3f boundBelow;
-				for (int i = 0; i < nSplits; ++i) {
+				for (int32_t i = 0; i < nSplits; ++i) {
 					boundBelow = Union(boundBelow, buckets[i].bounds);
 					countBelow += buckets[i].count;
 					costs[i] += countBelow * boundBelow.SurfaceArea();
 				}
 
-				int countAbove = 0;
+				int32_t countAbove = 0;
 				Bounds3f boundAbove;
-				for (int i = nSplits; i >= 1; --i) {
+				for (int32_t i = nSplits; i >= 1; --i) {
 					boundAbove = Union(boundAbove, buckets[i].bounds);
 					countAbove += buckets[i].count;
 					costs[i - 1] += countAbove * boundAbove.SurfaceArea();
 				}
 
-				int minCostSplitBucket = -1;
-				float minCost = Infinity;
-				for (int i = 0; i < nSplits; ++i) {
+				int32_t minCostSplitBucket = -1;
+				Float minCost = Infinity;
+				for (int32_t i = 0; i < nSplits; ++i) {
 					if (costs[i] < minCost) {
 						minCost = costs[i];
 						minCostSplitBucket = i;
 					}
 				}
 
-				float leafCost = bvhPrimitives.size();
+				Float leafCost = (Float)bvhPrimitives.size();
 				minCost = 1.f / 2.f + minCost / bounds.SurfaceArea();
 
 				if (bvhPrimitives.size() > maxPrimsInNode || minCost < leafCost) {
 					auto midIter = std::partition(
 						bvhPrimitives.begin(), bvhPrimitives.end(),
 						[=](const BVHPrimitive& bp) {
-							int b =
-								nBuckets * centroidBounds.Offset(bp.Centroid())[dim];
-							if (b == nBuckets)
-								b = nBuckets - 1;
+							int32_t b = (int32_t)(nBuckets * centroidBounds.Offset(bp.Centroid())[dim]);
+							if (b == nBuckets) b = nBuckets - 1;
 							return b <= minCostSplitBucket;
 						});
 					mid = midIter - bvhPrimitives.begin();
 				}
 				else {
-					int firstPrimOffset = orderedPrimsOffset->fetch_add(bvhPrimitives.size());
+					int32_t firstPrimOffset = orderedPrimsOffset->fetch_add((int32_t)bvhPrimitives.size());
 					for (size_t i = 0; i < bvhPrimitives.size(); ++i) {
-						int index = bvhPrimitives[i].primitiveIndex;
+						size_t index = bvhPrimitives[i].primitiveIndex;
 						orderedPrims[firstPrimOffset + i] = primitives[index];
 					}
-					node->InitLeaf(firstPrimOffset, bvhPrimitives.size(), bounds);
+					node->InitLeaf(firstPrimOffset, (int32_t)bvhPrimitives.size(), bounds);
 					return node;
 				}
 			}
@@ -305,10 +303,10 @@ BVHBuildNode* BVHAggregate::buildRecursive(std::span<BVHPrimitive> bvhPrimitives
 	return node;
 }
 
-int BVHAggregate::flattenBVH(BVHBuildNode* node, int* offset) {
+int BVHAggregate::flattenBVH(BVHBuildNode* node, int32_t* offset) {
 	LinearBVHNode* linearNode = &nodes[*offset];
 	linearNode->bounds = node->bounds;
-	int nodeOffset = (*offset)++;
+	int32_t nodeOffset = (*offset)++;
 	if (node->nPrimitives > 0) {
 		linearNode->primitivesOffset = node->firstPrimOffset;
 		linearNode->nPrimitives = node->nPrimitives;

@@ -7,7 +7,7 @@ public:
 	OGLMesh* mesh;
 	Texture<glm::vec4>* texture;
 	glm::ivec2 m_resolution;
-	glm::vec2 m_pixelSize;
+	Vec2 m_pixelSize;
 
 	Film(glm::ivec2 resolution);
 
@@ -16,6 +16,6 @@ public:
 	void SetPixel(int32_t x, int32_t y, const glm::vec4& color);
 	void AddPixel(int32_t x, int32_t y, const glm::vec4& color);
 
-	glm::vec2 GetUV(int32_t x, int32_t y) const;
-	glm::vec2 GetUV(int32_t x, int32_t y, const glm::vec2& u) const;
+	Vec2 GetUV(int32_t x, int32_t y) const;
+	Vec2 GetUV(int32_t x, int32_t y, const Vec2& u) const;
 };

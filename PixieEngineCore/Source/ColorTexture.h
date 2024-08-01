@@ -3,9 +3,9 @@
 
 class ColorTexture : public RTTexture {
 public:
-	ColorTexture(const glm::vec3& _color);
-	glm::vec3 Sample(const RTInteraction& intr) const override;
+	ColorTexture(const Vec3& _color);
+	Vec3 Sample(const RTInteraction& intr) const override;
 
 private:
-	glm::vec3 color;
+	Vec3 color;
 };

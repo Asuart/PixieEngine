@@ -1,13 +1,13 @@
 #pragma once
 #include "PixieEngineCoreHeaders.h"
 
-#define MAX_BONES_PER_VERTEX 4
+static const uint32_t MaxBonesPerVertex = 4;
 
 struct Vertex {
-	glm::vec3 p;
-	glm::vec3 n;
-	glm::vec2 uv;
-	int32_t boneIDs[MAX_BONES_PER_VERTEX];
-	float boneWeights[MAX_BONES_PER_VERTEX];
-	Vertex(const glm::vec3& _p = glm::vec3(0), const glm::vec3& _n = glm::vec3(0), const glm::vec2& _uv = glm::vec2(0));
+	Vec3 p;
+	Vec3 n;
+	Vec2 uv;
+	int32_t boneIDs[MaxBonesPerVertex];
+	Float boneWeights[MaxBonesPerVertex];
+	Vertex(const Vec3& _p = Vec3(0), const Vec3& _n = Vec3(0), const Vec2& _uv = Vec2(0));
 };

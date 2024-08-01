@@ -11,9 +11,9 @@ public:
 
 	RTMaterial(const std::string& name, RTTexture* texture = nullptr) : Material(name), texture(texture) {}
 
-	inline glm::vec3 Evaluate(const RTInteraction& collision) const;
-	inline constexpr float Pdf() const;
-	glm::vec3 Sample(const Ray& ray, const RTInteraction& collision, Ray& scatteredRay) const;
+	inline Vec3 Evaluate(const RTInteraction& collision) const;
+	inline constexpr Float Pdf() const;
+	Vec3 Sample(const Ray& ray, const RTInteraction& collision, Ray& scatteredRay) const;
 	virtual BxDF* GetBxDF(const RTInteraction& intr) const;
 	BSDF GetBSDF(const RTInteraction& intr) const;
 };

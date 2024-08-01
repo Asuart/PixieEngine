@@ -5,9 +5,9 @@ class ImageTexture : public RTTexture {
 public:
 	ImageTexture(const std::string& filePath);
 	~ImageTexture();
-	glm::vec3 Sample(const RTInteraction& intr) const override;
+	Vec3 Sample(const RTInteraction& intr) const override;
 
 private:
-	glm::vec3* data;
+	Vec3* data;
 	glm::ivec2 resolution;
 };

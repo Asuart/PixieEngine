@@ -8,8 +8,8 @@ class Primitive {
 public:
 	Bounds3f bounds;
 
-	virtual bool Intersect(const Ray& ray, RTInteraction& outCollision, float tMax = Infinity) const = 0;
-	virtual bool IntersectP(const Ray& ray, float tMax = Infinity) const = 0;
+	virtual bool Intersect(const Ray& ray, RTInteraction& outCollision, Float tMax = Infinity) const = 0;
+	virtual bool IntersectP(const Ray& ray, Float tMax = Infinity) const = 0;
 };
 
 class BoundingPrimitive : public Primitive {
@@ -18,8 +18,8 @@ public:
 
 	BoundingPrimitive(const std::vector<Primitive*>& _children);
 
-	bool Intersect(const Ray& ray, RTInteraction& outCollision, float tMax = Infinity) const override;
-	bool IntersectP(const Ray& ray, float tMax = Infinity) const override;
+	bool Intersect(const Ray& ray, RTInteraction& outCollision, Float tMax = Infinity) const override;
+	bool IntersectP(const Ray& ray, Float tMax = Infinity) const override;
 };
 
 class ShapePrimitive : public Primitive {
@@ -29,8 +29,8 @@ public:
 
 	ShapePrimitive(Shape* _shape, RTMaterial* _material);
 
-	bool Intersect(const Ray& ray, RTInteraction& outCollision, float tMax = Infinity) const override;
-	bool IntersectP(const Ray& ray, float tMax = Infinity) const override;
+	bool Intersect(const Ray& ray, RTInteraction& outCollision, Float tMax = Infinity) const override;
+	bool IntersectP(const Ray& ray, Float tMax = Infinity) const override;
 };
 
 struct BVHSplitBucket {
@@ -45,7 +45,7 @@ struct BVHPrimitive {
 	BVHPrimitive();
 	BVHPrimitive(size_t primitiveIndex, const Bounds3f& bounds);
 
-	glm::vec3 Centroid() const;
+	Vec3 Centroid() const;
 };
 
 struct BVHBuildNode {
@@ -72,8 +72,8 @@ public:
 	BVHAggregate(std::vector<Primitive*> p, int maxPrimsInNode = 1);
 
 	Bounds3f Bounds() const;
-	bool Intersect(const Ray& ray, RTInteraction& outCollision, float tMax = Infinity) const override;
-	bool IntersectP(const Ray& ray, float tMax = Infinity) const override;
+	bool Intersect(const Ray& ray, RTInteraction& outCollision, Float tMax = Infinity) const override;
+	bool IntersectP(const Ray& ray, Float tMax = Infinity) const override;
 
 	int maxPrimsInNode;
 	std::vector<Primitive*> primitives;
