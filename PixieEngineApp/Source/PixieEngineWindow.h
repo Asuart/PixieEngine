@@ -1,7 +1,5 @@
-#ifndef PIXIE_ENGINE_WINDOW
-#define PIXIE_ENGINE_WINDOW
-
-#include "pch.h"
+#pragma once
+#include "PixieEngineAppHeaders.h"
 #include "UserInput.h"
 
 class PixieEngineWindow {
@@ -16,5 +14,3 @@ public:
 private:
 	GLFWwindow* m_window;
 };
-
-#endif // PIXIE_ENGINE_WINDOW

@@ -1,8 +1,7 @@
-#include "pch.h"
 #include "PixieEngineApp.h"
 
 PixieEngineApp::PixieEngineApp() {
-	if (glewInit() != GLEW_OK) {
+	if (!gladLoadGL()) {
 		std::cout << "GLEW initialization failed.\n";
 		exit(1);
 	}
@@ -23,7 +22,7 @@ PixieEngineApp::PixieEngineApp() {
 	ImGui_ImplOpenGL3_Init();
 
 	SceneLoader sceneLoader;
-	m_rtScene = sceneLoader.LoadScene("../scenes/default.obj");
+	m_rtScene = sceneLoader.LoadScene("../Scenes/default.obj");
 
 	m_rayTracingRenderer = new RayTracingRenderer(glm::ivec2(1280, 720), m_rtScene);
 	m_rayTracingRenderer->StartRender();
@@ -45,7 +44,6 @@ void PixieEngineApp::Start() {
 	while (!m_window.IsShouldClose()) {
 		glfwPollEvents();
 
-		Time::Update();
 		UserInput::Reset();
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

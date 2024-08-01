@@ -1,9 +1,9 @@
-#include "pch.h"
+#include "PixieEngineAppHeaders.h"
 #include "PixieEngineApp.h"
 
 PixieEngineApp app;
 
-void window_size_callback(GLFWwindow* window, int width, int height) {
+void window_size_callback(GLFWwindow* window, int32_t width, int32_t height) {
 	app.HandleResize(width, height);
 }
 

@@ -16,7 +16,6 @@
 #include "Camera.h"
 #include "Shape.h"
 #include "PerlinNoise.h"
-#include "Time.h"
 #include "Primitive.h"
 #include "Light.h"
 #include "Film.h"

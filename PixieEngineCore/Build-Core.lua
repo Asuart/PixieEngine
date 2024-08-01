@@ -15,6 +15,11 @@ project "PixieEngineCore"
       "../Dependencies/glad/include",
    }
 
+   links
+   {
+	  "assimp-vc143-mt.lib"
+   }
+
    targetdir ("../Build/" .. OutputDir .. "/%{prj.name}")
    objdir ("../Build/Intermediates/" .. OutputDir .. "/%{prj.name}")
 

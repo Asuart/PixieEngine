@@ -1,5 +1,4 @@
 #pragma once
-#include "Time.h"
 #include "Film.h"
 #include "RTScene.h"
 #include "Light.h"

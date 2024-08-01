@@ -64,8 +64,8 @@ void CPURayTracer::StartRender() {
 	if (isRendering) EndRender();
 	isRendering = true;
 	sample = 0;
-	startTime = Time::GetTime();
-	sampleStartTime = startTime;
+	//startTime = Time::GetTime();
+	//sampleStartTime = startTime;
 
 	clear(quadQueue);
 	for (int32_t i = 0; i < quads.size(); i++) {
@@ -79,10 +79,10 @@ void CPURayTracer::StartRender() {
 			while (isRendering) {
 				quadQueueMutex.lock();
 				if (quadQueue.empty()) {
-					std::chrono::microseconds currrentTime = Time::GetTime();
-					renderTime = (currrentTime - startTime).count() / 1000.0;
-					lastSampleTime = (currrentTime - sampleStartTime).count() / 1000.0;
-					sampleStartTime = currrentTime;
+					//std::chrono::microseconds currrentTime = Time::GetTime();
+					//renderTime = (currrentTime - startTime).count() / 1000.0;
+					//lastSampleTime = (currrentTime - sampleStartTime).count() / 1000.0;
+					//sampleStartTime = currrentTime;
 					sample++;
 					for (int32_t i = 0; i < quads.size(); i++) {
 						quadQueue.push(i);

@@ -9,9 +9,8 @@ project "PixieEngineApp"
    { 
       "Source/**.h", 
       "Source/**.cpp", 
-      "../Dependencies/imgui/**.h", 
-      "../Dependencies/imgui/**.cpp", 
-      "../Dependencies/imgui/**.cpp", 
+      "../Dependencies/imgui/*.h", 
+      "../Dependencies/imgui/*.cpp", 
       "../Dependencies/imgui/backends/imgui_impl_opengl3_loader.h", 
       "../Dependencies/imgui/backends/imgui_impl_opengl3.h", 
       "../Dependencies/imgui/backends/imgui_impl_opengl3.cpp", 
@@ -23,8 +22,10 @@ project "PixieEngineApp"
    {
       "Source",
       "../PixieEngineCore/Source",
+      "../PixieEngineCore/Source/shaders",
       "../Dependencies/glad/include",
       "../Dependencies",
+      "../Dependencies/imgui",
       "../Dependencies/imgui/backends",
       "../Dependencies/imgui/examples/libs/glfw/include",
    }

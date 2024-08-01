@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "PixieEngineWindow.h"
 
 PixieEngineWindow::PixieEngineWindow(uint32_t width, uint32_t height) {

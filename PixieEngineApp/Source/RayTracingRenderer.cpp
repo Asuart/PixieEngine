@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "RayTracingRenderer.h"
 
 RayTracingRenderer::RayTracingRenderer(glm::ivec2 resolution, RTScene* scene)

@@ -1,4 +1,5 @@
 #pragma once
+#include "PixieEngineCoreHeaders.h"
 #include "AssimpGLMHelper.h"
 
 struct BoneInfo {

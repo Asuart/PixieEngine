@@ -1,7 +1,5 @@
-#ifndef PIXIE_ENGINE_APP 
-#define PIXIE_ENGINE_APP
-
-#include "pch.h"
+#pragma once
+#include "PixieEngineAppHeaders.h"
 #include "PixieEngineWindow.h"
 #include "RayTracingRenderer.h"
 
@@ -24,5 +22,3 @@ private:
 	void DrawUI();
 	void UpdateViewportResolution(glm::ivec2 resolution);
 };
-
-#endif // PIXIE_ENGINE_APP

@@ -1,24 +1,70 @@
 #pragma once
-#include "headers.h"
+#include "PixieEngineCoreHeaders.h"
 
-const float Pi = 3.14159265358979323846;
-const float InvPi = 0.31830988618379067154;
-const float Inv2Pi = 0.15915494309189533577;
-const float Inv4Pi = 0.07957747154594766788;
-const float PiOver2 = 1.57079632679489661923;
-const float PiOver4 = 0.78539816339744830961;
-const float Sqrt2 = 1.41421356237309504880;
-
-const float MachineEpsilon = std::numeric_limits<float>::epsilon() * 0.5f;
+#ifdef PIXIE_ENGINE_DOUBLE_PRECISION
+const double Pi = 3.14159265358979323846;
+const double InvPi = 0.31830988618379067154;
+const double Inv2Pi = 0.15915494309189533577;
+const double Inv4Pi = 0.07957747154594766788;
+const double PiOver2 = 1.57079632679489661923;
+const double PiOver4 = 0.78539816339744830961;
+const double Sqrt2 = 1.41421356237309504880;
+const double MachineEpsilon = std::numeric_limits<double>::epsilon() * 0.5;
+const double Infinity = std::numeric_limits<double>::infinity();
+const double ShadowEpsilon = 0.00001;
+const double MinusEpsilon = 0x1.fffffffffffffp-1;
+#else
+const float Pi = 3.1415926535f;
+const float InvPi = 0.3183098861f;
+const float Inv2Pi = 0.1591549430f;
+const float Inv4Pi = 0.0795774715f;
+const float PiOver2 = 1.5707963267f;
+const float PiOver4 = 0.7853981633f;
+const float Sqrt2 = 1.4142135623f;
+const float MachineEpsilon = std::numeric_limits<Float>::epsilon() * 0.5f;
+const float Infinity = std::numeric_limits<Float>::infinity();
 const float ShadowEpsilon = 0.0001f;
-const float Infinity = std::numeric_limits<float>::infinity();
+const float MinusEpsilon = 0x1.fffffep-1;
+#endif
 
-const double DoubleOneMinusEpsilon = 0x1.fffffffffffffp-1;
-const float FloatOneMinusEpsilon = 0x1.fffffep-1;
-const float OneMinusEpsilon = FloatOneMinusEpsilon;
+Float SafeSqrt(Float v);
+Float PowerHeuristic(int32_t nf, Float fPdf, int32_t ng, Float gPdf);
+Float SphericalTriangleArea(Vec3 v1, Vec3 v2, Vec3 v3);
+Float MaxComponent(const Vec3& v);
+Float UniformSpherePDF();
+Float UniformHemispherePDF();
+Float CosineHemispherePDF(Float cosTheta);
+Float CosTheta(Vec3 w);
+Float Cos2Theta(Vec3 w);
+Float AbsCosTheta(Vec3 w);
+Float Sin2Theta(Vec3 w);
+Float SinTheta(Vec3 w);
+Float TanTheta(Vec3 w);
+Float Tan2Theta(Vec3 w);
+Float CosPhi(Vec3 w);
+Float SinPhi(Vec3 w);
+Float length2(const Vec2& v);
+Float length2(const Vec3& v);
+Float gamma(int32_t n);
+Float FrDielectric(Float cosTheta_i, Float eta);
+
+Vec2 SampleUniformDiskConcentric(Vec2 u);
+Vec2 SampleUniformDiskPolar(Vec2 u);
+
+Vec3 SampleUniformSphere(Vec2 u);
+Vec3 SampleUniformHemisphere(Vec2 u);
+Vec3 SampleCosineHemisphere(Vec2 u);
+Vec3 FaceForward(Vec3  n, Vec3  v);
+Vec3 Reflect(Vec3 wo, Vec3 n);
+
+bool SameHemisphere(Vec3 w, Vec3 wp);
+bool Refract(Vec3 wi, Vec3 n, Float eta, Float* etap, Vec3* wt);
+bool isnan(const Vec3& v);
+
+void CoordinateSystem(Vec3 v1, Vec3* v2, Vec3* v3);
 
 template<typename T>
-T Lerp(float t, T from, T to) {
+T Lerp(Float t, T from, T to) {
 	return from + (to - from) * t;
 }
 
@@ -33,39 +79,3 @@ constexpr T Clamp(T val, U low, V high) {
 	else if (val > high) return T(high);
 	else                 return val;
 }
-
-float SafeSqrt(float v);
-float PowerHeuristic(int nf, float fPdf, int ng, float gPdf);
-float SphericalTriangleArea(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3);
-float MaxComponent(const glm::vec3& v);
-glm::vec3 SampleUniformSphere(glm::vec2 u);
-float UniformSpherePDF();
-glm::vec3 SampleUniformHemisphere(glm::vec2 u);
-float UniformHemispherePDF();
-void CoordinateSystem(glm::vec3 v1, glm::vec3* v2, glm::vec3* v3);
-glm::vec2 SampleUniformDiskConcentric(glm::vec2 u);
-glm::vec2 SampleUniformDiskPolar(glm::vec2 u);
-bool SameHemisphere(glm::vec3 w, glm::vec3 wp);
-glm::vec3 SampleCosineHemisphere(glm::vec2 u);
-float CosineHemispherePDF(float cosTheta);
-float CosTheta(glm::vec3 w);
-float Cos2Theta(glm::vec3 w);
-float AbsCosTheta(glm::vec3 w);
-float Sin2Theta(glm::vec3 w);
-float SinTheta(glm::vec3 w);
-float TanTheta(glm::vec3 w);
-float Tan2Theta(glm::vec3 w);
-float CosPhi(glm::vec3 w);
-float SinPhi(glm::vec3 w);
-
-bool Refract(glm::vec3 wi, glm::vec3 n, float eta, float* etap, glm::vec3* wt);
-float FrDielectric(float cosTheta_i, float eta);
-glm::vec3 FaceForward(glm::vec3  n, glm::vec3  v);
-glm::vec3 Reflect(glm::vec3 wo, glm::vec3 n);
-
-float gamma(int32_t n);
-
-bool isnan(const glm::vec3& v);
-
-double length2(const glm::vec2& v);
-double length2(const glm::vec3& v);
