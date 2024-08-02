@@ -1,7 +1,7 @@
 #include "RayTracingRenderer.h"
 
 RayTracingRenderer::RayTracingRenderer(glm::ivec2 resolution, RTScene* scene)
-	: m_resolution(resolution), m_rayTracer(new NormalsTracer({800, 600})), m_scene(scene), m_viewportResolution(resolution) {
+	: m_resolution(resolution), m_rayTracer(new RandomWalkIntegrator({800, 600})), m_scene(scene), m_viewportResolution(resolution) {
 	m_rayTracer->SetScene(scene);
 	//m_rayTracer->mode = CPURayTracerMode::LiPath;
 }
@@ -14,6 +14,7 @@ void RayTracingRenderer::DrawFrame() {
 	GLuint program = m_rayTracer->m_film.mesh->shader;
 	GLuint posLoc = glGetUniformLocation(program, "uPos");
 	GLuint sizeLoc = glGetUniformLocation(program, "uSize");
+	GLuint samplesLoc = glGetUniformLocation(program, "uSamples");
 
 	float textureAspect = (float)800 / 600;
 	float viewportAspect = (float)m_viewportResolution.x / m_viewportResolution.y;
@@ -37,6 +38,7 @@ void RayTracingRenderer::DrawFrame() {
 	glUseProgram(program);
 	glUniform2f(posLoc, posX, posY);
 	glUniform2f(sizeLoc, sizeX, sizeY);
+	glUniform1f(samplesLoc, m_rayTracer->m_samples);
 	glActiveTexture(GL_TEXTURE0);
 	m_rayTracer->m_film.texture->Bind(GL_TEXTURE0);
 	m_rayTracer->m_film.mesh->Draw();

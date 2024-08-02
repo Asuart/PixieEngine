@@ -5,3 +5,4 @@
 #include "FrameBuffer.h"
 #include "SceneLoader.h"
 #include "NormalsTracer.h"
+#include "RandomWalkIntegrator.h"

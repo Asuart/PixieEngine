@@ -16,9 +16,10 @@ const char* const QUAD_FRAGMENT_SHADER_SOURCE =
 "#version 330 core\n"
 "out vec4 color;\n"
 "in vec2 fTexCoord;\n"
+"uniform float uSamples;\n"
 "uniform sampler2D ourTexture;\n"
 "void main() {\n"
-"color = vec4(texture(ourTexture, fTexCoord).rgb, 1.0);\n"
+"color = vec4(texture(ourTexture, fTexCoord).rgb / uSamples, 1.0);\n"
 "}\n";
 
 

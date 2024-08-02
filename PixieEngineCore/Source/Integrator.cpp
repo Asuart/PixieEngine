@@ -39,6 +39,7 @@ void Integrator::Reset() {
 	m_triangleCheckStatBuffer.Clear();
 	m_sampleCountBuffer.Clear();
 	GenerateTiles();
+	m_samples = 1;
 	if (wasRendering) StartRender();
 }
 

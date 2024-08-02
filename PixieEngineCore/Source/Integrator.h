@@ -10,6 +10,7 @@ class Integrator : public Renderer {
 public:
 	Film m_film;
 	int32_t m_maxDepth = 1024;
+	uint32_t m_samples = 1;
 
 	virtual void SetScene(RTScene* scene);
 	virtual void SetResolution(const glm::ivec2& resolution) override;
@@ -30,7 +31,6 @@ protected:
 	bool m_isRendering = false;
 	int32_t m_threadsCount = 0;
 	int32_t m_maxThreads = 1;
-	uint32_t m_samples = 0;
 	std::vector<std::thread*> m_renderThreads;
 	glm::ivec2 m_tileSize = glm::ivec2(64, 64);
 	std::vector<Bounds2i> m_tiles;
