@@ -27,7 +27,7 @@ PixieEngineApp::PixieEngineApp() {
 	m_rayTracingRenderer = new RayTracingRenderer(glm::ivec2(1280, 720), m_rtScene);
 	m_rayTracingRenderer->StartRender();
 
-	m_viewportFrameBuffer = new FrameBuffer();
+	m_viewportFrameBuffer = new FrameBuffer(1, 1);
 }
 
 PixieEngineApp::~PixieEngineApp() {
@@ -50,8 +50,10 @@ void PixieEngineApp::Start() {
 
 		m_viewportFrameBuffer->Bind();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glViewport(0, 0, m_viewportFrameBuffer->m_resolution.x, m_viewportFrameBuffer->m_resolution.y);
 		m_rayTracingRenderer->DrawFrame();
 		m_viewportFrameBuffer->Unbind();
+		glViewport(0, 0, m_window.GetWindowSize().x, m_window.GetWindowSize().y);
 
 		DrawUI();
 
@@ -111,14 +113,17 @@ void PixieEngineApp::DrawUI() {
 
 	m_rayTracingRenderer->DrawUI();
 
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 	ImGui::Begin("Viewport");
 	ImVec2 viewportResolution = ImGui::GetContentRegionAvail();
+	ImGui::SetNextWindowSize(viewportResolution);
 	ImGui::Image((void*)m_viewportFrameBuffer->m_texture, viewportResolution, { 0.0, 1.0 }, { 1.0, 0.0 });
 	glm::ivec2 glmViewportResolution = { viewportResolution.x, viewportResolution.y };
 	if (glmViewportResolution != m_viewportResolution) {
 		UpdateViewportResolution(glmViewportResolution);
 	}
 	ImGui::End();
+	ImGui::PopStyleVar();
 
 	ImGui::End();
 

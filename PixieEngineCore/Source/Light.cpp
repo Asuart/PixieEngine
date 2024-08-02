@@ -1,16 +1,16 @@
 
 #include "Light.h"
 
-LightLiSample::LightLiSample(const Vec3& L, Vec3 wi, Float pdf, const RTInteraction& pLight)
+LightLiSample::LightLiSample(const glm::fvec3& L, Vec3 wi, Float pdf, const RTInteraction& pLight)
 	: L(L), wi(wi), pdf(pdf), pLight(pLight) {}
 
-DiffuseAreaLight::DiffuseAreaLight(Shape* shape, Vec3 emit, Float scale)
+DiffuseAreaLight::DiffuseAreaLight(Shape* shape, glm::fvec3 emit, Float scale)
 	: shape(shape), Lemit(emit), scale(scale) {};
 
-Vec3 DiffuseAreaLight::L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const {
+glm::fvec3 DiffuseAreaLight::L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const {
 	if (!twoSided && glm::dot(n, w) < 0)
 		return Vec3(0.f);
-	return scale * Lemit;
+	return (float)scale * Lemit;
 }
 
 std::optional<LightLiSample> DiffuseAreaLight::SampleLi(RTInteraction intr, Vec2 u) const {

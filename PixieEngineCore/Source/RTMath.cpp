@@ -1,7 +1,7 @@
 #include "RTMath.h"
 
 Float SafeSqrt(Float v) {
-	return glm::sqrt(glm::max(0.0f, v));
+	return glm::sqrt(glm::max((Float)0.0f, v));
 }
 
 Float PowerHeuristic(int32_t nf, Float fPdf, int32_t ng, Float gPdf) {
@@ -101,7 +101,7 @@ Float gamma(int32_t n) {
 }
 
 Vec2 SampleUniformDiskConcentric(Vec2 u) {
-	Vec2 uOffset = 2.0f * u - Vec2(1, 1);
+	Vec2 uOffset = (Float)2.0f * u - Vec2(1, 1);
 	if (uOffset.x == 0 && uOffset.y == 0)
 		return { 0, 0 };
 

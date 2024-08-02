@@ -28,8 +28,8 @@ Vec3 ImageTexture::Sample(const RTInteraction& intr) const {
 	if (data == nullptr)
 		return Vec3(0, 1, 1);
 
-	Float u = glm::clamp(intr.uv.x, 0.0f, 1.0f);
-	Float v = 1.0f - glm::clamp(intr.uv.y, 0.0f, 1.0f);
+	Float u = Clamp(intr.uv.x, 0.0f, 1.0f);
+	Float v = 1.0f - Clamp(intr.uv.y, 0.0f, 1.0f);
 
 	int32_t i = static_cast<int32_t>(u * resolution.x);
 	int32_t j = static_cast<int32_t>(v * resolution.y);

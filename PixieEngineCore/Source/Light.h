@@ -4,12 +4,12 @@
 #include "Shape.h"
 
 struct LightLiSample {
-	Vec3 L = Vec3(0);
-	Vec3 wi = Vec3(0);
+	glm::fvec3 L = glm::fvec3(0.0f);
+	Vec3 wi = Vec3(0.0f);
 	Float pdf = 0;
 	RTInteraction pLight;
 
-	LightLiSample(const Vec3& L, Vec3 wi, Float pdf, const RTInteraction& pLight);
+	LightLiSample(const glm::fvec3& L, Vec3 wi, Float pdf, const RTInteraction& pLight);
 };
 
 struct LightSampleContext {
@@ -21,12 +21,12 @@ class DiffuseAreaLight {
 public:
 	Shape* shape = nullptr;
 	bool twoSided = true;
-	Vec3 Lemit = Vec3(1.0);
+	glm::fvec3 Lemit = glm::fvec3(1.0);
 	Float scale = 1.0;
 
-	DiffuseAreaLight(Shape* shape, Vec3 emit = Vec3(1), Float scale = 1);
+	DiffuseAreaLight(Shape* shape, glm::fvec3 emit = glm::fvec3(1), Float scale = 1);
 
-	Vec3 L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const;
+	glm::fvec3 L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const;
 	std::optional<LightLiSample> SampleLi(RTInteraction intr, Vec2 u) const;
 };
 

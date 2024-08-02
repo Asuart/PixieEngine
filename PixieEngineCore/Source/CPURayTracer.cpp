@@ -162,8 +162,8 @@ Vec3 CPURayTracer::TraceNormals(Ray ray) const {
 }
 
 Vec3 CPURayTracer::TraceRay(Ray ray) const {
-	Vec3 L = Vec3(0);
-	Vec3 beta = Vec3(1);
+	glm::fvec3 L = glm::fvec3(0.0);
+	glm::fvec3 beta = glm::fvec3(1.0);
 	int32_t depth = 0;
 	bool specularBounce = true;
 
@@ -171,7 +171,7 @@ Vec3 CPURayTracer::TraceRay(Ray ray) const {
 		RTInteraction intr;
 		bool intersected = scene->Intersect(ray, intr);
 		if (!intersected) {
-			L += scene->GetSkyColor(ray) * beta;
+			L += (glm::fvec3)scene->GetSkyColor(ray) * beta;
 			break;
 		}
 
@@ -180,20 +180,20 @@ Vec3 CPURayTracer::TraceRay(Ray ray) const {
 		}
 
 		if (!sampleLights || specularBounce) {
-			L += intr.material->emission * beta;
+			L += intr.material->emission * (glm::fvec3)beta;
 		}
 
 		Ray scatteredRay;
 		Vec3 brdfMultiplier = intr.material->Sample(ray, intr, scatteredRay);
 		beta *= brdfMultiplier;
 
-		if (sampleLights && intr.material->emission == Vec3(0) && intr.material->transparency == 0) {
+		if (sampleLights && intr.material->emission == glm::fvec3(0.0f) && intr.material->transparency == 0) {
 			std::optional<SampledLight> sampledLight = lightSampler->Sample(RandomFloat());
 			if (sampledLight) {
 				std::optional<LightLiSample> ls = sampledLight->light.SampleLi(intr, Vec2(RandomFloat(), RandomFloat()));
-				if (ls && ls->L != Vec3(0) && ls->pdf > 0) {
+				if (ls && ls->L != glm::fvec3(0) && ls->pdf > 0) {
 					if (Unoccluded(intr, ls->pLight)) {
-						L += beta * ls->L * glm::abs(glm::dot(ls->wi, intr.n)) / (sampledLight->p * ls->pdf);
+						L += beta * (glm::fvec3)ls->L * (glm::fvec3)glm::abs(glm::dot(ls->wi, intr.n)) / (glm::fvec3)(sampledLight->p * ls->pdf);
 					}
 				}
 			}
@@ -215,14 +215,14 @@ Vec3 CPURayTracer::TraceRay(Ray ray) const {
 
 Vec3 CPURayTracer::TracePath(Ray ray) const {
 	RTInteraction intr;
-	Vec3 L = Vec3(0);
-	Vec3 beta = Vec3(1);
+	glm::fvec3 L = glm::fvec3(0.0);
+	glm::fvec3 beta = glm::fvec3(1.0);
 
 	for (int32_t depth = 0; depth < maxDepth; depth++) {
 		bool intersected = scene->Intersect(ray, intr);
 
 		if (!intersected) {
-			L += scene->GetSkyColor(ray) * beta;
+			L += (glm::fvec3)scene->GetSkyColor(ray) * beta;
 			break;
 		}
 
@@ -239,7 +239,7 @@ Vec3 CPURayTracer::TracePath(Ray ray) const {
 		Float dot = glm::abs(glm::dot(wp, intr.n));
 		Vec3 fcos = f * dot / UniformSpherePDF();
 		beta *= fcos;
-		if (beta == Vec3(0)) break;
+		if (beta == glm::fvec3(0.0)) break;
 
 		ray = Ray(intr.p, wp);
 	}
@@ -277,13 +277,13 @@ Vec3 CPURayTracer::LiRandomWalk(Ray ray, int depth) const {
 }
 
 Vec3 CPURayTracer::LiSimplePath(Ray ray) const {
-	Vec3 L(0.0f), beta(1.0f);
+	glm::fvec3 L(0.0f), beta(1.0f);
 	bool specularBounce = true;
 	int depth = 0;
-	while (beta != Vec3(0)) {
+	while (beta != glm::fvec3(0)) {
 		RTInteraction isect;
 		if (!scene->Intersect(ray, isect)) {
-			L += beta * scene->GetSkyColor(ray);
+			L += beta * (glm::fvec3)scene->GetSkyColor(ray);
 			break;
 		}
 
@@ -306,11 +306,11 @@ Vec3 CPURayTracer::LiSimplePath(Ray ray) const {
 			if (sampledLight) {
 				Vec2 uLight = Vec2(RandomFloat(), RandomFloat());
 				std::optional<LightLiSample> ls = sampledLight->light.SampleLi(isect, uLight);
-				if (ls && ls->L != Vec3(0) && ls->pdf > 0) {
+				if (ls && ls->L != glm::fvec3(0.0f) && ls->pdf > 0.0f) {
 					Vec3 wi = ls->wi;
-					Vec3 f = bsdf.f(wo, wi) * glm::abs(glm::dot(wi, isect.n));
-					if ((f != Vec3(0)) && Unoccluded(isect, ls->pLight)) {
-						L += beta * f * ls->L / (sampledLight->p * ls->pdf);
+					glm::fvec3 f = bsdf.f(wo, wi) * glm::abs(glm::dot(wi, isect.n));
+					if ((f != glm::fvec3(0.0f)) && Unoccluded(isect, ls->pLight)) {
+						L += beta * f * ls->L / (glm::fvec3)(sampledLight->p * ls->pdf);
 					}
 				}
 			}
@@ -463,16 +463,16 @@ Vec3 CPURayTracer::SampleLd(const RTInteraction& intr, const BSDF* bsdf) const {
 
 	DiffuseAreaLight light = sampledLight->light;
 	std::optional<LightLiSample> ls = light.SampleLi(intr, uLight);
-	if (!ls || ls->L == Vec3(0) || ls->pdf == 0)
+	if (!ls || ls->L == glm::fvec3(0) || ls->pdf == 0)
 		return {};
 
 	Vec3 wo = intr.wo, wi = ls->wi;
-	Vec3 f = bsdf->f(wo, wi) * glm::abs(glm::dot(wi, intr.n));
-	if (f == Vec3(0) || !Unoccluded(intr, ls->pLight))
+	glm::fvec3 f = bsdf->f(wo, wi) * glm::abs(glm::dot(wi, intr.n));
+	if (f == glm::fvec3(0) || !Unoccluded(intr, ls->pLight))
 		return {};
 
 	Float p_l = sampledLight->p * ls->pdf;
 	Float p_b = bsdf->PDF(wo, wi);
 	Float w_l = PowerHeuristic(1, p_l, 1, p_b);
-	return w_l * ls->L * f / p_l;
+	return (glm::fvec3)w_l * ls->L * f / (glm::fvec3)p_l;
 }

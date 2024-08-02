@@ -61,7 +61,7 @@ Vec3 Bounds3f::Offset(Vec3 p) const {
 }
 
 void Bounds3f::BoundingSphere(Vec3* center, Float* radius) const {
-	*center = (pMin + pMax) / 2.0f;
+	*center = (pMin + pMax) / (Float)2.0f;
 	*radius = Inside(*center, *this) ? glm::distance(*center, pMax) : 0;
 }
 

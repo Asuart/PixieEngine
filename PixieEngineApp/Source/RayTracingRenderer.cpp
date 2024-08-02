@@ -1,9 +1,9 @@
 #include "RayTracingRenderer.h"
 
 RayTracingRenderer::RayTracingRenderer(glm::ivec2 resolution, RTScene* scene)
-	: m_resolution(resolution), m_rayTracer(new CPURayTracer(m_resolution)), m_scene(scene), m_viewportResolution(resolution) {
+	: m_resolution(resolution), m_rayTracer(new NormalsTracer({800, 600})), m_scene(scene), m_viewportResolution(resolution) {
 	m_rayTracer->SetScene(scene);
-	m_rayTracer->mode = CPURayTracerMode::LiPath;
+	//m_rayTracer->mode = CPURayTracerMode::LiPath;
 }
 
 RayTracingRenderer::~RayTracingRenderer() {
@@ -11,13 +11,35 @@ RayTracingRenderer::~RayTracingRenderer() {
 }
 
 void RayTracingRenderer::DrawFrame() {
-	glUseProgram(m_rayTracer->film.mesh->shader);
-	GLint aspectLoc = glGetUniformLocation(m_rayTracer->film.mesh->shader, "aspect");
-	float aspect = ((float)m_resolution.x / m_resolution.y) / ((float)m_viewportResolution.x / m_viewportResolution.y);
-	glUniform1f(aspectLoc, aspect);
-	m_rayTracer->film.texture->Upload();
-	m_rayTracer->film.texture->Bind(GL_TEXTURE0);
-	m_rayTracer->film.mesh->Draw();
+	GLuint program = m_rayTracer->m_film.mesh->shader;
+	GLuint posLoc = glGetUniformLocation(program, "uPos");
+	GLuint sizeLoc = glGetUniformLocation(program, "uSize");
+
+	float textureAspect = (float)800 / 600;
+	float viewportAspect = (float)m_viewportResolution.x / m_viewportResolution.y;
+	float posX, posY;
+	float sizeX, sizeY;
+	if (viewportAspect > textureAspect) {
+		sizeY = 1.0f;
+		sizeX = textureAspect / viewportAspect;
+		posX = (1.0f - sizeX) * 0.5f;
+		posY = 0.0f;
+	}
+	else {
+		sizeX = 1.0f;
+		sizeY = viewportAspect / textureAspect;
+		posX = 0.0f;
+		posY = (1.0f - sizeY) * 0.5f;
+	}
+
+	m_rayTracer->m_film.texture->Upload();
+
+	glUseProgram(program);
+	glUniform2f(posLoc, posX, posY);
+	glUniform2f(sizeLoc, sizeX, sizeY);
+	glActiveTexture(GL_TEXTURE0);
+	m_rayTracer->m_film.texture->Bind(GL_TEXTURE0);
+	m_rayTracer->m_film.mesh->Draw();
 }
 
 void RayTracingRenderer::Reset() {
@@ -37,7 +59,7 @@ void RayTracingRenderer::StartRender() {
 }
 
 void RayTracingRenderer::StopRender() {
-	m_rayTracer->EndRender();
+	m_rayTracer->StopRender();
 }
 
 void RayTracingRenderer::DrawUI() {
@@ -50,30 +72,30 @@ void RayTracingRenderer::DrawUI() {
 		Reset();
 	}
 
-	if (ImGui::BeginCombo("Render Mode", to_string(m_rayTracer->mode).c_str())) {
-		for (int n = 0; n < (int32_t)CPURayTracerMode::_COUNT_; n++) {
-			CPURayTracerMode mode = CPURayTracerMode(n);
-			bool is_selected = (m_rayTracer->mode == mode);
-			if (ImGui::Selectable(to_string(mode).c_str(), is_selected)) {
-				m_rayTracer->mode = mode;
-				m_rayTracer->Reset();
-			}
-			if (is_selected) {
-				ImGui::SetItemDefaultFocus();
-			}
-		}
-		ImGui::EndCombo();
-	}
+	//if (ImGui::BeginCombo("Render Mode", to_string(m_rayTracer->mode).c_str())) {
+	//	for (int n = 0; n < (int32_t)CPURayTracerMode::_COUNT_; n++) {
+	//		CPURayTracerMode mode = CPURayTracerMode(n);
+	//		bool is_selected = (m_rayTracer->mode == mode);
+	//		if (ImGui::Selectable(to_string(mode).c_str(), is_selected)) {
+	//			m_rayTracer->mode = mode;
+	//			m_rayTracer->Reset();
+	//		}
+	//		if (is_selected) {
+	//			ImGui::SetItemDefaultFocus();
+	//		}
+	//	}
+	//	ImGui::EndCombo();
+	//}
 
 	if (ImGui::InputInt2("Render Resolution", (int*)&m_resolution)) {
-		m_rayTracer->Resize(m_resolution);
+		m_rayTracer->SetResolution(m_resolution);
 		for (Camera& camera : m_scene->cameras) {
 			camera.aspect = (float)m_resolution.x / m_resolution.y;
 		}
 	}
 
-	if (ImGui::InputInt("Max Bounces", &m_rayTracer->maxDepth)) {
-		m_rayTracer->maxDepth = Clamp(m_rayTracer->maxDepth, 0, 99999);
+	if (ImGui::InputInt("Max Bounces", &m_rayTracer->m_maxDepth)) {
+		m_rayTracer->m_maxDepth = Clamp(m_rayTracer->m_maxDepth, 0, 99999);
 		Reset();
 	}
 
@@ -92,36 +114,36 @@ void RayTracingRenderer::DrawUI() {
 		Reset();
 	}
 
-	if (m_rayTracer->mode == CPURayTracerMode::TraceRay) {
-		if (ImGui::Checkbox("Sample Lights", &m_rayTracer->sampleLights)) {
-			Reset();
-		}
-	}
-	else if (m_rayTracer->mode == CPURayTracerMode::LiSimplePath) {
-		if (ImGui::Checkbox("Sample Lights", &m_rayTracer->sampleLights)) {
-			Reset();
-		}
-		if (ImGui::Checkbox("Sample BSDF", &m_rayTracer->sampleBSDF)) {
-			Reset();
-		}
-	}
-	else if (m_rayTracer->mode == CPURayTracerMode::LiPath) {
-		if (ImGui::Checkbox("Regularize BSDF", &m_rayTracer->regularize)) {
-			Reset();
-		}
-	}
+	//if (m_rayTracer->mode == CPURayTracerMode::TraceRay) {
+	//	if (ImGui::Checkbox("Sample Lights", &m_rayTracer->sampleLights)) {
+	//		Reset();
+	//	}
+	//}
+	//else if (m_rayTracer->mode == CPURayTracerMode::LiSimplePath) {
+	//	if (ImGui::Checkbox("Sample Lights", &m_rayTracer->sampleLights)) {
+	//		Reset();
+	//	}
+	//	if (ImGui::Checkbox("Sample BSDF", &m_rayTracer->sampleBSDF)) {
+	//		Reset();
+	//	}
+	//}
+	//else if (m_rayTracer->mode == CPURayTracerMode::LiPath) {
+	//	if (ImGui::Checkbox("Regularize BSDF", &m_rayTracer->regularize)) {
+	//		Reset();
+	//	}
+	//}
 
-	std::string threadsText = std::string("Threads: ") + std::to_string(m_rayTracer->threads);
-	ImGui::Text(threadsText.c_str());
-
-	std::string samplesText = std::string("Samples: ") + std::to_string(m_rayTracer->sample);
-	ImGui::Text(samplesText.c_str());
-
-	std::string renderTimeText = std::string("Render Time: ") + std::to_string(m_rayTracer->renderTime);
-	ImGui::Text(renderTimeText.c_str());
-
-	std::string lastSampleTimeText = std::string("Last Sample Time: ") + std::to_string(m_rayTracer->lastSampleTime);
-	ImGui::Text(lastSampleTimeText.c_str());
+	//std::string threadsText = std::string("Threads: ") + std::to_string(m_rayTracer->threads);
+	//ImGui::Text(threadsText.c_str());
+	//
+	//std::string samplesText = std::string("Samples: ") + std::to_string(m_rayTracer->sample);
+	//ImGui::Text(samplesText.c_str());
+	//
+	//std::string renderTimeText = std::string("Render Time: ") + std::to_string(m_rayTracer->renderTime);
+	//ImGui::Text(renderTimeText.c_str());
+	//
+	//std::string lastSampleTimeText = std::string("Last Sample Time: ") + std::to_string(m_rayTracer->lastSampleTime);
+	//ImGui::Text(lastSampleTimeText.c_str());
 
 	ImGui::End();
 
@@ -157,5 +179,6 @@ void RayTracingRenderer::DrawUI() {
 }
 
 void RayTracingRenderer::SetViewportSize(glm::ivec2 resolution) {
-	m_viewportResolution - resolution;
+	m_viewportResolution = resolution;
+	//m_rayTracer->SetResolution(resolution);
 }

@@ -16,6 +16,6 @@ public:
 
 	glm::ivec2 m_resolution;
 	glm::ivec2 m_viewportResolution;
-	CPURayTracer* m_rayTracer;
+	Integrator* m_rayTracer;
 	RTScene* m_scene = nullptr;
 };

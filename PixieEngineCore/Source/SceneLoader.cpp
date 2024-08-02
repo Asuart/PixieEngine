@@ -63,7 +63,7 @@ void SceneLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 		if (!mat) {
 
 			aiColor4D color, colorEmissive, emissionIntensity;
-			Float emissionInt, roughness;
+			float emissionInt, roughness;
 			aiGetMaterialColor(scene->mMaterials[mesh->mMaterialIndex], AI_MATKEY_COLOR_DIFFUSE, &color);
 			aiGetMaterialFloat(scene->mMaterials[mesh->mMaterialIndex], AI_MATKEY_EMISSIVE_INTENSITY, &emissionInt);
 			aiGetMaterialColor(scene->mMaterials[mesh->mMaterialIndex], AI_MATKEY_EMISSIVE_INTENSITY, &emissionIntensity);
@@ -103,7 +103,7 @@ void SceneLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 		}
 		currentScene->shapes.push_back(triangle);
 		shapePrimitives.push_back(new ShapePrimitive(triangle, mat));
-		if (mat->emission != Vec3(0)) {
+		if (mat->emission != glm::vec3(0.0f)) {
 			currentScene->lights.push_back(DiffuseAreaLight(triangle, mat->emission * 10.0f));
 		}
 		trianglesCount++;

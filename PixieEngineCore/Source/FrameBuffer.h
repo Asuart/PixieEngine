@@ -2,7 +2,7 @@
 #include "PixieEngineCoreHeaders.h"
 
 struct FrameBuffer {
-	FrameBuffer();
+	FrameBuffer(uint32_t width, uint32_t height);
 	~FrameBuffer();
 
 	void Resize(uint32_t width, uint32_t height);

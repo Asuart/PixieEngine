@@ -142,7 +142,7 @@ void Transform::Decompose(Vec3* T, Mat4* R, Mat4* S) const {
     *R = M;
     do {
         Mat4 Rit = glm::inverse(glm::transpose(*R));
-        Mat4 Rnext = (*R + Rit) / 2.0f;
+        Mat4 Rnext = (*R + Rit) / (Float)2.0f;
 
         norm = 0;
         for (int i = 0; i < 3; ++i) {

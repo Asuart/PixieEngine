@@ -4,3 +4,4 @@
 #include "CPURayTracer.h"
 #include "FrameBuffer.h"
 #include "SceneLoader.h"
+#include "NormalsTracer.h"

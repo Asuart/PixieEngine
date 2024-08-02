@@ -54,7 +54,7 @@ BVHPrimitive::BVHPrimitive(size_t primitiveIndex, const Bounds3f& bounds)
 	: primitiveIndex(primitiveIndex), bounds(bounds) {}
 
 Vec3 BVHPrimitive::Centroid() const { 
-	return .5f * bounds.pMin + .5f * bounds.pMax; 
+	return (Float)0.5f * (bounds.pMin + bounds.pMax);
 }
 
 void BVHBuildNode::InitLeaf(int first, int n, const Bounds3f& b) {
