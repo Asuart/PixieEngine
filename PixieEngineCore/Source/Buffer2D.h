@@ -1,11 +1,9 @@
 #pragma once
 #include "PixieEngineCoreHeaders.h"
 
-template<class T>
+template <typename T>
 class Buffer2D {
 public:
-
-	Buffer2D() : m_size(0, 0), m_data(std::vector<T>());
 
 	Buffer2D(const glm::ivec2& size)
 		: m_size(size), m_data(std::vector<T>(size.x * size.y)) {}

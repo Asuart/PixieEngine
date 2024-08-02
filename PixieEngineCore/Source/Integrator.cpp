@@ -6,9 +6,8 @@ void clear(std::queue<int32_t>& q) {
 }
 
 Integrator::Integrator(const glm::ivec2& resolution)
-	: Renderer(resolution), m_film(Film(resolution)) {
-	SetResolution(resolution);
-}
+	: Renderer(resolution), m_film(Film(resolution)), m_rayStatBuffer(resolution),
+	m_boxCheckStatBuffer(resolution), m_triangleCheckStatBuffer(resolution), m_sampleCountBuffer(resolution) {}
 
 void Integrator::SetScene(RTScene* scene) {
 	bool wasRendering = m_isRendering;
@@ -49,7 +48,7 @@ void Integrator::StartRender() {
 
 	clear(m_tileQueue);
 	for (size_t i = 0; i < m_tileQueue.size(); i++) {
-		m_tileQueue.push(i);
+		m_tileQueue.push((int32_t)i);
 	}
 
 	m_threadsCount = std::min(m_maxThreads, (int32_t)m_tiles.size());
@@ -65,7 +64,7 @@ void Integrator::StartRender() {
 					//sampleStartTime = currrentTime;
 					m_samples++;
 					for (size_t i = 0; i < m_tiles.size(); i++) {
-						m_tileQueue.push(i);
+						m_tileQueue.push((int32_t)i);
 					}
 				}
 				int32_t index = m_tileQueue.front();
