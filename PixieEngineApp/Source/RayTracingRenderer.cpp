@@ -1,7 +1,7 @@
 #include "RayTracingRenderer.h"
 
 RayTracingRenderer::RayTracingRenderer(glm::ivec2 resolution, RTScene* scene)
-	: m_resolution(resolution), m_rayTracer(new RandomWalkIntegrator({800, 600})), m_scene(scene), m_viewportResolution(resolution) {
+	: m_resolution(resolution), m_rayTracer(new SimplePathIntegrator({800, 600})), m_scene(scene), m_viewportResolution(resolution) {
 	m_rayTracer->SetScene(scene);
 	//m_rayTracer->mode = CPURayTracerMode::LiPath;
 }

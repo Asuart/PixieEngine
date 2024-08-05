@@ -1,7 +1,7 @@
 #pragma once
 #include "PixieEngineCoreHeaders.h"
 #include "Renderer.h"
-#include "Buffer2D.h"
+#include "RayTracingStatistics.h"
 #include "Film.h"
 #include "RTScene.h"
 #include "Bounds.h"
@@ -24,10 +24,7 @@ protected:
 	Integrator(const glm::ivec2& resolution);
 
 	RTScene* m_scene = nullptr;
-	Buffer2D<uint64_t> m_rayStatBuffer;
-	Buffer2D<uint64_t> m_boxCheckStatBuffer;
-	Buffer2D<uint64_t> m_triangleCheckStatBuffer;
-	Buffer2D<uint64_t> m_sampleCountBuffer;
+	RayTracingStatistics m_stats;
 	bool m_isRendering = false;
 	int32_t m_threadsCount = 0;
 	int32_t m_maxThreads = 1;

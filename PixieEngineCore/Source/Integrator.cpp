@@ -6,8 +6,7 @@ void clear(std::queue<int32_t>& q) {
 }
 
 Integrator::Integrator(const glm::ivec2& resolution)
-	: Renderer(resolution), m_film(Film(resolution)), m_rayStatBuffer(resolution),
-	m_boxCheckStatBuffer(resolution), m_triangleCheckStatBuffer(resolution), m_sampleCountBuffer(resolution) {}
+	: Renderer(resolution), m_film(Film(resolution)), m_stats(resolution) {}
 
 void Integrator::SetScene(RTScene* scene) {
 	bool wasRendering = m_isRendering;
@@ -22,10 +21,7 @@ void Integrator::SetResolution(const glm::ivec2& resolution) {
 	StopRender();
 	m_resolution = resolution;
 	m_film.Resize(resolution);
-	m_rayStatBuffer.Resize(resolution);
-	m_boxCheckStatBuffer.Resize(resolution);
-	m_triangleCheckStatBuffer.Resize(resolution);
-	m_sampleCountBuffer.Resize(resolution);
+	m_stats.Resize(resolution);
 	Reset();
 	if (wasRendering) StartRender();
 }
@@ -34,10 +30,7 @@ void Integrator::Reset() {
 	bool wasRendering = m_isRendering;
 	StopRender();
 	m_film.Reset();
-	m_rayStatBuffer.Clear();
-	m_boxCheckStatBuffer.Clear();
-	m_triangleCheckStatBuffer.Clear();
-	m_sampleCountBuffer.Clear();
+	m_stats.Clear();
 	GenerateTiles();
 	m_samples = 1;
 	if (wasRendering) StartRender();
