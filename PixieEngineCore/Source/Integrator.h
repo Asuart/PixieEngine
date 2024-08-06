@@ -10,7 +10,6 @@ class Integrator : public Renderer {
 public:
 	Film m_film;
 	int32_t m_maxDepth = 1024;
-	uint32_t m_samples = 1;
 
 	virtual void SetScene(RTScene* scene);
 	virtual void SetResolution(const glm::ivec2& resolution) override;
@@ -19,6 +18,10 @@ public:
 	virtual void StopRender();
 	virtual void PerPixel(uint32_t x, uint32_t y);
 	virtual Vec3 Integrate(Ray ray) = 0;
+	uint32_t GetThreadsCount();
+	uint32_t GetSamplesCount();
+	float GetRenderTime();
+	float GetLastSampleTime();
 
 protected:
 	Integrator(const glm::ivec2& resolution);
@@ -26,6 +29,7 @@ protected:
 	RTScene* m_scene = nullptr;
 	RayTracingStatistics m_stats;
 	bool m_isRendering = false;
+	uint32_t m_samples = 1;
 	int32_t m_threadsCount = 0;
 	int32_t m_maxThreads = 8;
 	std::vector<std::thread*> m_renderThreads;

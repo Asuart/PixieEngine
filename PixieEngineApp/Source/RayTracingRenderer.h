@@ -1,9 +1,12 @@
 #pragma once
 #include "PixieEngineAppHeaders.h"
+#include "PixieEngineApp.h"
+
+class PixieEngineApp;
 
 class RayTracingRenderer {
 public:
-	RayTracingRenderer(glm::ivec2 resolution, RTScene* scene);
+	RayTracingRenderer(PixieEngineApp* parent, glm::ivec2 resolution, RTScene* scene);
 	~RayTracingRenderer();
 
 	void DrawFrame();
@@ -18,4 +21,7 @@ public:
 	glm::ivec2 m_viewportResolution;
 	Integrator* m_rayTracer;
 	RTScene* m_scene = nullptr;
+
+protected:
+	PixieEngineApp* m_parent;
 };

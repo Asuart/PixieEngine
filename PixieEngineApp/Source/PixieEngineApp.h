@@ -3,6 +3,8 @@
 #include "PixieEngineWindow.h"
 #include "RayTracingRenderer.h"
 
+class RayTracingRenderer;
+
 class PixieEngineApp {
 public:
 	PixieEngineApp();
@@ -12,7 +14,9 @@ public:
 	GLFWwindow* GetGLFWWindow();
 	void HandleResize(uint32_t width, uint32_t height);
 
-private:
+protected:
+	static const uint32_t m_maxScenePathLength = 1024;
+	char m_scenePath[m_maxScenePathLength] = "../Scenes/default.obj";
 	PixieEngineWindow m_window;
 	Scene* m_scene;
 	RTScene* m_rtScene;
@@ -22,4 +26,7 @@ private:
 
 	void DrawUI();
 	void UpdateViewportResolution(glm::ivec2 resolution);
+	void ReloadScene();
+
+	friend class RayTracingRenderer;
 };

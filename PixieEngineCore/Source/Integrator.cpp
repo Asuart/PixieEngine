@@ -113,3 +113,19 @@ void Integrator::GenerateTiles() {
 		}
 	}
 }
+
+uint32_t Integrator::GetThreadsCount() {
+	return m_threadsCount;
+}
+
+uint32_t Integrator::GetSamplesCount() {
+	return m_samples;
+}
+
+float Integrator::GetRenderTime() {
+	return 0;
+}
+
+float Integrator::GetLastSampleTime() {
+	return 0;
+}

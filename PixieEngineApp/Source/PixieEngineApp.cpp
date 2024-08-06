@@ -22,10 +22,10 @@ PixieEngineApp::PixieEngineApp() {
 	ImGui_ImplOpenGL3_Init();
 
 	SceneLoader sceneLoader;
-	m_scene = sceneLoader.LoadScene("../Scenes/default.obj");
+	m_scene = sceneLoader.LoadScene(m_scenePath);
 	m_rtScene = RTScene::FromScene(m_scene);
 
-	m_rayTracingRenderer = new RayTracingRenderer(glm::ivec2(1280, 720), m_rtScene);
+	m_rayTracingRenderer = new RayTracingRenderer(this, glm::ivec2(1280, 720), m_rtScene);
 	m_rayTracingRenderer->StartRender();
 
 	m_viewportFrameBuffer = new FrameBuffer(1, 1);
@@ -144,4 +144,23 @@ void PixieEngineApp::UpdateViewportResolution(glm::ivec2 resolution) {
 	m_viewportResolution = resolution;
 	m_rayTracingRenderer->SetViewportSize(resolution);
 	m_viewportFrameBuffer->Resize(resolution.x, resolution.y);
+}
+
+void PixieEngineApp::ReloadScene() {
+	m_rayTracingRenderer->StopRender();
+	if (m_rtScene) {
+		delete m_rtScene;
+		m_rtScene = nullptr;
+	}
+	if (m_scene) {
+		delete m_scene;
+		m_scene = nullptr;
+	}
+
+	SceneLoader sceneLoader;
+	m_scene = sceneLoader.LoadScene(m_scenePath);
+	m_rtScene = RTScene::FromScene(m_scene);
+
+	m_rayTracingRenderer->SetScene(m_rtScene);
+	m_rayTracingRenderer->StartRender();
 }

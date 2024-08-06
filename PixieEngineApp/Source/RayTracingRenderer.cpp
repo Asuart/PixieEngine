@@ -1,7 +1,7 @@
 #include "RayTracingRenderer.h"
 
-RayTracingRenderer::RayTracingRenderer(glm::ivec2 resolution, RTScene* scene)
-	: m_resolution(resolution), m_rayTracer(new RandomWalkIntegrator({256, 256})), m_scene(scene), m_viewportResolution(resolution) {
+RayTracingRenderer::RayTracingRenderer(PixieEngineApp* parent, glm::ivec2 resolution, RTScene* scene)
+	: m_parent(parent), m_resolution(resolution), m_rayTracer(new RandomWalkIntegrator({1280, 720})), m_scene(scene), m_viewportResolution(resolution) {
 	m_rayTracer->SetScene(scene);
 	//m_rayTracer->mode = CPURayTracerMode::LiPath;
 }
@@ -38,7 +38,7 @@ void RayTracingRenderer::DrawFrame() {
 	glUseProgram(program);
 	glUniform2f(posLoc, posX, posY);
 	glUniform2f(sizeLoc, sizeX, sizeY);
-	glUniform1f(samplesLoc, m_rayTracer->m_samples);
+	glUniform1f(samplesLoc, m_rayTracer->GetSamplesCount());
 	glActiveTexture(GL_TEXTURE0);
 	m_rayTracer->m_film.texture->Bind(GL_TEXTURE0);
 	m_rayTracer->m_film.mesh->Draw();
@@ -68,11 +68,12 @@ void RayTracingRenderer::DrawUI() {
 	ImGui::SetNextWindowSize(ImVec2(400, 400));
 	ImGui::Begin("Demo Select", 0);
 
-	//ImGui::InputText("Scene path", m_scenePath, m_scenePathLength);
-
+	ImGui::Text("Scene Path");
+	ImGui::InputText("##scene_path", m_parent->m_scenePath, m_parent->m_maxScenePathLength);
 	if (ImGui::Button("Reload Scene")) {
-		Reset();
+		m_parent->ReloadScene();
 	}
+	ImGui::Spacing();
 
 	//if (ImGui::BeginCombo("Render Mode", to_string(m_rayTracer->mode).c_str())) {
 	//	for (int n = 0; n < (int32_t)CPURayTracerMode::_COUNT_; n++) {
@@ -89,32 +90,45 @@ void RayTracingRenderer::DrawUI() {
 	//	ImGui::EndCombo();
 	//}
 
-	if (ImGui::InputInt2("Render Resolution", (int*)&m_resolution)) {
+	ImGui::Text("Render Resolution");
+	if (ImGui::InputInt2("##render_resolution", (int*)&m_resolution)) {
 		m_rayTracer->SetResolution(m_resolution);
 		for (Camera& camera : m_scene->cameras) {
 			camera.aspect = (float)m_resolution.x / m_resolution.y;
 		}
 	}
+	ImGui::Spacing();
 
-	if (ImGui::InputInt("Max Bounces", &m_rayTracer->m_maxDepth)) {
+	ImGui::Text("Max Ray Bounces");
+	if (ImGui::InputInt("##max-ray_bounces", &m_rayTracer->m_maxDepth)) {
 		m_rayTracer->m_maxDepth = Clamp(m_rayTracer->m_maxDepth, 0, 99999);
 		Reset();
 	}
+	ImGui::Spacing();
 
-	if (ImGui::RadioButton("Camera 1", m_scene->mainCamera == &m_scene->cameras[0])) {
-		m_scene->mainCamera = &m_scene->cameras[0];
-		Reset();
+
+	std::string activeCameraName = "Camera ";
+	for (size_t i = 0; i < m_scene->cameras.size(); i++) {
+		if (m_scene->mainCamera == &m_scene->cameras[i]) {
+			activeCameraName += std::to_string(i);
+			break;
+		}
 	}
-	ImGui::SameLine();
-	if (ImGui::RadioButton("Camera 2", m_scene->mainCamera == &m_scene->cameras[1])) {
-		m_scene->mainCamera = &m_scene->cameras[1];
-		Reset();
+	ImGui::Text("Active Camera");
+	if (ImGui::BeginCombo("##active_camera", activeCameraName.c_str())) {
+		for (size_t i = 0; i < m_scene->cameras.size(); i++) {
+			bool isSelected = m_scene->mainCamera == &m_scene->cameras[i];
+			if (ImGui::Selectable(("Camera " + std::to_string(i)).c_str(), isSelected)) {
+				m_scene->mainCamera = &m_scene->cameras[i];
+				m_rayTracer->Reset();
+			}
+			if (isSelected) {
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+		ImGui::EndCombo();
 	}
-	ImGui::SameLine();
-	if (ImGui::RadioButton("Camera 3", m_scene->mainCamera == &m_scene->cameras[2])) {
-		m_scene->mainCamera = &m_scene->cameras[2];
-		Reset();
-	}
+	ImGui::Spacing();
 
 	//if (m_rayTracer->mode == CPURayTracerMode::TraceRay) {
 	//	if (ImGui::Checkbox("Sample Lights", &m_rayTracer->sampleLights)) {
@@ -135,17 +149,17 @@ void RayTracingRenderer::DrawUI() {
 	//	}
 	//}
 
-	//std::string threadsText = std::string("Threads: ") + std::to_string(m_rayTracer->threads);
-	//ImGui::Text(threadsText.c_str());
-	//
-	//std::string samplesText = std::string("Samples: ") + std::to_string(m_rayTracer->sample);
-	//ImGui::Text(samplesText.c_str());
-	//
-	//std::string renderTimeText = std::string("Render Time: ") + std::to_string(m_rayTracer->renderTime);
-	//ImGui::Text(renderTimeText.c_str());
-	//
-	//std::string lastSampleTimeText = std::string("Last Sample Time: ") + std::to_string(m_rayTracer->lastSampleTime);
-	//ImGui::Text(lastSampleTimeText.c_str());
+	std::string threadsText = std::string("Threads: ") + std::to_string(m_rayTracer->GetThreadsCount());
+	ImGui::Text(threadsText.c_str());
+	
+	std::string samplesText = std::string("Samples: ") + std::to_string(m_rayTracer->GetSamplesCount());
+	ImGui::Text(samplesText.c_str());
+	
+	std::string renderTimeText = std::string("Render Time: ") + std::to_string(m_rayTracer->GetRenderTime());
+	ImGui::Text(renderTimeText.c_str());
+	
+	std::string lastSampleTimeText = std::string("Last Sample Time: ") + std::to_string(m_rayTracer->GetLastSampleTime());
+	ImGui::Text(lastSampleTimeText.c_str());
 
 	ImGui::End();
 

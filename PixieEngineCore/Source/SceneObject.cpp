@@ -2,7 +2,7 @@
 #include "SceneObject.h"
 
 SceneObject::SceneObject(const std::string& name, Transform transform)
-	: name(name), transform(transform) {}
+	: name(name), transform(transform), parent(nullptr) {}
 
 void SceneObject::AddComponent(Component* component) {
 	components.push_back(component);

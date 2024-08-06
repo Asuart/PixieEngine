@@ -19,7 +19,14 @@ public:
 	void AddComponent(Component* component);
 	void RemoveComponent(Component* component);
 	void RemoveComponent(const std::string& name);
+	Component* GetComponent(const std::string& name);
 
+protected:
+	virtual void OnStart();
+	virtual void OnUpdate();
+	virtual void OnFixedUpdate();
+
+public:
 	template<typename T>
 	T* GetComponent() {
 		for (size_t i = 0; i < components.size(); i++) {
@@ -30,11 +37,4 @@ public:
 		}
 		return nullptr;
 	}
-
-	Component* GetComponent(const std::string& name);
-
-protected:
-	virtual void OnStart();
-	virtual void OnUpdate();
-	virtual void OnFixedUpdate();
 };
