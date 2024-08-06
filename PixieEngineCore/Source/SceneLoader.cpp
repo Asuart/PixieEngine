@@ -13,35 +13,37 @@ Scene* SceneLoader::LoadScene(const std::string& filePath) {
 
 	std::map<std::string, BoneInfo> boneInfoMap;
 
-	SceneObject* rootObject = ProcessNode(loadedScene, loadedScene->rootObject, scene->mRootNode, scene);
+	SceneObject* rootObject = ProcessNode(loadedScene, loadedScene->rootObject, boneInfoMap, scene->mRootNode, scene);
 	loadedScene->AddObject(rootObject);
 
 	std::vector<Animation*> animations;
 	for (uint32_t i = 0; i < scene->mNumAnimations; i++) {
-		LoadBones(scene->mAnimations[i], boneInfoMap);
-		animations.push_back(new Animation(scene->mAnimations[i]->mDuration, scene->mAnimations[i]->mTicksPerSecond, rootObject));
+		std::vector<Bone> bones;
+		LoadBones(scene->mAnimations[i], boneInfoMap, bones);
+		animations.push_back(new Animation(scene->mAnimations[i]->mDuration, scene->mAnimations[i]->mTicksPerSecond, bones, boneInfoMap,  rootObject));
 	}
 
 	return loadedScene;
 }
 
-SceneObject* SceneLoader::ProcessNode(Scene* loadedScene, SceneObject* parentObject, aiNode* node, const aiScene* scene) {
+SceneObject* SceneLoader::ProcessNode(Scene* loadedScene, SceneObject* parentObject, std::map<std::string, BoneInfo>& boneInfoMap, aiNode* node, const aiScene* scene) {
 	std::cout << "  Node: " << node->mName.C_Str() << " (children: " << node->mNumChildren << ", meshes: " << node->mNumMeshes << ")\n";
 	SceneObject* nodeObject = new SceneObject(node->mName.data, Transform(AssimpGLMHelpers::ConvertMatrixToGLMFormat(node->mTransformation)));
 
 	for (uint32_t i = 0; i < node->mNumMeshes; i++) {
-		Mesh* mesh = ProcessMesh(loadedScene, nodeObject, scene->mMeshes[node->mMeshes[i]], scene);
+		Mesh* mesh = ProcessMesh(loadedScene, nodeObject, boneInfoMap, scene->mMeshes[node->mMeshes[i]], scene);
 		loadedScene->meshes.push_back(mesh);
 		nodeObject->AddComponent(new MeshComponent(mesh, nodeObject));
 	}
 
 	for (uint32_t i = 0; i < node->mNumChildren; i++) {
-		SceneObject* child = ProcessNode(loadedScene, nodeObject, node->mChildren[i], scene);
+		SceneObject* child = ProcessNode(loadedScene, nodeObject, boneInfoMap, node->mChildren[i], scene);
 		loadedScene->AddObject(child, parentObject);
 	}
+	return nodeObject;
 }
 
-Mesh* SceneLoader::ProcessMesh(Scene* loadedScene, SceneObject* object, aiMesh* mesh, const aiScene* scene) {
+Mesh* SceneLoader::ProcessMesh(Scene* loadedScene, SceneObject* object, std::map<std::string, BoneInfo>& boneInfoMap, aiMesh* mesh, const aiScene* scene) {
 	std::cout << "  Mesh: " << mesh->mName.C_Str() << " (vertices: " << mesh->mNumVertices << ", faces: " << mesh->mNumFaces << ")\n";
 
 	Material* material = nullptr;
@@ -78,7 +80,7 @@ Mesh* SceneLoader::ProcessMesh(Scene* loadedScene, SceneObject* object, aiMesh* 
 		}
 	}
 
-	ExtractBoneWeightForVertices(vertices, mesh, scene);
+	ExtractBoneWeightForVertices(vertices, boneInfoMap, mesh, scene);
 
 	return new Mesh(vertices, indices);
 }
@@ -94,7 +96,7 @@ Material* SceneLoader::ProcessMaterial(Scene* loadedScene, uint32_t materialInde
 
 	Material* material = nullptr;
 	std::string materialName = scene->mMaterials[materialIndex]->GetName().C_Str();
-	if (materialName =="Glass") {
+	if (materialName == "Glass") {
 		material = new DielectricMaterial(materialName, 0.0f, 0.0f, 1.7f, true);
 		material->transparency = 1.0f;
 		material->eta = 1.7f;
@@ -107,11 +109,11 @@ Material* SceneLoader::ProcessMaterial(Scene* loadedScene, uint32_t materialInde
 	material->emission = Vec3(colorEmissive.r, colorEmissive.g, colorEmissive.b);
 
 	loadedScene->materials.push_back(material);
+
+	return material;
 }
 
-void SceneLoader::LoadBones(const aiAnimation* animation, std::map<std::string, BoneInfo>& boneInfoMap) {
-	std::vector<Bone> bones;
-
+void SceneLoader::LoadBones(const aiAnimation* animation, std::map<std::string, BoneInfo>& boneInfoMap, std::vector<Bone>& bones) {
 	for (int32_t i = 0; i < animation->mNumChannels; i++) {
 		aiNodeAnim* channel = animation->mChannels[i];
 		std::string boneName = channel->mNodeName.data;
@@ -157,21 +159,18 @@ void SceneLoader::SetVertexBoneData(Vertex& vertex, int32_t boneID, Float weight
 	}
 }
 
-void SceneLoader::ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene) {
+void SceneLoader::ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, std::map<std::string, BoneInfo>& boneInfoMap, aiMesh* mesh, const aiScene* scene) {
 	if (!mesh->HasBones()) return;
-	std::map<std::string, BoneInfo> boneInfoMap;
-	int32_t boneCounter = 0;
 
 	for (int32_t boneIndex = 0; boneIndex < mesh->mNumBones; boneIndex++) {
 		int32_t boneID = -1;
 		std::string boneName = mesh->mBones[boneIndex]->mName.C_Str();
 		if (boneInfoMap.find(boneName) == boneInfoMap.end()) {
 			BoneInfo newBoneInfo;
-			newBoneInfo.id = boneCounter;
+			newBoneInfo.id = boneInfoMap.size();
 			newBoneInfo.offset = AssimpGLMHelpers::ConvertMatrixToGLMFormat(mesh->mBones[boneIndex]->mOffsetMatrix);
 			boneInfoMap[boneName] = newBoneInfo;
-			boneID = boneCounter;
-			boneCounter++;
+			boneID = newBoneInfo.id;
 		}
 		else {
 			boneID = boneInfoMap[boneName].id;

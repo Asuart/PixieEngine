@@ -1,6 +1,7 @@
 #pragma once
 #include "ShaderLibrary.h"
 #include "OGLMesh.h"
+#include "Texture.h"
 
 class Film {
 public:

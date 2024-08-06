@@ -14,6 +14,7 @@ public:
 
 private:
 	PixieEngineWindow m_window;
+	Scene* m_scene;
 	RTScene* m_rtScene;
 	RayTracingRenderer* m_rayTracingRenderer;
 	glm::ivec2 m_viewportResolution;

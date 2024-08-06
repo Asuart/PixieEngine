@@ -4,9 +4,8 @@
 #include "Medium.h"
 
 class Material;
-class Material;
 class Shape;
-class Mesh;
+struct Mesh;
 struct Light;
 
 struct Interaction {
@@ -33,7 +32,7 @@ struct SurfaceInteraction : public Interaction {
 	Float dudx = 0.0f, dvdx = 0.0f, dudy = 0.0f, dvdy = 0.0f;
 	Float area = 0.0f;
 	int32_t faceIndex = 0;
-	Material* material = nullptr;
+	const Material* material = nullptr;
 	Mesh* mesh = nullptr;
 	Light* areaLight = nullptr;
 };

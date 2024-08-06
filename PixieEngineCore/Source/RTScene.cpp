@@ -1,31 +1,47 @@
 #include "RTScene.h"
 
 RTScene* RTScene::FromScene(Scene* scene) {
-	Vec3 p0 = Vec3(mesh->mVertices[face.mIndices[0]].x, mesh->mVertices[face.mIndices[0]].y, mesh->mVertices[face.mIndices[0]].z);
-	Vec3 p1 = Vec3(mesh->mVertices[face.mIndices[1]].x, mesh->mVertices[face.mIndices[1]].y, mesh->mVertices[face.mIndices[1]].z);
-	Vec3 p2 = Vec3(mesh->mVertices[face.mIndices[2]].x, mesh->mVertices[face.mIndices[2]].y, mesh->mVertices[face.mIndices[2]].z);
+	uint64_t trianglesCount = 0, invalidTrianglesCount = 0;
 
-	Shape* triangle = new CachedTriangle(p0, p1, p2);
-	if (!triangle->IsValid()) {
-		delete triangle;
-		invalidTrianglesCount++;
-		continue;
+	RTScene* rtScene = new RTScene();
+	std::vector<Primitive*> shapePrimitives;
+	for (size_t sceneObjectIndex = 0; sceneObjectIndex < scene->flatObjects.size(); sceneObjectIndex++) {
+		SceneObject* object = scene->flatObjects[sceneObjectIndex];
+
+		MeshComponent* meshComopnent = object->GetComponent<MeshComponent>();
+		MaterialComponent* materialComponent = object->GetComponent<MaterialComponent>();
+		if (!meshComopnent || !materialComponent) continue;
+
+		const Mesh* mesh = meshComopnent->GetMesh();
+		const Material* material = materialComponent->GetMaterial();
+		if (!mesh || !material) continue;
+
+		for (size_t i = 0; i < mesh->indices.size(); i += 3) {
+			Vec3 p0 = mesh->vertices[mesh->indices[i + 0]].position;
+			Vec3 p1 = mesh->vertices[mesh->indices[i + 1]].position;
+			Vec3 p2 = mesh->vertices[mesh->indices[i + 2]].position;
+
+			Shape* triangle = new CachedTriangle(p0, p1, p2);
+			trianglesCount++;
+			if (!triangle->IsValid()) {
+				delete triangle;
+				invalidTrianglesCount++;
+				continue;
+			}
+
+			rtScene->shapes.push_back(triangle);
+			shapePrimitives.push_back(new ShapePrimitive(triangle, material));
+			if (material->emission != glm::vec3(0.0f)) {
+				rtScene->lights.push_back(DiffuseAreaLight(triangle, material->emission * 10.0f));
+			}
+		}
 	}
-	currentScene->shapes.push_back(triangle);
-	shapePrimitives.push_back(new ShapePrimitive(triangle, mat));
-	if (mat->emission != glm::vec3(0.0f)) {
-		currentScene->lights.push_back(DiffuseAreaLight(triangle, mat->emission * 10.0f));
-	}
-	trianglesCount++;
 
-
-
-	currentScene->rootPrimitive = new BVHAggregate(shapePrimitives);
+	rtScene->rootPrimitive = new BVHAggregate(shapePrimitives, 4);
 
 	std::cout << "Scene triangles count: " << trianglesCount << ", invalid triangles count: " << invalidTrianglesCount << "\n";
 
-	trianglesCount = 0;
-	invalidTrianglesCount = 0;
+	return rtScene;
 }
 
 RTScene::RTScene() {

@@ -7,6 +7,8 @@ class MeshComponent : public Component {
 public:
 	MeshComponent(Mesh* mesh, const SceneObject* parent);
 
+	const Mesh* GetMesh() const;
+
 protected:
 	Mesh* mesh = nullptr;
 };

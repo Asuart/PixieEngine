@@ -30,5 +30,6 @@ protected:
 	virtual void Update();
 	virtual void FixedUpdate();
 
+	friend class RTScene;
 	friend class SceneLoader;
 };

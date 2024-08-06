@@ -29,7 +29,7 @@ bool BoundingPrimitive::IntersectP(const Ray& ray, RayTracingStatistics& stats, 
 	return false;
 }
 
-ShapePrimitive::ShapePrimitive(Shape* _shape, Material* _material)
+ShapePrimitive::ShapePrimitive(Shape* _shape, const Material* _material)
 	: shape(_shape), material(_material) {
 	bounds = shape->Bounds();
 }

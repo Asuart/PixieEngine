@@ -26,16 +26,6 @@ void SceneObject::RemoveComponent(const std::string& name) {
 	}
 }
 
-template<typename T>
-Component* SceneObject::GetComponent() {
-	for (size_t i = 0; i < components.size(); i++) {
-		if (dynamic_cast<T*>(components[i])) {
-			return components[i];
-		}
-	}
-	return nullptr;
-}
-
 Component* SceneObject::GetComponent(const std::string& name) {
 	for (size_t i = 0; i < components.size(); i++) {
 		if (components[i]->name == name) {

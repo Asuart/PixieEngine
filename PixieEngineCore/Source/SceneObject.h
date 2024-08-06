@@ -21,7 +21,16 @@ public:
 	void RemoveComponent(const std::string& name);
 
 	template<typename T>
-	Component* GetComponent();
+	T* GetComponent() {
+		for (size_t i = 0; i < components.size(); i++) {
+			T* cast = dynamic_cast<T*>(components[i]);
+			if (cast) {
+				return cast;
+			}
+		}
+		return nullptr;
+	}
+
 	Component* GetComponent(const std::string& name);
 
 protected:

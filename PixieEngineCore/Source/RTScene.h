@@ -6,6 +6,8 @@
 #include "Camera.h"
 #include "RayTracingStatistics.h"
 #include "Scene.h"
+#include "MeshComponent.h"
+#include "MaterialComponent.h"
 
 class SceneLoader;
 
@@ -30,5 +32,6 @@ public:
 	bool IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax = Infinity) const;
 	Vec3 GetSkyColor(const Ray& ray) const;
 
+	friend class Scene;
 	friend class SceneLoader;
 };

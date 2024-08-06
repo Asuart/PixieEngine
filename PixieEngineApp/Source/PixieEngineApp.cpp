@@ -22,7 +22,8 @@ PixieEngineApp::PixieEngineApp() {
 	ImGui_ImplOpenGL3_Init();
 
 	SceneLoader sceneLoader;
-	m_rtScene = sceneLoader.LoadScene("../Scenes/default.obj");
+	m_scene = sceneLoader.LoadScene("../Scenes/default.obj");
+	m_rtScene = RTScene::FromScene(m_scene);
 
 	m_rayTracingRenderer = new RayTracingRenderer(glm::ivec2(1280, 720), m_rtScene);
 	m_rayTracingRenderer->StartRender();

@@ -8,7 +8,6 @@
 #include "Transform.h"
 #include "Texture.h"
 #include "Material.h"
-#include "Vertex.h"
 #include "Mesh.h"
 #include "OGLMesh.h"
 #include "Scene.h"

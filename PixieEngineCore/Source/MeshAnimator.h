@@ -1,6 +1,7 @@
 #pragma once
 #include "PixieEngineCoreHeaders.h"
 #include "AssimpGLMHelper.h"
+#include "SceneObject.h"
 
 struct KeyPosition {
     Vec3 position;
@@ -22,8 +23,7 @@ struct BoneInfo {
     Mat4 offset;
 };
 
-class Bone {
-public:
+struct Bone {
     std::string name;
     int32_t id;
     Mat4 localTransform;
@@ -46,36 +46,26 @@ private:
     Mat4 InterpolateScaling(Float animationTime);
 };
 
-struct AssimpNodeData {
-    Mat4 transformation;
-    std::string name;
-    std::vector<AssimpNodeData> children;
-};
-
 class Animation {
 public:
 
     Animation() = default;
-    Animation(float duration, int32_t ticksPerSecond, SceneObject* rootNode);
-    Animation(const std::string& animationPath, Skeleton* model);
+    Animation(float duration, int32_t ticksPerSecond, const std::vector<Bone>& bones, const std::map<std::string, BoneInfo>& boneInfoMap, SceneObject* rootObject);
     ~Animation();
 
     Bone* FindBone(const std::string& name);
 
     int32_t GetTicksPerSecond() const;
-    Float GetDuration() const;
-    const AssimpNodeData& GetRootNode() const;
+    float GetDuration() const;
+    const SceneObject* GetRootNode() const;
     const std::map<std::string, BoneInfo>& GetBoneIDMap() const;
 
 private:
-    Float duration;
+    float duration;
     int32_t ticksPerSecond;
     std::vector<Bone> bones;
-    AssimpNodeData rootNode;
     std::map<std::string, BoneInfo> boneInfoMap;
-
-    void ReadMissingBones(const aiAnimation* animation, Skeleton& model);
-    void ReadHeirarchyData(AssimpNodeData& dest, const aiNode* src);
+    SceneObject* rootNode;
 };
 
 class Animator {
@@ -84,7 +74,7 @@ public:
 
     void UpdateAnimation(Float dt);
     void PlayAnimation(Animation* pAnimation);
-    void CalculateBoneTransform(const AssimpNodeData* node, Mat4 parentTransform);
+    void CalculateBoneTransform(const SceneObject* node, Mat4 parentTransform);
     std::vector<Mat4> GetFinalBoneMatrices();
 
 private:
