@@ -1,5 +1,32 @@
-
 #include "RTScene.h"
+
+RTScene* RTScene::FromScene(Scene* scene) {
+	Vec3 p0 = Vec3(mesh->mVertices[face.mIndices[0]].x, mesh->mVertices[face.mIndices[0]].y, mesh->mVertices[face.mIndices[0]].z);
+	Vec3 p1 = Vec3(mesh->mVertices[face.mIndices[1]].x, mesh->mVertices[face.mIndices[1]].y, mesh->mVertices[face.mIndices[1]].z);
+	Vec3 p2 = Vec3(mesh->mVertices[face.mIndices[2]].x, mesh->mVertices[face.mIndices[2]].y, mesh->mVertices[face.mIndices[2]].z);
+
+	Shape* triangle = new CachedTriangle(p0, p1, p2);
+	if (!triangle->IsValid()) {
+		delete triangle;
+		invalidTrianglesCount++;
+		continue;
+	}
+	currentScene->shapes.push_back(triangle);
+	shapePrimitives.push_back(new ShapePrimitive(triangle, mat));
+	if (mat->emission != glm::vec3(0.0f)) {
+		currentScene->lights.push_back(DiffuseAreaLight(triangle, mat->emission * 10.0f));
+	}
+	trianglesCount++;
+
+
+
+	currentScene->rootPrimitive = new BVHAggregate(shapePrimitives);
+
+	std::cout << "Scene triangles count: " << trianglesCount << ", invalid triangles count: " << invalidTrianglesCount << "\n";
+
+	trianglesCount = 0;
+	invalidTrianglesCount = 0;
+}
 
 RTScene::RTScene() {
 	materials.push_back(new DiffuseMaterial("Default Materail", new ColorTexture(Vec3(0.8, 0.8, 0.0))));
@@ -41,7 +68,7 @@ RTScene::~RTScene() {
 	for (RTTexture* texture : textures) {
 		delete texture;
 	}
-	for (RTMaterial* material : materials) {
+	for (Material* material : materials) {
 		delete material;
 	}
 	for (Shape* shape : shapes) {
@@ -52,12 +79,12 @@ RTScene::~RTScene() {
 
 void RTScene::Update() {}
 
-bool RTScene::Intersect(const Ray& ray, RTInteraction& outCollision, Float tMax) const {
-	return rootPrimitive->Intersect(ray, outCollision, tMax);
+bool RTScene::Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax) const {
+	return rootPrimitive->Intersect(ray, outCollision, stats, tMax);
 }
 
-bool RTScene::IntersectP(const Ray& ray, Float tMax) const {
-	return rootPrimitive->IntersectP(ray, tMax);
+bool RTScene::IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax) const {
+	return rootPrimitive->IntersectP(ray, stats, tMax);
 }
 
 Vec3 RTScene::GetSkyColor(const Ray& ray) const {

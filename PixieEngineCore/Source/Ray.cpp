@@ -1,12 +1,10 @@
 #include "Ray.h"
 
-Ray::Ray(const Vec3& _origin, const Vec3& _direction)
-	: o(_origin), d(_direction) {
-	if (isnan(o) || isnan(d)) {
-		std::cout << "nan ray\n";
-	}
+Ray::Ray(uint32_t x, uint32_t y, const Vec3& _origin, const Vec3& _direction, Medium* medium)
+	: x(x), y(y), origin(_origin), direction(_direction), medium(medium) {
+	assert(!isnan(origin) || !isnan(direction));
 }
 
 Vec3 Ray::At(Float t) const {
-	return o + d * t;
+	return origin + direction * t;
 }

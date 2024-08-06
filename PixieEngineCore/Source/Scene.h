@@ -21,11 +21,14 @@ public:
 	std::vector<SceneObject*> FindObjectsWithComponent(const std::string& componentName);
 
 protected:
+	SceneObject* rootObject;
+	std::vector<SceneObject*> flatObjects;
+	std::vector<Material*> materials;
+	std::vector<Mesh*> meshes;
+
 	virtual void Start();
 	virtual void Update();
 	virtual void FixedUpdate();
 
-private:
-	SceneObject* rootObject;
-	std::vector<SceneObject*> flatObjects;
+	friend class SceneLoader;
 };

@@ -20,10 +20,9 @@
 #include "Light.h"
 #include "Film.h"
 #include "AssimpGLMHelper.h"
-#include "RTMaterial.h"
+#include "Material.h"
 #include "RTScene.h"
 #include "ShaderLibrary.h"
-#include "CPURayTracer.h"
 #include "SceneLoader.h"
 #include "FrameBuffer.h"
 

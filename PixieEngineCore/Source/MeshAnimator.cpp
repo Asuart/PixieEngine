@@ -1,38 +1,8 @@
 
 #include "MeshAnimator.h"
 
-Bone::Bone(const std::string& name, int32_t ID, const aiNodeAnim* channel)
-    : name(name), id(ID), localTransform(1.0f) {
-    numPositions = channel->mNumPositionKeys;
-    for (int32_t positionIndex = 0; positionIndex < numPositions; positionIndex++) {
-        aiVector3D aiPosition = channel->mPositionKeys[positionIndex].mValue;
-        Float timeStamp = (Float)channel->mPositionKeys[positionIndex].mTime;
-        KeyPosition data;
-        data.position = AssimpGLMHelpers::GetGLMVec(aiPosition);
-        data.timeStamp = timeStamp;
-        positions.push_back(data);
-    }
-
-    numRotations = channel->mNumRotationKeys;
-    for (int32_t rotationIndex = 0; rotationIndex < numRotations; rotationIndex++) {
-        aiQuaternion aiOrientation = channel->mRotationKeys[rotationIndex].mValue;
-        Float timeStamp = (Float)channel->mRotationKeys[rotationIndex].mTime;
-        KeyRotation data;
-        data.orientation = AssimpGLMHelpers::GetGLMQuat(aiOrientation);
-        data.timeStamp = timeStamp;
-        rotations.push_back(data);
-    }
-
-    numScalings = channel->mNumScalingKeys;
-    for (int32_t keyIndex = 0; keyIndex < numScalings; keyIndex++) {
-        aiVector3D scale = channel->mScalingKeys[keyIndex].mValue;
-        Float timeStamp = (Float)channel->mScalingKeys[keyIndex].mTime;
-        KeyScale data;
-        data.scale = AssimpGLMHelpers::GetGLMVec(scale);
-        data.timeStamp = timeStamp;
-        scales.push_back(data);
-    }
-}
+Bone::Bone(const std::string& name, int32_t ID)
+    : name(name), id(ID), localTransform(1.0f) { }
 
 void Bone::Update(Float animationTime) {
     Mat4 translation = InterpolatePosition(animationTime);
@@ -123,7 +93,7 @@ Animation::Animation(const std::string& animationPath, Skeleton* model) {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate);
     assert(scene && scene->mRootNode);
-    auto animation = scene->mAnimations[0];
+    aiAnimation* animation = scene->mAnimations[0];
     duration = (Float)animation->mDuration;
     ticksPerSecond = (int32_t)animation->mTicksPerSecond;
     ReadHeirarchyData(rootNode, scene->mRootNode);
@@ -138,10 +108,12 @@ Bone* Animation::FindBone(const std::string& name) {
             return Bone.GetBoneName() == name;
         }
     );
-    if (iter == bones.end())
+    if (iter == bones.end()) {
         return nullptr;
-    else
+    }
+    else {
         return &(*iter);
+    }
 }
 
 int32_t Animation::GetTicksPerSecond() const {
@@ -240,8 +212,9 @@ void Animator::CalculateBoneTransform(const AssimpNodeData* node, Mat4 parentTra
         finalBoneMatrices[index] = globalTransformation * offset;
     }
 
-    for (int32_t i = 0; i < node->childrenCount; i++)
+    for (int32_t i = 0; i < node->childrenCount; i++) {
         CalculateBoneTransform(&node->children[i], globalTransformation);
+    }
 }
 
 std::vector<Mat4> Animator::GetFinalBoneMatrices() {

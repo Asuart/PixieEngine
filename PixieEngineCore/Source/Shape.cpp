@@ -1,4 +1,3 @@
-
 #include "Shape.h"
 
 Vec3 SampleUniformTriangle(Vec2 u) {
@@ -38,10 +37,10 @@ Float Triangle::Area() const {
 }
 
 ShapeSample Triangle::Sample(Vec2 u) const {
-	RTInteraction intr;
+	SurfaceInteraction intr;
 	Vec3 b = SampleUniformTriangle(u);
-	intr.p = b[0] * v0 + b[1] * v1 + b[2] * v2;
-	intr.n = n;
+	intr.position = b[0] * v0 + b[1] * v1 + b[2] * v2;
+	intr.normal = n;
 	return ShapeSample(intr, 1.0f / Area());
 }
 
@@ -49,15 +48,18 @@ Bounds3f Triangle::Bounds() const {
 	return Union(Bounds3f(v0, v1), Bounds3f(v2));
 }
 
-bool Triangle::Intersect(const Ray& ray, RTInteraction& outCollision, Float tMax) const {
-	Float NdotRayDirection = glm::dot(n, ray.d);
-	if (fabs(NdotRayDirection) < ShadowEpsilon)
+bool Triangle::Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax) const {
+	stats.m_triangleCheckStatBuffer.Increment(ray.x, ray.y);
+	Float NdotRayDirection = glm::dot(n, ray.direction);
+	if (fabs(NdotRayDirection) < ShadowEpsilon) {
 		return false;
+	}
 
 	Float d = glm::dot(n, v0);
-	Float t = (d - glm::dot(n, ray.o)) / NdotRayDirection;
-	if (t < ShadowEpsilon || t > tMax)
+	Float t = (d - glm::dot(n, ray.origin)) / NdotRayDirection;
+	if (t < ShadowEpsilon || t > tMax) {
 		return false;
+	}
 
 	Vec3 P = ray.At(t);
 	Vec3 C;
@@ -68,40 +70,44 @@ bool Triangle::Intersect(const Ray& ray, RTInteraction& outCollision, Float tMax
 
 	Vec3 vp0 = P - v0;
 	C = glm::cross(edge0, vp0);
-	if (glm::dot(n, C) < 0)
+	if (glm::dot(n, C) < 0) {
 		return false;
+	}
 
 	Vec3 vp1 = P - v1;
 	C = glm::cross(edge1, vp1);
-	if (glm::dot(n, C) < 0)
+	if (glm::dot(n, C) < 0) {
 		return false;
+	}
 
 	Vec3 vp2 = P - v2;
 	C = glm::cross(edge2, vp2);
-	if (glm::dot(n, C) < 0)
-		return false;
+	if (glm::dot(n, C) < 0) return false;
 
 	Float area = glm::length(glm::cross(v1 - v0, v2 - v0)) * 0.5f;
 
 	outCollision.distance = t;
-	outCollision.backFace = NdotRayDirection < 0;
-	outCollision.n = outCollision.backFace ? n : -n;
-	outCollision.p = P;
+	outCollision.backface = NdotRayDirection < 0;
+	outCollision.normal = outCollision.backface ? n : -n;
+	outCollision.position = P;
 	outCollision.uv = Vec3(0);
 	outCollision.area = area;
 
 	return true;
 }
 
-bool Triangle::IntersectP(const Ray& ray, Float tMax) const {
-	Float NdotRayDirection = glm::dot(n, ray.d);
-	if (fabs(NdotRayDirection) < ShadowEpsilon)
+bool Triangle::IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax) const {
+	stats.m_triangleCheckStatBuffer.Increment(ray.x, ray.y);
+	Float NdotRayDirection = glm::dot(n, ray.direction);
+	if (fabs(NdotRayDirection) < ShadowEpsilon) {
 		return false;
+	}
 
 	Float d = glm::dot(n, v0);
-	Float t = (d - glm::dot(n, ray.o)) / NdotRayDirection;
-	if (t < ShadowEpsilon || t > tMax)
+	Float t = (d - glm::dot(n, ray.origin)) / NdotRayDirection;
+	if (t < ShadowEpsilon || t > tMax) {
 		return false;
+	}
 
 	Vec3 P = ray.At(t);
 	Vec3 C;
@@ -112,18 +118,21 @@ bool Triangle::IntersectP(const Ray& ray, Float tMax) const {
 
 	Vec3 vp0 = P - v0;
 	C = glm::cross(edge0, vp0);
-	if (glm::dot(n, C) < 0)
+	if (glm::dot(n, C) < 0) {
 		return false;
+	}
 
 	Vec3 vp1 = P - v1;
 	C = glm::cross(edge1, vp1);
-	if (glm::dot(n, C) < 0)
+	if (glm::dot(n, C) < 0) {
 		return false;
+	}
 
 	Vec3 vp2 = P - v2;
 	C = glm::cross(edge2, vp2);
-	if (glm::dot(n, C) < 0)
+	if (glm::dot(n, C) < 0) {
 		return false;
+	}
 
 	return true;
 }
@@ -157,10 +166,10 @@ Float CachedTriangle::Area() const {
 }
 
 ShapeSample CachedTriangle::Sample(Vec2 u) const {
-	RTInteraction intr;
+	SurfaceInteraction intr;
 	Vec3 b = SampleUniformTriangle(u);
-	intr.p = b[0] * v0 + b[1] * v1 + b[2] * v2;
-	intr.n = n;
+	intr.position = b[0] * v0 + b[1] * v1 + b[2] * v2;
+	intr.normal = n;
 	return ShapeSample(intr, 1.0f / Area());
 }
 
@@ -168,70 +177,82 @@ Bounds3f CachedTriangle::Bounds() const {
 	return Union(Bounds3f(v0, v1), Bounds3f(v2));
 }
 
-bool CachedTriangle::Intersect(const Ray& ray, RTInteraction& outCollision, Float tMax) const {
-	Float NdotRayDirection = glm::dot(n, ray.d);
-	if (fabs(NdotRayDirection) < ShadowEpsilon)
+bool CachedTriangle::Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax) const {
+	stats.m_triangleCheckStatBuffer.Increment(ray.x, ray.y);
+	Float NdotRayDirection = glm::dot(n, ray.direction);
+	if (fabs(NdotRayDirection) < ShadowEpsilon) {
 		return false;
+	}
 
-	Float t = (d - glm::dot(n, ray.o)) / NdotRayDirection;
-	if (t < ShadowEpsilon || t > tMax)
+	Float t = (d - glm::dot(n, ray.origin)) / NdotRayDirection;
+	if (t < ShadowEpsilon || t > tMax) {
 		return false;
+	}
 
 	Vec3 P = ray.At(t);
 	Vec3 C;
 
 	Vec3 vp0 = P - v0;
 	C = glm::cross(edge0, vp0);
-	if (glm::dot(n, C) < 0)
+	if (glm::dot(n, C) < 0) {
 		return false;
+	}
 
 	Vec3 vp1 = P - v1;
 	C = glm::cross(edge1, vp1);
-	if (glm::dot(n, C) < 0)
+	if (glm::dot(n, C) < 0) {
 		return false;
+	}
 
 	Vec3 vp2 = P - v2;
 	C = glm::cross(edge2, vp2);
-	if (glm::dot(n, C) < 0)
+	if (glm::dot(n, C) < 0) {
 		return false;
+	}
 
 	outCollision.distance = t;
-	outCollision.backFace = NdotRayDirection < 0;
-	outCollision.n = outCollision.backFace ? n : -n;
-	outCollision.p = P;
+	outCollision.backface = NdotRayDirection < 0;
+	outCollision.normal = outCollision.backface ? n : -n;
+	outCollision.position = P;
 	outCollision.uv = Vec3(0);
 	outCollision.area = area;
-	outCollision.dpdus = edge0;
+	outCollision.dpdu = edge0;
 
 	return true;
 }
 
-bool CachedTriangle::IntersectP(const Ray& ray, Float tMax) const {
-	Float NdotRayDirection = glm::dot(n, ray.d);
-	if (fabs(NdotRayDirection) < ShadowEpsilon)
+bool CachedTriangle::IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax) const {
+	stats.m_triangleCheckStatBuffer.Increment(ray.x, ray.y);
+	Float NdotRayDirection = glm::dot(n, ray.direction);
+	if (fabs(NdotRayDirection) < ShadowEpsilon) {
 		return false;
+	}
 
-	Float t = (d - glm::dot(n, ray.o)) / NdotRayDirection;
-	if (t < ShadowEpsilon || t > tMax)
+	Float t = (d - glm::dot(n, ray.origin)) / NdotRayDirection;
+	if (t < ShadowEpsilon || t > tMax) {
 		return false;
+	}
 
 	Vec3 P = ray.At(t);
 	Vec3 C;
 
 	Vec3 vp0 = P - v0;
 	C = glm::cross(edge0, vp0);
-	if (glm::dot(n, C) < 0)
+	if (glm::dot(n, C) < 0) {
 		return false;
+	}
 
 	Vec3 vp1 = P - v1;
 	C = glm::cross(edge1, vp1);
-	if (glm::dot(n, C) < 0)
+	if (glm::dot(n, C) < 0) {
 		return false;
+	}
 
 	Vec3 vp2 = P - v2;
 	C = glm::cross(edge2, vp2);
-	if (glm::dot(n, C) < 0)
+	if (glm::dot(n, C) < 0) {
 		return false;
+	}
 
 	return true;
 }
@@ -243,51 +264,56 @@ Bounds3f Sphere::Bounds() const {
 	return Bounds3f(Vec3(-r), Vec3(r));
 }
 
-bool Sphere::Intersect(const Ray& ray, RTInteraction& out_collision, Float tMax) const {
-	Vec3 oc = ray.o - c;
-	Float a = length2(ray.d);
-	Float half_b = glm::dot(oc, ray.d);
+bool Sphere::Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax) const {
+	Vec3 oc = ray.origin - c;
+	Float a = length2(ray.direction);
+	Float half_b = glm::dot(oc, ray.direction);
 	Float c = length2(oc) - r * r;
 
 	Float discriminant = half_b * half_b - a * c;
-	if (discriminant < 0) return false;
-	Float sqrtd = sqrt(discriminant);
+	if (discriminant < 0) {
+		return false;
+	}
 
+	Float sqrtd = sqrt(discriminant);
 	Float root = (-half_b - sqrtd) / a;
 	if (root < ShadowEpsilon || tMax < root) {
 		root = (-half_b + sqrtd) / a;
-		if (root < ShadowEpsilon || tMax < root)
+		if (root < ShadowEpsilon || tMax < root) {
 			return false;
+		}
 	}
 
-	out_collision.distance = root;
-	out_collision.p = ray.At(root);
-	Vec3 outNormal = (out_collision.p - c) / r;
+	outCollision.distance = root;
+	outCollision.position = ray.At(root);
+	Vec3 outNormal = (outCollision.position - c) / r;
 	Float theta = acos(-outNormal.y);
 	Float phi = atan2(-outNormal.z, outNormal.x) + Pi;
-	out_collision.uv = Vec2(phi / (2.0f * Pi), theta / Pi);
-	bool front_face = glm::dot(ray.d, outNormal) < 0;
-	out_collision.n = front_face ? outNormal : -outNormal;
-	out_collision.backFace = !front_face;
+	outCollision.uv = Vec2(phi / (2.0f * Pi), theta / Pi);
+	outCollision.backface = glm::dot(ray.direction, outNormal) > 0;
+	outCollision.normal = outCollision.backface ? outNormal : -outNormal;
 
 	return true;
 }
 
-bool Sphere::IntersectP(const Ray& ray, Float tMax) const {
-	Vec3 oc = ray.o - c;
-	Float a = length2(ray.d);
-	Float half_b = glm::dot(oc, ray.d);
+bool Sphere::IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax) const {
+	Vec3 oc = ray.origin - c;
+	Float a = length2(ray.direction);
+	Float half_b = glm::dot(oc, ray.direction);
 	Float c = length2(oc) - r * r;
 
 	Float discriminant = half_b * half_b - a * c;
-	if (discriminant < 0) return false;
-	Float sqrtd = sqrt(discriminant);
+	if (discriminant < 0) {
+		return false;
+	}
 
+	Float sqrtd = sqrt(discriminant);
 	Float root = (-half_b - sqrtd) / a;
 	if (root < ShadowEpsilon || tMax < root) {
 		root = (-half_b + sqrtd) / a;
-		if (root < ShadowEpsilon || tMax < root)
+		if (root < ShadowEpsilon || tMax < root) {
 			return false;
+		}
 	}
 
 	return true;

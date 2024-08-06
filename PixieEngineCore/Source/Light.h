@@ -1,15 +1,15 @@
 #pragma once
 #include "PixieEngineCoreHeaders.h"
-#include "RTInteraction.h"
+#include "Interaction.h"
 #include "Shape.h"
 
 struct LightLiSample {
 	glm::fvec3 L = glm::fvec3(0.0f);
 	Vec3 wi = Vec3(0.0f);
 	Float pdf = 0;
-	RTInteraction pLight;
+	SurfaceInteraction pLight;
 
-	LightLiSample(const glm::fvec3& L, Vec3 wi, Float pdf, const RTInteraction& pLight);
+	LightLiSample(const glm::fvec3& L, Vec3 wi, Float pdf, const SurfaceInteraction& pLight);
 };
 
 struct LightSampleContext {
@@ -27,7 +27,7 @@ public:
 	DiffuseAreaLight(Shape* shape, glm::fvec3 emit = glm::fvec3(1), Float scale = 1);
 
 	glm::fvec3 L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const;
-	std::optional<LightLiSample> SampleLi(RTInteraction intr, Vec2 u) const;
+	std::optional<LightLiSample> SampleLi(SurfaceInteraction intr, Vec2 u) const;
 };
 
 struct SampledLight {

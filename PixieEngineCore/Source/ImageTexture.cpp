@@ -24,7 +24,7 @@ ImageTexture::~ImageTexture() {
 	delete[] data;
 }
 
-Vec3 ImageTexture::Sample(const RTInteraction& intr) const {
+Vec3 ImageTexture::Sample(const SurfaceInteraction& intr) const {
 	if (data == nullptr)
 		return Vec3(0, 1, 1);
 

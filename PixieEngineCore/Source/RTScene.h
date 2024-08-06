@@ -4,13 +4,15 @@
 #include "Primitive.h"
 #include "Light.h"
 #include "Camera.h"
+#include "RayTracingStatistics.h"
+#include "Scene.h"
 
 class SceneLoader;
 
 class RTScene {
 public:
 	std::vector<RTTexture*> textures;
-	std::vector<RTMaterial*> materials;
+	std::vector<Material*> materials;
 	std::vector<Shape*> shapes;
 	std::vector<DiffuseAreaLight> lights;
 	std::vector<Camera> cameras;
@@ -18,12 +20,14 @@ public:
 	Vec3 skyColor = Vec3(0);
 	Primitive* rootPrimitive = nullptr;
 
+	static RTScene* FromScene(Scene* scene);
+
 	RTScene();
 	~RTScene();
 
 	void Update();
-	bool Intersect(const Ray& ray, RTInteraction& outCollision, Float tMax = Infinity) const;
-	bool IntersectP(const Ray& ray, Float tMax = Infinity) const;
+	bool Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax = Infinity) const;
+	bool IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax = Infinity) const;
 	Vec3 GetSkyColor(const Ray& ray) const;
 
 	friend class SceneLoader;

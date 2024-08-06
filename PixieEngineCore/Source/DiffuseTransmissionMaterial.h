@@ -1,11 +1,11 @@
 #pragma once
-#include "RTMaterial.h"
+#include "Material.h"
 
-class DiffuseTransmissionMaterial : public RTMaterial {
+class DiffuseTransmissionMaterial : public Material {
 public:
 	DiffuseTransmissionMaterial(const std::string& name, Vec3 reflectance, Vec3 transmittance, Float scale);
 
-	BxDF* GetBxDF(const RTInteraction& intr) const override;
+	BxDF* GetBxDF(const SurfaceInteraction& intr) const override;
 
 private:
 	Vec3 reflectance, transmittance;

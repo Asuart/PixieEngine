@@ -1,5 +1,5 @@
 #pragma once
-#include "RTInteraction.h"
+#include "Interaction.h"
 
 class VisibleSurface {
 public:
@@ -9,7 +9,7 @@ public:
 	Vec3 albedo;
 	bool set = false;
 
-	VisibleSurface(const RTInteraction& si, Vec3 albedo);
+	VisibleSurface(const SurfaceInteraction& si, Vec3 albedo);
 
 	operator bool() const;
 };

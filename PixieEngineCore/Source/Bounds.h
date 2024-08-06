@@ -2,6 +2,7 @@
 #include "PixieEngineCoreHeaders.h"
 #include "Ray.h"
 #include "RTMath.h"
+#include "RayTracingStatistics.h"
 
 struct Bounds2i {
 	glm::ivec2 pMin, pMax;
@@ -26,8 +27,8 @@ public:
 	void BoundingSphere(Vec3* center, Float* radius) const;
 	bool IsEmpty() const;
 	bool IsDegenerate() const;
-	bool IntersectP(Vec3 o, Vec3 d, Float tMax = Infinity, Float* hitt0 = nullptr, Float* hitt1 = nullptr) const;
-	bool IntersectP(Vec3 o, Vec3 d, Float tMax, Vec3 invDir, const int32_t dirIsNeg[3]) const;
+	bool IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax = Infinity, Float* hitt0 = nullptr, Float* hitt1 = nullptr) const;
+	bool IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax, Vec3 invDir, const int32_t dirIsNeg[3]) const;
 
 	Vec3 operator[](int32_t i) const;
 	Vec3 operator[](int32_t i);

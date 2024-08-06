@@ -1,11 +1,11 @@
 #pragma once
-#include "RTMaterial.h"
+#include "Material.h"
 
-class DielectricMaterial : public RTMaterial {
+class DielectricMaterial : public Material {
 public:
 	DielectricMaterial(const std::string& name, Float uRoughness, Float vRoughness, Float eta, bool remapRoughness);
 
-	BxDF* GetBxDF(const RTInteraction& intr) const override;
+	BxDF* GetBxDF(const SurfaceInteraction& intr) const override;
 
 private:
 	Float uRoughness, vRoughness;

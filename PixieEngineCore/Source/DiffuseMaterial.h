@@ -1,9 +1,9 @@
 #pragma once
-#include "RTMaterial.h"
+#include "Material.h"
 
-class DiffuseMaterial : public RTMaterial {
+class DiffuseMaterial : public Material {
 public:
 	DiffuseMaterial(const std::string& name, RTTexture* texture);
 
-	BxDF* GetBxDF(const RTInteraction& intr) const override;
+	BxDF* GetBxDF(const SurfaceInteraction& intr) const override;
 };

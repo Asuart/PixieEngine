@@ -22,10 +22,12 @@ Vec3 Transform::ApplyPoint(Vec3 p) const {
     Float yp = m[1][0] * p.x + m[1][1] * p.y + m[1][2] * p.z + m[1][3];
     Float zp = m[2][0] * p.x + m[2][1] * p.y + m[2][2] * p.z + m[2][3];
     Float wp = m[3][0] * p.x + m[3][1] * p.y + m[3][2] * p.z + m[3][3];
-    if (wp == 1)
+    if (wp == 1.0f) {
         return Vec3(xp, yp, zp);
-    else
+    }
+    else {
         return Vec3(xp, yp, zp) / wp;
+    }
 }
 
 Vec3 Transform::ApplyVector(Vec3 v) const {
@@ -44,33 +46,36 @@ Vec3 Transform::ApplyNormal(Vec3 n) const {
 }
 
 Ray Transform::ApplyRay(const Ray& r, Float* tMax) const {
-    Vec3 o = (*this).ApplyPoint(Vec3(r.o));
-    Vec3 d = (*this).ApplyVector(r.d);
+    Vec3 o = (*this).ApplyPoint(Vec3(r.origin));
+    Vec3 d = (*this).ApplyVector(r.direction);
 
     Float lengthSquared = length2(d);
     if (lengthSquared > 0) {
         o += d * MachineEpsilon;
     }
 
-    return Ray(o, d);
+    return Ray(r.x, r.y, o, d);
 }
 
-RTInteraction Transform::ApplyInteraction(const RTInteraction& in) const {
-    RTInteraction ret(in);
-    ret.p = (*this).ApplyPoint(in.p);
-    ret.n = (*this).ApplyNormal(in.n);
-    if (length2(ret.n) > 0)
-        ret.n = glm::normalize(ret.n);
+SurfaceInteraction Transform::ApplyInteraction(const SurfaceInteraction& in) const {
+    SurfaceInteraction ret(in);
+    ret.position = (*this).ApplyPoint(in.position);
+    ret.normal = (*this).ApplyNormal(in.normal);
+    if (length2(ret.normal) > 0.0f) {
+        ret.normal = glm::normalize(ret.normal);
+    }
     ret.wo = (*this).ApplyVector(in.wo);
-    if (length2(ret.wo) > 0)
+    if (length2(ret.wo) > 0) {
         ret.wo = glm::normalize(ret.wo);
+    }
     return ret;
 }
 
 Bounds3f Transform::ApplyBounds(const Bounds3f& b) const {
     Bounds3f bt;
-    for (int i = 0; i < 8; ++i)
+    for (int32_t i = 0; i < 8; ++i) {
         bt = Union(bt, (*this).ApplyBounds(b));
+    }
     return bt;
 }
 
@@ -80,10 +85,12 @@ Vec3 Transform::ApplyInversePoint(Vec3 p) const {
     Float yp = (mInv[1][0] * x + mInv[1][1] * y) + (mInv[1][2] * z + mInv[1][3]);
     Float zp = (mInv[2][0] * x + mInv[2][1] * y) + (mInv[2][2] * z + mInv[2][3]);
     Float wp = (mInv[3][0] * x + mInv[3][1] * y) + (mInv[3][2] * z + mInv[3][3]);
-    if (wp == 1)
+    if (wp == 1.0f) {
         return Vec3(xp, yp, zp);
-    else
+    }
+    else {
         return Vec3(xp, yp, zp) / wp;
+    }
 }
 
 Vec3 Transform::ApplyInverseVector(Vec3 v) const {
@@ -103,27 +110,29 @@ Vec3 Transform::ApplyInverseNormal(Vec3 n) const {
 }
 
 Ray Transform::ApplyInverseRay(const Ray& r, Float* tMax) const {
-    Vec3 o = ApplyInversePoint(r.o);
-    Vec3 d = ApplyInverseVector(r.d);
+    Vec3 o = ApplyInversePoint(r.origin);
+    Vec3 d = ApplyInverseVector(r.direction);
 
     Float lengthSquared = length2(d);
-    if (lengthSquared > 0) {
+    if (lengthSquared > 0.0f) {
         o -= d * MachineEpsilon;
     }
 
-    return Ray(o, d);
+    return Ray(r.x, r.y,o, d);
 }
 
-RTInteraction Transform::ApplyInverseInteraction(const RTInteraction& in) const {
-    RTInteraction ret(in);
+SurfaceInteraction Transform::ApplyInverseInteraction(const SurfaceInteraction& in) const {
+    SurfaceInteraction ret(in);
     Transform t = Inverse(*this);
-    ret.p = t.ApplyPoint(in.p);
-    ret.n = t.ApplyNormal(in.n);
-    if (length2(ret.n) > 0)
-        ret.n = glm::normalize(ret.n);
+    ret.position = t.ApplyPoint(in.position);
+    ret.normal = t.ApplyNormal(in.normal);
+    if (length2(ret.normal) > 0.0f) {
+        ret.normal = glm::normalize(ret.normal);
+    }
     ret.wo = t.ApplyVector(in.wo);
-    if (length2(ret.wo) > 0)
+    if (length2(ret.wo) > 0.0f) {
         ret.wo = glm::normalize(ret.wo);
+    }
     return ret;
 }
 
@@ -133,27 +142,26 @@ void Transform::Decompose(Vec3* T, Mat4* R, Mat4* S) const {
     T->z = m[2][3];
 
     Mat4 M = m;
-    for (int i = 0; i < 3; ++i)
-        M[i][3] = M[3][i] = 0.f;
-    M[3][3] = 1.f;
+    for (int32_t i = 0; i < 3; ++i) {
+        M[i][3] = M[3][i] = 0.0f;
+    }
+    M[3][3] = 1.0f;
 
     Float norm;
-    int count = 0;
+    int32_t count = 0;
     *R = M;
     do {
         Mat4 Rit = glm::inverse(glm::transpose(*R));
         Mat4 Rnext = (*R + Rit) / (Float)2.0f;
 
         norm = 0;
-        for (int i = 0; i < 3; ++i) {
-            Float n = std::abs((*R)[i][0] - Rnext[i][0]) +
-                std::abs((*R)[i][1] - Rnext[i][1]) +
-                std::abs((*R)[i][2] - Rnext[i][2]);
+        for (int32_t i = 0; i < 3; ++i) {
+            Float n = std::abs((*R)[i][0] - Rnext[i][0]) + std::abs((*R)[i][1] - Rnext[i][1]) + std::abs((*R)[i][2] - Rnext[i][2]);
             norm = std::max(norm, n);
         }
 
         *R = Rnext;
-    } while (++count < 100 && norm > .0001);
+    } while (++count < 100 && norm > 0.0001f);
 
     *S = glm::inverse(*R) * M;
 }
@@ -226,20 +234,25 @@ Transform Rotate(Float theta, Vec3 axis) {
 
 Transform RotateFromTo(Vec3 from, Vec3 to) {
     Vec3 refl;
-    if (std::abs(from.x) < 0.72f && std::abs(to.x) < 0.72f)
+    if (std::abs(from.x) < 0.72f && std::abs(to.x) < 0.72f) {
         refl = Vec3(1, 0, 0);
-    else if (std::abs(from.y) < 0.72f && std::abs(to.y) < 0.72f)
+    }
+    else if (std::abs(from.y) < 0.72f && std::abs(to.y) < 0.72f) {
         refl = Vec3(0, 1, 0);
-    else
+    }
+    else {
         refl = Vec3(0, 0, 1);
+    }
 
     Vec3 u = refl - from, v = refl - to;
     Mat4 r;
-    for (int i = 0; i < 3; ++i)
-        for (int j = 0; j < 3; ++j)
+    for (int32_t i = 0; i < 3; ++i) {
+        for (int32_t j = 0; j < 3; ++j) {
             r[i][j] = ((i == j) ? 1 : 0) - 2 / glm::dot(u, u) * u[i] * u[j] -
-            2 / glm::dot(v, v) * v[i] * v[j] +
-            4 * glm::dot(u, v) / (glm::dot(u, u) * glm::dot(v, v)) * v[i] * u[j];
+                2 / glm::dot(v, v) * v[i] * v[j] +
+                4 * glm::dot(u, v) / (glm::dot(u, u) * glm::dot(v, v)) * v[i] * u[j];
+        }
+    }
 
     return Transform(r, glm::transpose(r));
 }

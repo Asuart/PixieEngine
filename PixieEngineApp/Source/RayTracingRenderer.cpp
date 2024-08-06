@@ -1,7 +1,7 @@
 #include "RayTracingRenderer.h"
 
 RayTracingRenderer::RayTracingRenderer(glm::ivec2 resolution, RTScene* scene)
-	: m_resolution(resolution), m_rayTracer(new SimplePathIntegrator({800, 600})), m_scene(scene), m_viewportResolution(resolution) {
+	: m_resolution(resolution), m_rayTracer(new RandomWalkIntegrator({256, 256})), m_scene(scene), m_viewportResolution(resolution) {
 	m_rayTracer->SetScene(scene);
 	//m_rayTracer->mode = CPURayTracerMode::LiPath;
 }
@@ -153,7 +153,7 @@ void RayTracingRenderer::DrawUI() {
 	ImGui::Begin("Scene", 0);
 
 	if (m_scene->materials.size() > 0 && ImGui::CollapsingHeader("Materials")) {
-		for (RTMaterial* material : m_scene->materials) {
+		for (Material* material : m_scene->materials) {
 			if (ImGui::CollapsingHeader(material->name.c_str())) {
 				if (ImGui::ColorEdit3("Albedo", (float*)&material->albedo)) {
 					Reset();

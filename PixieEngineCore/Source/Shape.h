@@ -1,12 +1,12 @@
 #pragma once
 #include "Ray.h"
 #include "Bounds.h"
-#include "RTInteraction.h"
+#include "Interaction.h"
 
 Vec3 SampleUniformTriangle(Vec2 u);
 
 struct ShapeSample {
-	RTInteraction intr;
+	SurfaceInteraction intr;
 	Float pdf;
 };
 
@@ -17,8 +17,8 @@ public:
 	virtual Float Area() const = 0;
 	virtual ShapeSample Sample(Vec2 u) const = 0;
 	virtual Bounds3f Bounds() const = 0;
-	virtual bool Intersect(const Ray& ray, RTInteraction& outCollision, Float tMax) const = 0;
-	virtual bool IntersectP(const Ray& ray, Float tMax) const = 0;
+	virtual bool Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax) const = 0;
+	virtual bool IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax) const = 0;
 };
 
 class Triangle : public Shape {
@@ -33,8 +33,8 @@ public:
 	Float Area() const override;
 	ShapeSample Sample(Vec2 u) const override;
 	Bounds3f Bounds() const override;
-	bool Intersect(const Ray& ray, RTInteraction& outCollision, Float tMax) const override;
-	bool IntersectP(const Ray& ray, Float tMax) const override;
+	bool Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax) const override;
+	bool IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax) const override;
 
 };
 
@@ -53,8 +53,8 @@ public:
 	Float Area() const override;
 	ShapeSample Sample(Vec2 u) const override;
 	Bounds3f Bounds() const override;
-	bool Intersect(const Ray& ray, RTInteraction& outCollision, Float tMax) const override;
-	bool IntersectP(const Ray& ray, Float tMax) const override;
+	bool Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax) const override;
+	bool IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax) const override;
 };
 
 class Sphere : public Shape {
@@ -65,6 +65,6 @@ public:
 	Sphere(Vec3 _c, Float _r);
 
 	Bounds3f Bounds() const override;
-	bool Intersect(const Ray& ray, RTInteraction& out_collision, Float tMax) const override;
-	bool IntersectP(const Ray& ray, Float tMax) const override;
+	bool Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax) const override;
+	bool IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax) const override;
 };

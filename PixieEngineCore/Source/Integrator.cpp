@@ -89,15 +89,15 @@ void Integrator::StopRender() {
 
 void Integrator::PerPixel(uint32_t x, uint32_t y) {
 	Vec2 uv = m_film.GetUV(x, y, Vec2(RandomFloat(), RandomFloat()));
-	Ray ray = m_scene->mainCamera->GetRay(uv);
+	Ray ray = m_scene->mainCamera->GetRay(x, y, uv);
 	Vec3 color = Integrate(ray);
 	m_film.AddPixel(x, y, glm::vec4(color, 1.0));
 }
 
-bool Integrator::Unoccluded(const RTInteraction& p0, const RTInteraction& p1) const {
-	Vec3 dir = p1.p - p0.p;
+bool Integrator::Unoccluded(uint32_t x, uint32_t y, const SurfaceInteraction& p0, const SurfaceInteraction& p1) {
+	Vec3 dir = p1.position - p0.position;
 	Float tMax = glm::length(dir);
-	return !m_scene->IntersectP(Ray(p0.p, glm::normalize(dir)), tMax - ShadowEpsilon);
+	return !m_scene->IntersectP(Ray(x, y, p0.position, glm::normalize(dir)), m_stats, tMax - ShadowEpsilon);
 }
 
 void Integrator::GenerateTiles() {

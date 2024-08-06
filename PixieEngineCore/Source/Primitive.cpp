@@ -3,16 +3,16 @@
 
 BoundingPrimitive::BoundingPrimitive(const std::vector<Primitive*>& _children)
 	: children(_children) {
-	for (int i = 0; i < children.size(); i++) {
+	for (int32_t i = 0; i < children.size(); i++) {
 		bounds = Union(bounds, children[i]->bounds);
 	}
 }
 
-bool BoundingPrimitive::Intersect(const Ray& ray, RTInteraction& outCollision, Float tMax) const {
-	if (!bounds.IntersectP(ray.o, ray.d, tMax)) return false;
+bool BoundingPrimitive::Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax) const {
+	if (!bounds.IntersectP(ray, stats, tMax)) return false;
 	bool intersected = false;
-	for (int i = 0; i < children.size(); i++) {
-		bool intr = children[i]->Intersect(ray, outCollision, tMax);
+	for (int32_t i = 0; i < children.size(); i++) {
+		bool intr = children[i]->Intersect(ray, outCollision, stats, tMax);
 		if (intr) {
 			intersected = true;
 			tMax = outCollision.distance;
@@ -21,31 +21,31 @@ bool BoundingPrimitive::Intersect(const Ray& ray, RTInteraction& outCollision, F
 	return intersected;
 }
 
-bool BoundingPrimitive::IntersectP(const Ray& ray, Float tMax) const {
-	if (!bounds.IntersectP(ray.o, ray.d, tMax)) return false;
-	for (int i = 0; i < children.size(); i++) {
-		if (children[i]->IntersectP(ray, tMax)) return true;
+bool BoundingPrimitive::IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax) const {
+	if (!bounds.IntersectP(ray, stats, tMax)) return false;
+	for (int32_t i = 0; i < children.size(); i++) {
+		if (children[i]->IntersectP(ray, stats, tMax)) return true;
 	}
 	return false;
 }
 
-ShapePrimitive::ShapePrimitive(Shape* _shape, RTMaterial* _material)
+ShapePrimitive::ShapePrimitive(Shape* _shape, Material* _material)
 	: shape(_shape), material(_material) {
 	bounds = shape->Bounds();
 }
 
-bool ShapePrimitive::Intersect(const Ray& ray, RTInteraction& outCollision, Float tMax) const {
-	if (!bounds.IntersectP(ray.o, ray.d, tMax)) return false;
-	bool col = shape->Intersect(ray, outCollision, tMax);
+bool ShapePrimitive::Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax) const {
+	if (!bounds.IntersectP(ray, stats, tMax)) return false;
+	bool col = shape->Intersect(ray, outCollision, stats, tMax);
 	if (col) {
 		outCollision.material = material;
 	}
 	return col;
 }
 
-bool ShapePrimitive::IntersectP(const Ray& ray, Float tMax) const {
-	if (!bounds.IntersectP(ray.o, ray.d, tMax)) return false;
-	return shape->IntersectP(ray, tMax);
+bool ShapePrimitive::IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax) const {
+	if (!bounds.IntersectP(ray, stats, tMax)) return false;
+	return shape->IntersectP(ray, stats, tMax);
 }
 
 BVHPrimitive::BVHPrimitive() {}
@@ -53,18 +53,18 @@ BVHPrimitive::BVHPrimitive() {}
 BVHPrimitive::BVHPrimitive(size_t primitiveIndex, const Bounds3f& bounds)
 	: primitiveIndex(primitiveIndex), bounds(bounds) {}
 
-Vec3 BVHPrimitive::Centroid() const { 
+Vec3 BVHPrimitive::Centroid() const {
 	return (Float)0.5f * (bounds.pMin + bounds.pMax);
 }
 
-void BVHBuildNode::InitLeaf(int first, int n, const Bounds3f& b) {
+void BVHBuildNode::InitLeaf(int32_t first, int32_t n, const Bounds3f& b) {
 	firstPrimOffset = first;
 	nPrimitives = n;
 	bounds = b;
 	children[0] = children[1] = nullptr;
 }
 
-void BVHBuildNode::InitInterior(int axis, BVHBuildNode* c0, BVHBuildNode* c1) {
+void BVHBuildNode::InitInterior(int32_t axis, BVHBuildNode* c0, BVHBuildNode* c1) {
 	children[0] = c0;
 	children[1] = c1;
 	bounds = Union(c0->bounds, c1->bounds);
@@ -72,7 +72,7 @@ void BVHBuildNode::InitInterior(int axis, BVHBuildNode* c0, BVHBuildNode* c1) {
 	nPrimitives = 0;
 }
 
-BVHAggregate::BVHAggregate(std::vector<Primitive*> prims, int maxPrimsInNode)
+BVHAggregate::BVHAggregate(std::vector<Primitive*> prims, int32_t maxPrimsInNode)
 	: maxPrimsInNode(std::min(255, maxPrimsInNode)), primitives(std::move(prims)) {
 	std::vector<BVHPrimitive> bvhPrimitives(primitives.size());
 	for (size_t i = 0; i < primitives.size(); ++i) {
@@ -82,9 +82,9 @@ BVHAggregate::BVHAggregate(std::vector<Primitive*> prims, int maxPrimsInNode)
 	std::vector<Primitive*> orderedPrims(primitives.size());
 	BVHBuildNode* root;
 	// Build BVH according to selected _splitMethod_
-	std::atomic<int> totalNodes{ 0 };
+	std::atomic<int32_t> totalNodes{ 0 };
 
-	std::atomic<int> orderedPrimsOffset{ 0 };
+	std::atomic<int32_t> orderedPrimsOffset{ 0 };
 	root = buildRecursive(std::span<BVHPrimitive>(bvhPrimitives), &totalNodes, &orderedPrimsOffset, orderedPrims);
 
 	primitives.swap(orderedPrims);
@@ -92,7 +92,7 @@ BVHAggregate::BVHAggregate(std::vector<Primitive*> prims, int maxPrimsInNode)
 	// Convert BVH into compact representation in _nodes_ array
 	bvhPrimitives.resize(0);
 	nodes = new LinearBVHNode[totalNodes];
-	int offset = 0;
+	int32_t offset = 0;
 	flattenBVH(root, &offset);
 }
 
@@ -100,28 +100,26 @@ Bounds3f BVHAggregate::Bounds() const {
 	return nodes[0].bounds;
 }
 
-bool BVHAggregate::Intersect(const Ray& ray, RTInteraction& outCollision, Float tMax) const {
+bool BVHAggregate::Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax) const {
 	if (!nodes) return false;
-	Vec3 invDir(1 / ray.d.x, 1 / ray.d.y, 1 / ray.d.z);
-	int dirIsNeg[3] = { int(invDir.x < 0), int(invDir.y < 0), int(invDir.z < 0) };
-	int toVisitOffset = 0, currentNodeIndex = 0;
-	int nodesToVisit[64];
+	Vec3 invDir(1 / ray.direction.x, 1 / ray.direction.y, 1 / ray.direction.z);
+	int32_t dirIsNeg[3] = { int32_t(invDir.x < 0), int32_t(invDir.y < 0), int32_t(invDir.z < 0) };
+	int32_t toVisitOffset = 0, currentNodeIndex = 0;
+	int32_t nodesToVisit[64];
 	bool collided = false;
 	while (true) {
 		const LinearBVHNode* node = &nodes[currentNodeIndex];
-		if (node->bounds.IntersectP(ray.o, ray.d, tMax)) {
+		if (node->bounds.IntersectP(ray, stats, tMax)) {
 			if (node->nPrimitives > 0) {
-				for (int i = 0; i < node->nPrimitives; ++i) {
-					bool col = primitives[node->primitivesOffset + i]->Intersect(ray, outCollision, tMax);
+				for (int32_t i = 0; i < node->nPrimitives; ++i) {
+					bool col = primitives[node->primitivesOffset + i]->Intersect(ray, outCollision, stats, tMax);
 					if (col) {
 						collided = true;
 						tMax = outCollision.distance;
 					}
 				}
-				if (toVisitOffset == 0)
-					break;
+				if (toVisitOffset == 0) break;
 				currentNodeIndex = nodesToVisit[--toVisitOffset];
-
 			}
 			else {
 				if (dirIsNeg[node->axis]) {
@@ -135,33 +133,31 @@ bool BVHAggregate::Intersect(const Ray& ray, RTInteraction& outCollision, Float 
 			}
 		}
 		else {
-			if (toVisitOffset == 0)
-				break;
+			if (toVisitOffset == 0) break;
 			currentNodeIndex = nodesToVisit[--toVisitOffset];
 		}
 	}
 	return collided;
 }
 
-bool BVHAggregate::IntersectP(const Ray& ray, Float tMax) const {
+bool BVHAggregate::IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax) const {
 	if (!nodes) return false;
-	Vec3 invDir(1.f / ray.d.x, 1.f / ray.d.y, 1.f / ray.d.z);
-	int dirIsNeg[3] = { static_cast<int>(invDir.x < 0), static_cast<int>(invDir.y < 0), static_cast<int>(invDir.z < 0) };
-	int nodesToVisit[64];
-	int toVisitOffset = 0, currentNodeIndex = 0;
+	Vec3 invDir(1.f / ray.direction.x, 1.f / ray.direction.y, 1.f / ray.direction.z);
+	int32_t dirIsNeg[3] = { int32_t(invDir.x < 0), int32_t(invDir.y < 0), int32_t(invDir.z < 0) };
+	int32_t nodesToVisit[64];
+	int32_t toVisitOffset = 0, currentNodeIndex = 0;
 
 	while (true) {
 		const LinearBVHNode* node = &nodes[currentNodeIndex];
-		if (node->bounds.IntersectP(ray.o, ray.d, tMax)) {
+		if (node->bounds.IntersectP(ray, stats, tMax)) {
 			// Process BVH node _node_ for traversal
 			if (node->nPrimitives > 0) {
-				for (int i = 0; i < node->nPrimitives; ++i) {
-					if (primitives[node->primitivesOffset + i]->IntersectP(ray, tMax)) {
+				for (int32_t i = 0; i < node->nPrimitives; ++i) {
+					if (primitives[node->primitivesOffset + i]->IntersectP(ray, stats, tMax)) {
 						return true;
 					}
 				}
-				if (toVisitOffset == 0)
-					break;
+				if (toVisitOffset == 0) break;
 				currentNodeIndex = nodesToVisit[--toVisitOffset];
 			}
 			else {
@@ -177,17 +173,16 @@ bool BVHAggregate::IntersectP(const Ray& ray, Float tMax) const {
 			}
 		}
 		else {
-			if (toVisitOffset == 0)
-				break;
+			if (toVisitOffset == 0) break;
 			currentNodeIndex = nodesToVisit[--toVisitOffset];
 		}
 	}
 	return false;
 }
 
-BVHBuildNode* BVHAggregate::buildRecursive(std::span<BVHPrimitive> bvhPrimitives, std::atomic<int>* totalNodes, std::atomic<int>* orderedPrimsOffset, std::vector<Primitive*>& orderedPrims) {
+BVHBuildNode* BVHAggregate::buildRecursive(std::span<BVHPrimitive> bvhPrimitives, std::atomic<int32_t>* totalNodes, std::atomic<int32_t>* orderedPrimsOffset, std::vector<Primitive*>& orderedPrims) {
 	BVHBuildNode* node = new BVHBuildNode();
-	++* totalNodes;
+	++*totalNodes;
 	Bounds3f bounds;
 	for (const auto& prim : bvhPrimitives) {
 		bounds = Union(bounds, prim.bounds);
@@ -303,7 +298,7 @@ BVHBuildNode* BVHAggregate::buildRecursive(std::span<BVHPrimitive> bvhPrimitives
 	return node;
 }
 
-int BVHAggregate::flattenBVH(BVHBuildNode* node, int32_t* offset) {
+int32_t BVHAggregate::flattenBVH(BVHBuildNode* node, int32_t* offset) {
 	LinearBVHNode* linearNode = &nodes[*offset];
 	linearNode->bounds = node->bounds;
 	int32_t nodeOffset = (*offset)++;

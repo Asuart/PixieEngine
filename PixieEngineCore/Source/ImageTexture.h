@@ -5,7 +5,7 @@ class ImageTexture : public RTTexture {
 public:
 	ImageTexture(const std::string& filePath);
 	~ImageTexture();
-	Vec3 Sample(const RTInteraction& intr) const override;
+	Vec3 Sample(const SurfaceInteraction& intr) const override;
 
 private:
 	Vec3* data;

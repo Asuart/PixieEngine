@@ -2,11 +2,6 @@
 #include "PixieEngineCoreHeaders.h"
 #include "AssimpGLMHelper.h"
 
-struct BoneInfo {
-    int32_t id;
-    Mat4 offset;
-};
-
 struct KeyPosition {
     Vec3 position;
     Float timeStamp;
@@ -22,61 +17,46 @@ struct KeyScale {
     Float timeStamp;
 };
 
+struct BoneInfo {
+    int32_t id;
+    Mat4 offset;
+};
+
 class Bone {
 public:
-    Bone(const std::string& name, int32_t ID, const aiNodeAnim* channel);
+    std::string name;
+    int32_t id;
+    Mat4 localTransform;
+    std::vector<KeyPosition> positions;
+    std::vector<KeyRotation> rotations;
+    std::vector<KeyScale> scales;
+
+    Bone(const std::string& name, int32_t ID);
 
     void Update(Float animationTime);
-
-    Mat4 GetLocalTransform() const;
-    std::string GetBoneName() const;
-    int32_t GetBoneID() const;
 
     int32_t GetPositionIndex(Float animationTime) const;
     int32_t GetRotationIndex(Float animationTime) const;
     int32_t GetScaleIndex(Float animationTime) const;
 
 private:
-    std::vector<KeyPosition> positions;
-    std::vector<KeyRotation> rotations;
-    std::vector<KeyScale> scales;
-    int32_t numPositions;
-    int32_t numRotations;
-    int32_t numScalings;
-
-    Mat4 localTransform;
-    std::string name;
-    int32_t id;
-
     Float GetScaleFactor(Float lastTimeStamp, Float nextTimeStamp, Float animationTime);
     Mat4 InterpolatePosition(Float animationTime);
     Mat4 InterpolateRotation(Float animationTime);
     Mat4 InterpolateScaling(Float animationTime);
 };
 
-struct Skeleton {
-    std::map<std::string, BoneInfo> boneInfoMap;
-    int32_t boneCount;
-
-    std::map<std::string, BoneInfo>& GetBoneInfoMap() {
-        return boneInfoMap;
-    }
-
-    int32_t& GetBoneCount() {
-        return boneCount;
-    }
-};
-
 struct AssimpNodeData {
     Mat4 transformation;
     std::string name;
-    int32_t childrenCount;
     std::vector<AssimpNodeData> children;
 };
 
 class Animation {
 public:
+
     Animation() = default;
+    Animation(float duration, int32_t ticksPerSecond, SceneObject* rootNode);
     Animation(const std::string& animationPath, Skeleton* model);
     ~Animation();
 

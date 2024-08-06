@@ -4,7 +4,7 @@
 class CheckerTexture : public RTTexture {
 public:
 	CheckerTexture(RTTexture* _even, RTTexture* _odd, Float scale = 10);
-	Vec3 Sample(const RTInteraction& intr) const override;
+	Vec3 Sample(const SurfaceInteraction& intr) const override;
 
 private:
 	RTTexture* even, * odd;

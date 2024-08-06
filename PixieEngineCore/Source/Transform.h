@@ -1,7 +1,7 @@
 #pragma once
 #include "RTMath.h"
 #include "Ray.h"
-#include "RTInteraction.h"
+#include "Interaction.h"
 #include "Bounds.h"
 
 class Transform {
@@ -18,14 +18,14 @@ public:
 	Vec3 ApplyVector(Vec3 v) const;
 	Vec3 ApplyNormal(Vec3 n) const;
 	Ray ApplyRay(const Ray& r, Float* tMax = nullptr) const;
-	RTInteraction ApplyInteraction(const RTInteraction& in) const;
+	SurfaceInteraction ApplyInteraction(const SurfaceInteraction& in) const;
 	Bounds3f ApplyBounds(const Bounds3f& b) const;
 
 	Vec3 ApplyInversePoint(Vec3 p) const;
 	Vec3 ApplyInverseVector(Vec3 v) const;
 	Vec3 ApplyInverseNormal(Vec3 n) const;
 	Ray ApplyInverseRay(const Ray& r, Float* tMax = nullptr) const;
-	RTInteraction ApplyInverseInteraction(const RTInteraction& in) const;
+	SurfaceInteraction ApplyInverseInteraction(const SurfaceInteraction& in) const;
 
 	void Decompose(Vec3* T, Mat4* R, Mat4* S) const;
 	bool IsIdentity() const;

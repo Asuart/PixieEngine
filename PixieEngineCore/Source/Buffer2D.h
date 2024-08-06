@@ -29,6 +29,10 @@ public:
 		std::fill(m_data.data(), m_data.data() + m_data.size(), 0);
 	}
 
+	void Increment(uint32_t x, uint32_t y) {
+		m_data[y * m_size.x + x]++;
+	}
+
 private:
 	std::vector<T> m_data;
 	glm::ivec2 m_size;

@@ -13,7 +13,7 @@ public:
 	Component() = delete;
 
 protected:
-	Component(const std::string& name, SceneObject* parent);
+	Component(const std::string& name, const SceneObject* parent);
 
 	virtual void OnStart();
 	virtual void OnUpdate();

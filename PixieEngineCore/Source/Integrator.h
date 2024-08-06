@@ -27,13 +27,13 @@ protected:
 	RayTracingStatistics m_stats;
 	bool m_isRendering = false;
 	int32_t m_threadsCount = 0;
-	int32_t m_maxThreads = 1;
+	int32_t m_maxThreads = 8;
 	std::vector<std::thread*> m_renderThreads;
 	glm::ivec2 m_tileSize = glm::ivec2(64, 64);
 	std::vector<Bounds2i> m_tiles;
 	std::queue<int32_t> m_tileQueue;
 	std::mutex m_tileQueueMutex;
 
-	bool Unoccluded(const RTInteraction& p0, const RTInteraction& p1) const;
+	bool Unoccluded(uint32_t x, uint32_t y, const SurfaceInteraction& p0, const SurfaceInteraction& p1);
 	void GenerateTiles();
 };

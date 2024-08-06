@@ -14,9 +14,9 @@ Vec3 SimplePathIntegrator::Integrate(Ray ray) {
 	int32_t depth = 0;
 
 	while (beta != glm::fvec3(0.0)) {
-		RTInteraction isect;
+		SurfaceInteraction isect;
 
-		if (!m_scene->Intersect(ray, isect)) {
+		if (!m_scene->Intersect(ray, isect, m_stats)) {
 			if (!m_sampleLights || specularBounce) {
 				L += m_scene->GetSkyColor(ray) * beta;
 			}
@@ -37,7 +37,7 @@ Vec3 SimplePathIntegrator::Integrate(Ray ray) {
 			break;
 		}
 
-		Vec3 wo = -ray.d;
+		Vec3 wo = -ray.direction;
 		if (m_sampleLights) {
 			std::optional<SampledLight> sampledLight = m_lightSampler.Sample(RandomFloat());
 			if (sampledLight) {
@@ -45,8 +45,8 @@ Vec3 SimplePathIntegrator::Integrate(Ray ray) {
 				std::optional<LightLiSample> ls = sampledLight->light.SampleLi(isect, uLight);
 				if (ls && ls->L != glm::fvec3(0.0f) && ls->pdf > 0) {
 					Vec3 wi = ls->wi;
-					glm::fvec3 f = bsdf.f(wo, wi) * glm::abs(glm::dot(wi, isect.n));
-					if (f != glm::fvec3(0.0f) && Unoccluded(isect, ls->pLight)) {
+					glm::fvec3 f = bsdf.f(wo, wi) * glm::abs(glm::dot(wi, isect.normal));
+					if (f != glm::fvec3(0.0f) && Unoccluded(ray.x, ray.y, isect, ls->pLight)) {
 						L += beta * f * ls->L / (sampledLight->p * ls->pdf);
 					}
 				}
@@ -59,9 +59,9 @@ Vec3 SimplePathIntegrator::Integrate(Ray ray) {
 			if (!bs) {
 				break;
 			}
-			beta *= bs->f * glm::abs(glm::dot(bs->wi, isect.n)) / bs->pdf;
+			beta *= bs->f * glm::abs(glm::dot(bs->wi, isect.normal)) / bs->pdf;
 			specularBounce = bs->IsSpecular();
-			ray = Ray(isect.p, bs->wi);
+			ray = Ray(ray.x, ray.y, isect.position, bs->wi);
 		}
 		else {
 			Float pdf;
@@ -74,16 +74,16 @@ Vec3 SimplePathIntegrator::Integrate(Ray ray) {
 			else {
 				wi = SampleUniformHemisphere({ RandomFloat(), RandomFloat() });
 				pdf = UniformHemispherePDF();
-				if (IsReflective(flags) && glm::dot(wo, isect.n) * glm::dot(wi, isect.n) < 0.0f) {
+				if (IsReflective(flags) && glm::dot(wo, isect.normal) * glm::dot(wi, isect.normal) < 0.0f) {
 					wi = -wi;
 				}
-				else if (IsTransmissive(flags) && glm::dot(wo, isect.n) * glm::dot(wi, isect.n) > 0.0f) {
+				else if (IsTransmissive(flags) && glm::dot(wo, isect.normal) * glm::dot(wi, isect.normal) > 0.0f) {
 					wi = -wi;
 				}
 			}
-			beta *= bsdf.f(wo, wi) * glm::abs(glm::dot(wi, isect.n)) / pdf;
+			beta *= bsdf.f(wo, wi) * glm::abs(glm::dot(wi, isect.normal)) / pdf;
 			specularBounce = false;
-			ray = Ray(isect.p, wi);
+			ray = Ray(ray.x, ray.y, isect.position, wi);
 		}
 	}
 

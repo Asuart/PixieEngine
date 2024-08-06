@@ -18,5 +18,5 @@ public:
 	Camera(Vec3 _lookFrom, Vec3 _lookAt, Vec3 _up, Float _fov, Float _aspect, Float _aperture, Float _focusDistance, Float _near = ShadowEpsilon, Float _far = 10000.0);
 
 	void LookAt(const Vec3& _lookFrom, const Vec3& _lookAt, const Vec3& _up);
-	Ray GetRay(const Vec2& uv) const;
+	Ray GetRay(uint32_t x, uint32_t y, const Vec2& uv) const;
 };

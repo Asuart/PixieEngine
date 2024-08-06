@@ -13,9 +13,9 @@ void Camera::LookAt(const Vec3& _lookFrom, const Vec3& _lookAt, const Vec3& _up)
 	transform = ::LookAt(_lookFrom, _lookAt, _up);
 }
 
-Ray Camera::GetRay(const Vec2& coord) const {
+Ray Camera::GetRay(uint32_t x, uint32_t y, const Vec2& coord) const {
 	Float theta = Lerp(coord.x, (fov * aspect) / 2, -(fov * aspect) / 2);
 	Float phi = Lerp(coord.y, -fov / 2, fov / 2);
 	Vec3 dir = glm::normalize(Vec3(glm::tan(theta), glm::tan(phi), 1));
-	return transform.ApplyInverseRay(Ray(Vec3(0), dir));
+	return transform.ApplyInverseRay(Ray(x, y, Vec3(0), dir));
 }

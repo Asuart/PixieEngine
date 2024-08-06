@@ -27,7 +27,7 @@ Vec3 Bounds3f::Diagonal() const {
 
 Float Bounds3f::SurfaceArea() const {
 	Vec3 d = Diagonal();
-	return 2 * (d.x * d.y + d.x * d.z + d.y * d.z);
+	return 2.0f * (d.x * d.y + d.x * d.z + d.y * d.z);
 }
 
 Float Bounds3f::Volume() const {
@@ -37,12 +37,7 @@ Float Bounds3f::Volume() const {
 
 int Bounds3f::MaxDimension() const {
 	Vec3 d = Diagonal();
-	if (d.x > d.y && d.x > d.z)
-		return 0;
-	else if (d.y > d.z)
-		return 1;
-	else
-		return 2;
+	return (d.x > d.y && d.x > d.z) ? 0 : (d.y > d.z ? 1 : 2);
 }
 
 Vec3 Bounds3f::Lerp(Vec3 t) const {
@@ -51,12 +46,15 @@ Vec3 Bounds3f::Lerp(Vec3 t) const {
 
 Vec3 Bounds3f::Offset(Vec3 p) const {
 	Vec3 o = p - pMin;
-	if (pMax.x > pMin.x)
+	if (pMax.x > pMin.x) {
 		o.x /= pMax.x - pMin.x;
-	if (pMax.y > pMin.y)
+	}
+	if (pMax.y > pMin.y) {
 		o.y /= pMax.y - pMin.y;
-	if (pMax.z > pMin.z)
+	}
+	if (pMax.z > pMin.z) {
 		o.z /= pMax.z - pMin.z;
+	}
 	return o;
 }
 
@@ -73,55 +71,49 @@ bool Bounds3f::IsDegenerate() const {
 	return pMin.x > pMax.x || pMin.y > pMax.y || pMin.z > pMax.z;
 }
 
-bool Bounds3f::IntersectP(Vec3 o, Vec3 d, Float tMax, Float* hitt0, Float* hitt1) const {
+bool Bounds3f::IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax, Float* hitt0, Float* hitt1) const {
+	stats.m_boxCheckStatBuffer.Increment(ray.x, ray.y);
+
 	Float t0 = 0, t1 = tMax;
-	for (int i = 0; i < 3; ++i) {
-		Float invRayDir = 1 / d[i];
-		Float tNear = (pMin[i] - o[i]) * invRayDir;
-		Float tFar = (pMax[i] - o[i]) * invRayDir;
+	for (int32_t i = 0; i < 3; ++i) {
+		Float invRayDir = 1 / ray.direction[i];
+		Float tNear = (pMin[i] - ray.origin[i]) * invRayDir;
+		Float tFar = (pMax[i] - ray.origin[i]) * invRayDir;
 		if (tNear > tFar)
 			std::swap(tNear, tFar);
 		tFar *= 1 + 2 * gamma(3);
 
 		t0 = tNear > t0 ? tNear : t0;
 		t1 = tFar < t1 ? tFar : t1;
-		if (t0 > t1)
-			return false;
+		if (t0 > t1) return false;
 	}
-	if (hitt0)
-		*hitt0 = t0;
-	if (hitt1)
-		*hitt1 = t1;
+	if (hitt0) *hitt0 = t0;
+	if (hitt1) *hitt1 = t1;
 	return true;
 }
 
-bool Bounds3f::IntersectP(Vec3 o, Vec3 d, Float raytMax, Vec3 invDir, const int32_t dirIsNeg[3]) const {
+bool Bounds3f::IntersectP(const Ray& ray, RayTracingStatistics& stats, Float raytMax, Vec3 invDir, const int32_t dirIsNeg[3]) const {
+	stats.m_boxCheckStatBuffer.Increment(ray.x, ray.y);
 	const Bounds3f& bounds = *this;
-	Float tMin = (bounds[dirIsNeg[0]].x - o.x) * invDir.x;
-	Float tMax = (bounds[1 - dirIsNeg[0]].x - o.x) * invDir.x;
-	Float tyMin = (bounds[dirIsNeg[1]].y - o.y) * invDir.y;
-	Float tyMax = (bounds[1 - dirIsNeg[1]].y - o.y) * invDir.y;
+	Float tMin = (bounds[dirIsNeg[0]].x - ray.origin.x) * invDir.x;
+	Float tMax = (bounds[1 - dirIsNeg[0]].x - ray.origin.x) * invDir.x;
+	Float tyMin = (bounds[dirIsNeg[1]].y - ray.origin.y) * invDir.y;
+	Float tyMax = (bounds[1 - dirIsNeg[1]].y - ray.origin.y) * invDir.y;
 
 	tMax *= 1 + 2 * gamma(3);
 	tyMax *= 1 + 2 * gamma(3);
 
-	if (tMin > tyMax || tyMin > tMax)
-		return false;
-	if (tyMin > tMin)
-		tMin = tyMin;
-	if (tyMax < tMax)
-		tMax = tyMax;
+	if (tMin > tyMax || tyMin > tMax) return false;
+	if (tyMin > tMin) tMin = tyMin;
+	if (tyMax < tMax) tMax = tyMax;
 
-	Float tzMin = (bounds[dirIsNeg[2]].z - o.z) * invDir.z;
-	Float tzMax = (bounds[1 - dirIsNeg[2]].z - o.z) * invDir.z;
+	Float tzMin = (bounds[dirIsNeg[2]].z - ray.origin.z) * invDir.z;
+	Float tzMax = (bounds[1 - dirIsNeg[2]].z - ray.origin.z) * invDir.z;
 	tzMax *= 1 + 2 * gamma(3);
 
-	if (tMin > tzMax || tzMin > tMax)
-		return false;
-	if (tzMin > tMin)
-		tMin = tzMin;
-	if (tzMax < tMax)
-		tMax = tzMax;
+	if (tMin > tzMax || tzMin > tMax) return false;
+	if (tzMin > tMin) tMin = tzMin;
+	if (tzMax < tMax) tMax = tzMax;
 
 	return (tMin < raytMax) && (tMax > 0);
 }
