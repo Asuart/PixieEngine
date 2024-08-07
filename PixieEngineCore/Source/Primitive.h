@@ -26,9 +26,10 @@ public:
 class ShapePrimitive : public Primitive {
 public:
 	const Material* material;
+	const AreaLight* areaLight;
 	Shape* shape;
 
-	ShapePrimitive(Shape* _shape, const Material* _material);
+	ShapePrimitive(Shape* _shape, const Material* _material, const AreaLight* _areaLight = nullptr);
 
 	bool Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax = Infinity) const override;
 	bool IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax = Infinity) const override;

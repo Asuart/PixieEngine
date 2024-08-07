@@ -16,7 +16,7 @@ public:
 	std::vector<RTTexture*> textures;
 	std::vector<Material*> materials;
 	std::vector<Shape*> shapes;
-	std::vector<DiffuseAreaLight> lights;
+	std::vector<AreaLight*> lights;
 	std::vector<Camera> cameras;
 	Camera* mainCamera;
 	Vec3 skyColor = Vec3(0);

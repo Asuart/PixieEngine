@@ -1,11 +1,13 @@
-
 #include "Light.h"
 
 LightLiSample::LightLiSample(const glm::fvec3& L, Vec3 wi, Float pdf, const SurfaceInteraction& pLight)
 	: L(L), wi(wi), pdf(pdf), pLight(pLight) {}
 
+AreaLight::AreaLight(Shape* shape, glm::fvec3 emit, Float scale)
+	: shape(shape), Lemit(emit), scale(scale) {}
+
 DiffuseAreaLight::DiffuseAreaLight(Shape* shape, glm::fvec3 emit, Float scale)
-	: shape(shape), Lemit(emit), scale(scale) {};
+	: AreaLight(shape, emit, scale) {};
 
 glm::fvec3 DiffuseAreaLight::L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const {
 	if (!twoSided && glm::dot(n, w) < 0) {
@@ -31,7 +33,7 @@ std::optional<LightLiSample> DiffuseAreaLight::SampleLi(SurfaceInteraction intr,
 	return LightLiSample(Le, wi, ss->pdf / solidAnglePDF, ss->intr);
 }
 
-UniformLightSampler::UniformLightSampler(const std::vector<DiffuseAreaLight>& _lights)
+UniformLightSampler::UniformLightSampler(const std::vector<AreaLight*>& _lights)
 	: lights(_lights) {}
 
 std::optional<SampledLight> UniformLightSampler::Sample(Float u) const {

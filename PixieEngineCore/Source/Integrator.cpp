@@ -127,9 +127,9 @@ uint32_t Integrator::GetSamplesCount() {
 
 float Integrator::GetRenderTime() {
 	std::chrono::milliseconds newTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-	return (newTime - m_renderStartTime).count() / 1000.0;
+	return (newTime - m_renderStartTime).count() / 1000.0f;
 }
 
 float Integrator::GetLastSampleTime() {
-	return m_lastSampleTime.count() / 1000.0;
+	return m_lastSampleTime.count() / 1000.0f;
 }

@@ -1,4 +1,5 @@
 #include "Interaction.h"
+#include "Light.h"
 
 Vec3 Interaction::OffsetRayOrigin(Vec3 origin) const {
     return origin + normal * ShadowEpsilon;
@@ -19,4 +20,8 @@ bool Interaction::IsSurfaceInteraction() const {
 
 bool Interaction::IsMediumInteraction() const { 
     return !IsSurfaceInteraction(); 
+}
+
+glm::fvec3 SurfaceInteraction::Le(const glm::vec3& wo) const {
+    return areaLight ? areaLight->L(position, normal, uv, wo) : glm::fvec3(0.0f);
 }

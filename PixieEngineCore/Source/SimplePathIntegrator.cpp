@@ -4,8 +4,11 @@ SimplePathIntegrator::SimplePathIntegrator(const glm::ivec2& resolution)
 	: Integrator(resolution), m_lightSampler({}) {}
 
 void SimplePathIntegrator::SetScene(RTScene* scene) {
+	StopRender();
 	m_scene = scene;
 	m_lightSampler = UniformLightSampler(m_scene->lights);
+	Reset();
+	StartRender();
 }
 
 Vec3 SimplePathIntegrator::Integrate(Ray ray) {
@@ -24,7 +27,7 @@ Vec3 SimplePathIntegrator::Integrate(Ray ray) {
 		}
 
 		if (!m_sampleLights || specularBounce) {
-			L += beta* isect.material->emission; // isect.Le(-ray.d);
+			L += beta * isect.material->emission; // isect.Le(-ray.d);
 		}
 
 		BSDF bsdf = isect.material->GetBSDF(isect); // isect.material->GetBSDF(ray, camera, sampler);
@@ -42,7 +45,7 @@ Vec3 SimplePathIntegrator::Integrate(Ray ray) {
 			std::optional<SampledLight> sampledLight = m_lightSampler.Sample(RandomFloat());
 			if (sampledLight) {
 				Vec2 uLight = { RandomFloat(), RandomFloat() };
-				std::optional<LightLiSample> ls = sampledLight->light.SampleLi(isect, uLight);
+				std::optional<LightLiSample> ls = sampledLight->light->SampleLi(isect, uLight);
 				if (ls && ls->L != glm::fvec3(0.0f) && ls->pdf > 0) {
 					Vec3 wi = ls->wi;
 					glm::fvec3 f = bsdf.f(wo, wi) * glm::abs(glm::dot(wi, isect.normal));

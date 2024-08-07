@@ -30,10 +30,13 @@ RTScene* RTScene::FromScene(Scene* scene) {
 			}
 
 			rtScene->shapes.push_back(triangle);
-			shapePrimitives.push_back(new ShapePrimitive(triangle, material));
+			AreaLight* areaLight = nullptr;
 			if (material->emission != glm::vec3(0.0f)) {
-				rtScene->lights.push_back(DiffuseAreaLight(triangle, material->emission * 10.0f));
+				areaLight = new DiffuseAreaLight(triangle, material->emission * 10.0f);
+				rtScene->lights.push_back(areaLight);
 			}
+			shapePrimitives.push_back(new ShapePrimitive(triangle, material, areaLight));
+
 		}
 	}
 

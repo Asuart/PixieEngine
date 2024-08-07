@@ -9,10 +9,10 @@ void key_callback(GLFWwindow* window, int32_t key, int32_t scancode, int32_t act
 }
 
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
-	UserInput::mouseDeltaX = xpos - UserInput::mouseX;
-	UserInput::mouseDeltaY = ypos - UserInput::mouseY;
-	UserInput::mouseX = xpos;
-	UserInput::mouseY = ypos;
+	UserInput::mouseDeltaX = (float)(xpos - UserInput::mouseX);
+	UserInput::mouseDeltaY = (float)(ypos - UserInput::mouseY);
+	UserInput::mouseX = (float)xpos;
+	UserInput::mouseY = (float)ypos;
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {

@@ -15,7 +15,7 @@ Vec3 RandomWalkIntegrator::IntegrateRandomWalk(Ray ray, uint32_t depth) {
 	}
 
 	Vec3 wo = -ray.direction;
-	glm::vec3 Le = isect.material->emission; // isect.Le(wo);
+	glm::vec3 Le = isect.Le(wo);
 
 	if (depth == m_maxDepth) {
 		return Le;

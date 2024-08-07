@@ -7,6 +7,8 @@ class Material;
 class Shape;
 struct Mesh;
 struct Light;
+class AreaLight;
+struct ShapeSample;
 
 struct Interaction {
 	Vec3 position = Vec3(0.0f);
@@ -33,8 +35,10 @@ struct SurfaceInteraction : public Interaction {
 	Float area = 0.0f;
 	int32_t faceIndex = 0;
 	const Material* material = nullptr;
+	const AreaLight* areaLight = nullptr;
 	Mesh* mesh = nullptr;
-	Light* areaLight = nullptr;
+
+	glm::fvec3 Le(const glm::vec3& wo) const;
 };
 
 struct MediumInteraction : public Interaction {

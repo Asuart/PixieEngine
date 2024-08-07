@@ -17,29 +17,38 @@ struct LightSampleContext {
 	Vec3 n;
 };
 
-class DiffuseAreaLight {
+class AreaLight {
 public:
 	Shape* shape = nullptr;
-	bool twoSided = true;
 	glm::fvec3 Lemit = glm::fvec3(1.0);
 	Float scale = 1.0;
+	bool twoSided = true;
 
+	virtual glm::fvec3 L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const = 0;
+	virtual std::optional<LightLiSample> SampleLi(SurfaceInteraction intr, Vec2 u) const = 0;
+
+protected:
+	AreaLight(Shape* shape, glm::fvec3 emit = glm::fvec3(1), Float scale = 1);
+};
+
+class DiffuseAreaLight : public AreaLight {
+public:
 	DiffuseAreaLight(Shape* shape, glm::fvec3 emit = glm::fvec3(1), Float scale = 1);
 
-	glm::fvec3 L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const;
-	std::optional<LightLiSample> SampleLi(SurfaceInteraction intr, Vec2 u) const;
+	virtual glm::fvec3 L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const;
+	virtual std::optional<LightLiSample> SampleLi(SurfaceInteraction intr, Vec2 u) const;
 };
 
 struct SampledLight {
-	DiffuseAreaLight light;
+	AreaLight* light;
 	Float p = 0;
 };
 
 class UniformLightSampler {
-	std::vector<DiffuseAreaLight> lights;
+	std::vector<AreaLight*> lights;
 public:
 
-	UniformLightSampler(const std::vector<DiffuseAreaLight>& _lights);
+	UniformLightSampler(const std::vector<AreaLight*>& _lights);
 
 	std::optional<SampledLight> Sample(Float u) const;
 	Float PMF() const;

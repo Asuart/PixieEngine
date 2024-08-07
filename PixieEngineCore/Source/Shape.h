@@ -1,14 +1,11 @@
 #pragma once
 #include "Ray.h"
 #include "Bounds.h"
-#include "Interaction.h"
+#include "ShapeSample.h"
 
 Vec3 SampleUniformTriangle(Vec2 u);
 
-struct ShapeSample {
-	SurfaceInteraction intr;
-	Float pdf;
-};
+struct SurfaceInteraction;
 
 class Shape {
 public:

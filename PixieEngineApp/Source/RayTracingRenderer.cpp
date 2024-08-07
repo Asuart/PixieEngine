@@ -46,7 +46,7 @@ void RayTracingRenderer::DrawFrame() {
 	glUseProgram(program);
 	glUniform2f(posLoc, posX, posY);
 	glUniform2f(sizeLoc, sizeX, sizeY);
-	glUniform1f(samplesLoc, m_rayTracer->GetSamplesCount());
+	glUniform1f(samplesLoc, (float)m_rayTracer->GetSamplesCount());
 	glActiveTexture(GL_TEXTURE0);
 	m_rayTracer->m_film.texture->Bind(GL_TEXTURE0);
 	m_rayTracer->m_film.mesh->Draw();

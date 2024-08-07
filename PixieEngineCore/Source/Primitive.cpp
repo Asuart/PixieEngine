@@ -29,8 +29,8 @@ bool BoundingPrimitive::IntersectP(const Ray& ray, RayTracingStatistics& stats, 
 	return false;
 }
 
-ShapePrimitive::ShapePrimitive(Shape* _shape, const Material* _material)
-	: shape(_shape), material(_material) {
+ShapePrimitive::ShapePrimitive(Shape* _shape, const Material* _material, const AreaLight* _areaLight)
+	: shape(_shape), material(_material), areaLight(_areaLight) {
 	bounds = shape->Bounds();
 }
 
@@ -39,6 +39,7 @@ bool ShapePrimitive::Intersect(const Ray& ray, SurfaceInteraction& outCollision,
 	bool col = shape->Intersect(ray, outCollision, stats, tMax);
 	if (col) {
 		outCollision.material = material;
+		outCollision.areaLight = areaLight;
 	}
 	return col;
 }
