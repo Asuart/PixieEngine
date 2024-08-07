@@ -4,8 +4,6 @@
 #include "MeshComponent.h"
 #include "MaterialComponent.h"
 #include "MeshAnimator.h"
-#include "DiffuseMaterial.h"
-#include "DielectricMaterial.h"
 #include "ColorTexture.h"
 
 class SceneLoader {

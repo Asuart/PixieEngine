@@ -1,6 +1,6 @@
 #pragma once
 #include "Textures.h"
-#include "Materials.h"
+#include "Material.h"
 #include "Primitive.h"
 #include "Light.h"
 #include "Camera.h"

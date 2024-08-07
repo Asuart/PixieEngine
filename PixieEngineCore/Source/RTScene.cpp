@@ -45,7 +45,7 @@ RTScene* RTScene::FromScene(Scene* scene) {
 }
 
 RTScene::RTScene() {
-	materials.push_back(new DiffuseMaterial("Default Materail", new ColorTexture(Vec3(0.8, 0.8, 0.0))));
+	materials.push_back(new Material("Default Materail",Vec3(0.8, 0.8, 0.0)));
 
 	Vec3 lookfrom1(0.0f, 0.0f, 10.0f);
 	Vec3 lookat1(0.0f, 0.0f, 0.0f);

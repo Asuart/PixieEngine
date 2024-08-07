@@ -3,9 +3,9 @@
 
 class ColorTexture : public RTTexture {
 public:
-	ColorTexture(const Vec3& _color);
+	ColorTexture(const Vec3& materialColor);
 	Vec3 Sample(const SurfaceInteraction& intr) const override;
 
 private:
-	Vec3 color;
+	const Vec3& color;
 };

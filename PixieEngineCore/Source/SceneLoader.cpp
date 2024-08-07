@@ -85,28 +85,23 @@ Mesh* SceneLoader::ProcessMesh(Scene* loadedScene, SceneObject* object, std::map
 }
 
 Material* SceneLoader::ProcessMaterial(Scene* loadedScene, uint32_t materialIndex, const aiScene* scene) {
-	aiColor4D color, colorEmissive, emissionIntensity;
-	float emissionInt, roughness;
+	aiColor4D color, colorEmissive;
+	float emissionInt, roughness, opacity, eta;
 	aiGetMaterialColor(scene->mMaterials[materialIndex], AI_MATKEY_COLOR_DIFFUSE, &color);
-	aiGetMaterialFloat(scene->mMaterials[materialIndex], AI_MATKEY_EMISSIVE_INTENSITY, &emissionInt);
-	aiGetMaterialColor(scene->mMaterials[materialIndex], AI_MATKEY_EMISSIVE_INTENSITY, &emissionIntensity);
 	aiGetMaterialColor(scene->mMaterials[materialIndex], AI_MATKEY_COLOR_EMISSIVE, &colorEmissive);
+	aiGetMaterialFloat(scene->mMaterials[materialIndex], AI_MATKEY_EMISSIVE_INTENSITY, &emissionInt);
 	aiGetMaterialFloat(scene->mMaterials[materialIndex], AI_MATKEY_ROUGHNESS_FACTOR, &roughness);
+	aiGetMaterialFloat(scene->mMaterials[materialIndex], AI_MATKEY_OPACITY, &opacity);
+	aiGetMaterialFloat(scene->mMaterials[materialIndex], AI_MATKEY_REFRACTI, &eta);	
 
-	Material* material = nullptr;
 	std::string materialName = scene->mMaterials[materialIndex]->GetName().C_Str();
-	if (materialName == "Glass") {
-		material = new DielectricMaterial(materialName, 0.0f, 0.0f, 1.7f, true);
-		material->transparency = 1.0f;
-		material->eta = 1.7f;
-	}
-	else {
-		material = new DiffuseMaterial(materialName, new ColorTexture(Vec3(color.r, color.g, color.b)));
-	}
+	Material* material = new Material(materialName);
 	material->albedo = Vec3(color.r, color.g, color.b);
-	material->rtTexture = new ColorTexture(Vec3(color.r, color.g, color.b));
+	material->roughness = roughness;
+	material->rtTexture = new ColorTexture(material->albedo);
 	material->emission = Vec3(colorEmissive.r, colorEmissive.g, colorEmissive.b);
-
+	material->transparency = 1.0 - opacity;
+	material->eta = eta;
 	loadedScene->materials.push_back(material);
 
 	return material;

@@ -64,3 +64,22 @@ BSDF Material::GetBSDF(const SurfaceInteraction& intr) const {
 	BxDF* bxdf = GetBxDF(intr);
 	return BSDF(intr.normal, intr.dpdu, bxdf);
 }
+
+
+//BxDF* DiffuseMaterial::GetBxDF(const SurfaceInteraction& intr) const {
+//	return new DiffuseBxDF(rtTexture->Sample(intr));
+//}
+
+//BxDF* DiffuseTransmissionMaterial::GetBxDF(const SurfaceInteraction& intr) const {
+//	return new DiffuseTransmissionBxDF(reflectance * scale, transmittance * scale);
+//}
+
+//BxDF* DielectricMaterial::GetBxDF(const SurfaceInteraction& intr) const {
+//	Float urough = uRoughness, vrough = vRoughness;
+//	if (false) {
+//		urough = TrowbridgeReitzDistribution::RoughnessToAlpha(urough);
+//		vrough = TrowbridgeReitzDistribution::RoughnessToAlpha(vrough);
+//	}
+//	TrowbridgeReitzDistribution distrib(urough, vrough);
+//	return new DielectricBxDF(eta, distrib);
+//}
