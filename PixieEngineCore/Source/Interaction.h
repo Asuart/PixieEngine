@@ -1,10 +1,13 @@
 #pragma once
 #include "PixieEngineCoreHeaders.h"
-#include "Ray.h"
 #include "Medium.h"
+#include "BSDF.h"
+#include "Sampler.h"
 
 class Material;
 class Shape;
+class Camera;
+struct Ray;
 struct Mesh;
 struct Light;
 class AreaLight;
@@ -39,6 +42,7 @@ struct SurfaceInteraction : public Interaction {
 	Mesh* mesh = nullptr;
 
 	glm::fvec3 Le(const glm::vec3& wo) const;
+	BSDF GetBSDF(const Ray& ray, const Camera* camera, Sampler* sampler);
 };
 
 struct MediumInteraction : public Interaction {

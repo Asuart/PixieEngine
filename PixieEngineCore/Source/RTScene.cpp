@@ -36,7 +36,6 @@ RTScene* RTScene::FromScene(Scene* scene) {
 				rtScene->lights.push_back(areaLight);
 			}
 			shapePrimitives.push_back(new ShapePrimitive(triangle, material, areaLight));
-
 		}
 	}
 

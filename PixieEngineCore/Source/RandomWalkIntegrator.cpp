@@ -3,11 +3,11 @@
 RandomWalkIntegrator::RandomWalkIntegrator(const glm::ivec2& resolution)
 	: Integrator(resolution) {}
 
-Vec3 RandomWalkIntegrator::Integrate(Ray ray) {
-	return IntegrateRandomWalk(ray);
+Vec3 RandomWalkIntegrator::Integrate(Ray ray, Sampler* sampler) {
+	return IntegrateRandomWalk(ray, sampler);
 }
 
-Vec3 RandomWalkIntegrator::IntegrateRandomWalk(Ray ray, uint32_t depth) {
+Vec3 RandomWalkIntegrator::IntegrateRandomWalk(Ray ray, Sampler* sampler, uint32_t depth) {
 	SurfaceInteraction isect;
 
 	if (!m_scene->Intersect(ray, isect, m_stats)) {
@@ -23,7 +23,7 @@ Vec3 RandomWalkIntegrator::IntegrateRandomWalk(Ray ray, uint32_t depth) {
 
 	BSDF bsdf = isect.material->GetBSDF(isect);
 
-	Vec2 u = Vec2(RandomFloat(), RandomFloat());
+	Vec2 u = sampler->Get2D();
 	Vec3 wp = SampleUniformSphere(u);
 
 	glm::vec3 fcos = bsdf.f(wo, wp) * glm::abs(glm::dot(wp, isect.normal));
@@ -32,5 +32,5 @@ Vec3 RandomWalkIntegrator::IntegrateRandomWalk(Ray ray, uint32_t depth) {
 	}
 
 	ray = Ray(ray.x, ray.y, isect.position, wp);
-	return Le + fcos * IntegrateRandomWalk(ray, depth + 1) / (1 / (4 * Pi));
+	return Le + fcos * IntegrateRandomWalk(ray, sampler, depth + 1) / (1 / (4 * Pi));
 }

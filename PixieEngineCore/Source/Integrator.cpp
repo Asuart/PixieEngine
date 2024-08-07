@@ -68,9 +68,10 @@ void Integrator::StartRender() {
 				m_tileQueue.pop();
 				m_tileQueueMutex.unlock();
 				Bounds2i quad = m_tiles[index];
+				Sampler sampler;
 				for (int32_t y = quad.pMin.y; y < quad.pMax.y; y++) {
 					for (int32_t x = quad.pMin.x; x < quad.pMax.x; x++) {
-						PerPixel(x, y);
+						PerPixel(x, y, &sampler);
 					}
 				}
 			}
@@ -90,10 +91,10 @@ void Integrator::StopRender() {
 	m_renderThreads.clear();
 }
 
-void Integrator::PerPixel(uint32_t x, uint32_t y) {
-	Vec2 uv = m_film.GetUV(x, y, Vec2(RandomFloat(), RandomFloat()));
+void Integrator::PerPixel(uint32_t x, uint32_t y, Sampler* sampler) {
+	Vec2 uv = m_film.GetUV(x, y, sampler->Get2D());
 	Ray ray = m_scene->mainCamera->GetRay(x, y, uv);
-	Vec3 color = Integrate(ray);
+	Vec3 color = Integrate(ray, sampler);
 	m_film.AddPixel(x, y, glm::vec4(color, 1.0));
 }
 

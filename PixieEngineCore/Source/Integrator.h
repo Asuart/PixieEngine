@@ -17,8 +17,8 @@ public:
 	virtual void Reset() override;
 	virtual void StartRender();
 	virtual void StopRender();
-	virtual void PerPixel(uint32_t x, uint32_t y);
-	virtual Vec3 Integrate(Ray ray) = 0;
+	virtual void PerPixel(uint32_t x, uint32_t y, Sampler* sampler);
+	virtual Vec3 Integrate(Ray ray, Sampler* sampler) = 0;
 	uint32_t GetThreadsCount();
 	uint32_t GetSamplesCount();
 	float GetRenderTime();

@@ -8,6 +8,8 @@ enum class RayTracingMode : uint32_t {
 	RandomWalk = 0,
 	SimplePathTracing,
 	PathTracing,
+	TestNormals,
+	TestSampler,
 	COUNT
 };
 

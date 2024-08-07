@@ -2,9 +2,11 @@
 
 std::string to_string(RayTracingMode mode) {
 	switch (mode) {
-	case RayTracingMode::RandomWalk: return "RandomWalk ";
-	case RayTracingMode::SimplePathTracing: return "SimplePathTracing";
-	case RayTracingMode::PathTracing: return "PathTracing";
+	case RayTracingMode::RandomWalk: return "Random Walk ";
+	case RayTracingMode::SimplePathTracing: return "Simple Path Tracing";
+	case RayTracingMode::PathTracing: return "Path Tracing";
+	case RayTracingMode::TestNormals: return "Test Normals";
+	case RayTracingMode::TestSampler: return "Test Sampler";
 	default: return "Undefined Ray Tracing Mode";
 	}
 }
@@ -136,24 +138,23 @@ void RayTracingRenderer::DrawUI() {
 	}
 	ImGui::Spacing();
 
-	//if (m_rayTracer->mode == CPURayTracerMode::TraceRay) {
-//	if (ImGui::Checkbox("Sample Lights", &m_rayTracer->sampleLights)) {
-//		Reset();
-//	}
-//}
-//else if (m_rayTracer->mode == CPURayTracerMode::LiSimplePath) {
-//	if (ImGui::Checkbox("Sample Lights", &m_rayTracer->sampleLights)) {
-//		Reset();
-//	}
-//	if (ImGui::Checkbox("Sample BSDF", &m_rayTracer->sampleBSDF)) {
-//		Reset();
-//	}
-//}
-//else if (m_rayTracer->mode == CPURayTracerMode::LiPath) {
-//	if (ImGui::Checkbox("Regularize BSDF", &m_rayTracer->regularize)) {
-//		Reset();
-//	}
-//}
+	if (m_rayTracingMode == RayTracingMode::SimplePathTracing) {
+		SimplePathIntegrator* integrator = dynamic_cast<SimplePathIntegrator*>(m_rayTracer);
+		if (ImGui::Checkbox("Sample Lights", &integrator->m_sampleLights)) {
+			Reset();
+		}
+		if (ImGui::Checkbox("Sample BSDF", &integrator->m_sampleBSDF)) {
+			Reset();
+		}
+		ImGui::Spacing();
+	} 
+	else if (m_rayTracingMode == RayTracingMode::PathTracing) {
+		PathIntegrator* integrator = dynamic_cast<PathIntegrator*>(m_rayTracer);
+		if (ImGui::Checkbox("Regularize BSDF", &integrator->m_regularize)) {
+			Reset();
+		}
+		ImGui::Spacing();
+	}
 
 	std::string threadsText = std::string("Threads: ") + std::to_string(m_rayTracer->GetThreadsCount());
 	ImGui::Text(threadsText.c_str());
@@ -187,7 +188,9 @@ void RayTracingRenderer::SetRayTracingMode(RayTracingMode mode) {
 	switch (m_rayTracingMode) {
 	case RayTracingMode::SimplePathTracing: m_rayTracer = new SimplePathIntegrator(m_resolution); break;
 	case RayTracingMode::PathTracing: m_rayTracer = new PathIntegrator(m_resolution); break;
-	case RayTracingMode::RandomWalk: default: 
+	case RayTracingMode::TestNormals: m_rayTracer = new TestNormalsIntegrator(m_resolution); break;
+	case RayTracingMode::TestSampler: m_rayTracer = new TestSamplerIntegrator(m_resolution); break;
+	case RayTracingMode::RandomWalk: default:
 		m_rayTracer = new RandomWalkIntegrator(m_resolution); break;
 	}
 

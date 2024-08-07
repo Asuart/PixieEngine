@@ -11,7 +11,7 @@ void SimplePathIntegrator::SetScene(RTScene* scene) {
 	StartRender();
 }
 
-Vec3 SimplePathIntegrator::Integrate(Ray ray) {
+Vec3 SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 	glm::fvec3 L(0.0f), beta(1.0f);
 	bool specularBounce = true;
 	int32_t depth = 0;
@@ -27,10 +27,10 @@ Vec3 SimplePathIntegrator::Integrate(Ray ray) {
 		}
 
 		if (!m_sampleLights || specularBounce) {
-			L += beta * isect.material->emission; // isect.Le(-ray.d);
+			L += beta * isect.Le(-ray.direction);
 		}
 
-		BSDF bsdf = isect.material->GetBSDF(isect); // isect.material->GetBSDF(ray, camera, sampler);
+		BSDF bsdf = isect.GetBSDF(ray, m_scene->mainCamera, sampler);
 		if (!bsdf) {
 			//isect.SkipIntersection(&ray, si->tHit);
 			continue;
@@ -42,9 +42,10 @@ Vec3 SimplePathIntegrator::Integrate(Ray ray) {
 
 		Vec3 wo = -ray.direction;
 		if (m_sampleLights) {
-			std::optional<SampledLight> sampledLight = m_lightSampler.Sample(RandomFloat());
+			Float u = sampler->Get();
+			std::optional<SampledLight> sampledLight = m_lightSampler.Sample(u);
 			if (sampledLight) {
-				Vec2 uLight = { RandomFloat(), RandomFloat() };
+				Vec2 uLight = sampler->Get2D();
 				std::optional<LightLiSample> ls = sampledLight->light->SampleLi(isect, uLight);
 				if (ls && ls->L != glm::fvec3(0.0f) && ls->pdf > 0) {
 					Vec3 wi = ls->wi;
@@ -57,8 +58,8 @@ Vec3 SimplePathIntegrator::Integrate(Ray ray) {
 		}
 
 		if (m_sampleBSDF) {
-			Float u = RandomFloat();
-			std::optional<BSDFSample> bs = bsdf.Sample_f(wo, u, {RandomFloat(), RandomFloat()});
+			Float u = sampler->Get();
+			std::optional<BSDFSample> bs = bsdf.Sample_f(wo, u, sampler->Get2D());
 			if (!bs) {
 				break;
 			}
@@ -71,11 +72,11 @@ Vec3 SimplePathIntegrator::Integrate(Ray ray) {
 			Vec3 wi;
 			BxDFFlags flags = bsdf.Flags();
 			if (IsReflective(flags) && IsTransmissive(flags)) {
-				wi = SampleUniformSphere({ RandomFloat(), RandomFloat() });
+				wi = SampleUniformSphere(sampler->Get2D());
 				pdf = UniformSpherePDF();
 			}
 			else {
-				wi = SampleUniformHemisphere({ RandomFloat(), RandomFloat() });
+				wi = SampleUniformHemisphere(sampler->Get2D());
 				pdf = UniformHemispherePDF();
 				if (IsReflective(flags) && glm::dot(wo, isect.normal) * glm::dot(wi, isect.normal) < 0.0f) {
 					wi = -wi;

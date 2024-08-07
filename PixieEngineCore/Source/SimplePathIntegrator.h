@@ -5,13 +5,14 @@
 
 class SimplePathIntegrator : public Integrator {
 public:
+	bool m_sampleLights = true;
+	bool m_sampleBSDF = true;
+
 	SimplePathIntegrator(const glm::ivec2& resolution);
 
 	virtual void SetScene(RTScene* scene) override;
-	virtual Vec3 Integrate(Ray ray) override;
+	virtual Vec3 Integrate(Ray ray, Sampler* sampler) override;
 
 protected:
-	bool m_sampleLights = true;
-	bool m_sampleBSDF = true;
 	UniformLightSampler m_lightSampler;
 };

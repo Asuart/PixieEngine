@@ -3,6 +3,9 @@
 #include "Texture.h"
 #include "RTTexture.h"
 #include "BSDF.h"
+#include "Ray.h"
+
+struct SurfaceInteraction;
 
 class Material {
 public:

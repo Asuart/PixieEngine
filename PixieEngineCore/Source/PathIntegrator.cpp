@@ -8,7 +8,7 @@ void PathIntegrator::SetScene(RTScene* scene) {
 	m_lightSampler = UniformLightSampler(m_scene->lights);
 }
 
-Vec3 PathIntegrator::Integrate(Ray ray) {
+Vec3 PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 	glm::fvec3 L(0.0f), beta(1.0f);
 	int32_t depth = 0;
 	Float p_b = 0.0f, etaScale = 1.0f;

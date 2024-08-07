@@ -5,12 +5,13 @@
 
 class PathIntegrator : public Integrator {
 public:
+	bool m_regularize = true;
+
 	PathIntegrator(const glm::ivec2& resolution);
 
 	virtual void SetScene(RTScene* scene) override;
-	virtual Vec3 Integrate(Ray ray) override;
+	virtual Vec3 Integrate(Ray ray, Sampler* sampler) override;
 
 protected:
-	bool m_regularize = true;
 	UniformLightSampler m_lightSampler;
 };

@@ -139,7 +139,7 @@ Vec3 Reflect(Vec3 wo, Vec3 n) {
 
 Vec3 SampleUniformSphere(Vec2 u) {
 	Float z = 1 - 2 * u[0];
-	Float r = glm::sqrt(1 - Sqr(z));
+	Float r = glm::sqrt(glm::abs(1 - Sqr(z)));
 	Float phi = 2 * Pi * u[1];
 	return { r * std::cos(phi), r * std::sin(phi), z };
 }
