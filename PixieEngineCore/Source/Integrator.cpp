@@ -40,6 +40,9 @@ void Integrator::StartRender() {
 	if (!m_scene || m_isRendering) return;
 	m_isRendering = true;
 
+	m_renderStartTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
+	m_sampleStartTime = m_renderStartTime;
+
 	clear(m_tileQueue);
 	for (size_t i = 0; i < m_tileQueue.size(); i++) {
 		m_tileQueue.push((int32_t)i);
@@ -52,10 +55,10 @@ void Integrator::StartRender() {
 			while (m_isRendering) {
 				m_tileQueueMutex.lock();
 				if (m_tileQueue.empty()) {
-					//std::chrono::microseconds currrentTime = Time::GetTime();
-					//renderTime = (currrentTime - startTime).count() / 1000.0;
-					//lastSampleTime = (currrentTime - sampleStartTime).count() / 1000.0;
-					//sampleStartTime = currrentTime;
+					std::chrono::microseconds currrentTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
+					m_lastSampleTime = currrentTime - m_sampleStartTime;
+					m_sampleStartTime = currrentTime;
+
 					m_samples++;
 					for (size_t i = 0; i < m_tiles.size(); i++) {
 						m_tileQueue.push((int32_t)i);
@@ -123,9 +126,10 @@ uint32_t Integrator::GetSamplesCount() {
 }
 
 float Integrator::GetRenderTime() {
-	return 0;
+	std::chrono::milliseconds newTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+	return (newTime - m_renderStartTime).count() / 1000.0;
 }
 
 float Integrator::GetLastSampleTime() {
-	return 0;
+	return m_lastSampleTime.count() / 1000.0;
 }

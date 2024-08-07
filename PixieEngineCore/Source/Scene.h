@@ -19,6 +19,9 @@ public:
 	std::vector<SceneObject*> FindObjects(const std::string& objectName);
 	SceneObject* FindObjectWithComponent(const std::string& componentName);
 	std::vector<SceneObject*> FindObjectsWithComponent(const std::string& componentName);
+	SceneObject* GetRootObject();
+	std::vector<Material*>& GetMaterialsList();
+	std::vector<Mesh*>& GetMeshesList();
 
 protected:
 	SceneObject* rootObject;

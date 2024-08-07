@@ -4,8 +4,23 @@
 
 class PixieEngineApp;
 
+enum class RayTracingMode : uint32_t {
+	RandomWalk = 0,
+	SimplePathTracing,
+	PathTracing,
+	COUNT
+};
+
+std::string to_string(RayTracingMode mode);
+
 class RayTracingRenderer {
 public:
+	glm::ivec2 m_resolution;
+	glm::ivec2 m_viewportResolution;
+	Integrator* m_rayTracer;
+	RTScene* m_scene = nullptr;
+	bool m_resizeRendererToVieport = false;
+
 	RayTracingRenderer(PixieEngineApp* parent, glm::ivec2 resolution, RTScene* scene);
 	~RayTracingRenderer();
 
@@ -16,12 +31,9 @@ public:
 	void StopRender();
 	void DrawUI();
 	void SetViewportSize(glm::ivec2 resolution);
-
-	glm::ivec2 m_resolution;
-	glm::ivec2 m_viewportResolution;
-	Integrator* m_rayTracer;
-	RTScene* m_scene = nullptr;
+	void SetRayTracingMode(RayTracingMode mode);
 
 protected:
 	PixieEngineApp* m_parent;
+	RayTracingMode m_rayTracingMode = RayTracingMode::RandomWalk;
 };

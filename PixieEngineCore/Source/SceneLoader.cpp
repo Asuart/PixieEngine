@@ -58,7 +58,6 @@ Mesh* SceneLoader::ProcessMesh(Scene* loadedScene, SceneObject* object, std::map
 		}
 		if (!material) {
 			material = ProcessMaterial(loadedScene, mesh->mMaterialIndex, scene);
-			loadedScene->materials.push_back(material);
 		}
 	}
 	object->AddComponent(new MaterialComponent(material, object));

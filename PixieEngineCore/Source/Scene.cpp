@@ -116,6 +116,18 @@ std::vector<SceneObject*> Scene::FindObjectsWithComponent(const std::string& com
 	return objects;
 }
 
+SceneObject* Scene::GetRootObject() {
+	return rootObject;
+}
+
+std::vector<Material*>& Scene::GetMaterialsList() {
+	return materials;
+}
+
+std::vector<Mesh*>& Scene::GetMeshesList() {
+	return meshes;
+}
+
 void Scene::Start() {}
 
 void Scene::Update() {}

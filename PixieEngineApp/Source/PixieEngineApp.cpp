@@ -111,20 +111,11 @@ void PixieEngineApp::DrawUI() {
 	}
 
 	//ImGui::ShowDemoWindow();
-
-	m_rayTracingRenderer->DrawUI();
-
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-	ImGui::Begin("Viewport");
-	ImVec2 viewportResolution = ImGui::GetContentRegionAvail();
-	ImGui::SetNextWindowSize(viewportResolution);
-	ImGui::Image((void*)m_viewportFrameBuffer->m_texture, viewportResolution, { 0.0, 1.0 }, { 1.0, 0.0 });
-	glm::ivec2 glmViewportResolution = { viewportResolution.x, viewportResolution.y };
-	if (glmViewportResolution != m_viewportResolution) {
-		UpdateViewportResolution(glmViewportResolution);
-	}
-	ImGui::End();
-	ImGui::PopStyleVar();
+	DrawSettingsWindow();
+	DrawViewportWindow();
+	DrawSceneWindow();
+	DrawMaterialsWindow();
+	DrawInspectorWindow();
 
 	ImGui::End();
 
@@ -138,6 +129,129 @@ void PixieEngineApp::DrawUI() {
 		ImGui::RenderPlatformWindowsDefault();
 		glfwMakeContextCurrent(backup_current_context);
 	}
+}
+
+void PixieEngineApp::DrawSettingsWindow() {
+	ImGui::SetNextWindowSize(ImVec2(400, 400));
+	ImGui::Begin("Settings", 0);
+
+	ImGui::PushItemWidth(-FLT_MIN);
+
+	ImGui::Text("Scene Path");
+	ImGui::InputText("##scene_path", m_scenePath, m_maxScenePathLength);
+	if (ImGui::Button("Reload Scene")) {
+		ReloadScene();
+	}
+	ImGui::Spacing();
+
+	m_rayTracingRenderer->DrawUI();
+
+	ImGui::PopItemWidth();
+
+	ImGui::End();
+}
+
+void PixieEngineApp::DrawViewportWindow() {
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+	ImGui::Begin("Viewport");
+	ImVec2 viewportResolution = ImGui::GetContentRegionAvail();
+	ImGui::SetNextWindowSize(viewportResolution);
+	ImGui::Image((void*)m_viewportFrameBuffer->m_texture, viewportResolution, { 0.0, 1.0 }, { 1.0, 0.0 });
+	glm::ivec2 glmViewportResolution = { viewportResolution.x, viewportResolution.y };
+	if (glmViewportResolution != m_viewportResolution) {
+		UpdateViewportResolution(glmViewportResolution);
+	}
+	ImGui::End();
+	ImGui::PopStyleVar();
+}
+
+void PixieEngineApp::DrawSceneWindow() {
+	ImGui::SetNextWindowSize(ImVec2(400, 400));
+	ImGui::Begin("Scene", 0);
+	DrawSceneTree(m_scene->GetRootObject());
+	ImGui::End();
+}
+
+void PixieEngineApp::DrawSceneTree(SceneObject* object) {
+	ImGuiTreeNodeFlags flags = 0;
+	if (object == m_scene->GetRootObject()) flags |= ImGuiTreeNodeFlags_DefaultOpen;
+	if (object->children.size() == 0) flags |= ImGuiTreeNodeFlags_Leaf;
+	if (object == m_selectedObject) flags |= ImGuiTreeNodeFlags_Selected;
+	if (ImGui::TreeNodeEx(object->name.c_str(), flags)) {
+		if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
+			m_selectedObject = object;
+		}
+		for (size_t i = 0; i < object->children.size(); i++) {
+			DrawSceneTree(object->children[i]);
+		}
+		ImGui::TreePop();
+	}
+}
+
+void PixieEngineApp::DrawMaterialsWindow() {
+	ImGui::SetNextWindowSize(ImVec2(400, 400));
+	ImGui::Begin("Materials", 0);
+
+	std::vector<Material*> materials = m_scene->GetMaterialsList();
+	for (Material* material : materials) {
+		if (ImGui::CollapsingHeader(material->name.c_str())) {
+			if (ImGui::ColorEdit3("Albedo", (float*)&material->albedo)) {
+				m_rayTracingRenderer->Reset();
+			}
+			if (ImGui::ColorEdit3("Emission", (float*)&material->emission)) {
+				m_rayTracingRenderer->Reset();
+			}
+			if (ImGui::DragFloat("Roughness", &material->roughness, 0.01f, 0.0f, 1.0f)) {
+				m_rayTracingRenderer->Reset();
+			}
+			if (ImGui::DragFloat("Metallic", &material->metallic, 0.01f, 0.0f, 1.0f)) {
+				m_rayTracingRenderer->Reset();
+			}
+			if (ImGui::DragFloat("Transparency", &material->transparency, 0.01f, 0.0f, 1.0f)) {
+				m_rayTracingRenderer->Reset();
+			}
+			if (ImGui::DragFloat("Refraction", &material->eta, 0.01f, 0.0f, 10.0f)) {
+				m_rayTracingRenderer->Reset();
+			}
+		}
+	}
+
+	ImGui::End();
+}
+
+void PixieEngineApp::DrawInspectorWindow() {
+	ImGui::SetNextWindowSize(ImVec2(400, 400));
+	ImGui::Begin("Inspector", 0);
+	if (!m_selectedObject) {
+		ImGui::End();
+		return;
+	}
+
+	ImGui::Text(m_selectedObject->name.c_str());
+	ImGui::Spacing();
+
+	Transform& transform = m_selectedObject->transform;
+	ImGui::Text("Transform");
+	if (ImGui::DragFloat3("Position", (float*)&transform.position, 0.01f, -10000.0, 10000.0)) {
+		transform.UpdateMatrices();
+	}
+	if (ImGui::DragFloat3("Rotation", (float*)&transform.rotation, 0.01f, -10000.0, 10000.0)) {
+		transform.UpdateMatrices();
+	}
+	if (ImGui::DragFloat3("Scale", (float*)&transform.scale, 0.01f, -10000.0, 10000.0)) {
+		transform.UpdateMatrices();
+	}
+	ImGui::Spacing();
+
+	ImGui::Text("Components");
+	if (m_selectedObject->components.size() > 0) {
+		for (size_t i = 0; i < m_selectedObject->components.size(); i++) {
+			ImGui::Text(m_selectedObject->components[i]->name.c_str());
+		}
+	}
+	ImGui::Spacing();
+
+	ImGui::End();
 }
 
 void PixieEngineApp::UpdateViewportResolution(glm::ivec2 resolution) {

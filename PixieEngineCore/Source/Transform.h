@@ -7,12 +7,18 @@
 class Transform {
 	Mat4 m = Mat4(), mInv = Mat4();
 public:
+	glm::fvec3 position;
+	glm::fvec3 rotation;
+	glm::fvec3 scale;
+
 	Transform();
 	Transform(const Mat4& m);
 	Transform(const Mat4& m, const Mat4& mInv);
 
 	const Mat4& GetMatrix() const;
 	const Mat4& GetInverseMatrix() const;
+
+	void UpdateMatrices();
 
 	Vec3 ApplyPoint(Vec3 p) const;
 	Vec3 ApplyVector(Vec3 v) const;

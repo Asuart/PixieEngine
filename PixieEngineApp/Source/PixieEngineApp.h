@@ -23,8 +23,15 @@ protected:
 	RayTracingRenderer* m_rayTracingRenderer;
 	glm::ivec2 m_viewportResolution;
 	FrameBuffer* m_viewportFrameBuffer;
+	SceneObject* m_selectedObject = nullptr;
 
 	void DrawUI();
+	void DrawSettingsWindow();
+	void DrawViewportWindow();
+	void DrawSceneWindow();
+	void DrawSceneTree(SceneObject* object);
+	void DrawMaterialsWindow();
+	void DrawInspectorWindow();
 	void UpdateViewportResolution(glm::ivec2 resolution);
 	void ReloadScene();
 

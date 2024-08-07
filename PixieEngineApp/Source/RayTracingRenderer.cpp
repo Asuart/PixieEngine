@@ -1,9 +1,17 @@
 #include "RayTracingRenderer.h"
 
+std::string to_string(RayTracingMode mode) {
+	switch (mode) {
+	case RayTracingMode::RandomWalk: return "RandomWalk ";
+	case RayTracingMode::SimplePathTracing: return "SimplePathTracing";
+	case RayTracingMode::PathTracing: return "PathTracing";
+	default: return "Undefined Ray Tracing Mode";
+	}
+}
+
 RayTracingRenderer::RayTracingRenderer(PixieEngineApp* parent, glm::ivec2 resolution, RTScene* scene)
-	: m_parent(parent), m_resolution(resolution), m_rayTracer(new RandomWalkIntegrator({1280, 720})), m_scene(scene), m_viewportResolution(resolution) {
-	m_rayTracer->SetScene(scene);
-	//m_rayTracer->mode = CPURayTracerMode::LiPath;
+	: m_parent(parent), m_resolution(resolution), m_rayTracer(new RandomWalkIntegrator(resolution)), m_scene(scene), m_viewportResolution(resolution) {
+	SetScene(scene);
 }
 
 RayTracingRenderer::~RayTracingRenderer() {
@@ -16,7 +24,7 @@ void RayTracingRenderer::DrawFrame() {
 	GLuint sizeLoc = glGetUniformLocation(program, "uSize");
 	GLuint samplesLoc = glGetUniformLocation(program, "uSamples");
 
-	float textureAspect = (float)800 / 600;
+	float textureAspect = (float)m_resolution.x / m_resolution.y;
 	float viewportAspect = (float)m_viewportResolution.x / m_viewportResolution.y;
 	float posX, posY;
 	float sizeX, sizeY;
@@ -65,30 +73,21 @@ void RayTracingRenderer::StopRender() {
 }
 
 void RayTracingRenderer::DrawUI() {
-	ImGui::SetNextWindowSize(ImVec2(400, 400));
-	ImGui::Begin("Demo Select", 0);
-
-	ImGui::Text("Scene Path");
-	ImGui::InputText("##scene_path", m_parent->m_scenePath, m_parent->m_maxScenePathLength);
-	if (ImGui::Button("Reload Scene")) {
-		m_parent->ReloadScene();
+	ImGui::Text("Ray Tracing Mode");
+	if (ImGui::BeginCombo("##ray_tracing_mode", to_string(m_rayTracingMode).c_str())) {
+		for (int n = 0; n < (int32_t)RayTracingMode::COUNT; n++) {
+			RayTracingMode mode = RayTracingMode(n);
+			bool isSelected = (m_rayTracingMode == mode);
+			if (ImGui::Selectable(to_string(mode).c_str(), isSelected)) {
+				SetRayTracingMode(mode);
+			}
+			if (isSelected) {
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+		ImGui::EndCombo();
 	}
 	ImGui::Spacing();
-
-	//if (ImGui::BeginCombo("Render Mode", to_string(m_rayTracer->mode).c_str())) {
-	//	for (int n = 0; n < (int32_t)CPURayTracerMode::_COUNT_; n++) {
-	//		CPURayTracerMode mode = CPURayTracerMode(n);
-	//		bool is_selected = (m_rayTracer->mode == mode);
-	//		if (ImGui::Selectable(to_string(mode).c_str(), is_selected)) {
-	//			m_rayTracer->mode = mode;
-	//			m_rayTracer->Reset();
-	//		}
-	//		if (is_selected) {
-	//			ImGui::SetItemDefaultFocus();
-	//		}
-	//	}
-	//	ImGui::EndCombo();
-	//}
 
 	ImGui::Text("Render Resolution");
 	if (ImGui::InputInt2("##render_resolution", (int*)&m_resolution)) {
@@ -100,12 +99,11 @@ void RayTracingRenderer::DrawUI() {
 	ImGui::Spacing();
 
 	ImGui::Text("Max Ray Bounces");
-	if (ImGui::InputInt("##max-ray_bounces", &m_rayTracer->m_maxDepth)) {
+	if (ImGui::InputInt("##max_ray_bounces", &m_rayTracer->m_maxDepth)) {
 		m_rayTracer->m_maxDepth = Clamp(m_rayTracer->m_maxDepth, 0, 99999);
 		Reset();
 	}
 	ImGui::Spacing();
-
 
 	std::string activeCameraName = "Camera ";
 	for (size_t i = 0; i < m_scene->cameras.size(); i++) {
@@ -130,24 +128,32 @@ void RayTracingRenderer::DrawUI() {
 	}
 	ImGui::Spacing();
 
+	ImGui::Text("Max Render Threads");
+	if (ImGui::InputInt("##max_render_threads", &m_rayTracer->m_maxThreads)) {
+		m_rayTracer->m_maxThreads = Clamp(m_rayTracer->m_maxThreads, 1, 128);
+		m_rayTracer->StopRender();
+		m_rayTracer->StartRender();
+	}
+	ImGui::Spacing();
+
 	//if (m_rayTracer->mode == CPURayTracerMode::TraceRay) {
-	//	if (ImGui::Checkbox("Sample Lights", &m_rayTracer->sampleLights)) {
-	//		Reset();
-	//	}
-	//}
-	//else if (m_rayTracer->mode == CPURayTracerMode::LiSimplePath) {
-	//	if (ImGui::Checkbox("Sample Lights", &m_rayTracer->sampleLights)) {
-	//		Reset();
-	//	}
-	//	if (ImGui::Checkbox("Sample BSDF", &m_rayTracer->sampleBSDF)) {
-	//		Reset();
-	//	}
-	//}
-	//else if (m_rayTracer->mode == CPURayTracerMode::LiPath) {
-	//	if (ImGui::Checkbox("Regularize BSDF", &m_rayTracer->regularize)) {
-	//		Reset();
-	//	}
-	//}
+//	if (ImGui::Checkbox("Sample Lights", &m_rayTracer->sampleLights)) {
+//		Reset();
+//	}
+//}
+//else if (m_rayTracer->mode == CPURayTracerMode::LiSimplePath) {
+//	if (ImGui::Checkbox("Sample Lights", &m_rayTracer->sampleLights)) {
+//		Reset();
+//	}
+//	if (ImGui::Checkbox("Sample BSDF", &m_rayTracer->sampleBSDF)) {
+//		Reset();
+//	}
+//}
+//else if (m_rayTracer->mode == CPURayTracerMode::LiPath) {
+//	if (ImGui::Checkbox("Regularize BSDF", &m_rayTracer->regularize)) {
+//		Reset();
+//	}
+//}
 
 	std::string threadsText = std::string("Threads: ") + std::to_string(m_rayTracer->GetThreadsCount());
 	ImGui::Text(threadsText.c_str());
@@ -160,41 +166,31 @@ void RayTracingRenderer::DrawUI() {
 	
 	std::string lastSampleTimeText = std::string("Last Sample Time: ") + std::to_string(m_rayTracer->GetLastSampleTime());
 	ImGui::Text(lastSampleTimeText.c_str());
-
-	ImGui::End();
-
-	ImGui::SetNextWindowSize(ImVec2(400, 400));
-	ImGui::Begin("Scene", 0);
-
-	if (m_scene->materials.size() > 0 && ImGui::CollapsingHeader("Materials")) {
-		for (Material* material : m_scene->materials) {
-			if (ImGui::CollapsingHeader(material->name.c_str())) {
-				if (ImGui::ColorEdit3("Albedo", (float*)&material->albedo)) {
-					Reset();
-				}
-				if (ImGui::ColorEdit3("Emission", (float*)&material->emission)) {
-					Reset();
-				}
-				if (ImGui::DragFloat("Roughness", &material->roughness, 0.01f, 0.0f, 1.0f)) {
-					Reset();
-				}
-				if (ImGui::DragFloat("Metallic", &material->metallic, 0.01f, 0.0f, 1.0f)) {
-					Reset();
-				}
-				if (ImGui::DragFloat("Transparency", &material->transparency, 0.01f, 0.0f, 1.0f)) {
-					Reset();
-				}
-				if (ImGui::DragFloat("Refraction", &material->eta, 0.01f, 0.0f, 10.0f)) {
-					Reset();
-				}
-			}
-		}
-	}
-
-	ImGui::End();
 }
 
 void RayTracingRenderer::SetViewportSize(glm::ivec2 resolution) {
 	m_viewportResolution = resolution;
-	//m_rayTracer->SetResolution(resolution);
+	if (m_resizeRendererToVieport) {
+		m_rayTracer->SetResolution(resolution);
+	}
+}
+
+void RayTracingRenderer::SetRayTracingMode(RayTracingMode mode) {
+	if (mode == m_rayTracingMode) return;
+	m_rayTracingMode = mode;
+
+	if (m_rayTracer) {
+		m_rayTracer->StopRender();
+		delete m_rayTracer;
+	}
+
+	switch (m_rayTracingMode) {
+	case RayTracingMode::SimplePathTracing: m_rayTracer = new SimplePathIntegrator(m_resolution); break;
+	case RayTracingMode::PathTracing: m_rayTracer = new PathIntegrator(m_resolution); break;
+	case RayTracingMode::RandomWalk: default: 
+		m_rayTracer = new RandomWalkIntegrator(m_resolution); break;
+	}
+
+	m_rayTracer->SetScene(m_scene);
+	m_rayTracer->StartRender();
 }

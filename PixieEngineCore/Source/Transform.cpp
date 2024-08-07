@@ -17,6 +17,10 @@ const Mat4& Transform::GetInverseMatrix() const {
     return mInv;
 }
 
+void Transform::UpdateMatrices() {
+
+}
+
 Vec3 Transform::ApplyPoint(Vec3 p) const {
     Float xp = m[0][0] * p.x + m[0][1] * p.y + m[0][2] * p.z + m[0][3];
     Float yp = m[1][0] * p.x + m[1][1] * p.y + m[1][2] * p.z + m[1][3];
