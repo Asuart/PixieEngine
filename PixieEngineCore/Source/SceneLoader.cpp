@@ -20,7 +20,7 @@ Scene* SceneLoader::LoadScene(const std::string& filePath) {
 	for (uint32_t i = 0; i < scene->mNumAnimations; i++) {
 		std::vector<Bone> bones;
 		LoadBones(scene->mAnimations[i], boneInfoMap, bones);
-		animations.push_back(new Animation(scene->mAnimations[i]->mDuration, scene->mAnimations[i]->mTicksPerSecond, bones, boneInfoMap,  rootObject));
+		animations.push_back(new Animation((float)scene->mAnimations[i]->mDuration, (int32_t)scene->mAnimations[i]->mTicksPerSecond, bones, boneInfoMap,  rootObject));
 	}
 
 	return loadedScene;
@@ -74,7 +74,7 @@ Mesh* SceneLoader::ProcessMesh(Scene* loadedScene, SceneObject* object, std::map
 	std::vector<int32_t> indices;
 	for (uint32_t i = 0; i < mesh->mNumFaces; i++) {
 		aiFace face = mesh->mFaces[i];
-		for (int32_t j = 0; j < face.mNumIndices; j++) {
+		for (uint32_t j = 0; j < face.mNumIndices; j++) {
 			indices.push_back(face.mIndices[j]);
 		}
 	}
@@ -100,7 +100,7 @@ Material* SceneLoader::ProcessMaterial(Scene* loadedScene, uint32_t materialInde
 	material->roughness = roughness;
 	material->rtTexture = new ColorTexture(material->albedo);
 	material->emission = Vec3(colorEmissive.r, colorEmissive.g, colorEmissive.b);
-	material->transparency = 1.0 - opacity;
+	material->transparency = 1.0f - opacity;
 	material->eta = eta;
 	loadedScene->materials.push_back(material);
 
@@ -108,34 +108,34 @@ Material* SceneLoader::ProcessMaterial(Scene* loadedScene, uint32_t materialInde
 }
 
 void SceneLoader::LoadBones(const aiAnimation* animation, std::map<std::string, BoneInfo>& boneInfoMap, std::vector<Bone>& bones) {
-	for (int32_t i = 0; i < animation->mNumChannels; i++) {
+	for (uint32_t i = 0; i < animation->mNumChannels; i++) {
 		aiNodeAnim* channel = animation->mChannels[i];
 		std::string boneName = channel->mNodeName.data;
 
 		if (boneInfoMap.find(boneName) == boneInfoMap.end()) {
-			boneInfoMap[boneName].id = boneInfoMap.size();
+			boneInfoMap[boneName].id = (int32_t)boneInfoMap.size();
 		}
 
 		Bone bone = Bone(boneName, boneInfoMap[boneName].id);
 
-		for (int32_t positionIndex = 0; positionIndex < channel->mNumPositionKeys; positionIndex++) {
+		for (uint32_t positionIndex = 0; positionIndex < channel->mNumPositionKeys; positionIndex++) {
 			KeyPosition data;
 			data.position = AssimpGLMHelpers::GetGLMVec(channel->mPositionKeys[positionIndex].mValue);
-			data.timeStamp = channel->mPositionKeys[positionIndex].mTime;
+			data.timeStamp = (Float)channel->mPositionKeys[positionIndex].mTime;
 			bone.positions.push_back(data);
 		}
 
-		for (int32_t rotationIndex = 0; rotationIndex < channel->mNumRotationKeys; rotationIndex++) {
+		for (uint32_t rotationIndex = 0; rotationIndex < channel->mNumRotationKeys; rotationIndex++) {
 			KeyRotation data;
 			data.orientation = AssimpGLMHelpers::GetGLMQuat(channel->mRotationKeys[rotationIndex].mValue);
-			data.timeStamp = channel->mRotationKeys[rotationIndex].mTime;
+			data.timeStamp = (Float)channel->mRotationKeys[rotationIndex].mTime;
 			bone.rotations.push_back(data);
 		}
 
-		for (int32_t keyIndex = 0; keyIndex < channel->mNumScalingKeys; keyIndex++) {
+		for (uint32_t keyIndex = 0; keyIndex < channel->mNumScalingKeys; keyIndex++) {
 			KeyScale data;
 			data.scale = AssimpGLMHelpers::GetGLMVec(channel->mScalingKeys[keyIndex].mValue);
-			data.timeStamp = channel->mScalingKeys[keyIndex].mTime;
+			data.timeStamp = (Float)channel->mScalingKeys[keyIndex].mTime;
 			bone.scales.push_back(data);
 		}
 
@@ -156,12 +156,12 @@ void SceneLoader::SetVertexBoneData(Vertex& vertex, int32_t boneID, Float weight
 void SceneLoader::ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, std::map<std::string, BoneInfo>& boneInfoMap, aiMesh* mesh, const aiScene* scene) {
 	if (!mesh->HasBones()) return;
 
-	for (int32_t boneIndex = 0; boneIndex < mesh->mNumBones; boneIndex++) {
+	for (uint32_t boneIndex = 0; boneIndex < mesh->mNumBones; boneIndex++) {
 		int32_t boneID = -1;
 		std::string boneName = mesh->mBones[boneIndex]->mName.C_Str();
 		if (boneInfoMap.find(boneName) == boneInfoMap.end()) {
 			BoneInfo newBoneInfo;
-			newBoneInfo.id = boneInfoMap.size();
+			newBoneInfo.id = (int32_t)boneInfoMap.size();
 			newBoneInfo.offset = AssimpGLMHelpers::ConvertMatrixToGLMFormat(mesh->mBones[boneIndex]->mOffsetMatrix);
 			boneInfoMap[boneName] = newBoneInfo;
 			boneID = newBoneInfo.id;

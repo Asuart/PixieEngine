@@ -30,7 +30,7 @@ const Mesh* MeshComponent::GetMesh() const {
 }
 
 void MeshComponent::Draw() {
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
+	glBindVertexArray(vao);
 	glDrawElements(GL_TRIANGLES, mesh->indices.size(), GL_UNSIGNED_INT, NULL);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 }

@@ -8,3 +8,4 @@
 #include "RandomWalkIntegrator.h"
 #include "SimplePathIntegrator.h"
 #include "PathIntegrator.h"
+#include "SceneRenderer.h"

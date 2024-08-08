@@ -21,6 +21,7 @@ protected:
 	Scene* m_scene;
 	RTScene* m_rtScene;
 	RayTracingRenderer* m_rayTracingRenderer;
+	SceneRenderer* m_sceneRenderer;
 	glm::ivec2 m_viewportResolution;
 	FrameBuffer* m_viewportFrameBuffer;
 	SceneObject* m_selectedObject = nullptr;

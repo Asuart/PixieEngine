@@ -14,4 +14,6 @@ public:
 
 protected:
 	UniformLightSampler m_lightSampler;
+
+	//Vec3 SampleLd(const SurfaceInteraction& intr, const BSDF* bsdf) const;
 };

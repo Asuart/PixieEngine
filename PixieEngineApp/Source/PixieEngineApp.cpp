@@ -25,10 +25,12 @@ PixieEngineApp::PixieEngineApp() {
 	m_scene = sceneLoader.LoadScene(m_scenePath);
 	m_rtScene = RTScene::FromScene(m_scene);
 
+	m_sceneRenderer = new SceneRenderer(glm::ivec2(1280, 720), m_scene);
+
 	m_rayTracingRenderer = new RayTracingRenderer(this, glm::ivec2(1280, 720), m_rtScene);
 	m_rayTracingRenderer->StartRender();
 
-	m_viewportFrameBuffer = new FrameBuffer(1, 1);
+	m_viewportFrameBuffer = new FrameBuffer(1280, 720);
 }
 
 PixieEngineApp::~PixieEngineApp() {
@@ -52,7 +54,8 @@ void PixieEngineApp::Start() {
 		m_viewportFrameBuffer->Bind();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glViewport(0, 0, m_viewportFrameBuffer->m_resolution.x, m_viewportFrameBuffer->m_resolution.y);
-		m_rayTracingRenderer->DrawFrame();
+		//m_rayTracingRenderer->DrawFrame();
+		m_sceneRenderer->DrawFrame();
 		m_viewportFrameBuffer->Unbind();
 		glViewport(0, 0, m_window.GetWindowSize().x, m_window.GetWindowSize().y);
 

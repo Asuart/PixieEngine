@@ -2,6 +2,7 @@
 #include "UID.h"
 #include "Transform.h"
 #include "SceneObject.h"
+#include "Camera.h"
 
 class Scene {
 public:
@@ -22,12 +23,15 @@ public:
 	SceneObject* GetRootObject();
 	std::vector<Material*>& GetMaterialsList();
 	std::vector<Mesh*>& GetMeshesList();
+	Camera* GetMainCamera();
 
 protected:
 	SceneObject* rootObject;
 	std::vector<SceneObject*> flatObjects;
 	std::vector<Material*> materials;
 	std::vector<Mesh*> meshes;
+	std::vector<Camera> cameras;
+	Camera* mainCamera = nullptr;
 
 	virtual void Start();
 	virtual void Update();
