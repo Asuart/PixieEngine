@@ -1,27 +1,5 @@
 #include "UserInput.h"
 
-void key_callback(GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods) {
-	UserInput::buttonPressed = true;
-	UserInput::key = key;
-	UserInput::scancode = scancode;
-	UserInput::action = action;
-	UserInput::mods = mods;
-}
-
-void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
-	UserInput::mouseDeltaX = (float)(xpos - UserInput::mouseX);
-	UserInput::mouseDeltaY = (float)(ypos - UserInput::mouseY);
-	UserInput::mouseX = (float)xpos;
-	UserInput::mouseY = (float)ypos;
-}
-
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
-	UserInput::mouseButtonPressed = true;
-	UserInput::mouseButton = button;
-	UserInput::mouseAction = action;
-	UserInput::mouseMods = mods;
-}
-
 GLFWwindow* UserInput::window = nullptr;
 
 bool UserInput::buttonPressed = false;
@@ -35,10 +13,32 @@ uint32_t UserInput::mouseButton;
 uint32_t UserInput::mouseAction;
 uint32_t UserInput::mouseMods;
 
-float UserInput::mouseX = 0;
-float UserInput::mouseY = 0;
-float UserInput::mouseDeltaX = 0;
-float UserInput::mouseDeltaY = 0;
+double UserInput::mouseX = 0;
+double UserInput::mouseY = 0;
+double UserInput::mouseDeltaX = 0;
+double UserInput::mouseDeltaY = 0;
+
+void key_callback(GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods) {
+	UserInput::buttonPressed = true;
+	UserInput::key = key;
+	UserInput::scancode = scancode;
+	UserInput::action = action;
+	UserInput::mods = mods;
+}
+
+void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
+	UserInput::mouseDeltaX = xpos - UserInput::mouseX;
+	UserInput::mouseDeltaY = ypos - UserInput::mouseY;
+	UserInput::mouseX = xpos;
+	UserInput::mouseY = ypos;
+}
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+	UserInput::mouseButtonPressed = true;
+	UserInput::mouseButton = button;
+	UserInput::mouseAction = action;
+	UserInput::mouseMods = mods;
+}
 
 void UserInput::Reset() {
 	UserInput::buttonPressed = false;

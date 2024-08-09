@@ -46,10 +46,8 @@ PixieEngineApp::~PixieEngineApp() {
 void PixieEngineApp::Start() {
 	while (!m_window.IsShouldClose()) {
 		glfwPollEvents();
-
-		UserInput::Reset();
-
 		HandleUserInput();
+		UserInput::Reset();
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -293,6 +291,8 @@ void PixieEngineApp::ReloadScene() {
 
 void PixieEngineApp::HandleUserInput() {
 	const Vec3 speed = Vec3(0.1);
+	const Vec2 rotationSpeed = Vec2(0.05);
+
 	if (UserInput::GetKey(GLFW_KEY_W)) {
 		if (m_scene) {
 			Camera* camera = m_scene->GetMainCamera();
@@ -386,6 +386,19 @@ void PixieEngineApp::HandleUserInput() {
 			if (camera) {
 				camera->m_transform.position -= camera->m_transform.up * speed;
 				camera->m_transform.UpdateMatrices();
+			}
+		}
+	}
+	if (UserInput::GetMouseButton(GLFW_MOUSE_BUTTON_2)) {
+		if (UserInput::mouseDeltaX) {
+			if (m_scene) {
+				Camera* camera = m_scene->GetMainCamera();
+				if (camera) {
+					camera->m_transform.rotation.y += rotationSpeed.x * (float)UserInput::mouseDeltaX;
+					if (camera->m_transform.rotation.y >= PiOver2) camera->m_transform.rotation.y -= 2 * PiOver2;
+					camera->m_transform.UpdateMatrices();
+					std::cout << camera->m_transform.rotation.y << "\n";
+				}
 			}
 		}
 	}

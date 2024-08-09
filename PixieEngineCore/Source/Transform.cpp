@@ -2,19 +2,19 @@
 #include "Transform.h"
 
 Transform::Transform()
-    : m(Mat4(1.0)), mInv(Mat4(1)), forward(Vec3(0, 0, 1)), up(Vec3(0, -1, 0)), right(Vec3(-1, 0, 0)) {
+    : m(Mat4(1.0)), mInv(Mat4(1)), forward(Vec3(0, 0, -1)), up(Vec3(0, 1, 0)), right(Vec3(1, 0, 0)) {
     Decompose();
     UpdateDirections();
 };
 
 Transform::Transform(const Mat4& m)
-    : m(m), mInv(glm::inverse(m)), forward(Vec3(0, 0, 1)), up(Vec3(0, -1, 0)), right(Vec3(-1, 0, 0)) {
+    : m(m), mInv(glm::inverse(m)), forward(Vec3(0, 0, -1)), up(Vec3(0, 1, 0)), right(Vec3(1, 0, 0)) {
     Decompose();
     UpdateDirections();
 }
 
 Transform::Transform(const Mat4& m, const Mat4& mInv)
-    : m(m), mInv(mInv), forward(Vec3(0, 0, 1)), up(Vec3(0, 1, 0)), right(Vec3(-1, 0, 0)) {
+    : m(m), mInv(mInv), forward(Vec3(0, 0, -1)), up(Vec3(0, 1, 0)), right(Vec3(1, 0, 0)) {
     Decompose();
     UpdateDirections();
 }
@@ -30,7 +30,7 @@ const Mat4& Transform::GetInverseMatrix() const {
 void Transform::UpdateMatrices() {
     Mat4 mTranslate = glm::translate(position);
     Mat4 mScale = glm::scale(scale);
-    Mat4 mRotate = glm::rotate(PiOver2, rotation);
+    Mat4 mRotate = glm::toMat4(glm::quat(rotation));
     m = mTranslate * mScale * mRotate;
     mInv = glm::inverse(m);
     Decompose();
@@ -165,7 +165,10 @@ void Transform::Decompose() {
 }
 
 void Transform::UpdateDirections() {
-
+    glm::mat3 mRotate = glm::toMat4(glm::quat(rotation));
+    up = mRotate * glm::vec3(0.0, -1.0, 0.0);
+    forward = mRotate * glm::vec3(-1.0, 0.0, 0.0);
+    right = mRotate * glm::vec3(0.0, 0.0, -1.0);
 }
 
 bool Transform::IsIdentity() const {

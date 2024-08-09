@@ -16,10 +16,10 @@ public:
 	static uint32_t mouseAction;
 	static uint32_t mouseMods;
 
-	static float mouseX;
-	static float mouseY;
-	static float mouseDeltaX;
-	static float mouseDeltaY;
+	static double mouseX;
+	static double mouseY;
+	static double mouseDeltaX;
+	static double mouseDeltaY;
 
 	static void Reset();
 
