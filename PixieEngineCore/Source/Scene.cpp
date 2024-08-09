@@ -159,6 +159,10 @@ std::vector<Mesh*>& Scene::GetMeshesList() {
 	return meshes;
 }
 
+std::vector<Camera>& Scene::GetCameras() {
+	return cameras;
+}
+
 Camera* Scene::GetMainCamera() {
 	return mainCamera;
 }

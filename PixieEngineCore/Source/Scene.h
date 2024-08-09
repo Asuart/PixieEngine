@@ -23,6 +23,7 @@ public:
 	SceneObject* GetRootObject();
 	std::vector<Material*>& GetMaterialsList();
 	std::vector<Mesh*>& GetMeshesList();
+	std::vector<Camera>& GetCameras();
 	Camera* GetMainCamera();
 
 protected:

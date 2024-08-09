@@ -265,6 +265,7 @@ void PixieEngineApp::DrawInspectorWindow() {
 
 void PixieEngineApp::UpdateViewportResolution(glm::ivec2 resolution) {
 	m_viewportResolution = resolution;
+	m_sceneRenderer->SetResolution(resolution);
 	m_rayTracingRenderer->SetViewportSize(resolution);
 	m_viewportFrameBuffer->Resize(resolution.x, resolution.y);
 }

@@ -11,12 +11,13 @@ public:
 	SceneRenderer(const glm::ivec2& resolution, Scene* scene = nullptr);
 
 	void SetScene(Scene* scene);
+	void SetResolution(const glm::ivec2& resolution) override;
 	void DrawFrame();
 	void Reset() override;
 
 protected:
-	Scene* scene = nullptr;
-	GLuint defaultShader = 0;
+	Scene* m_scene = nullptr;
+	GLuint m_defaultShader = 0;
 
 	void DrawObject(SceneObject* object, GLuint mModelLoc);
 };
