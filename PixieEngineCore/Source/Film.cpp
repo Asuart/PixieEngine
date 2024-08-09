@@ -2,7 +2,7 @@
 
 Film::Film(glm::ivec2 resolution)
 	: m_resolution(resolution), m_pixelSize(Vec2(1.0f) / (Vec2)resolution) {
-	Vec2 min(-1.0), max(1.0);
+	Vec2 min(0.0), max(1.0);
 	std::vector<Vertex> vertices = {
 		{Vertex(Vec3(min.x, min.y, 0))},
 		{Vertex(Vec3(min.x, max.y, 0))},

@@ -12,7 +12,7 @@ std::string to_string(RayTracingMode mode) {
 }
 
 RayTracingRenderer::RayTracingRenderer(PixieEngineApp* parent, glm::ivec2 resolution, RTScene* scene)
-	: m_parent(parent), m_resolution(resolution), m_rayTracer(new RandomWalkIntegrator(resolution)), m_scene(scene), m_viewportResolution(resolution) {
+	: m_parent(parent), m_resolution(resolution), m_rayTracer(new SimplePathIntegrator(resolution)), m_scene(scene), m_viewportResolution(resolution) {
 	SetScene(scene);
 }
 
@@ -62,7 +62,7 @@ void RayTracingRenderer::SetScene(RTScene* scene) {
 	m_scene = scene;
 	m_rayTracer->SetScene(scene);
 	for (Camera& camera : m_scene->cameras) {
-		camera.aspect = (float)m_resolution.x / m_resolution.y;
+		camera.SetAspect((float)m_resolution.x / m_resolution.y);
 	}
 }
 
@@ -95,7 +95,7 @@ void RayTracingRenderer::DrawUI() {
 	if (ImGui::InputInt2("##render_resolution", (int*)&m_resolution)) {
 		m_rayTracer->SetResolution(m_resolution);
 		for (Camera& camera : m_scene->cameras) {
-			camera.aspect = (float)m_resolution.x / m_resolution.y;
+			camera.SetAspect((float)m_resolution.x / m_resolution.y);
 		}
 	}
 	ImGui::Spacing();
