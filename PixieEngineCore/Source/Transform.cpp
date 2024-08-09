@@ -1,21 +1,22 @@
 
 #include "Transform.h"
 
-Transform::Transform() {
-    Mat4 rotation, scale;
-    Decompose(&position, &rotation, &scale);
+Transform::Transform()
+    : m(Mat4(1.0)), mInv(Mat4(1)), forward(Vec3(0, 0, 1)), up(Vec3(0, -1, 0)), right(Vec3(-1, 0, 0)) {
+    Decompose();
+    UpdateDirections();
 };
 
 Transform::Transform(const Mat4& m)
-    : m(m), mInv(glm::inverse(m)) {
-    Mat4 rotation, scale;
-    Decompose(&position, &rotation, &scale);
+    : m(m), mInv(glm::inverse(m)), forward(Vec3(0, 0, 1)), up(Vec3(0, -1, 0)), right(Vec3(-1, 0, 0)) {
+    Decompose();
+    UpdateDirections();
 }
 
 Transform::Transform(const Mat4& m, const Mat4& mInv)
-    : m(m), mInv(mInv) {
-    Mat4 rotation, scale;
-    Decompose(&position, &rotation, &scale);
+    : m(m), mInv(mInv), forward(Vec3(0, 0, 1)), up(Vec3(0, 1, 0)), right(Vec3(-1, 0, 0)) {
+    Decompose();
+    UpdateDirections();
 }
 
 const Mat4& Transform::GetMatrix() const {
@@ -27,7 +28,13 @@ const Mat4& Transform::GetInverseMatrix() const {
 }
 
 void Transform::UpdateMatrices() {
-
+    Mat4 mTranslate = glm::translate(position);
+    Mat4 mScale = glm::scale(scale);
+    Mat4 mRotate = glm::rotate(PiOver2, rotation);
+    m = mTranslate * mScale * mRotate;
+    mInv = glm::inverse(m);
+    Decompose();
+    UpdateDirections();
 }
 
 Vec3 Transform::ApplyPoint(Vec3 p) const {
@@ -149,34 +156,16 @@ SurfaceInteraction Transform::ApplyInverseInteraction(const SurfaceInteraction& 
     return ret;
 }
 
-void Transform::Decompose(Vec3* T, Mat4* R, Mat4* S) const {
-    T->x = m[0][3];
-    T->y = m[1][3];
-    T->z = m[2][3];
+void Transform::Decompose() {
+    glm::vec3 skew;
+    glm::vec4 perspective;
+    glm::quat qRotation;
+    glm::decompose(m, scale, qRotation, position, skew, perspective);
+    rotation = glm::eulerAngles(qRotation);
+}
 
-    Mat4 M = m;
-    for (int32_t i = 0; i < 3; ++i) {
-        M[i][3] = M[3][i] = 0.0f;
-    }
-    M[3][3] = 1.0f;
+void Transform::UpdateDirections() {
 
-    Float norm;
-    int32_t count = 0;
-    *R = M;
-    do {
-        Mat4 Rit = glm::inverse(glm::transpose(*R));
-        Mat4 Rnext = (*R + Rit) / (Float)2.0f;
-
-        norm = 0;
-        for (int32_t i = 0; i < 3; ++i) {
-            Float n = std::abs((*R)[i][0] - Rnext[i][0]) + std::abs((*R)[i][1] - Rnext[i][1]) + std::abs((*R)[i][2] - Rnext[i][2]);
-            norm = std::max(norm, n);
-        }
-
-        *R = Rnext;
-    } while (++count < 100 && norm > 0.0001f);
-
-    *S = glm::inverse(*R) * M;
 }
 
 bool Transform::IsIdentity() const {

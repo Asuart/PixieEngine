@@ -36,6 +36,7 @@ protected:
 	void DrawInspectorWindow();
 	void UpdateViewportResolution(glm::ivec2 resolution);
 	void ReloadScene();
+	void HandleUserInput();
 
 	friend class RayTracingRenderer;
 };

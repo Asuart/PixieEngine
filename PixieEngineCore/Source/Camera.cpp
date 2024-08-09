@@ -11,7 +11,8 @@ void Camera::LookAt(const Vec3& lookFrom, const Vec3& lookAt, const Vec3& up) {
 	m_lookAt = lookAt;
 	m_lookFrom = lookFrom;
 	m_up = up;
-	m_transform = Transform(glm::lookAt(lookFrom, lookAt, up));
+	Mat4 look = glm::lookAt(lookFrom, lookAt, up);
+	m_transform = Transform(look);
 }
 
 void Camera::SetAspect(float aspect) {
@@ -29,10 +30,6 @@ Ray Camera::GetRay(uint32_t x, uint32_t y, const Vec2& coord) const {
 	Float phi = Lerp(coord.y, -m_fovy / 2, m_fovy / 2);
 	Vec3 dir = glm::normalize(glm::mat3(m_transform.GetMatrix()) * Vec3(glm::tan(theta), glm::tan(phi), 1.0f));
 	return Ray(x, y, m_lookFrom, dir);
-}
-
-const Transform& Camera::GetTransform() const {
-	return m_transform;
 }
 
 const Mat4& Camera::GetViewMatrix() const {

@@ -10,6 +10,9 @@ public:
 	glm::fvec3 position;
 	glm::fvec3 rotation;
 	glm::fvec3 scale;
+	glm::fvec3 forward;
+	glm::fvec3 right;
+	glm::fvec3 up;
 
 	Transform();
 	Transform(const Mat4& m);
@@ -33,7 +36,6 @@ public:
 	Ray ApplyInverseRay(const Ray& r, Float* tMax = nullptr) const;
 	SurfaceInteraction ApplyInverseInteraction(const SurfaceInteraction& in) const;
 
-	void Decompose(Vec3* T, Mat4* R, Mat4* S) const;
 	bool IsIdentity() const;
 	bool HasScale(Float tolerance = 1e-3f) const;
 	bool SwapsHandedness() const;
@@ -41,6 +43,10 @@ public:
 	bool operator==(const Transform& t) const;
 	bool operator!=(const Transform& t) const;
 	Transform operator*(const Transform& t2) const;
+
+protected:
+	void Decompose();
+	void UpdateDirections();
 };
 
 Transform Inverse(const Transform& t);

@@ -49,6 +49,8 @@ void PixieEngineApp::Start() {
 
 		UserInput::Reset();
 
+		HandleUserInput();
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		m_viewportFrameBuffer->Bind();
@@ -287,4 +289,104 @@ void PixieEngineApp::ReloadScene() {
 
 	m_rayTracingRenderer->SetScene(m_rtScene);
 	m_rayTracingRenderer->StartRender();
+}
+
+void PixieEngineApp::HandleUserInput() {
+	const Vec3 speed = Vec3(0.1);
+	if (UserInput::GetKey(GLFW_KEY_W)) {
+		if (m_scene) {
+			Camera* camera = m_scene->GetMainCamera();
+			if (camera) {
+				camera->m_transform.position += camera->m_transform.forward * speed;
+				camera->m_transform.UpdateMatrices();
+			}
+		}
+		if (m_rtScene) {
+			Camera* camera = m_rtScene->mainCamera;
+			if (camera) {
+				camera->m_transform.position += camera->m_transform.forward * speed;
+				camera->m_transform.UpdateMatrices();
+			}
+		}
+	}
+	if (UserInput::GetKey(GLFW_KEY_S)) {
+		if (m_scene) {
+			Camera* camera = m_scene->GetMainCamera();
+			if (camera) {
+				camera->m_transform.position -= camera->m_transform.forward * speed;
+				camera->m_transform.UpdateMatrices();
+			}
+		}
+		if (m_rtScene) {
+			Camera* camera = m_rtScene->mainCamera;
+			if (camera) {
+				camera->m_transform.position -= camera->m_transform.forward * speed;
+				camera->m_transform.UpdateMatrices();
+			}
+		}
+	}
+	if (UserInput::GetKey(GLFW_KEY_D)) {
+		if (m_scene) {
+			Camera* camera = m_scene->GetMainCamera();
+			if (camera) {
+				camera->m_transform.position += camera->m_transform.right * speed;
+				camera->m_transform.UpdateMatrices();
+			}
+		}
+		if (m_rtScene) {
+			Camera* camera = m_rtScene->mainCamera;
+			if (camera) {
+				camera->m_transform.position += camera->m_transform.right * speed;
+				camera->m_transform.UpdateMatrices();
+			}
+		}
+	}
+	if (UserInput::GetKey(GLFW_KEY_A)) {
+		if (m_scene) {
+			Camera* camera = m_scene->GetMainCamera();
+			if (camera) {
+				camera->m_transform.position -= camera->m_transform.right * speed;
+				camera->m_transform.UpdateMatrices();
+			}
+		}
+		if (m_rtScene) {
+			Camera* camera = m_rtScene->mainCamera;
+			if (camera) {
+				camera->m_transform.position -= camera->m_transform.right * speed;
+				camera->m_transform.UpdateMatrices();
+			}
+		}
+	}
+	if (UserInput::GetKey(GLFW_KEY_SPACE)) {
+		if (m_scene) {
+			Camera* camera = m_scene->GetMainCamera();
+			if (camera) {
+				camera->m_transform.position += camera->m_transform.up * speed;
+				camera->m_transform.UpdateMatrices();
+			}
+		}
+		if (m_rtScene) {
+			Camera* camera = m_rtScene->mainCamera;
+			if (camera) {
+				camera->m_transform.position += camera->m_transform.up * speed;
+				camera->m_transform.UpdateMatrices();
+			}
+		}
+	}
+	if (UserInput::GetKey(GLFW_KEY_LEFT_CONTROL)) {
+		if (m_scene) {
+			Camera* camera = m_scene->GetMainCamera();
+			if (camera) {
+				camera->m_transform.position -= camera->m_transform.up * speed;
+				camera->m_transform.UpdateMatrices();
+			}
+		}
+		if (m_rtScene) {
+			Camera* camera = m_rtScene->mainCamera;
+			if (camera) {
+				camera->m_transform.position -= camera->m_transform.up * speed;
+				camera->m_transform.UpdateMatrices();
+			}
+		}
+	}
 }
