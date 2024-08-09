@@ -1,13 +1,22 @@
 
 #include "Transform.h"
 
-Transform::Transform() {};
+Transform::Transform() {
+    Mat4 rotation, scale;
+    Decompose(&position, &rotation, &scale);
+};
 
 Transform::Transform(const Mat4& m)
-    : m(m), mInv(glm::inverse(m)) {}
+    : m(m), mInv(glm::inverse(m)) {
+    Mat4 rotation, scale;
+    Decompose(&position, &rotation, &scale);
+}
 
 Transform::Transform(const Mat4& m, const Mat4& mInv)
-    : m(m), mInv(mInv) {}
+    : m(m), mInv(mInv) {
+    Mat4 rotation, scale;
+    Decompose(&position, &rotation, &scale);
+}
 
 const Mat4& Transform::GetMatrix() const {
     return m;
@@ -209,33 +218,6 @@ Transform Transpose(const Transform& t) {
     return Transform(glm::transpose(t.GetMatrix()), glm::transpose(t.GetInverseMatrix()));
 }
 
-Transform Rotate(Float sinTheta, Float cosTheta, Vec3 axis) {
-    Vec3 a = glm::normalize(axis);
-    Mat4 m;
-    m[0][0] = a.x * a.x + (1 - a.x * a.x) * cosTheta;
-    m[0][1] = a.x * a.y * (1 - cosTheta) - a.z * sinTheta;
-    m[0][2] = a.x * a.z * (1 - cosTheta) + a.y * sinTheta;
-    m[0][3] = 0;
-
-    m[1][0] = a.x * a.y * (1 - cosTheta) + a.z * sinTheta;
-    m[1][1] = a.y * a.y + (1 - a.y * a.y) * cosTheta;
-    m[1][2] = a.y * a.z * (1 - cosTheta) - a.x * sinTheta;
-    m[1][3] = 0;
-
-    m[2][0] = a.x * a.z * (1 - cosTheta) - a.y * sinTheta;
-    m[2][1] = a.y * a.z * (1 - cosTheta) + a.x * sinTheta;
-    m[2][2] = a.z * a.z + (1 - a.z * a.z) * cosTheta;
-    m[2][3] = 0;
-
-    return Transform(m, glm::transpose(m));
-}
-
-Transform Rotate(Float theta, Vec3 axis) {
-    Float sinTheta = std::sin(glm::radians(theta));
-    Float cosTheta = std::cos(glm::radians(theta));
-    return Rotate(sinTheta, cosTheta, axis);
-}
-
 Transform RotateFromTo(Vec3 from, Vec3 to) {
     Vec3 refl;
     if (std::abs(from.x) < 0.72f && std::abs(to.x) < 0.72f) {
@@ -259,107 +241,4 @@ Transform RotateFromTo(Vec3 from, Vec3 to) {
     }
 
     return Transform(r, glm::transpose(r));
-}
-
-Transform Translate(Vec3 delta) {
-    Mat4 m(
-        1, 0, 0, delta.x,
-        0, 1, 0, delta.y,
-        0, 0, 1, delta.z,
-        0, 0, 0, 1);
-    Mat4 minv(
-        1, 0, 0, -delta.x,
-        0, 1, 0, -delta.y,
-        0, 0, 1, -delta.z,
-        0, 0, 0, 1);
-    return Transform(m, minv);
-}
-
-Transform Scale(Float x, Float y, Float z) {
-    Mat4 m(
-        x, 0, 0, 0,
-        0, y, 0, 0,
-        0, 0, z, 0,
-        0, 0, 0, 1);
-    Mat4 minv(
-        1 / x, 0, 0, 0,
-        0, 1 / y, 0, 0,
-        0, 0, 1 / z, 0,
-        0, 0, 0, 1);
-    return Transform(m, minv);
-}
-
-Transform RotateX(Float theta) {
-    Float sinTheta = std::sin(glm::radians(theta));
-    Float cosTheta = std::cos(glm::radians(theta));
-    Mat4 m(
-        1, 0, 0, 0,
-        0, cosTheta, -sinTheta, 0,
-        0, sinTheta, cosTheta, 0,
-        0, 0, 0, 1);
-    return Transform(m, glm::transpose(m));
-}
-
-Transform RotateY(Float theta) {
-    Float sinTheta = std::sin(glm::radians(theta));
-    Float cosTheta = std::cos(glm::radians(theta));
-    Mat4 m(
-        cosTheta, 0, sinTheta, 0,
-        0, 1, 0, 0,
-        -sinTheta, 0, cosTheta, 0,
-        0, 0, 0, 1);
-    return Transform(m, glm::transpose(m));
-}
-Transform RotateZ(Float theta) {
-    Float sinTheta = std::sin(glm::radians(theta));
-    Float cosTheta = std::cos(glm::radians(theta));
-    Mat4 m(
-        cosTheta, -sinTheta, 0, 0,
-        sinTheta, cosTheta, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1);
-    return Transform(m, glm::transpose(m));
-}
-
-Transform LookAt(Vec3 pos, Vec3 look, Vec3 up) {
-    Mat4 worldFromCamera;
-
-    worldFromCamera[0][3] = pos.x;
-    worldFromCamera[1][3] = pos.y;
-    worldFromCamera[2][3] = pos.z;
-    worldFromCamera[3][3] = 1;
-
-    Vec3 dir = glm::normalize(look - pos);
-    Vec3 right = glm::normalize(glm::cross(glm::normalize(up), dir));
-    Vec3 newUp = glm::cross(dir, right);
-
-    worldFromCamera[0][0] = right.x;
-    worldFromCamera[1][0] = right.y;
-    worldFromCamera[2][0] = right.z;
-    worldFromCamera[3][0] = 0.;
-    worldFromCamera[0][1] = newUp.x;
-    worldFromCamera[1][1] = newUp.y;
-    worldFromCamera[2][1] = newUp.z;
-    worldFromCamera[3][1] = 0.;
-    worldFromCamera[0][2] = dir.x;
-    worldFromCamera[1][2] = dir.y;
-    worldFromCamera[2][2] = dir.z;
-    worldFromCamera[3][2] = 0.;
-
-    Mat4 cameraFromWorld = glm::inverse(worldFromCamera);
-    return Transform(cameraFromWorld, worldFromCamera);
-}
-
-Transform Orthographic(Float zNear, Float zFar) {
-    return Scale(1, 1, 1 / (zFar - zNear)) * Translate(Vec3(0, 0, -zNear));
-}
-
-Transform Perspective(Float fov, Float n, Float f) {
-    Mat4 persp(
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, f / (f - n), -f * n / (f - n),
-        0, 0, 1, 0);
-    Float invTanAng = 1 / std::tan(glm::radians(fov) / 2);
-    return Scale(invTanAng, invTanAng, 1) * Transform(persp);
 }

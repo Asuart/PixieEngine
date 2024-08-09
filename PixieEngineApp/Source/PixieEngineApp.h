@@ -25,6 +25,7 @@ protected:
 	glm::ivec2 m_viewportResolution;
 	FrameBuffer* m_viewportFrameBuffer;
 	SceneObject* m_selectedObject = nullptr;
+	bool m_rayTracingViewport = true;
 
 	void DrawUI();
 	void DrawSettingsWindow();

@@ -98,6 +98,10 @@ void RayTracingRenderer::DrawUI() {
 			camera.SetAspect((float)m_resolution.x / m_resolution.y);
 		}
 	}
+	if (ImGui::Checkbox("Resize to viewport", &m_resizeRendererToVieport)) {
+		Reset();
+		SetViewportSize(m_viewportResolution);
+	}
 	ImGui::Spacing();
 
 	ImGui::Text("Max Ray Bounces");
@@ -172,7 +176,11 @@ void RayTracingRenderer::DrawUI() {
 void RayTracingRenderer::SetViewportSize(glm::ivec2 resolution) {
 	m_viewportResolution = resolution;
 	if (m_resizeRendererToVieport) {
+		m_resolution = resolution;
 		m_rayTracer->SetResolution(resolution);
+		for (size_t i = 0; i < m_scene->cameras.size(); i++) {
+			m_scene->cameras[i].SetAspect((float)resolution.x / resolution.y);
+		}
 	}
 }
 

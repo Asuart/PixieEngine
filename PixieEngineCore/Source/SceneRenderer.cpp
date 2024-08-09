@@ -24,11 +24,8 @@ void SceneRenderer::DrawFrame() {
 	GLuint mViewLoc = glGetUniformLocation(defaultShader, "mView");
 	GLuint mProjectioLoc = glGetUniformLocation(defaultShader, "mProjection");
 	
-	//glUniformMatrix4fv(mViewLoc, 1, GL_FALSE, &camera->transform.GetMatrix()[0][0]);
-	const glm::mat4& projection = camera->GetProjectionMatrix();
-	const glm::mat4& view = camera->GetViewMatrix();;
-	glUniformMatrix4fv(mViewLoc, 1, GL_FALSE, &view[0][0]);
-	glUniformMatrix4fv(mProjectioLoc, 1, GL_FALSE, &projection[0][0]);
+	glUniformMatrix4fv(mViewLoc, 1, GL_FALSE, &camera->GetViewMatrix()[0][0]);
+	glUniformMatrix4fv(mProjectioLoc, 1, GL_FALSE, &camera->GetProjectionMatrix()[0][0]);
 
 	SceneObject* rootObject = scene->GetRootObject();
 	DrawObject(rootObject, mModelLoc);

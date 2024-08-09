@@ -45,14 +45,5 @@ public:
 
 Transform Inverse(const Transform& t);
 Transform Transpose(const Transform& t);
-Transform Rotate(Float sinTheta, Float cosTheta, Vec3 axis);
-Transform Rotate(Float theta, Vec3 axis);
 Transform RotateFromTo(Vec3 from, Vec3 to);
-Transform Translate(Vec3 delta);
-Transform Scale(Float x, Float y, Float z);
-Transform RotateX(Float theta);
-Transform RotateY(Float theta);
-Transform RotateZ(Float theta);
-Transform LookAt(Vec3 pos, Vec3 look, Vec3 up);
-Transform Orthographic(Float zNear, Float zFar);
-Transform Perspective(Float fov, Float n, Float f);
+

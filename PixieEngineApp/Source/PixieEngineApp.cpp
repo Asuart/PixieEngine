@@ -54,8 +54,12 @@ void PixieEngineApp::Start() {
 		m_viewportFrameBuffer->Bind();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glViewport(0, 0, m_viewportFrameBuffer->m_resolution.x, m_viewportFrameBuffer->m_resolution.y);
-		m_rayTracingRenderer->DrawFrame();
-		//m_sceneRenderer->DrawFrame();
+		if (m_rayTracingViewport) {
+			m_rayTracingRenderer->DrawFrame();
+		}
+		else {
+			m_sceneRenderer->DrawFrame();
+		}
 		m_viewportFrameBuffer->Unbind();
 		glViewport(0, 0, m_window.GetWindowSize().x, m_window.GetWindowSize().y);
 
@@ -139,6 +143,8 @@ void PixieEngineApp::DrawSettingsWindow() {
 	ImGui::Begin("Settings", 0);
 
 	ImGui::PushItemWidth(-FLT_MIN);
+
+	if (ImGui::Checkbox("RayTracing viewport", &m_rayTracingViewport)) {}
 
 	ImGui::Text("Scene Path");
 	ImGui::InputText("##scene_path", m_scenePath, m_maxScenePathLength);
