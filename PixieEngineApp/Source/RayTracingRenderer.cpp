@@ -12,7 +12,7 @@ std::string to_string(RayTracingMode mode) {
 }
 
 RayTracingRenderer::RayTracingRenderer(PixieEngineApp* parent, glm::ivec2 resolution, RTScene* scene)
-	: m_parent(parent), m_resolution(resolution), m_rayTracer(new SimplePathIntegrator(resolution)), m_scene(scene), m_viewportResolution(resolution) {
+	: m_parent(parent), m_resolution(resolution), m_rayTracer(new RandomWalkIntegrator(resolution)), m_scene(scene), m_viewportResolution(resolution) {
 	SetScene(scene);
 }
 

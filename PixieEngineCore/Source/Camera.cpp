@@ -11,8 +11,9 @@ void Camera::LookAt(const Vec3& lookFrom, const Vec3& lookAt, const Vec3& up) {
 	m_lookAt = lookAt;
 	m_lookFrom = lookFrom;
 	m_up = up;
-	Mat4 look = glm::lookAt(lookFrom, lookAt, up);
-	m_transform = Transform(look);
+	//Mat4 look = glm::lookAt(lookFrom, lookAt, up);
+	//m_transform = Transform(look);
+	m_transform.LookAt(lookFrom, lookAt, up);
 }
 
 void Camera::SetAspect(float aspect) {

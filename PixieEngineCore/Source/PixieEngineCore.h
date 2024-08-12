@@ -1,4 +1,5 @@
 #pragma once
+#include "Timer.h"
 #include "PixieEngineCoreHeaders.h"
 #include "RTScene.h"
 #include "FrameBuffer.h"

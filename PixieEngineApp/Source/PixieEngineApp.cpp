@@ -241,13 +241,13 @@ void PixieEngineApp::DrawInspectorWindow() {
 
 	Transform& transform = m_selectedObject->transform;
 	ImGui::Text("Transform");
-	if (ImGui::DragFloat3("Position", (float*)&transform.position, 0.01f, -10000.0, 10000.0)) {
+	if (ImGui::DragFloat3("Position", (float*)&transform.GetPosition(), 0.01f, -10000.0, 10000.0)) {
 		transform.UpdateMatrices();
 	}
-	if (ImGui::DragFloat3("Rotation", (float*)&transform.rotation, 0.01f, -10000.0, 10000.0)) {
+	if (ImGui::DragFloat3("Rotation", (float*)&transform.GetRotation(), 0.01f, -10000.0, 10000.0)) {
 		transform.UpdateMatrices();
 	}
-	if (ImGui::DragFloat3("Scale", (float*)&transform.scale, 0.01f, -10000.0, 10000.0)) {
+	if (ImGui::DragFloat3("Scale", (float*)&transform.GetScale(), 0.01f, -10000.0, 10000.0)) {
 		transform.UpdateMatrices();
 	}
 	ImGui::Spacing();
@@ -290,22 +290,20 @@ void PixieEngineApp::ReloadScene() {
 }
 
 void PixieEngineApp::HandleUserInput() {
-	const Vec3 speed = Vec3(0.1);
-	const Vec2 rotationSpeed = Vec2(0.05);
+	const Float speed = 10.0;
+	const Float rotationSpeed = 0.05;
 
 	if (UserInput::GetKey(GLFW_KEY_W)) {
 		if (m_scene) {
 			Camera* camera = m_scene->GetMainCamera();
 			if (camera) {
-				camera->m_transform.position += camera->m_transform.forward * speed;
-				camera->m_transform.UpdateMatrices();
+				camera->m_transform.MoveForward(speed * Timer::fixedDeltaTime);
 			}
 		}
 		if (m_rtScene) {
 			Camera* camera = m_rtScene->mainCamera;
 			if (camera) {
-				camera->m_transform.position += camera->m_transform.forward * speed;
-				camera->m_transform.UpdateMatrices();
+				camera->m_transform.MoveForward(speed * Timer::fixedDeltaTime);
 			}
 		}
 	}
@@ -313,15 +311,13 @@ void PixieEngineApp::HandleUserInput() {
 		if (m_scene) {
 			Camera* camera = m_scene->GetMainCamera();
 			if (camera) {
-				camera->m_transform.position -= camera->m_transform.forward * speed;
-				camera->m_transform.UpdateMatrices();
+				camera->m_transform.MoveForward(-speed * Timer::fixedDeltaTime);
 			}
 		}
 		if (m_rtScene) {
 			Camera* camera = m_rtScene->mainCamera;
 			if (camera) {
-				camera->m_transform.position -= camera->m_transform.forward * speed;
-				camera->m_transform.UpdateMatrices();
+				camera->m_transform.MoveForward(-speed * Timer::fixedDeltaTime);
 			}
 		}
 	}
@@ -329,15 +325,13 @@ void PixieEngineApp::HandleUserInput() {
 		if (m_scene) {
 			Camera* camera = m_scene->GetMainCamera();
 			if (camera) {
-				camera->m_transform.position += camera->m_transform.right * speed;
-				camera->m_transform.UpdateMatrices();
+				camera->m_transform.MoveRight(speed * Timer::fixedDeltaTime);
 			}
 		}
 		if (m_rtScene) {
 			Camera* camera = m_rtScene->mainCamera;
 			if (camera) {
-				camera->m_transform.position += camera->m_transform.right * speed;
-				camera->m_transform.UpdateMatrices();
+				camera->m_transform.MoveRight(speed * Timer::fixedDeltaTime);
 			}
 		}
 	}
@@ -345,15 +339,13 @@ void PixieEngineApp::HandleUserInput() {
 		if (m_scene) {
 			Camera* camera = m_scene->GetMainCamera();
 			if (camera) {
-				camera->m_transform.position -= camera->m_transform.right * speed;
-				camera->m_transform.UpdateMatrices();
+				camera->m_transform.MoveRight(-speed * Timer::fixedDeltaTime);
 			}
 		}
 		if (m_rtScene) {
 			Camera* camera = m_rtScene->mainCamera;
 			if (camera) {
-				camera->m_transform.position -= camera->m_transform.right * speed;
-				camera->m_transform.UpdateMatrices();
+				camera->m_transform.MoveRight(-speed * Timer::fixedDeltaTime);
 			}
 		}
 	}
@@ -361,15 +353,13 @@ void PixieEngineApp::HandleUserInput() {
 		if (m_scene) {
 			Camera* camera = m_scene->GetMainCamera();
 			if (camera) {
-				camera->m_transform.position += camera->m_transform.up * speed;
-				camera->m_transform.UpdateMatrices();
+				camera->m_transform.MoveUp(speed * Timer::fixedDeltaTime);
 			}
 		}
 		if (m_rtScene) {
 			Camera* camera = m_rtScene->mainCamera;
 			if (camera) {
-				camera->m_transform.position += camera->m_transform.up * speed;
-				camera->m_transform.UpdateMatrices();
+				camera->m_transform.MoveUp(speed * Timer::fixedDeltaTime);
 			}
 		}
 	}
@@ -377,15 +367,13 @@ void PixieEngineApp::HandleUserInput() {
 		if (m_scene) {
 			Camera* camera = m_scene->GetMainCamera();
 			if (camera) {
-				camera->m_transform.position -= camera->m_transform.up * speed;
-				camera->m_transform.UpdateMatrices();
+				camera->m_transform.MoveUp(-speed * Timer::fixedDeltaTime);
 			}
 		}
 		if (m_rtScene) {
 			Camera* camera = m_rtScene->mainCamera;
 			if (camera) {
-				camera->m_transform.position -= camera->m_transform.up * speed;
-				camera->m_transform.UpdateMatrices();
+				camera->m_transform.MoveUp(-speed * Timer::fixedDeltaTime);
 			}
 		}
 	}
@@ -394,10 +382,8 @@ void PixieEngineApp::HandleUserInput() {
 			if (m_scene) {
 				Camera* camera = m_scene->GetMainCamera();
 				if (camera) {
-					camera->m_transform.rotation.y += rotationSpeed.x * (float)UserInput::mouseDeltaX;
-					if (camera->m_transform.rotation.y >= PiOver2) camera->m_transform.rotation.y -= 2 * PiOver2;
-					camera->m_transform.UpdateMatrices();
-					std::cout << camera->m_transform.rotation.y << "\n";
+					camera->m_transform.AddRotationY(rotationSpeed * UserInput::mouseDeltaX);
+					//std::cout << camera->m_transform.forward.x << " " << camera->m_transform.forward.y << " " << camera->m_transform.forward.z << " length: " << glm::length2(camera->m_transform.forward) << "\n";
 				}
 			}
 		}

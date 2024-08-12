@@ -3,6 +3,7 @@
 
 #ifdef PIXIE_ENGINE_DOUBLE_PRECISION
 const double Pi = 3.14159265358979323846;
+const double TwoPi = Pi * 2.0;
 const double InvPi = 0.31830988618379067154;
 const double Inv2Pi = 0.15915494309189533577;
 const double Inv4Pi = 0.07957747154594766788;
@@ -14,17 +15,18 @@ const double Infinity = std::numeric_limits<double>::infinity();
 const double ShadowEpsilon = 0.00001;
 const double MinusEpsilon = 0x1.fffffffffffffp-1;
 #else
-const Float Pi = 3.1415926535f;
-const Float InvPi = 0.3183098861f;
-const Float Inv2Pi = 0.1591549430f;
-const Float Inv4Pi = 0.0795774715f;
-const Float PiOver2 = 1.5707963267f;
-const Float PiOver4 = 0.7853981633f;
-const Float Sqrt2 = 1.4142135623f;
-const Float MachineEpsilon = std::numeric_limits<Float>::epsilon() * 0.5f;
-const Float Infinity = std::numeric_limits<Float>::infinity();
-const Float ShadowEpsilon = 0.0001f;
-const Float MinusEpsilon = 0x1.fffffep-1;
+const float Pi = 3.1415926535f;
+const float TwoPi = Pi * 2.0f;
+const float InvPi = 0.3183098861f;
+const float Inv2Pi = 0.1591549430f;
+const float Inv4Pi = 0.0795774715f;
+const float PiOver2 = 1.5707963267f;
+const float PiOver4 = 0.7853981633f;
+const float Sqrt2 = 1.4142135623f;
+const float MachineEpsilon = std::numeric_limits<Float>::epsilon() * 0.5f;
+const float Infinity = std::numeric_limits<Float>::infinity();
+const float ShadowEpsilon = 0.0001f;
+const float MinusEpsilon = 0x1.fffffep-1;
 #endif
 
 Float SafeSqrt(Float v);

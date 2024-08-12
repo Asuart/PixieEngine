@@ -37,5 +37,5 @@ public:
 
 protected:
 	PixieEngineApp* m_parent;
-	RayTracingMode m_rayTracingMode = RayTracingMode::SimplePathTracing;
+	RayTracingMode m_rayTracingMode = RayTracingMode::RandomWalk;
 };

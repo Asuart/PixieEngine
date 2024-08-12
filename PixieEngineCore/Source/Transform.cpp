@@ -1,236 +1,367 @@
 
 #include "Transform.h"
 
-Transform::Transform()
-    : m(Mat4(1.0)), mInv(Mat4(1)), forward(Vec3(0, 0, -1)), up(Vec3(0, 1, 0)), right(Vec3(1, 0, 0)) {
-    Decompose();
-    UpdateDirections();
+Transform::Transform(const Vec3& position, const Vec3& rotation, const Vec3& scale)
+	: m_position(position), m_rotation(rotation), m_scale(scale) {
+	UpdateMatrices();
+	UpdateDirections();
 };
 
 Transform::Transform(const Mat4& m)
-    : m(m), mInv(glm::inverse(m)), forward(Vec3(0, 0, -1)), up(Vec3(0, 1, 0)), right(Vec3(1, 0, 0)) {
-    Decompose();
-    UpdateDirections();
+	: m_transform(m), m_inverseTransform(glm::inverse(m)) {
+	Decompose();
+	UpdateMatrices();
+	UpdateDirections();
 }
 
 Transform::Transform(const Mat4& m, const Mat4& mInv)
-    : m(m), mInv(mInv), forward(Vec3(0, 0, -1)), up(Vec3(0, 1, 0)), right(Vec3(1, 0, 0)) {
-    Decompose();
-    UpdateDirections();
+	: m_transform(m), m_inverseTransform(mInv) {
+	Decompose();
+	UpdateMatrices();
+	UpdateDirections();
 }
 
 const Mat4& Transform::GetMatrix() const {
-    return m;
+	return m_transform;
 }
 
 const Mat4& Transform::GetInverseMatrix() const {
-    return mInv;
+	return m_inverseTransform;
+}
+
+Vec3& Transform::GetPosition() {
+	return m_position;
+}
+
+Vec3& Transform::GetRotation() {
+	return m_rotation;
+}
+
+Vec3& Transform::GetScale() {
+	return m_scale;
+}
+
+void Transform::LookAt(Vec3 pos, Vec3 look, Vec3 up) {
+	Mat4 worldFromCamera = Mat4(1.0f);
+
+	worldFromCamera[0][3] = pos.x;
+	worldFromCamera[1][3] = pos.y;
+	worldFromCamera[2][3] = pos.z;
+	worldFromCamera[3][3] = 1;
+
+	m_forward = glm::normalize(pos - look);
+	m_right = glm::normalize(glm::cross(glm::normalize(up), m_forward));
+	m_up = glm::cross(m_forward, m_right);
+
+	worldFromCamera[0][0] = m_right.x;
+	worldFromCamera[1][0] = m_right.y;
+	worldFromCamera[2][0] = m_right.z;
+	worldFromCamera[3][0] = 0.;
+	worldFromCamera[0][1] = m_up.x;
+	worldFromCamera[1][1] = m_up.y;
+	worldFromCamera[2][1] = m_up.z;
+	worldFromCamera[3][1] = 0.;
+	worldFromCamera[0][2] = m_forward.x;
+	worldFromCamera[1][2] = m_forward.y;
+	worldFromCamera[2][2] = m_forward.z;
+	worldFromCamera[3][2] = 0.;
+
+	m_transform = glm::inverse(glm::transpose(worldFromCamera));
+	m_inverseTransform = glm::inverse(worldFromCamera);
+
+	Decompose();
+}
+
+void Transform::SetPosition(Float x, Float y, Float z) {
+	m_position = Vec3(x, y, z);
+	UpdateMatrices();
+}
+
+void Transform::SetPosition(const Vec3& pos) {
+	m_position = pos;
+	UpdateMatrices();
+}
+
+void Transform::Move(Float x, Float y, Float z) {
+	m_position += Vec3(x, y, z);
+	UpdateMatrices();
+}
+
+void Transform::Move(const Vec3& offset) {
+	m_position += offset;
+	UpdateMatrices();
+}
+
+void Transform::MoveForward(Float value) {
+	m_position += m_forward * value;
+	UpdateMatrices();
+}
+
+void Transform::MoveRight(Float value) {
+	m_position += m_right * value;
+	UpdateMatrices();
+}
+
+void Transform::MoveUp(Float value) {
+	m_position += m_up * value;
+	UpdateMatrices();
+}
+
+void Transform::SetRotation(Float x, Float y, Float z) {
+	SetRotation(m_rotation + Vec3(x, y, z));
+}
+
+void Transform::SetRotation(const Vec3& rotation) {
+	m_rotation = rotation;
+	if (m_rotation.x >= TwoPi) m_rotation.x -= std::floor(m_rotation.x / TwoPi) * TwoPi;
+	if (m_rotation.x <= -TwoPi) m_rotation.x += std::floor(-m_rotation.x / TwoPi) * TwoPi;
+	if (m_rotation.y >= TwoPi) m_rotation.y -= std::floor(m_rotation.y / TwoPi) * TwoPi;
+	if (m_rotation.y <= -TwoPi) m_rotation.y += std::floor(-m_rotation.y / TwoPi) * TwoPi;
+	if (m_rotation.z >= TwoPi) m_rotation.z -= std::floor(m_rotation.z / TwoPi) * TwoPi;
+	if (m_rotation.z <= -TwoPi) m_rotation.z += std::floor(-m_rotation.z / TwoPi) * TwoPi;
+	UpdateMatrices();
+	UpdateDirections();
+}
+
+void Transform::SetRotationX(Float rotation) {
+	m_rotation.x = rotation;
+	if (m_rotation.x >= TwoPi) m_rotation.x -= std::floor(m_rotation.x / TwoPi) * TwoPi;
+	if (m_rotation.x <= -TwoPi) m_rotation.x += std::floor(-m_rotation.x / TwoPi) * TwoPi;
+	UpdateMatrices();
+	UpdateDirections();
+}
+
+void Transform::SetRotationY(Float rotation) {
+	std::cout << m_forward.x << " " << m_forward.y << " " << m_forward.z << " length: " << glm::length2(m_forward) << "\n";
+	m_rotation.y = rotation;
+	if (m_rotation.y >= TwoPi) m_rotation.y -= std::floor(m_rotation.y / TwoPi) * TwoPi;
+	if (m_rotation.y <= -TwoPi) m_rotation.y += std::floor(-m_rotation.y / TwoPi) * TwoPi;
+	UpdateMatrices();
+	UpdateDirections();
+	std::cout << m_forward.x << " " << m_forward.y << " " << m_forward.z << " length: " << glm::length2(m_forward) << "\n";
+}
+
+void Transform::SetRotationZ(Float rotation) {
+	m_rotation.z = rotation;
+	if (m_rotation.z >= TwoPi) m_rotation.z -= std::floor(m_rotation.z / TwoPi) * TwoPi;
+	if (m_rotation.z <= -TwoPi) m_rotation.z += std::floor(-m_rotation.z / TwoPi) * TwoPi;
+	UpdateMatrices();
+	UpdateDirections();
+}
+
+void Transform::AddRotation(Float x, Float y, Float z) {
+	SetRotation(m_rotation + Vec3(x, y, z));
+}
+
+void Transform::AddRotationX(Float rotation) {
+	SetRotationX(m_rotation.x + rotation);
+}
+
+void Transform::AddRotationY(Float rotation) {
+	SetRotationY(m_rotation.y + rotation);
+}
+
+void Transform::AddRotationZ(Float rotation) {
+	SetRotationX(m_rotation.z + rotation);
+}
+
+void Transform::SetScale(Float x, Float y, Float z) {
+	m_scale = Vec3(x, y, z);
+	UpdateMatrices();
+}
+
+void Transform::SetScale(const Vec3& scale) {
+	m_scale = scale;
+	UpdateMatrices();
+}
+
+void Transform::AddScale(Float x, Float y, Float z) {
+	m_scale += Vec3(x, y, z);
+	UpdateMatrices();
+}
+
+void Transform::AddScale(const Vec3& change) {
+	m_scale += change;
+	UpdateMatrices();
 }
 
 void Transform::UpdateMatrices() {
-    Mat4 mTranslate = glm::translate(position);
-    Mat4 mScale = glm::scale(scale);
-    Mat4 mRotate = glm::toMat4(glm::quat(rotation));
-    m = mTranslate * mScale * mRotate;
-    mInv = glm::inverse(m);
-    Decompose();
-    UpdateDirections();
+	Mat4 mTranslate = glm::translate(m_position);
+	Mat4 mScale = glm::scale(m_scale);
+	Mat4 mRotate = glm::rotate(m_rotation.x, glm::vec3(1.0f, 0.0f, 0.0f)) * glm::rotate(m_rotation.y, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(m_rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	m_transform = mRotate * mScale * mTranslate;
+	m_inverseTransform = glm::inverse(m_transform);
+	UpdateDirections();
 }
 
 Vec3 Transform::ApplyPoint(Vec3 p) const {
-    Float xp = m[0][0] * p.x + m[0][1] * p.y + m[0][2] * p.z + m[0][3];
-    Float yp = m[1][0] * p.x + m[1][1] * p.y + m[1][2] * p.z + m[1][3];
-    Float zp = m[2][0] * p.x + m[2][1] * p.y + m[2][2] * p.z + m[2][3];
-    Float wp = m[3][0] * p.x + m[3][1] * p.y + m[3][2] * p.z + m[3][3];
-    if (wp == 1.0f) {
-        return Vec3(xp, yp, zp);
-    }
-    else {
-        return Vec3(xp, yp, zp) / wp;
-    }
+	Vec4 transformed = m_transform * Vec4(p, 1.0);
+	if (transformed.w == 1.0f) {
+		return transformed;
+	}
+	else {
+		return transformed / transformed.w;
+	}
 }
 
 Vec3 Transform::ApplyVector(Vec3 v) const {
-    return Vec3(
-        m[0][0] * v.x + m[0][1] * v.y + m[0][2] * v.z,
-        m[1][0] * v.x + m[1][1] * v.y + m[1][2] * v.z,
-        m[2][0] * v.x + m[2][1] * v.y + m[2][2] * v.z);
+	return m_transform * Vec4(v, 0.0);
 }
 
 Vec3 Transform::ApplyNormal(Vec3 n) const {
-    Float x = n.x, y = n.y, z = n.z;
-    return Vec3(
-        mInv[0][0] * x + mInv[1][0] * y + mInv[2][0] * z,
-        mInv[0][1] * x + mInv[1][1] * y + mInv[2][1] * z,
-        mInv[0][2] * x + mInv[1][2] * y + mInv[2][2] * z);
+	return Mat3(glm::transpose(glm::inverse(m_transform))) * n;
 }
 
 Ray Transform::ApplyRay(const Ray& r, Float* tMax) const {
-    Vec3 o = (*this).ApplyPoint(Vec3(r.origin));
-    Vec3 d = (*this).ApplyVector(r.direction);
+	Vec3 o = ApplyPoint(r.origin);
+	Vec3 d = ApplyVector(r.direction);
 
-    Float lengthSquared = length2(d);
-    if (lengthSquared > 0) {
-        o += d * MachineEpsilon;
-    }
+	Float lengthSquared = length2(d);
+	if (lengthSquared > 0) {
+		o += d * MachineEpsilon;
+	}
 
-    return Ray(r.x, r.y, o, d);
+	return Ray(r.x, r.y, o, d);
 }
 
 SurfaceInteraction Transform::ApplyInteraction(const SurfaceInteraction& in) const {
-    SurfaceInteraction ret(in);
-    ret.position = (*this).ApplyPoint(in.position);
-    ret.normal = (*this).ApplyNormal(in.normal);
-    if (length2(ret.normal) > 0.0f) {
-        ret.normal = glm::normalize(ret.normal);
-    }
-    ret.wo = (*this).ApplyVector(in.wo);
-    if (length2(ret.wo) > 0) {
-        ret.wo = glm::normalize(ret.wo);
-    }
-    return ret;
+	SurfaceInteraction ret(in);
+	ret.position = ApplyPoint(in.position);
+	ret.normal = ApplyNormal(in.normal);
+	if (length2(ret.normal) > 0.0f) {
+		ret.normal = glm::normalize(ret.normal);
+	}
+	ret.wo = ApplyVector(in.wo);
+	if (length2(ret.wo) > 0) {
+		ret.wo = glm::normalize(ret.wo);
+	}
+	return ret;
 }
 
 Bounds3f Transform::ApplyBounds(const Bounds3f& b) const {
-    Bounds3f bt;
-    for (int32_t i = 0; i < 8; ++i) {
-        bt = Union(bt, (*this).ApplyBounds(b));
-    }
-    return bt;
+	Bounds3f bt;
+	for (int32_t i = 0; i < 8; ++i) {
+		bt = Union(bt, ApplyBounds(b));
+	}
+	return bt;
 }
 
 Vec3 Transform::ApplyInversePoint(Vec3 p) const {
-    Float x = p.x, y = p.y, z = p.z;
-    Float xp = (mInv[0][0] * x + mInv[0][1] * y) + (mInv[0][2] * z + mInv[0][3]);
-    Float yp = (mInv[1][0] * x + mInv[1][1] * y) + (mInv[1][2] * z + mInv[1][3]);
-    Float zp = (mInv[2][0] * x + mInv[2][1] * y) + (mInv[2][2] * z + mInv[2][3]);
-    Float wp = (mInv[3][0] * x + mInv[3][1] * y) + (mInv[3][2] * z + mInv[3][3]);
-    if (wp == 1.0f) {
-        return Vec3(xp, yp, zp);
-    }
-    else {
-        return Vec3(xp, yp, zp) / wp;
-    }
+	Vec4 transformed = m_inverseTransform * Vec4(p, 1.0);
+	if (transformed.w == 1.0f) {
+		return transformed;
+	}
+	else {
+		return transformed / transformed.w;
+	}
 }
 
 Vec3 Transform::ApplyInverseVector(Vec3 v) const {
-    Float x = v.x, y = v.y, z = v.z;
-    return Vec3(
-        mInv[0][0] * x + mInv[0][1] * y + mInv[0][2] * z,
-        mInv[1][0] * x + mInv[1][1] * y + mInv[1][2] * z,
-        mInv[2][0] * x + mInv[2][1] * y + mInv[2][2] * z);
+	return m_inverseTransform * Vec4(v, 0.0);
 }
 
 Vec3 Transform::ApplyInverseNormal(Vec3 n) const {
-    Float x = n.x, y = n.y, z = n.z;
-    return Vec3(
-        m[0][0] * x + m[1][0] * y + m[2][0] * z,
-        m[0][1] * x + m[1][1] * y + m[2][1] * z,
-        m[0][2] * x + m[1][2] * y + m[2][2] * z);
+	return Mat3(glm::transpose(glm::inverse(m_inverseTransform))) * n;
 }
 
 Ray Transform::ApplyInverseRay(const Ray& r, Float* tMax) const {
-    Vec3 o = ApplyInversePoint(r.origin);
-    Vec3 d = ApplyInverseVector(r.direction);
+	Vec3 o = ApplyInversePoint(r.origin);
+	Vec3 d = ApplyInverseVector(r.direction);
 
-    Float lengthSquared = length2(d);
-    if (lengthSquared > 0.0f) {
-        o -= d * MachineEpsilon;
-    }
+	Float lengthSquared = length2(d);
+	if (lengthSquared > 0.0f) {
+		o -= d * MachineEpsilon;
+	}
 
-    return Ray(r.x, r.y,o, d);
+	return Ray(r.x, r.y, o, d);
 }
 
 SurfaceInteraction Transform::ApplyInverseInteraction(const SurfaceInteraction& in) const {
-    SurfaceInteraction ret(in);
-    Transform t = Inverse(*this);
-    ret.position = t.ApplyPoint(in.position);
-    ret.normal = t.ApplyNormal(in.normal);
-    if (length2(ret.normal) > 0.0f) {
-        ret.normal = glm::normalize(ret.normal);
-    }
-    ret.wo = t.ApplyVector(in.wo);
-    if (length2(ret.wo) > 0.0f) {
-        ret.wo = glm::normalize(ret.wo);
-    }
-    return ret;
+	SurfaceInteraction ret(in);
+	Transform t = Inverse(*this);
+	ret.position = t.ApplyPoint(in.position);
+	ret.normal = t.ApplyNormal(in.normal);
+	if (length2(ret.normal) > 0.0f) {
+		ret.normal = glm::normalize(ret.normal);
+	}
+	ret.wo = t.ApplyVector(in.wo);
+	if (length2(ret.wo) > 0.0f) {
+		ret.wo = glm::normalize(ret.wo);
+	}
+	return ret;
 }
 
 void Transform::Decompose() {
-    glm::vec3 skew;
-    glm::vec4 perspective;
-    glm::quat qRotation;
-    glm::decompose(m, scale, qRotation, position, skew, perspective);
-    rotation = glm::eulerAngles(qRotation);
+	glm::vec3 skew;
+	glm::vec4 perspective;
+	glm::quat qRotation;
+	glm::decompose(m_transform, m_scale, qRotation, m_position, skew, perspective);
+	m_rotation = glm::eulerAngles(qRotation);
 }
 
 void Transform::UpdateDirections() {
-    glm::mat3 mRotate = glm::toMat4(glm::quat(rotation));
-    up = mRotate * glm::vec3(0.0, -1.0, 0.0);
-    forward = mRotate * glm::vec3(-1.0, 0.0, 0.0);
-    right = mRotate * glm::vec3(0.0, 0.0, -1.0);
+	glm::mat3 mRotate = glm::rotate(m_rotation.x, glm::vec3(1.0f, 0.0f, 0.0f)) * glm::rotate(m_rotation.y, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(m_rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	m_forward = glm::normalize(mRotate * glm::vec3(0.0, 0.0, -1.0));
+	m_up = glm::normalize(mRotate * glm::vec3(0.0, 1.0, 0.0));
+	m_right = glm::normalize(mRotate * glm::vec3(1.0, 0.0, 0.0));
 }
 
 bool Transform::IsIdentity() const {
-    return m == Mat4();
+	return m_transform == Mat4(1.0f);
 }
 
 bool Transform::HasScale(Float tolerance) const {
-    Float la2 = length2((*this).ApplyVector(Vec3(1, 0, 0)));
-    Float lb2 = length2((*this).ApplyVector(Vec3(0, 1, 0)));
-    Float lc2 = length2((*this).ApplyVector(Vec3(0, 0, 1)));
-    return (std::abs(la2 - 1) > tolerance || std::abs(lb2 - 1) > tolerance || std::abs(lc2 - 1) > tolerance);
+	Float la2 = length2(ApplyVector(Vec3(1, 0, 0)));
+	Float lb2 = length2(ApplyVector(Vec3(0, 1, 0)));
+	Float lc2 = length2(ApplyVector(Vec3(0, 0, 1)));
+	return (std::abs(la2 - 1) > tolerance || std::abs(lb2 - 1) > tolerance || std::abs(lc2 - 1) > tolerance);
 }
 
 bool Transform::SwapsHandedness() const {
-    glm::mat3 s(
-        m[0][0], m[0][1], m[0][2],
-        m[1][0], m[1][1], m[1][2],
-        m[2][0], m[2][1], m[2][2]);
-    return glm::determinant(s) < 0;
+	return glm::determinant(Mat3(m_transform)) < 0;
 }
 
 bool Transform::operator==(const Transform& t) const {
-    return t.m == m;
+	return t.m_transform == m_transform;
 }
 
 bool Transform::operator!=(const Transform& t) const {
-    return t.m != m;
+	return t.m_transform != m_transform;
 }
 
 Transform Transform::operator*(const Transform& t2) const {
-    return Transform(m * t2.m, t2.mInv * mInv);
+	return Transform(m_transform * t2.m_transform, t2.m_inverseTransform * m_inverseTransform);
 }
 
 Transform Inverse(const Transform& t) {
-    return Transform(t.GetInverseMatrix(), t.GetMatrix());
+	return Transform(t.GetInverseMatrix(), t.GetMatrix());
 }
 
 Transform Transpose(const Transform& t) {
-    return Transform(glm::transpose(t.GetMatrix()), glm::transpose(t.GetInverseMatrix()));
+	return Transform(glm::transpose(t.GetMatrix()), glm::transpose(t.GetInverseMatrix()));
 }
 
 Transform RotateFromTo(Vec3 from, Vec3 to) {
-    Vec3 refl;
-    if (std::abs(from.x) < 0.72f && std::abs(to.x) < 0.72f) {
-        refl = Vec3(1, 0, 0);
-    }
-    else if (std::abs(from.y) < 0.72f && std::abs(to.y) < 0.72f) {
-        refl = Vec3(0, 1, 0);
-    }
-    else {
-        refl = Vec3(0, 0, 1);
-    }
+	Vec3 refl;
+	if (std::abs(from.x) < 0.72f && std::abs(to.x) < 0.72f) {
+		refl = Vec3(1, 0, 0);
+	}
+	else if (std::abs(from.y) < 0.72f && std::abs(to.y) < 0.72f) {
+		refl = Vec3(0, 1, 0);
+	}
+	else {
+		refl = Vec3(0, 0, 1);
+	}
 
-    Vec3 u = refl - from, v = refl - to;
-    Mat4 r;
-    for (int32_t i = 0; i < 3; ++i) {
-        for (int32_t j = 0; j < 3; ++j) {
-            r[i][j] = ((i == j) ? 1 : 0) - 2 / glm::dot(u, u) * u[i] * u[j] -
-                2 / glm::dot(v, v) * v[i] * v[j] +
-                4 * glm::dot(u, v) / (glm::dot(u, u) * glm::dot(v, v)) * v[i] * u[j];
-        }
-    }
+	Vec3 u = refl - from, v = refl - to;
+	Mat4 r;
+	for (int32_t i = 0; i < 3; ++i) {
+		for (int32_t j = 0; j < 3; ++j) {
+			r[i][j] = ((i == j) ? 1 : 0) - 2 / glm::dot(u, u) * u[i] * u[j] -
+				2 / glm::dot(v, v) * v[i] * v[j] +
+				4 * glm::dot(u, v) / (glm::dot(u, u) * glm::dot(v, v)) * v[i] * u[j];
+		}
+	}
 
-    return Transform(r, glm::transpose(r));
+	return Transform(r, glm::transpose(r));
 }
