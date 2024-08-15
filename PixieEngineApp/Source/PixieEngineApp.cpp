@@ -231,15 +231,33 @@ void PixieEngineApp::DrawMaterialsWindow() {
 void PixieEngineApp::DrawInspectorWindow() {
 	ImGui::SetNextWindowSize(ImVec2(400, 400));
 	ImGui::Begin("Inspector", 0);
-	if (!m_selectedObject) {
-		ImGui::End();
-		return;
+
+	if (Camera* mainCamera = m_scene->GetMainCamera()) {
+		ImGui::Text("Main Camera");
+		ImGui::Spacing();
+		DrawTransform(mainCamera->m_transform);
 	}
 
-	ImGui::Text(m_selectedObject->name.c_str());
-	ImGui::Spacing();
+	if (m_selectedObject) {
+		ImGui::Text(m_selectedObject->name.c_str());
+		ImGui::Spacing();
 
-	Transform& transform = m_selectedObject->transform;
+		DrawTransform(m_selectedObject->transform);
+		ImGui::Spacing();
+
+		ImGui::Text("Components");
+		if (m_selectedObject->components.size() > 0) {
+			for (size_t i = 0; i < m_selectedObject->components.size(); i++) {
+				ImGui::Text(m_selectedObject->components[i]->name.c_str());
+			}
+		}
+		ImGui::Spacing();
+	}
+
+	ImGui::End();
+}
+
+void PixieEngineApp::DrawTransform(Transform& transform) {
 	ImGui::Text("Transform");
 	if (ImGui::DragFloat3("Position", (float*)&transform.GetPosition(), 0.01f, -10000.0, 10000.0)) {
 		transform.UpdateMatrices();
@@ -250,17 +268,6 @@ void PixieEngineApp::DrawInspectorWindow() {
 	if (ImGui::DragFloat3("Scale", (float*)&transform.GetScale(), 0.01f, -10000.0, 10000.0)) {
 		transform.UpdateMatrices();
 	}
-	ImGui::Spacing();
-
-	ImGui::Text("Components");
-	if (m_selectedObject->components.size() > 0) {
-		for (size_t i = 0; i < m_selectedObject->components.size(); i++) {
-			ImGui::Text(m_selectedObject->components[i]->name.c_str());
-		}
-	}
-	ImGui::Spacing();
-
-	ImGui::End();
 }
 
 void PixieEngineApp::UpdateViewportResolution(glm::ivec2 resolution) {
@@ -291,7 +298,7 @@ void PixieEngineApp::ReloadScene() {
 
 void PixieEngineApp::HandleUserInput() {
 	const Float speed = 10.0;
-	const Float rotationSpeed = 0.05;
+	const Float rotationSpeed = 0.1;
 
 	if (UserInput::GetKey(GLFW_KEY_W)) {
 		if (m_scene) {
@@ -306,6 +313,7 @@ void PixieEngineApp::HandleUserInput() {
 				camera->m_transform.MoveForward(speed * Timer::fixedDeltaTime);
 			}
 		}
+		m_rayTracingRenderer->Reset();
 	}
 	if (UserInput::GetKey(GLFW_KEY_S)) {
 		if (m_scene) {
@@ -320,6 +328,7 @@ void PixieEngineApp::HandleUserInput() {
 				camera->m_transform.MoveForward(-speed * Timer::fixedDeltaTime);
 			}
 		}
+		m_rayTracingRenderer->Reset();
 	}
 	if (UserInput::GetKey(GLFW_KEY_D)) {
 		if (m_scene) {
@@ -334,6 +343,7 @@ void PixieEngineApp::HandleUserInput() {
 				camera->m_transform.MoveRight(speed * Timer::fixedDeltaTime);
 			}
 		}
+		m_rayTracingRenderer->Reset();
 	}
 	if (UserInput::GetKey(GLFW_KEY_A)) {
 		if (m_scene) {
@@ -348,6 +358,7 @@ void PixieEngineApp::HandleUserInput() {
 				camera->m_transform.MoveRight(-speed * Timer::fixedDeltaTime);
 			}
 		}
+		m_rayTracingRenderer->Reset();
 	}
 	if (UserInput::GetKey(GLFW_KEY_SPACE)) {
 		if (m_scene) {
@@ -362,6 +373,7 @@ void PixieEngineApp::HandleUserInput() {
 				camera->m_transform.MoveUp(speed * Timer::fixedDeltaTime);
 			}
 		}
+		m_rayTracingRenderer->Reset();
 	}
 	if (UserInput::GetKey(GLFW_KEY_LEFT_CONTROL)) {
 		if (m_scene) {
@@ -376,6 +388,7 @@ void PixieEngineApp::HandleUserInput() {
 				camera->m_transform.MoveUp(-speed * Timer::fixedDeltaTime);
 			}
 		}
+		m_rayTracingRenderer->Reset();
 	}
 	if (UserInput::GetMouseButton(GLFW_MOUSE_BUTTON_2)) {
 		if (UserInput::mouseDeltaX) {
@@ -383,9 +396,15 @@ void PixieEngineApp::HandleUserInput() {
 				Camera* camera = m_scene->GetMainCamera();
 				if (camera) {
 					camera->m_transform.AddRotationY(rotationSpeed * UserInput::mouseDeltaX);
-					//std::cout << camera->m_transform.forward.x << " " << camera->m_transform.forward.y << " " << camera->m_transform.forward.z << " length: " << glm::length2(camera->m_transform.forward) << "\n";
 				}
 			}
 		}
+		if (m_rtScene) {
+			Camera* camera = m_rtScene->mainCamera;
+			if (camera) {
+				camera->m_transform.AddRotationY(rotationSpeed * UserInput::mouseDeltaX);
+			}
+		}
+		m_rayTracingRenderer->Reset();
 	}
 }

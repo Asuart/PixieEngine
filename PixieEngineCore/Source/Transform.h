@@ -15,6 +15,10 @@ public:
 	Vec3& GetPosition();
 	Vec3& GetRotation();
 	Vec3& GetScale();
+	const Vec3& GetPositionValue() const;
+	const Vec3& GetRotationValue() const;
+	const Vec3& GetScaleValue() const;
+
 
 	void LookAt(Vec3 pos, Vec3 look, Vec3 up);
 	void SetPosition(Float x, Float y, Float z);

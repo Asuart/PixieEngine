@@ -32,6 +32,7 @@ protected:
 	void DrawViewportWindow();
 	void DrawSceneWindow();
 	void DrawSceneTree(SceneObject* object);
+	void DrawTransform(Transform& transform);
 	void DrawMaterialsWindow();
 	void DrawInspectorWindow();
 	void UpdateViewportResolution(glm::ivec2 resolution);

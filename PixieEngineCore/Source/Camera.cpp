@@ -8,11 +8,6 @@ Camera::Camera(Vec3 lookFrom, Vec3 lookAt, Vec3 up, Float fovy, Float aspect, Fl
 }
 
 void Camera::LookAt(const Vec3& lookFrom, const Vec3& lookAt, const Vec3& up) {
-	m_lookAt = lookAt;
-	m_lookFrom = lookFrom;
-	m_up = up;
-	//Mat4 look = glm::lookAt(lookFrom, lookAt, up);
-	//m_transform = Transform(look);
 	m_transform.LookAt(lookFrom, lookAt, up);
 }
 
@@ -27,14 +22,18 @@ void Camera::SetFieldOfViewY(float fovy) {
 }
 
 Ray Camera::GetRay(uint32_t x, uint32_t y, const Vec2& coord) const {
-	Float theta = Lerp(coord.x, (m_fovy * m_aspect) / 2, -(m_fovy * m_aspect) / 2);
+	Float theta = Lerp(coord.x, -(m_fovy * m_aspect) / 2, (m_fovy * m_aspect) / 2);
 	Float phi = Lerp(coord.y, -m_fovy / 2, m_fovy / 2);
-	Vec3 dir = glm::normalize(glm::mat3(m_transform.GetMatrix()) * Vec3(glm::tan(theta), glm::tan(phi), 1.0f));
-	return Ray(x, y, m_lookFrom, dir);
+	Vec3 dir = glm::normalize(glm::mat3(m_transform.GetMatrix()) * Vec3(glm::tan(theta), glm::tan(phi), -1.0f));
+	return Ray(x, y, m_transform.GetPositionValue(), dir);
 }
 
 const Mat4& Camera::GetViewMatrix() const {
 	return m_transform.GetMatrix();
+}
+
+const Mat4& Camera::GetInverseViewMatrix() const {
+	return m_transform.GetInverseMatrix();
 }
 
 const Mat4& Camera::GetProjectionMatrix() const {

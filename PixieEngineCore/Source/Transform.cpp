@@ -41,35 +41,25 @@ Vec3& Transform::GetScale() {
 	return m_scale;
 }
 
+const Vec3& Transform::GetPositionValue() const {
+	return m_position;
+}
+
+const Vec3& Transform::GetRotationValue() const {
+	return m_rotation;
+}
+
+const Vec3& Transform::GetScaleValue() const {
+	return m_scale;
+}
+
 void Transform::LookAt(Vec3 pos, Vec3 look, Vec3 up) {
-	Mat4 worldFromCamera = Mat4(1.0f);
-
-	worldFromCamera[0][3] = pos.x;
-	worldFromCamera[1][3] = pos.y;
-	worldFromCamera[2][3] = pos.z;
-	worldFromCamera[3][3] = 1;
-
-	m_forward = glm::normalize(pos - look);
-	m_right = glm::normalize(glm::cross(glm::normalize(up), m_forward));
-	m_up = glm::cross(m_forward, m_right);
-
-	worldFromCamera[0][0] = m_right.x;
-	worldFromCamera[1][0] = m_right.y;
-	worldFromCamera[2][0] = m_right.z;
-	worldFromCamera[3][0] = 0.;
-	worldFromCamera[0][1] = m_up.x;
-	worldFromCamera[1][1] = m_up.y;
-	worldFromCamera[2][1] = m_up.z;
-	worldFromCamera[3][1] = 0.;
-	worldFromCamera[0][2] = m_forward.x;
-	worldFromCamera[1][2] = m_forward.y;
-	worldFromCamera[2][2] = m_forward.z;
-	worldFromCamera[3][2] = 0.;
-
-	m_transform = glm::inverse(glm::transpose(worldFromCamera));
-	m_inverseTransform = glm::inverse(worldFromCamera);
-
+	m_transform = glm::lookAt(pos, look, up);
+	m_inverseTransform = glm::inverse(m_transform);
 	Decompose();
+	SetPosition(pos);
+	AddRotationY(180.0f);
+	UpdateDirections();
 }
 
 void Transform::SetPosition(Float x, Float y, Float z) {
@@ -113,20 +103,20 @@ void Transform::SetRotation(Float x, Float y, Float z) {
 
 void Transform::SetRotation(const Vec3& rotation) {
 	m_rotation = rotation;
-	if (m_rotation.x >= TwoPi) m_rotation.x -= std::floor(m_rotation.x / TwoPi) * TwoPi;
-	if (m_rotation.x <= -TwoPi) m_rotation.x += std::floor(-m_rotation.x / TwoPi) * TwoPi;
-	if (m_rotation.y >= TwoPi) m_rotation.y -= std::floor(m_rotation.y / TwoPi) * TwoPi;
-	if (m_rotation.y <= -TwoPi) m_rotation.y += std::floor(-m_rotation.y / TwoPi) * TwoPi;
-	if (m_rotation.z >= TwoPi) m_rotation.z -= std::floor(m_rotation.z / TwoPi) * TwoPi;
-	if (m_rotation.z <= -TwoPi) m_rotation.z += std::floor(-m_rotation.z / TwoPi) * TwoPi;
+	if (m_rotation.x >= MaxDegrees) m_rotation.x -= std::floor(m_rotation.x / MaxDegrees) * MaxDegrees;
+	if (m_rotation.x <= -MaxDegrees) m_rotation.x += std::floor(-m_rotation.x / MaxDegrees) * MaxDegrees;
+	if (m_rotation.y >= MaxDegrees) m_rotation.y -= std::floor(m_rotation.y / MaxDegrees) * MaxDegrees;
+	if (m_rotation.y <= -MaxDegrees) m_rotation.y += std::floor(-m_rotation.y / MaxDegrees) * MaxDegrees;
+	if (m_rotation.z >= MaxDegrees) m_rotation.z -= std::floor(m_rotation.z / MaxDegrees) * MaxDegrees;
+	if (m_rotation.z <= -MaxDegrees) m_rotation.z += std::floor(-m_rotation.z / MaxDegrees) * MaxDegrees;
 	UpdateMatrices();
 	UpdateDirections();
 }
 
 void Transform::SetRotationX(Float rotation) {
 	m_rotation.x = rotation;
-	if (m_rotation.x >= TwoPi) m_rotation.x -= std::floor(m_rotation.x / TwoPi) * TwoPi;
-	if (m_rotation.x <= -TwoPi) m_rotation.x += std::floor(-m_rotation.x / TwoPi) * TwoPi;
+	if (m_rotation.x >= MaxDegrees) m_rotation.x -= std::floor(m_rotation.x / MaxDegrees) * MaxDegrees;
+	if (m_rotation.x <= -MaxDegrees) m_rotation.x += std::floor(-m_rotation.x / MaxDegrees) * MaxDegrees;
 	UpdateMatrices();
 	UpdateDirections();
 }
@@ -134,8 +124,8 @@ void Transform::SetRotationX(Float rotation) {
 void Transform::SetRotationY(Float rotation) {
 	std::cout << m_forward.x << " " << m_forward.y << " " << m_forward.z << " length: " << glm::length2(m_forward) << "\n";
 	m_rotation.y = rotation;
-	if (m_rotation.y >= TwoPi) m_rotation.y -= std::floor(m_rotation.y / TwoPi) * TwoPi;
-	if (m_rotation.y <= -TwoPi) m_rotation.y += std::floor(-m_rotation.y / TwoPi) * TwoPi;
+	if (m_rotation.y >= MaxDegrees) m_rotation.y -= std::floor(m_rotation.y / MaxDegrees) * MaxDegrees;
+	if (m_rotation.y <= -MaxDegrees) m_rotation.y += std::floor(-m_rotation.y / MaxDegrees) * MaxDegrees;
 	UpdateMatrices();
 	UpdateDirections();
 	std::cout << m_forward.x << " " << m_forward.y << " " << m_forward.z << " length: " << glm::length2(m_forward) << "\n";
@@ -143,8 +133,8 @@ void Transform::SetRotationY(Float rotation) {
 
 void Transform::SetRotationZ(Float rotation) {
 	m_rotation.z = rotation;
-	if (m_rotation.z >= TwoPi) m_rotation.z -= std::floor(m_rotation.z / TwoPi) * TwoPi;
-	if (m_rotation.z <= -TwoPi) m_rotation.z += std::floor(-m_rotation.z / TwoPi) * TwoPi;
+	if (m_rotation.z >= MaxDegrees) m_rotation.z -= std::floor(m_rotation.z / MaxDegrees) * MaxDegrees;
+	if (m_rotation.z <= -MaxDegrees) m_rotation.z += std::floor(-m_rotation.z / MaxDegrees) * MaxDegrees;
 	UpdateMatrices();
 	UpdateDirections();
 }
@@ -186,10 +176,13 @@ void Transform::AddScale(const Vec3& change) {
 }
 
 void Transform::UpdateMatrices() {
-	Mat4 mTranslate = glm::translate(m_position);
-	Mat4 mScale = glm::scale(m_scale);
-	Mat4 mRotate = glm::rotate(m_rotation.x, glm::vec3(1.0f, 0.0f, 0.0f)) * glm::rotate(m_rotation.y, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(m_rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	m_transform = mRotate * mScale * mTranslate;
+	Mat4 rotateX = glm::rotate(Mat4(1.0f), glm::radians(m_rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+	Mat4 rotateY = glm::rotate(Mat4(1.0f), glm::radians(m_rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+	Mat4 rotateZ = glm::rotate(Mat4(1.0f), glm::radians(m_rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+	Mat4 mRotate = rotateY * rotateX * rotateZ;
+	Mat4 mTranslate = glm::translate(Mat4(1.0f), m_position);
+	Mat4 mScale = glm::scale(Mat4(1.0f), m_scale);
+	m_transform = mTranslate * mRotate * mScale;
 	m_inverseTransform = glm::inverse(m_transform);
 	UpdateDirections();
 }
@@ -296,14 +289,17 @@ void Transform::Decompose() {
 	glm::vec4 perspective;
 	glm::quat qRotation;
 	glm::decompose(m_transform, m_scale, qRotation, m_position, skew, perspective);
-	m_rotation = glm::eulerAngles(qRotation);
+	m_rotation = glm::degrees(glm::eulerAngles(qRotation));
 }
 
 void Transform::UpdateDirections() {
-	glm::mat3 mRotate = glm::rotate(m_rotation.x, glm::vec3(1.0f, 0.0f, 0.0f)) * glm::rotate(m_rotation.y, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(m_rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	m_forward = glm::normalize(mRotate * glm::vec3(0.0, 0.0, -1.0));
-	m_up = glm::normalize(mRotate * glm::vec3(0.0, 1.0, 0.0));
-	m_right = glm::normalize(mRotate * glm::vec3(1.0, 0.0, 0.0));
+	Mat4 rotateX = glm::rotate(Mat4(1.0f), glm::radians(m_rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+	Mat4 rotateY = glm::rotate(Mat4(1.0f), glm::radians(m_rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+	Mat4 rotateZ = glm::rotate(Mat4(1.0f), glm::radians(m_rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+	Mat4 mRotate = rotateY * rotateX * rotateZ;
+	m_forward = glm::normalize(mRotate * glm::vec4(0.0, 0.0, -1.0, 0.0));
+	m_up = glm::normalize(mRotate * glm::vec4(0.0, 1.0, 0.0, 0.0));
+	m_right = glm::normalize(mRotate * glm::vec4(1.0, 0.0, 0.0, 0.0));
 }
 
 bool Transform::IsIdentity() const {

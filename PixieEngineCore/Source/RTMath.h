@@ -14,6 +14,7 @@ const double MachineEpsilon = std::numeric_limits<double>::epsilon() * 0.5;
 const double Infinity = std::numeric_limits<double>::infinity();
 const double ShadowEpsilon = 0.00001;
 const double MinusEpsilon = 0x1.fffffffffffffp-1;
+const double MaxDegrees = 360.0;
 #else
 const float Pi = 3.1415926535f;
 const float TwoPi = Pi * 2.0f;
@@ -27,6 +28,7 @@ const float MachineEpsilon = std::numeric_limits<Float>::epsilon() * 0.5f;
 const float Infinity = std::numeric_limits<Float>::infinity();
 const float ShadowEpsilon = 0.0001f;
 const float MinusEpsilon = 0x1.fffffep-1;
+const float MaxDegrees = 360.0f;
 #endif
 
 Float SafeSqrt(Float v);
