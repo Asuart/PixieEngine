@@ -19,6 +19,7 @@ public:
 
 	Vec3 Corner(int32_t corner) const;
 	Vec3 Diagonal() const;
+	Vec3 Center() const;
 	Float SurfaceArea() const;
 	Float Volume() const;
 	int MaxDimension() const;

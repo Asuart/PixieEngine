@@ -5,6 +5,7 @@
 #include "MeshComponent.h"
 #include "MaterialComponent.h"
 #include "ShaderLibrary.h"
+#include "Light.h"
 
 class SceneRenderer : public Renderer {
 public:
@@ -20,4 +21,7 @@ protected:
 	GLuint m_defaultShader = 0;
 
 	void DrawObject(SceneObject* object, GLuint mModelLoc);
+	void SetupCamera(const Camera* camera);
+	void SetupLights();
+	void SetupMaterial(const Material* material);
 };

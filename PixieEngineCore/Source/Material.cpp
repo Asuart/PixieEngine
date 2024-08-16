@@ -1,7 +1,16 @@
 #include "Material.h"
 
 Material::Material(const std::string& name, Vec3 _albedo, Vec3 _emission, Float _roughness, Float _metallic, Float _transparency, Float _eta)
-	: name(name), albedo(_albedo), emission(_emission), roughness(_roughness), metallic(_metallic), transparency(_transparency), eta(_eta) {}
+	: name(name), albedo(_albedo), emission(_emission), roughness(_roughness), metallic(_metallic), transparency(_transparency), eta(_eta),
+	m_emission(_emission), m_albedo(_albedo), m_roughness(_roughness), m_metallic(_metallic), m_transparency(_transparency), m_refraction(_eta) {}
+
+bool Material::IsEmissive() {
+	return m_emission.GetRGBValue() != glm::fvec3(0.0f, 0.0f, 0.0f);
+}
+
+bool Material::IsTranslucent() {
+	return m_transparency > 0.0f;
+}
 
 Vec3 Refract(const Vec3& uv, const Vec3& n, Float etai_over_etat) {
 	Float cos_theta = fmin(glm::dot(-uv, n), 1.0f);

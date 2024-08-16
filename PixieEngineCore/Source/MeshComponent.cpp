@@ -31,6 +31,6 @@ const Mesh* MeshComponent::GetMesh() const {
 
 void MeshComponent::Draw() {
 	glBindVertexArray(vao);
-	glDrawElements(GL_TRIANGLES, mesh->indices.size(), GL_UNSIGNED_INT, NULL);
+	glDrawElements(GL_TRIANGLES, (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, NULL);
 	glBindVertexArray(0);
 }

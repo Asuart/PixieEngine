@@ -98,8 +98,9 @@ void PixieEngineApp::DrawUI() {
 	windowFlags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
 	windowFlags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
-	if (dockspaceFlags & ImGuiDockNodeFlags_PassthruCentralNode)
+	if (dockspaceFlags & ImGuiDockNodeFlags_PassthruCentralNode) {
 		windowFlags |= ImGuiWindowFlags_NoBackground;
+	}
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 	ImGui::Begin("DockSpace Demo", &dockingOpen, windowFlags);
@@ -165,7 +166,7 @@ void PixieEngineApp::DrawViewportWindow() {
 	ImGui::Begin("Viewport");
 	ImVec2 viewportResolution = ImGui::GetContentRegionAvail();
 	ImGui::SetNextWindowSize(viewportResolution);
-	ImGui::Image((void*)m_viewportFrameBuffer->m_texture, viewportResolution, { 0.0, 1.0 }, { 1.0, 0.0 });
+	ImGui::Image((void*)(uint64_t)m_viewportFrameBuffer->m_texture, viewportResolution, { 0.0, 1.0 }, { 1.0, 0.0 });
 	glm::ivec2 glmViewportResolution = { viewportResolution.x, viewportResolution.y };
 	if (glmViewportResolution != m_viewportResolution) {
 		UpdateViewportResolution(glmViewportResolution);
@@ -297,8 +298,8 @@ void PixieEngineApp::ReloadScene() {
 }
 
 void PixieEngineApp::HandleUserInput() {
-	const Float speed = 10.0;
-	const Float rotationSpeed = 0.1;
+	const Float speed = 10.0f;
+	const Float rotationSpeed = 0.1f;
 
 	if (UserInput::GetKey(GLFW_KEY_W)) {
 		if (m_scene) {
@@ -392,19 +393,21 @@ void PixieEngineApp::HandleUserInput() {
 	}
 	if (UserInput::GetMouseButton(GLFW_MOUSE_BUTTON_2)) {
 		if (UserInput::mouseDeltaX) {
-			if (m_scene) {
-				Camera* camera = m_scene->GetMainCamera();
-				if (camera) {
-					camera->m_transform.AddRotationY(rotationSpeed * UserInput::mouseDeltaX);
+			if (UserInput::mouseDeltaX) {
+				if (m_scene) {
+					Camera* camera = m_scene->GetMainCamera();
+					if (camera) {
+						camera->m_transform.AddRotationY(rotationSpeed * (Float)UserInput::mouseDeltaX);
+					}
 				}
 			}
-		}
-		if (m_rtScene) {
-			Camera* camera = m_rtScene->mainCamera;
-			if (camera) {
-				camera->m_transform.AddRotationY(rotationSpeed * UserInput::mouseDeltaX);
+			if (m_rtScene) {
+				Camera* camera = m_rtScene->mainCamera;
+				if (camera) {
+					camera->m_transform.AddRotationY(rotationSpeed * (Float)UserInput::mouseDeltaX);
+				}
 			}
+			m_rayTracingRenderer->Reset();
 		}
-		m_rayTracingRenderer->Reset();
 	}
 }

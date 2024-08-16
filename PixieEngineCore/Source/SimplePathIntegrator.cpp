@@ -51,7 +51,7 @@ Vec3 SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 					Vec3 wi = ls->wi;
 					glm::fvec3 f = bsdf.f(wo, wi) * glm::abs(glm::dot(wi, isect.normal));
 					if (f != glm::fvec3(0.0f) && Unoccluded(ray.x, ray.y, isect, ls->pLight)) {
-						L += beta * f * ls->L / (sampledLight->p * ls->pdf);
+						L += 10.0f * beta * f * ls->L / (sampledLight->p * ls->pdf);
 					}
 				}
 			}

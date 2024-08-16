@@ -21,7 +21,7 @@ public:
 	glm::ivec2 m_viewportResolution;
 	Integrator* m_rayTracer;
 	RTScene* m_scene = nullptr;
-	bool m_resizeRendererToVieport = false;
+	bool m_resizeRendererToVieport = true;
 
 	RayTracingRenderer(PixieEngineApp* parent, glm::ivec2 resolution, RTScene* scene);
 	~RayTracingRenderer();

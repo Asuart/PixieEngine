@@ -4,11 +4,29 @@
 #include "RTTexture.h"
 #include "BSDF.h"
 #include "Ray.h"
+#include "Spectrum.h"
 
 struct SurfaceInteraction;
 
 class Material {
 public:
+	Spectrum m_albedo = Spectrum(0.8f, 0.8f, 0.8f);
+	Texture<Spectrum>* m_albedoTexture = nullptr;
+	Spectrum m_emission = Spectrum(0.0f, 0.0f, 0.0f);
+	Texture<Spectrum>* m_emissionTexture = nullptr;
+	float m_metallic = 1.0f;
+	Texture<float>* m_metallicTexture = nullptr;
+	float m_roughness = 1.0f;
+	Texture<float>* m_roughnessTexture = nullptr;
+	float m_ambiendOcclusion = 1.0f;
+	Texture<float>* m_ambientOcclusionTexture = nullptr;
+	float m_refraction = 1.0f;
+	float m_transparency = 0.0f;
+	Texture<glm::fvec3>* m_normalTexture = nullptr;
+
+	bool IsEmissive();
+	bool IsTranslucent();
+
 	const std::string name;
 	glm::fvec3 albedo;
 	glm::fvec3 emission;

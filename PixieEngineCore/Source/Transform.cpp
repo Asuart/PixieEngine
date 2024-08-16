@@ -122,13 +122,11 @@ void Transform::SetRotationX(Float rotation) {
 }
 
 void Transform::SetRotationY(Float rotation) {
-	std::cout << m_forward.x << " " << m_forward.y << " " << m_forward.z << " length: " << glm::length2(m_forward) << "\n";
 	m_rotation.y = rotation;
 	if (m_rotation.y >= MaxDegrees) m_rotation.y -= std::floor(m_rotation.y / MaxDegrees) * MaxDegrees;
 	if (m_rotation.y <= -MaxDegrees) m_rotation.y += std::floor(-m_rotation.y / MaxDegrees) * MaxDegrees;
 	UpdateMatrices();
 	UpdateDirections();
-	std::cout << m_forward.x << " " << m_forward.y << " " << m_forward.z << " length: " << glm::length2(m_forward) << "\n";
 }
 
 void Transform::SetRotationZ(Float rotation) {

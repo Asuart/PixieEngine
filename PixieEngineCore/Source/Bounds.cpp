@@ -25,6 +25,10 @@ Vec3 Bounds3f::Diagonal() const {
 	return pMax - pMin;
 }
 
+Vec3 Bounds3f::Center() const {
+	return pMin + Diagonal() * 0.5f;
+}
+
 Float Bounds3f::SurfaceArea() const {
 	Vec3 d = Diagonal();
 	return 2.0f * (d.x * d.y + d.x * d.z + d.y * d.z);

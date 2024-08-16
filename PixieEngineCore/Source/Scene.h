@@ -3,6 +3,7 @@
 #include "Transform.h"
 #include "SceneObject.h"
 #include "Camera.h"
+#include "MaterialComponent.h"
 
 class Scene {
 public:
@@ -23,6 +24,7 @@ public:
 	SceneObject* GetRootObject();
 	std::vector<Material*>& GetMaterialsList();
 	std::vector<Mesh*>& GetMeshesList();
+	std::vector<MaterialComponent*>& GetAreaLights();
 	std::vector<Camera>& GetCameras();
 	Camera* GetMainCamera();
 
@@ -31,6 +33,7 @@ protected:
 	std::vector<SceneObject*> flatObjects;
 	std::vector<Material*> materials;
 	std::vector<Mesh*> meshes;
+	std::vector<MaterialComponent*> areaLights;
 	std::vector<Camera> cameras;
 	Camera* mainCamera = nullptr;
 
