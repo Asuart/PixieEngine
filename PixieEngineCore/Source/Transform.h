@@ -1,4 +1,5 @@
 #pragma once
+#include "UID.h"
 #include "RTMath.h"
 #include "Ray.h"
 #include "Interaction.h"
@@ -6,6 +7,8 @@
 
 class Transform {
 public:
+	UID id;
+
 	Transform(const Vec3& position = Vec3(0.0f), const Vec3& rotation = Vec3(0.0f), const Vec3& scale = Vec3(1.0f));
 	Transform(const Mat4& m);
 	Transform(const Mat4& m, const Mat4& mInv);

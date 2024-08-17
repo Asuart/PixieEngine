@@ -1,6 +1,6 @@
 #include "MeshComponent.h"
 
-MeshComponent::MeshComponent(Mesh* mesh, const SceneObject* parent)
+MeshComponent::MeshComponent(Mesh* mesh, SceneObject* parent)
 	: Component("Mesh Component", parent), mesh(mesh) {
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);

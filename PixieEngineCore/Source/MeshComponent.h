@@ -5,7 +5,7 @@
 
 class MeshComponent : public Component {
 public:
-	MeshComponent(Mesh* mesh, const SceneObject* parent);
+	MeshComponent(Mesh* mesh, SceneObject* parent);
 	~MeshComponent();
 
 	const Mesh* GetMesh() const;

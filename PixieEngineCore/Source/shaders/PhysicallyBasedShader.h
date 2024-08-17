@@ -43,17 +43,17 @@ const char* const PBR_VERTEX_SHADER_SOURCE =
 "        vec3 localNormal = mat3(finalBonesMatrices[boneIDs[i]]) * norm;\n"
 "    }\n"
 ""
-"    gl_Position = mProjection * mView * vec4(pos, 1.0);\n"
+"    gl_Position = mProjection * mView * mModel * vec4(pos, 1.0);\n"
 "	 fTexCoords = uv;\n"
-"	 fWorldPos = gl_Position.xyz;\n"
-"    fNormal = norm;\n"
+"	 fWorldPos = (mModel * vec4(pos, 1.0)).xyz;\n"
+"    fNormal = mat3(transpose(inverse(mModel))) * norm;\n"
 "}\n";
 
 const char* const PBR_FRAGMENT_SHADER_SOURCE =
 "#version 330 core\n"
 "out vec4 FragColor;\n"
 ""
-"const int MAX_LIGHTS = 1;\n"
+"const int MAX_LIGHTS = 4;\n"
 "const float PI = 3.14159265359;\n"
 ""
 "in vec2 fTexCoords;\n"

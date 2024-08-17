@@ -74,7 +74,8 @@ void SceneRenderer::SetupLights() {
 
 	std::vector<MaterialComponent*>& areaLights = m_scene->GetAreaLights();
 	for (size_t i = 0; i < areaLights.size() && i < MaxLights; i++) {
-		const glm::fvec3& center = areaLights[i]->parent->transform.GetPositionValue();
+		const Mesh* mesh = areaLights[i]->parent->GetComponent<MeshComponent>()->GetMesh();
+		const glm::fvec3& center = mesh->GetCenter() + areaLights[i]->parent->transform.GetPositionValue();
 		positions[i * 3 + 0] = center.x;
 		positions[i * 3 + 1] = center.y;
 		positions[i * 3 + 2] = center.z;

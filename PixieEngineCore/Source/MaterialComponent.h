@@ -4,7 +4,7 @@
 
 class MaterialComponent : public Component {
 public:
-	MaterialComponent(Material* material, const SceneObject* parent);
+	MaterialComponent(Material* material, SceneObject* parent);
 
 	const Material* GetMaterial() const;
 

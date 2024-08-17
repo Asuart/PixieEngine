@@ -2,12 +2,16 @@
 
 std::atomic<uint64_t> UID::counter = 0;
 
-UID::UID() : value(UID::counter++) {}
+UID::UID() : m_value(UID::counter++) {}
 
 bool UID::operator==(const UID& other) {
-	return value == other.value;
+	return m_value == other.m_value;
 }
 
 bool UID::operator!=(const UID& other) {
-	return value != other.value;
+	return m_value != other.m_value;
+}
+
+std::string UID::ToString() {
+	return std::to_string(m_value);
 }
