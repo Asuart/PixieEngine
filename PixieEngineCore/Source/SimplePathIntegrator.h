@@ -10,7 +10,7 @@ public:
 
 	SimplePathIntegrator(const glm::ivec2& resolution);
 
-	virtual void SetScene(RTScene* scene) override;
+	virtual void SetScene(Scene* scene) override;
 	virtual Vec3 Integrate(Ray ray, Sampler* sampler) override;
 
 protected:

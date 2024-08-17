@@ -1,7 +1,7 @@
 #pragma once
 #include "Timer.h"
 #include "PixieEngineCoreHeaders.h"
-#include "RTScene.h"
+#include "Scene.h"
 #include "FrameBuffer.h"
 #include "SceneLoader.h"
 #include "TestNormalsIntegrator.h"

@@ -20,7 +20,6 @@
 #include "Film.h"
 #include "AssimpGLMHelper.h"
 #include "Material.h"
-#include "RTScene.h"
 #include "ShaderLibrary.h"
 #include "SceneLoader.h"
 #include "FrameBuffer.h"

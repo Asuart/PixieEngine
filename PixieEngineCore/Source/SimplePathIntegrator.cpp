@@ -3,10 +3,10 @@
 SimplePathIntegrator::SimplePathIntegrator(const glm::ivec2& resolution)
 	: Integrator(resolution), m_lightSampler({}) {}
 
-void SimplePathIntegrator::SetScene(RTScene* scene) {
+void SimplePathIntegrator::SetScene(Scene* scene) {
 	StopRender();
 	m_scene = scene;
-	m_lightSampler = UniformLightSampler(m_scene->lights);
+	m_lightSampler = UniformLightSampler(m_scene->GetGeometrySnapshot()->GetAreaLights());
 	Reset();
 	StartRender();
 }
@@ -30,7 +30,7 @@ Vec3 SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 			L += beta * isect.Le(-ray.direction);
 		}
 
-		BSDF bsdf = isect.GetBSDF(ray, m_scene->mainCamera, sampler);
+		BSDF bsdf = isect.GetBSDF(ray, m_scene->GetMainCamera(), sampler);
 		if (!bsdf) {
 			//isect.SkipIntersection(&ray, si->tHit);
 			continue;

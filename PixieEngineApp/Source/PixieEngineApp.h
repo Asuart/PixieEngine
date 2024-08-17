@@ -19,7 +19,6 @@ protected:
 	char m_scenePath[m_maxScenePathLength] = "../Scenes/default.obj";
 	PixieEngineWindow m_window;
 	Scene* m_scene;
-	RTScene* m_rtScene;
 	RayTracingRenderer* m_rayTracingRenderer;
 	SceneRenderer* m_sceneRenderer;
 	glm::ivec2 m_viewportResolution;

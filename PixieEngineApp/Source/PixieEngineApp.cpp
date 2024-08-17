@@ -23,11 +23,11 @@ PixieEngineApp::PixieEngineApp() {
 
 	SceneLoader sceneLoader;
 	m_scene = sceneLoader.LoadScene(m_scenePath);
-	m_rtScene = RTScene::FromScene(m_scene);
+	m_scene->MakeGeometrySnapshot();
 
 	m_sceneRenderer = new SceneRenderer(glm::ivec2(1280, 720), m_scene);
 
-	m_rayTracingRenderer = new RayTracingRenderer(this, glm::ivec2(1280, 720), m_rtScene);
+	m_rayTracingRenderer = new RayTracingRenderer(this, glm::ivec2(1280, 720), m_scene);
 	if (m_rayTracingViewport) {
 		m_rayTracingRenderer->StartRender();
 	}
@@ -36,7 +36,6 @@ PixieEngineApp::PixieEngineApp() {
 }
 
 PixieEngineApp::~PixieEngineApp() {
-	delete m_rtScene;
 	delete m_rayTracingRenderer;
 	delete m_viewportFrameBuffer;
 
@@ -290,10 +289,6 @@ void PixieEngineApp::UpdateViewportResolution(glm::ivec2 resolution) {
 
 void PixieEngineApp::ReloadScene() {
 	m_rayTracingRenderer->StopRender();
-	if (m_rtScene) {
-		delete m_rtScene;
-		m_rtScene = nullptr;
-	}
 	if (m_scene) {
 		delete m_scene;
 		m_scene = nullptr;
@@ -301,9 +296,11 @@ void PixieEngineApp::ReloadScene() {
 
 	SceneLoader sceneLoader;
 	m_scene = sceneLoader.LoadScene(m_scenePath);
-	m_rtScene = RTScene::FromScene(m_scene);
+	m_scene->MakeGeometrySnapshot();
 
-	m_rayTracingRenderer->SetScene(m_rtScene);
+	m_sceneRenderer->SetScene(m_scene);
+
+	m_rayTracingRenderer->SetScene(m_scene);
 	m_rayTracingRenderer->StartRender();
 }
 
@@ -318,23 +315,11 @@ void PixieEngineApp::HandleUserInput() {
 				camera->m_transform.MoveForward(speed * Timer::fixedDeltaTime);
 			}
 		}
-		if (m_rtScene) {
-			Camera* camera = m_rtScene->mainCamera;
-			if (camera) {
-				camera->m_transform.MoveForward(speed * Timer::fixedDeltaTime);
-			}
-		}
 		if (m_rayTracingViewport) m_rayTracingRenderer->Reset();
 	}
 	if (UserInput::GetKey(GLFW_KEY_S)) {
 		if (m_scene) {
 			Camera* camera = m_scene->GetMainCamera();
-			if (camera) {
-				camera->m_transform.MoveForward(-speed * Timer::fixedDeltaTime);
-			}
-		}
-		if (m_rtScene) {
-			Camera* camera = m_rtScene->mainCamera;
 			if (camera) {
 				camera->m_transform.MoveForward(-speed * Timer::fixedDeltaTime);
 			}
@@ -348,23 +333,11 @@ void PixieEngineApp::HandleUserInput() {
 				camera->m_transform.MoveRight(speed * Timer::fixedDeltaTime);
 			}
 		}
-		if (m_rtScene) {
-			Camera* camera = m_rtScene->mainCamera;
-			if (camera) {
-				camera->m_transform.MoveRight(speed * Timer::fixedDeltaTime);
-			}
-		}
 		if (m_rayTracingViewport)m_rayTracingRenderer->Reset();
 	}
 	if (UserInput::GetKey(GLFW_KEY_A)) {
 		if (m_scene) {
 			Camera* camera = m_scene->GetMainCamera();
-			if (camera) {
-				camera->m_transform.MoveRight(-speed * Timer::fixedDeltaTime);
-			}
-		}
-		if (m_rtScene) {
-			Camera* camera = m_rtScene->mainCamera;
 			if (camera) {
 				camera->m_transform.MoveRight(-speed * Timer::fixedDeltaTime);
 			}
@@ -378,23 +351,11 @@ void PixieEngineApp::HandleUserInput() {
 				camera->m_transform.MoveUp(speed * Timer::fixedDeltaTime);
 			}
 		}
-		if (m_rtScene) {
-			Camera* camera = m_rtScene->mainCamera;
-			if (camera) {
-				camera->m_transform.MoveUp(speed * Timer::fixedDeltaTime);
-			}
-		}
 		if (m_rayTracingViewport)m_rayTracingRenderer->Reset();
 	}
 	if (UserInput::GetKey(GLFW_KEY_LEFT_CONTROL)) {
 		if (m_scene) {
 			Camera* camera = m_scene->GetMainCamera();
-			if (camera) {
-				camera->m_transform.MoveUp(-speed * Timer::fixedDeltaTime);
-			}
-		}
-		if (m_rtScene) {
-			Camera* camera = m_rtScene->mainCamera;
 			if (camera) {
 				camera->m_transform.MoveUp(-speed * Timer::fixedDeltaTime);
 			}
@@ -409,12 +370,6 @@ void PixieEngineApp::HandleUserInput() {
 					if (camera) {
 						camera->m_transform.AddRotationY(rotationSpeed * (Float)UserInput::mouseDeltaX);
 					}
-				}
-			}
-			if (m_rtScene) {
-				Camera* camera = m_rtScene->mainCamera;
-				if (camera) {
-					camera->m_transform.AddRotationY(rotationSpeed * (Float)UserInput::mouseDeltaX);
 				}
 			}
 			if (m_rayTracingViewport)m_rayTracingRenderer->Reset();

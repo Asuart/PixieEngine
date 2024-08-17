@@ -4,6 +4,7 @@
 #include "SceneObject.h"
 #include "Camera.h"
 #include "MaterialComponent.h"
+#include "GeometrySnapshot.h"
 
 class Scene {
 public:
@@ -27,15 +28,25 @@ public:
 	std::vector<MaterialComponent*>& GetAreaLights();
 	std::vector<Camera>& GetCameras();
 	Camera* GetMainCamera();
+	void SetMainCamera(uint32_t index);
+	void SetMainCamera(Camera* camera);
+
+	// Ray tracing finctionality
+	void MakeGeometrySnapshot();
+	GeometrySnapshot* GetGeometrySnapshot();
+	bool Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax = Infinity) const;
+	bool IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax = Infinity) const;
+	Vec3 GetSkyColor(const Ray& ray);
 
 protected:
-	SceneObject* rootObject;
+	SceneObject* rootObject = nullptr;
 	std::vector<SceneObject*> flatObjects;
 	std::vector<Material*> materials;
 	std::vector<Mesh*> meshes;
 	std::vector<MaterialComponent*> areaLights;
 	std::vector<Camera> cameras;
 	Camera* mainCamera = nullptr;
+	GeometrySnapshot* geometrySnapshot = nullptr;
 
 	virtual void Start();
 	virtual void Update();

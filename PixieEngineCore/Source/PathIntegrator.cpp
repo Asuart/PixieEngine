@@ -3,9 +3,9 @@
 PathIntegrator::PathIntegrator(const glm::ivec2& resolution)
 	: Integrator(resolution), m_lightSampler({}) {}
 
-void PathIntegrator::SetScene(RTScene* scene) {
+void PathIntegrator::SetScene(Scene* scene) {
 	m_scene = scene;
-	m_lightSampler = UniformLightSampler(m_scene->lights);
+	m_lightSampler = UniformLightSampler(m_scene->GetGeometrySnapshot()->GetAreaLights());
 }
 
 Vec3 PathIntegrator::Integrate(Ray ray, Sampler* sampler) {

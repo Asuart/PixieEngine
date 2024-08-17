@@ -3,7 +3,7 @@
 #include "Renderer.h"
 #include "RayTracingStatistics.h"
 #include "Film.h"
-#include "RTScene.h"
+#include "Scene.h"
 #include "Bounds.h"
 
 class Integrator : public Renderer {
@@ -12,7 +12,7 @@ public:
 	int32_t m_maxDepth = 1024;
 	int32_t m_maxThreads = 2;
 
-	virtual void SetScene(RTScene* scene);
+	virtual void SetScene(Scene* scene);
 	virtual void SetResolution(const glm::ivec2& resolution) override;
 	virtual void Reset() override;
 	virtual void StartRender();
@@ -27,7 +27,7 @@ public:
 protected:
 	Integrator(const glm::ivec2& resolution);
 
-	RTScene* m_scene = nullptr;
+	Scene* m_scene = nullptr;
 	RayTracingStatistics m_stats;
 	bool m_isRendering = false;
 	uint32_t m_samples = 1;

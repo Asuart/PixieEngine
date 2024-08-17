@@ -171,8 +171,37 @@ Camera* Scene::GetMainCamera() {
 	return mainCamera;
 }
 
+void Scene::SetMainCamera(uint32_t index) {
+	mainCamera = &cameras[index];
+}
+
+void Scene::SetMainCamera(Camera* camera) {
+	mainCamera = camera;
+}
+
 void Scene::Start() {}
 
 void Scene::Update() {}
 
 void Scene::FixedUpdate() {}
+
+void Scene::MakeGeometrySnapshot() {
+	if (geometrySnapshot) delete geometrySnapshot;
+	geometrySnapshot = new GeometrySnapshot(flatObjects);
+}
+
+GeometrySnapshot* Scene::GetGeometrySnapshot() {
+	return geometrySnapshot;
+}
+
+bool Scene::Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax) const {
+	return geometrySnapshot->Intersect(ray, outCollision, stats, tMax);
+}
+
+bool Scene::IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax) const {
+	return geometrySnapshot->IntersectP(ray, stats, tMax);
+}
+
+Vec3 Scene::GetSkyColor(const Ray& ray) {
+	return Vec3(0.0f, 0.0f, 0.0f);
+}

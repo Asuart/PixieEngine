@@ -11,7 +11,7 @@ std::string to_string(RayTracingMode mode) {
 	}
 }
 
-RayTracingRenderer::RayTracingRenderer(PixieEngineApp* parent, glm::ivec2 resolution, RTScene* scene)
+RayTracingRenderer::RayTracingRenderer(PixieEngineApp* parent, glm::ivec2 resolution, Scene* scene)
 	: m_parent(parent), m_resolution(resolution), m_rayTracer(new RandomWalkIntegrator(resolution)), m_scene(scene), m_viewportResolution(resolution) {
 	SetScene(scene);
 }
@@ -58,10 +58,10 @@ void RayTracingRenderer::Reset() {
 	m_rayTracer->Reset();
 }
 
-void RayTracingRenderer::SetScene(RTScene* scene) {
+void RayTracingRenderer::SetScene(Scene* scene) {
 	m_scene = scene;
 	m_rayTracer->SetScene(scene);
-	for (Camera& camera : m_scene->cameras) {
+	for (Camera& camera : m_scene->GetCameras()) {
 		camera.SetAspect((float)m_resolution.x / m_resolution.y);
 	}
 }
@@ -94,7 +94,7 @@ void RayTracingRenderer::DrawUI() {
 	ImGui::Text("Render Resolution");
 	if (ImGui::InputInt2("##render_resolution", (int*)&m_resolution)) {
 		m_rayTracer->SetResolution(m_resolution);
-		for (Camera& camera : m_scene->cameras) {
+		for (Camera& camera : m_scene->GetCameras()) {
 			camera.SetAspect((float)m_resolution.x / m_resolution.y);
 		}
 	}
@@ -112,18 +112,19 @@ void RayTracingRenderer::DrawUI() {
 	ImGui::Spacing();
 
 	std::string activeCameraName = "Camera ";
-	for (size_t i = 0; i < m_scene->cameras.size(); i++) {
-		if (m_scene->mainCamera == &m_scene->cameras[i]) {
+	const std::vector<Camera>& cameras = m_scene->GetCameras();
+	for (size_t i = 0; i < cameras.size(); i++) {
+		if (m_scene->GetMainCamera() == &cameras[i]) {
 			activeCameraName += std::to_string(i);
 			break;
 		}
 	}
 	ImGui::Text("Active Camera");
 	if (ImGui::BeginCombo("##active_camera", activeCameraName.c_str())) {
-		for (size_t i = 0; i < m_scene->cameras.size(); i++) {
-			bool isSelected = m_scene->mainCamera == &m_scene->cameras[i];
+		for (size_t i = 0; i < cameras.size(); i++) {
+			bool isSelected = m_scene->GetMainCamera() == &cameras[i];
 			if (ImGui::Selectable(("Camera " + std::to_string(i)).c_str(), isSelected)) {
-				m_scene->mainCamera = &m_scene->cameras[i];
+				m_scene->SetMainCamera(i);
 				m_rayTracer->Reset();
 			}
 			if (isSelected) {
@@ -178,8 +179,9 @@ void RayTracingRenderer::SetViewportSize(glm::ivec2 resolution) {
 	if (m_resizeRendererToVieport) {
 		m_resolution = resolution;
 		m_rayTracer->SetResolution(resolution);
-		for (size_t i = 0; i < m_scene->cameras.size(); i++) {
-			m_scene->cameras[i].SetAspect((float)resolution.x / resolution.y);
+		std::vector<Camera>& cameras = m_scene->GetCameras();
+		for (size_t i = 0; i < cameras.size(); i++) {
+			cameras[i].SetAspect((float)resolution.x / resolution.y);
 		}
 	}
 }

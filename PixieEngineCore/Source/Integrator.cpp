@@ -8,7 +8,7 @@ void clear(std::queue<int32_t>& q) {
 Integrator::Integrator(const glm::ivec2& resolution)
 	: Renderer(resolution), m_film(Film(resolution)), m_stats(resolution) {}
 
-void Integrator::SetScene(RTScene* scene) {
+void Integrator::SetScene(Scene* scene) {
 	bool wasRendering = m_isRendering;
 	StopRender();
 	m_scene = scene;
@@ -93,7 +93,7 @@ void Integrator::StopRender() {
 
 void Integrator::PerPixel(uint32_t x, uint32_t y, Sampler* sampler) {
 	Vec2 uv = m_film.GetUV(x, y, sampler->Get2D());
-	Ray ray = m_scene->mainCamera->GetRay(x, y, uv);
+	Ray ray = m_scene->GetMainCamera()->GetRay(x, y, uv);
 	Vec3 color = Integrate(ray, sampler);
 	m_film.AddPixel(x, y, glm::vec4(color, 1.0));
 }
