@@ -8,8 +8,8 @@ void PathIntegrator::SetScene(Scene* scene) {
 	m_lightSampler = UniformLightSampler(m_scene->GetGeometrySnapshot()->GetAreaLights());
 }
 
-Vec3 PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
-	glm::fvec3 L(0.0f), beta(1.0f);
+Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
+	Spectrum L(0.0f), beta(1.0f);
 	int32_t depth = 0;
 	Float p_b = 0.0f, etaScale = 1.0f;
 	bool specularBounce = false, anyNonSpecularBounces = false;

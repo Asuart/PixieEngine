@@ -4,7 +4,7 @@
 #include "BSDF.h"
 #include "Sampler.h"
 
-class Material;
+struct Material;
 class Shape;
 class Camera;
 struct Ray;
@@ -41,7 +41,7 @@ struct SurfaceInteraction : public Interaction {
 	const AreaLight* areaLight = nullptr;
 	Mesh* mesh = nullptr;
 
-	glm::fvec3 Le(const glm::vec3& wo) const;
+	Spectrum Le(const glm::vec3& wo) const;
 	BSDF GetBSDF(const Ray& ray, const Camera* camera, Sampler* sampler);
 };
 

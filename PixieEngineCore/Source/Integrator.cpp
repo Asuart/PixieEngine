@@ -94,8 +94,8 @@ void Integrator::StopRender() {
 void Integrator::PerPixel(uint32_t x, uint32_t y, Sampler* sampler) {
 	Vec2 uv = m_film.GetUV(x, y, sampler->Get2D());
 	Ray ray = m_scene->GetMainCamera()->GetRay(x, y, uv);
-	Vec3 color = Integrate(ray, sampler);
-	m_film.AddPixel(x, y, glm::vec4(color, 1.0));
+	Spectrum color = Integrate(ray, sampler);
+	m_film.AddPixel(x, y, glm::vec4(color.GetRGBValue(), 1.0));
 }
 
 bool Integrator::Unoccluded(uint32_t x, uint32_t y, const SurfaceInteraction& p0, const SurfaceInteraction& p1) {

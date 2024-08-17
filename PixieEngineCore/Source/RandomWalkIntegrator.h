@@ -6,8 +6,8 @@ class RandomWalkIntegrator : public Integrator {
 public:
 	RandomWalkIntegrator(const glm::ivec2& resolution);
 
-	virtual Vec3 Integrate(Ray ray, Sampler* sampler) override;
+	virtual Spectrum Integrate(Ray ray, Sampler* sampler) override;
 
 protected:
-	virtual Vec3 IntegrateRandomWalk(Ray ray, Sampler* sampler, uint32_t depth = 0);
+	virtual Spectrum IntegrateRandomWalk(Ray ray, Sampler* sampler, uint32_t depth = 0);
 };

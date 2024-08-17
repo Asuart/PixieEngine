@@ -213,23 +213,23 @@ void PixieEngineApp::DrawMaterialsWindow() {
 
 	std::vector<Material*> materials = m_scene->GetMaterialsList();
 	for (Material* material : materials) {
-		if (ImGui::CollapsingHeader(material->name.c_str())) {
-			if (ImGui::ColorEdit3("Albedo", (float*)&material->albedo)) {
+		if (ImGui::CollapsingHeader(material->m_name.c_str())) {
+			if (ImGui::ColorEdit3("Albedo", (float*)&material->m_albedo.GetRGB())) {
 				m_rayTracingRenderer->Reset();
 			}
-			if (ImGui::ColorEdit3("Emission", (float*)&material->emission)) {
+			if (ImGui::ColorEdit3("Emission", (float*)&material->m_emission.GetRGB())) {
 				m_rayTracingRenderer->Reset();
 			}
-			if (ImGui::DragFloat("Roughness", &material->roughness, 0.01f, 0.0f, 1.0f)) {
+			if (ImGui::DragFloat("Roughness", &material->m_roughness, 0.01f, 0.0f, 1.0f)) {
 				m_rayTracingRenderer->Reset();
 			}
-			if (ImGui::DragFloat("Metallic", &material->metallic, 0.01f, 0.0f, 1.0f)) {
+			if (ImGui::DragFloat("Metallic", &material->m_metallic, 0.01f, 0.0f, 1.0f)) {
 				m_rayTracingRenderer->Reset();
 			}
-			if (ImGui::DragFloat("Transparency", &material->transparency, 0.01f, 0.0f, 1.0f)) {
+			if (ImGui::DragFloat("Transparency", &material->m_transparency, 0.01f, 0.0f, 1.0f)) {
 				m_rayTracingRenderer->Reset();
 			}
-			if (ImGui::DragFloat("Refraction", &material->eta, 0.01f, 0.0f, 10.0f)) {
+			if (ImGui::DragFloat("Refraction", &material->m_refraction, 0.01f, 0.0f, 10.0f)) {
 				m_rayTracingRenderer->Reset();
 			}
 		}

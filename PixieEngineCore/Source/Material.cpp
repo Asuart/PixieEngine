@@ -1,8 +1,7 @@
 #include "Material.h"
 
-Material::Material(const std::string& name, Vec3 _albedo, Vec3 _emission, Float _roughness, Float _metallic, Float _transparency, Float _eta)
-	: name(name), albedo(_albedo), emission(_emission), roughness(_roughness), metallic(_metallic), transparency(_transparency), eta(_eta),
-	m_emission(_emission), m_albedo(_albedo), m_roughness(_roughness), m_metallic(_metallic), m_transparency(_transparency), m_refraction(_eta) {}
+Material::Material(const std::string& name, Spectrum albedo, Spectrum emission, float roughness, float metallic, float transparency, float refraction)
+	: m_name(name),	m_emission(emission), m_albedo(albedo), m_roughness(roughness), m_metallic(metallic), m_transparency(transparency), m_refraction(refraction) {}
 
 bool Material::IsEmissive() {
 	return m_emission.GetRGBValue() != glm::fvec3(0.0f, 0.0f, 0.0f);
@@ -19,29 +18,29 @@ Vec3 Refract(const Vec3& uv, const Vec3& n, Float etai_over_etat) {
 	return r_out_perp + r_out_parallel;
 }
 
-Float Reflectance(Float cosine, Float ref_idx) {
+float Reflectance(Float cosine, Float ref_idx) {
 	Float r0 = (1.0f - ref_idx) / (1.0f + ref_idx);
 	r0 = r0 * r0;
 	return r0 + (1.0f - r0) * pow((1.0f - cosine), 5.0f);
 }
 
-inline Vec3 Material::Evaluate(const SurfaceInteraction& collision) const {
-	Vec3 color = albedo;
-	if (rtTexture) {
-		color *= rtTexture->Sample(collision);
+Spectrum Material::Evaluate(const SurfaceInteraction& collision) const {
+	glm::fvec3 color = m_albedo.GetRGBValue();
+	if (m_albedoTexture) {
+		color *= m_albedoTexture->Sample(collision);
 	}
 	return color / Pi;
 }
 
-inline constexpr Float Material::Pdf() const {
+float Material::Pdf() const {
 	return Inv2Pi;
 }
 
-Vec3 Material::Sample(const Ray& ray, const SurfaceInteraction& collision, Ray& scatteredRay) const {
+Spectrum Material::Sample(const Ray& ray, const SurfaceInteraction& collision, Ray& scatteredRay) const {
 	Vec3 scatteredDirection;
 
-	if (transparency > RandomFloat()) {
-		Float refraction = !collision.backface ? eta : (1.0f / eta);
+	if (m_transparency > RandomFloat()) {
+		Float refraction = !collision.backface ? m_refraction : (1.0f / m_refraction);
 
 		Float cosTheta = glm::dot(-ray.direction, collision.normal);
 		Float sinTheta = sqrt(1.0f - cosTheta * cosTheta);
@@ -66,29 +65,27 @@ Vec3 Material::Sample(const Ray& ray, const SurfaceInteraction& collision, Ray& 
 }
 
 BxDF* Material::GetBxDF(const SurfaceInteraction& intr) const {
-	return new DiffuseBxDF(rtTexture->Sample(intr));
+	if (RandomFloat() > m_transparency) {
+		return new DiffuseBxDF(Evaluate(intr));
+	}
+	else {
+		const glm::fvec2 anisotropicRoughness = glm::fvec2(1.0f, 1.0f);
+		const bool normalizeAnisotropicRoughness = false;
+
+		float urough = m_roughness * anisotropicRoughness.x;
+		float vrough = m_roughness * anisotropicRoughness.y;
+		if (normalizeAnisotropicRoughness) {
+			urough = TrowbridgeReitzDistribution::RoughnessToAlpha(urough);
+			vrough = TrowbridgeReitzDistribution::RoughnessToAlpha(vrough);
+		}
+
+		TrowbridgeReitzDistribution distrib(urough, vrough);
+		return new DielectricBxDF(m_refraction, distrib);
+	}
+	//return new DiffuseTransmissionBxDF(reflectance * scale, transmittance * scale);
 }
 
 BSDF Material::GetBSDF(const SurfaceInteraction& intr) const {
 	BxDF* bxdf = GetBxDF(intr);
 	return BSDF(intr.normal, intr.dpdu, bxdf);
 }
-
-
-//BxDF* DiffuseMaterial::GetBxDF(const SurfaceInteraction& intr) const {
-//	return new DiffuseBxDF(rtTexture->Sample(intr));
-//}
-
-//BxDF* DiffuseTransmissionMaterial::GetBxDF(const SurfaceInteraction& intr) const {
-//	return new DiffuseTransmissionBxDF(reflectance * scale, transmittance * scale);
-//}
-
-//BxDF* DielectricMaterial::GetBxDF(const SurfaceInteraction& intr) const {
-//	Float urough = uRoughness, vrough = vRoughness;
-//	if (false) {
-//		urough = TrowbridgeReitzDistribution::RoughnessToAlpha(urough);
-//		vrough = TrowbridgeReitzDistribution::RoughnessToAlpha(vrough);
-//	}
-//	TrowbridgeReitzDistribution distrib(urough, vrough);
-//	return new DielectricBxDF(eta, distrib);
-//}

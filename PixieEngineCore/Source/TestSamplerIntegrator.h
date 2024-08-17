@@ -5,5 +5,5 @@ class TestSamplerIntegrator : public Integrator {
 public:
 	TestSamplerIntegrator(const glm::ivec2& resolution);
 
-	virtual Vec3 Integrate(Ray ray, Sampler* sampler) override;
+	virtual Spectrum Integrate(Ray ray, Sampler* sampler) override;
 };

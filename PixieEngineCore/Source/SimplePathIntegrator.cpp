@@ -11,12 +11,12 @@ void SimplePathIntegrator::SetScene(Scene* scene) {
 	StartRender();
 }
 
-Vec3 SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
-	glm::fvec3 L(0.0f), beta(1.0f);
+Spectrum SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
+	Spectrum L(0.0f, 0.0f, 0.0f), beta(1.0f, 1.0f, 1.0f);
 	bool specularBounce = true;
 	int32_t depth = 0;
 
-	while (beta != glm::fvec3(0.0)) {
+	while (beta) {
 		SurfaceInteraction isect;
 
 		if (!m_scene->Intersect(ray, isect, m_stats)) {
@@ -47,11 +47,11 @@ Vec3 SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 			if (sampledLight) {
 				Vec2 uLight = sampler->Get2D();
 				std::optional<LightLiSample> ls = sampledLight->light->SampleLi(isect, uLight);
-				if (ls && ls->L != glm::fvec3(0.0f) && ls->pdf > 0) {
+				if (ls && ls->L && ls->pdf > 0) {
 					Vec3 wi = ls->wi;
-					glm::fvec3 f = bsdf.f(wo, wi) * glm::abs(glm::dot(wi, isect.normal));
-					if (f != glm::fvec3(0.0f) && Unoccluded(ray.x, ray.y, isect, ls->pLight)) {
-						L += 10.0f * beta * f * ls->L / (sampledLight->p * ls->pdf);
+					Spectrum f = bsdf.f(wo, wi) * glm::abs(glm::dot(wi, isect.normal));
+					if (f && Unoccluded(ray.x, ray.y, isect, ls->pLight)) {
+						L += beta * f * ls->L / (sampledLight->p * ls->pdf);
 					}
 				}
 			}

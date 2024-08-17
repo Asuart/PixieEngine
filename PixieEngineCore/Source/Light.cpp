@@ -1,19 +1,19 @@
 #include "Light.h"
 
-LightLiSample::LightLiSample(const glm::fvec3& L, Vec3 wi, Float pdf, const SurfaceInteraction& pLight)
+LightLiSample::LightLiSample(Spectrum L, Vec3 wi, Float pdf, const SurfaceInteraction& pLight)
 	: L(L), wi(wi), pdf(pdf), pLight(pLight) {}
 
-AreaLight::AreaLight(Shape* shape, glm::fvec3 emit, Float scale)
+AreaLight::AreaLight(Shape* shape, Spectrum emit, float scale)
 	: shape(shape), Lemit(emit), scale(scale) {}
 
-DiffuseAreaLight::DiffuseAreaLight(Shape* shape, glm::fvec3 emit, Float scale)
+DiffuseAreaLight::DiffuseAreaLight(Shape* shape, Spectrum emit, Float scale)
 	: AreaLight(shape, emit, scale) {};
 
-glm::fvec3 DiffuseAreaLight::L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const {
+Spectrum DiffuseAreaLight::L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const {
 	if (!twoSided && glm::dot(n, w) < 0) {
-		return Vec3(0.f);
+		return Spectrum();
 	}
-	return (float)scale * Lemit;
+	return scale * Lemit;
 }
 
 std::optional<LightLiSample> DiffuseAreaLight::SampleLi(SurfaceInteraction intr, Vec2 u) const {
@@ -23,8 +23,8 @@ std::optional<LightLiSample> DiffuseAreaLight::SampleLi(SurfaceInteraction intr,
 	}
 
 	Vec3 wi = glm::normalize(ss->intr.position - intr.position);
-	Vec3 Le = L(ss->intr.position, ss->intr.normal, ss->intr.uv, wi);
-	if (Le == Vec3(0)) {
+	Spectrum Le = L(ss->intr.position, ss->intr.normal, ss->intr.uv, wi);
+	if (!Le) {
 		return {};
 	}
 

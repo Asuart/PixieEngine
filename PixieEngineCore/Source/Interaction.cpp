@@ -25,8 +25,8 @@ bool Interaction::IsMediumInteraction() const {
     return !IsSurfaceInteraction(); 
 }
 
-glm::fvec3 SurfaceInteraction::Le(const glm::vec3& wo) const {
-    return areaLight ? areaLight->L(position, normal, uv, wo) : glm::fvec3(0.0f);
+Spectrum SurfaceInteraction::Le(const glm::vec3& wo) const {
+    return areaLight ? areaLight->L(position, normal, uv, wo) : Spectrum();
 }
 
 BSDF SurfaceInteraction::GetBSDF(const Ray& ray, const Camera* camera, Sampler* sampler) {

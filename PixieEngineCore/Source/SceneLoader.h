@@ -4,7 +4,6 @@
 #include "MeshComponent.h"
 #include "MaterialComponent.h"
 #include "MeshAnimator.h"
-#include "ColorTexture.h"
 
 class SceneLoader {
 public:

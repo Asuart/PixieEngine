@@ -1,5 +1,7 @@
 #pragma once
 #include "PixieEngineCoreHeaders.h"
+#include "Interaction.h"
+#include "Spectrum.h"
 
 template <typename T>
 struct Texture {
@@ -8,24 +10,37 @@ struct Texture {
 	std::vector<T> pixels;
 
 	Texture(glm::ivec2 _resolution)
-		: resolution(_resolution), pixels(_resolution.x* _resolution.y) {}
+		: resolution(_resolution), pixels(_resolution.x * _resolution.y) {}
 
-	int32_t ByteSize() {
+	~Texture() {
+		glDeleteTextures(1, &id);
+	}
+
+	int32_t GetByteSize() {
 		return (int32_t)pixels.size() * sizeof(T);
 	}
 
 	T GetPixel(int32_t x, int32_t y) {
-		int32_t pixelIndex = y * resolution.x + x;
+		uint32_t pixelIndex = y * resolution.x + x;
+		if (pixelIndex >= pixels.size()) return T();
+		return pixels[pixelIndex];
+	}
+
+	T GetPixel(const glm::ivec2& coord) {
+		uint32_t pixelIndex = coord.y * resolution.x + coord.x;
+		if (pixelIndex >= pixels.size()) return T();
 		return pixels[pixelIndex];
 	}
 
 	void SetPixel(int32_t x, int32_t y, T p) {
-		int32_t pixelIndex = y * resolution.x + x;
+		uint32_t pixelIndex = y * resolution.x + x;
+		if (pixelIndex >= pixels.size()) return;
 		pixels[pixelIndex] = p;
 	}
 
 	void AccumulatePixel(int32_t x, int32_t y, T p) {
-		int32_t pixelIndex = y * resolution.x + x;
+		uint32_t pixelIndex = y * resolution.x + x;
+		if (pixelIndex >= pixels.size()) return;
 		pixels[pixelIndex] += p;
 	}
 
@@ -36,7 +51,7 @@ struct Texture {
 	}
 
 	void Reset() {
-		memset(&pixels[0], 0, ByteSize());
+		memset(&pixels[0], 0, GetByteSize());
 	}
 
 	void Upload() {
@@ -59,6 +74,14 @@ struct Texture {
 		}
 		glActiveTexture(activeTexture);
 		glBindTexture(GL_TEXTURE_2D, id);
+	}
+
+	T Sample(const SurfaceInteraction& intr) const {
+		uint32_t x = (uint32_t)(intr.uv.x * (resolution.x - 1));
+		uint32_t y = (uint32_t)(intr.uv.y * (resolution.y - 1));
+		uint32_t pixelIndex = y * resolution.x + x;
+		if (pixelIndex >= pixels.size()) return T();
+		return pixels[pixelIndex];
 	}
 
 private:

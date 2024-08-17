@@ -1,16 +1,17 @@
 #pragma once
 #include "PixieEngineCoreHeaders.h"
 #include "BxDFTools.h"
+#include "Spectrum.h"
 
 struct BSDFSample {
-	Vec3 f;
+	Spectrum f;
 	Vec3 wi;
 	Float pdf = 0;
 	BxDFFlags flags;
 	Float eta = 1;
 	bool pdfIsProportional = false;
 
-	BSDFSample(Vec3 f, Vec3 wi, Float pdf, BxDFFlags flags, Float eta = 1, bool pdfIsProportional = false);
+	BSDFSample(Spectrum f, Vec3 wi, Float pdf, BxDFFlags flags, Float eta = 1, bool pdfIsProportional = false);
 
 	bool IsReflection() const;
 	bool IsTransmission() const;

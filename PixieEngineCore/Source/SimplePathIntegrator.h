@@ -11,7 +11,7 @@ public:
 	SimplePathIntegrator(const glm::ivec2& resolution);
 
 	virtual void SetScene(Scene* scene) override;
-	virtual Vec3 Integrate(Ray ray, Sampler* sampler) override;
+	virtual Spectrum Integrate(Ray ray, Sampler* sampler) override;
 
 protected:
 	UniformLightSampler m_lightSampler;

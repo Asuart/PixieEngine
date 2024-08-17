@@ -51,7 +51,7 @@ Mesh* SceneLoader::ProcessMesh(Scene* loadedScene, SceneObject* object, std::map
 		std::string materialName = scene->mMaterials[mesh->mMaterialIndex]->GetName().C_Str();
 		std::cout << "  Material: " << materialName << "\n";
 		for (Material* existingMaterial : loadedScene->materials) {
-			if (existingMaterial->name == materialName) {
+			if (existingMaterial->m_name == materialName) {
 				material = existingMaterial;
 				break;
 			}
@@ -60,6 +60,7 @@ Mesh* SceneLoader::ProcessMesh(Scene* loadedScene, SceneObject* object, std::map
 			material = ProcessMaterial(loadedScene, mesh->mMaterialIndex, scene);
 		}
 	}
+
 	MaterialComponent* materialComponent = new MaterialComponent(material, object);
 	object->AddComponent(materialComponent);
 	if (material->IsEmissive()) {
@@ -100,16 +101,10 @@ Material* SceneLoader::ProcessMaterial(Scene* loadedScene, uint32_t materialInde
 
 	std::string materialName = scene->mMaterials[materialIndex]->GetName().C_Str();
 	Material* material = new Material(materialName);
-	material->albedo = Vec3(color.r, color.g, color.b);
 	material->m_albedo = Vec3(color.r, color.g, color.b);
-	material->roughness = roughness;
 	material->m_roughness = roughness;
-	material->rtTexture = new ColorTexture(material->albedo);
-	material->emission = Vec3(colorEmissive.r, colorEmissive.g, colorEmissive.b);
 	material->m_emission = Vec3(colorEmissive.r, colorEmissive.g, colorEmissive.b);
-	material->transparency = 1.0f - opacity;
 	material->m_transparency = 1.0f - opacity;
-	material->eta = eta;
 	material->m_refraction = eta;
 	loadedScene->materials.push_back(material);
 

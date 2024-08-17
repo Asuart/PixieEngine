@@ -4,12 +4,12 @@
 #include "Shape.h"
 
 struct LightLiSample {
-	glm::fvec3 L = glm::fvec3(0.0f);
+	Spectrum L = Spectrum();
 	Vec3 wi = Vec3(0.0f);
 	Float pdf = 0;
 	SurfaceInteraction pLight;
 
-	LightLiSample(const glm::fvec3& L, Vec3 wi, Float pdf, const SurfaceInteraction& pLight);
+	LightLiSample(Spectrum L, Vec3 wi, Float pdf, const SurfaceInteraction& pLight);
 };
 
 struct LightSampleContext {
@@ -20,22 +20,22 @@ struct LightSampleContext {
 class AreaLight {
 public:
 	Shape* shape = nullptr;
-	glm::fvec3 Lemit = glm::fvec3(1.0);
-	Float scale = 1.0;
+	Spectrum Lemit = Spectrum(1.0f, 1.0f, 1.0f);
+	float scale = 1.0f;
 	bool twoSided = true;
 
-	virtual glm::fvec3 L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const = 0;
+	virtual Spectrum L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const = 0;
 	virtual std::optional<LightLiSample> SampleLi(SurfaceInteraction intr, Vec2 u) const = 0;
 
 protected:
-	AreaLight(Shape* shape, glm::fvec3 emit = glm::fvec3(1), Float scale = 1);
+	AreaLight(Shape* shape, Spectrum emit = Spectrum(1.0f, 1.0f, 1.0f), float scale = 1.0f);
 };
 
 class DiffuseAreaLight : public AreaLight {
 public:
-	DiffuseAreaLight(Shape* shape, glm::fvec3 emit = glm::fvec3(1), Float scale = 1);
+	DiffuseAreaLight(Shape* shape, Spectrum emit = Spectrum(1.0f, 1.0f, 1.0f), Float scale = 1);
 
-	virtual glm::fvec3 L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const;
+	virtual Spectrum L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const;
 	virtual std::optional<LightLiSample> SampleLi(SurfaceInteraction intr, Vec2 u) const;
 };
 
