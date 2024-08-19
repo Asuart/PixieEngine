@@ -37,8 +37,8 @@ GeometrySnapshot::GeometrySnapshot(const std::vector<SceneObject*>& flatObjects,
 
 			m_shapes.push_back(triangle);
 			AreaLight* areaLight = nullptr;
-			if (material->m_emission) {
-				areaLight = new DiffuseAreaLight(triangle, material->m_emission);
+			if (material->m_emissionStrength) {
+				areaLight = new DiffuseAreaLight(triangle, material);
 				m_areaLights.push_back(areaLight);
 			}
 			shapePrimitives.push_back(new ShapePrimitive(triangle, material, areaLight));

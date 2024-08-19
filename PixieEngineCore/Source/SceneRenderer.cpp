@@ -79,7 +79,7 @@ void SceneRenderer::SetupLights() {
 		positions[i * 3 + 0] = center.x;
 		positions[i * 3 + 1] = center.y;
 		positions[i * 3 + 2] = center.z;
-		const glm::fvec3& emission = areaLights[i]->GetMaterial()->m_emission.GetRGBValue();
+		const glm::fvec3 emission = areaLights[i]->GetMaterial()->GetEmission().GetRGBValue();
 		colors[i * 3 + 0] = emission.x;
 		colors[i * 3 + 1] = emission.y;
 		colors[i * 3 + 2] = emission.z;

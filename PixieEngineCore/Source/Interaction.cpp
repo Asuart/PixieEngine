@@ -32,3 +32,8 @@ Spectrum SurfaceInteraction::Le(const glm::vec3& wo) const {
 BSDF SurfaceInteraction::GetBSDF(const Ray& ray, const Camera* camera, Sampler* sampler) {
     return material->GetBSDF(*this);
 }
+
+Ray SurfaceInteraction::SpawnRay(const Ray& rayi, const BSDF& bsdf, Vec3 wi, int32_t flags, Float eta) const {
+    Ray rd = Ray(rayi.x, rayi.y, position, wi);
+    return rd;
+}

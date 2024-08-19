@@ -137,6 +137,10 @@ bool Triangle::IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMa
 	return true;
 }
 
+Float Triangle::PDF(SurfaceInteraction ctx, Vec3 wi) const {
+	return 1.0f / Area();
+}
+
 CachedTriangle::CachedTriangle(Vec3 _v0, Vec3 _v1, Vec3 _v2, Vec3 _n)
 	: v0(_v0), v1(_v1), v2(_v2) {
 	edge0 = v1 - v0;
@@ -255,6 +259,10 @@ bool CachedTriangle::IntersectP(const Ray& ray, RayTracingStatistics& stats, Flo
 	}
 
 	return true;
+}
+
+Float CachedTriangle::PDF(SurfaceInteraction ctx, Vec3 wi) const {
+	return 1.0f / Area();
 }
 
 Sphere::Sphere(Vec3 _c, Float _r)

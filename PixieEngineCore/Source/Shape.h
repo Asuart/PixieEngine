@@ -16,6 +16,7 @@ public:
 	virtual Bounds3f Bounds() const = 0;
 	virtual bool Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax) const = 0;
 	virtual bool IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax) const = 0;
+	virtual Float PDF(SurfaceInteraction ctx, Vec3 wi) const = 0;
 };
 
 class Triangle : public Shape {
@@ -32,7 +33,7 @@ public:
 	Bounds3f Bounds() const override;
 	bool Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax) const override;
 	bool IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax) const override;
-
+	Float PDF(SurfaceInteraction ctx, Vec3 wi) const override;
 };
 
 class CachedTriangle : public Shape {
@@ -52,6 +53,7 @@ public:
 	Bounds3f Bounds() const override;
 	bool Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax) const override;
 	bool IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax) const override;
+	Float PDF(SurfaceInteraction ctx, Vec3 wi) const override;
 };
 
 class Sphere : public Shape {

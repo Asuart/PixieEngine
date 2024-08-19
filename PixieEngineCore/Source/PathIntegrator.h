@@ -2,6 +2,7 @@
 #include "PixieEngineCoreHeaders.h"
 #include "Integrator.h"
 #include "Random.h"
+#include "VisibleSurface.h"
 
 class PathIntegrator : public Integrator {
 public:
@@ -15,5 +16,5 @@ public:
 protected:
 	UniformLightSampler m_lightSampler;
 
-	//Vec3 SampleLd(const SurfaceInteraction& intr, const BSDF* bsdf) const;
+	Spectrum SampleLd(uint32_t x, uint32_t y, const SurfaceInteraction& intr, const BSDF* bsdf);
 };

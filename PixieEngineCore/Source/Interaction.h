@@ -43,6 +43,7 @@ struct SurfaceInteraction : public Interaction {
 
 	Spectrum Le(const glm::vec3& wo) const;
 	BSDF GetBSDF(const Ray& ray, const Camera* camera, Sampler* sampler);
+	Ray SpawnRay(const Ray& rayi, const BSDF& bsdf, Vec3 wi, int32_t flags, Float eta) const;
 };
 
 struct MediumInteraction : public Interaction {

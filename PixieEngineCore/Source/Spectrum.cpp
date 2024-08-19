@@ -43,6 +43,14 @@ void Spectrum::operator*=(const Spectrum& other) {
 	m_rgb *= other.m_rgb;
 }
 
+void Spectrum::operator/=(const Float& value) {
+	m_rgb /= value;
+}
+
+void Spectrum::operator/=(const Spectrum& other) {
+	m_rgb /= other.m_rgb;
+}
+
 bool Spectrum::operator==(const Spectrum& other) {
 	return m_rgb == other.m_rgb;
 }

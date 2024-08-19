@@ -26,6 +26,7 @@ public:
 	std::vector<Material*>& GetMaterialsList();
 	std::vector<Mesh*>& GetMeshesList();
 	std::vector<MaterialComponent*>& GetAreaLights();
+	std::vector<Light*>& GetInfiniteLights();
 	std::vector<Camera>& GetCameras();
 	Camera* GetMainCamera();
 	void SetMainCamera(uint32_t index);
@@ -45,6 +46,7 @@ protected:
 	std::vector<Mesh*> meshes;
 	std::vector<MaterialComponent*> areaLights;
 	std::vector<Camera> cameras;
+	std::vector<Light*> infiniteLights;
 	Camera* mainCamera = nullptr;
 	GeometrySnapshot* geometrySnapshot = nullptr;
 

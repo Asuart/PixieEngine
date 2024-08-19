@@ -91,7 +91,7 @@ Mesh* SceneLoader::ProcessMesh(Scene* loadedScene, SceneObject* object, std::map
 
 Material* SceneLoader::ProcessMaterial(Scene* loadedScene, uint32_t materialIndex, const aiScene* scene) {
 	aiColor4D color, colorEmissive;
-	float emissionInt, roughness, opacity, eta;
+	float emissionInt = 0.0f, roughness = 0.0f, opacity = 0.0f, eta = 0.0f;
 	aiGetMaterialColor(scene->mMaterials[materialIndex], AI_MATKEY_COLOR_DIFFUSE, &color);
 	aiGetMaterialColor(scene->mMaterials[materialIndex], AI_MATKEY_COLOR_EMISSIVE, &colorEmissive);
 	aiGetMaterialFloat(scene->mMaterials[materialIndex], AI_MATKEY_EMISSIVE_INTENSITY, &emissionInt);
@@ -99,11 +99,18 @@ Material* SceneLoader::ProcessMaterial(Scene* loadedScene, uint32_t materialInde
 	aiGetMaterialFloat(scene->mMaterials[materialIndex], AI_MATKEY_OPACITY, &opacity);
 	aiGetMaterialFloat(scene->mMaterials[materialIndex], AI_MATKEY_REFRACTI, &eta);	
 
+
+	glm::fvec3 glmEmissionColor = glm::fvec3(colorEmissive.r, colorEmissive.g, colorEmissive.b);
+	float emissionNormaizer = MaxComponent(glmEmissionColor);
+	glmEmissionColor /= emissionNormaizer;
+	emissionInt = emissionNormaizer * (emissionInt ? emissionInt : 1.0f);
+
 	std::string materialName = scene->mMaterials[materialIndex]->GetName().C_Str();
 	Material* material = new Material(materialName);
 	material->m_albedo = Vec3(color.r, color.g, color.b);
 	material->m_roughness = roughness;
-	material->m_emission = Vec3(colorEmissive.r, colorEmissive.g, colorEmissive.b);
+	material->m_emissionColor = glmEmissionColor;
+	material->m_emissionStrength = emissionInt;
 	material->m_transparency = 1.0f - opacity;
 	material->m_refraction = eta;
 	loadedScene->materials.push_back(material);

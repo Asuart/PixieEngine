@@ -88,6 +88,10 @@ Float FrDielectric(Float cosTheta_i, Float eta) {
 	return (Sqr(r_parl) + Sqr(r_perp)) / 2;
 }
 
+Float AbsDot(const Vec3& v1, const Vec3& v2) {
+	return glm::abs(glm::dot(v1, v2));
+}
+
 Float length2(const Vec2& v) {
 	return v.x * v.x + v.y * v.y;
 }
@@ -139,7 +143,7 @@ Vec3 Reflect(Vec3 wo, Vec3 n) {
 
 Vec3 SampleUniformSphere(Vec2 u) {
 	Float z = 1 - 2 * u[0];
-	Float r = glm::sqrt(glm::abs(1 - Sqr(z)));
+	Float r = SafeSqrt(1 - Sqr(z));
 	Float phi = 2 * Pi * u[1];
 	return { r * std::cos(phi), r * std::sin(phi), z };
 }

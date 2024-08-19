@@ -163,6 +163,10 @@ std::vector<MaterialComponent*>& Scene::GetAreaLights() {
 	return areaLights;
 }
 
+std::vector<Light*>& Scene::GetInfiniteLights() {
+	return infiniteLights;
+}
+
 std::vector<Camera>& Scene::GetCameras() {
 	return cameras;
 }

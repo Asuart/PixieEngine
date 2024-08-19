@@ -2,6 +2,7 @@
 #include "PixieEngineCoreHeaders.h"
 #include "Interaction.h"
 #include "Shape.h"
+#include "Material.h"
 
 struct LightLiSample {
 	Spectrum L = Spectrum();
@@ -17,26 +18,35 @@ struct LightSampleContext {
 	Vec3 n;
 };
 
-class AreaLight {
-public:
-	Shape* shape = nullptr;
-	Spectrum Lemit = Spectrum(1.0f, 1.0f, 1.0f);
-	float scale = 1.0f;
-	bool twoSided = true;
+struct Light {
+	Spectrum m_emission;
+
+	Light(Spectrum emission = Spectrum());
 
 	virtual Spectrum L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const = 0;
+	virtual Spectrum Le(const Ray& ray);
+	virtual Float PDF_Li(SurfaceInteraction ctx, Vec3 wi, bool allowIncompletePDF = false) const = 0;
+};
+
+class AreaLight : public Light {
+public:
+	Shape* shape = nullptr;
+	const Material* material = nullptr;
+	bool twoSided = true;
+
 	virtual std::optional<LightLiSample> SampleLi(SurfaceInteraction intr, Vec2 u) const = 0;
 
 protected:
-	AreaLight(Shape* shape, Spectrum emit = Spectrum(1.0f, 1.0f, 1.0f), float scale = 1.0f);
+	AreaLight(Shape* shape, const Material* material);
 };
 
 class DiffuseAreaLight : public AreaLight {
 public:
-	DiffuseAreaLight(Shape* shape, Spectrum emit = Spectrum(1.0f, 1.0f, 1.0f), Float scale = 1);
+	DiffuseAreaLight(Shape* shape, const Material* material);
 
 	virtual Spectrum L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const;
 	virtual std::optional<LightLiSample> SampleLi(SurfaceInteraction intr, Vec2 u) const;
+	virtual Float PDF_Li(SurfaceInteraction ctx, Vec3 wi, bool allowIncompletePDF = false) const;
 };
 
 struct SampledLight {
@@ -51,5 +61,6 @@ public:
 	UniformLightSampler(const std::vector<AreaLight*>& _lights);
 
 	std::optional<SampledLight> Sample(Float u) const;
-	Float PMF() const;
+	Float PMF(const Light* light) const;
+	Float PMF(const SurfaceInteraction& ctx, const Light* light) const;
 };

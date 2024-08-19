@@ -33,7 +33,7 @@ void Film::SetPixel(int32_t x, int32_t y, const glm::vec4& color) {
 }
 
 void Film::AddPixel(int32_t x, int32_t y, const glm::vec4& color) {
-	texture->AccumulatePixel(x, y, glm::clamp(color, 0.0f, 1000.0f));
+	texture->AccumulatePixel(x, y, glm::clamp(color, 0.0f, 10000.0f));
 }
 
 Vec2 Film::GetUV(int32_t x, int32_t y) const {

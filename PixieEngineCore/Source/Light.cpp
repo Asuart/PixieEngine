@@ -1,19 +1,26 @@
 #include "Light.h"
 
+Light::Light(Spectrum emission) 
+	: m_emission(emission) {}
+
+Spectrum Light::Le(const Ray& ray) {
+	return m_emission;
+}
+
 LightLiSample::LightLiSample(Spectrum L, Vec3 wi, Float pdf, const SurfaceInteraction& pLight)
 	: L(L), wi(wi), pdf(pdf), pLight(pLight) {}
 
-AreaLight::AreaLight(Shape* shape, Spectrum emit, float scale)
-	: shape(shape), Lemit(emit), scale(scale) {}
+AreaLight::AreaLight(Shape* shape, const Material* material)
+	: shape(shape), material(material) {}
 
-DiffuseAreaLight::DiffuseAreaLight(Shape* shape, Spectrum emit, Float scale)
-	: AreaLight(shape, emit, scale) {};
+DiffuseAreaLight::DiffuseAreaLight(Shape* shape, const Material* material)
+	: AreaLight(shape, material) {};
 
 Spectrum DiffuseAreaLight::L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const {
-	if (!twoSided && glm::dot(n, w) < 0) {
+	if (!twoSided && glm::dot(n, w) < 0.0f) {
 		return Spectrum();
 	}
-	return scale * Lemit;
+	return material->GetEmission();
 }
 
 std::optional<LightLiSample> DiffuseAreaLight::SampleLi(SurfaceInteraction intr, Vec2 u) const {
@@ -33,6 +40,10 @@ std::optional<LightLiSample> DiffuseAreaLight::SampleLi(SurfaceInteraction intr,
 	return LightLiSample(Le, wi, ss->pdf / solidAnglePDF, ss->intr);
 }
 
+Float DiffuseAreaLight::PDF_Li(SurfaceInteraction ctx, Vec3 wi, bool allowIncompletePDF) const {
+	return shape->PDF(ctx, wi);
+}
+
 UniformLightSampler::UniformLightSampler(const std::vector<AreaLight*>& _lights)
 	: lights(_lights) {}
 
@@ -44,9 +55,13 @@ std::optional<SampledLight> UniformLightSampler::Sample(Float u) const {
 	return SampledLight{ lights[lightIndex], 1.0f / lights.size() };
 }
 
-Float UniformLightSampler::PMF() const {
+Float UniformLightSampler::PMF(const Light* light) const {
 	if (lights.empty()) {
 		return 0.0f;
 	}
 	return 1.0f / lights.size();
+}
+
+Float UniformLightSampler::PMF(const SurfaceInteraction& ctx, const Light* light) const {
+	return PMF(light); 
 }

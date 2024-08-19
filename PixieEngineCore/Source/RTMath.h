@@ -51,6 +51,7 @@ Float length2(const Vec2& v);
 Float length2(const Vec3& v);
 Float gamma(int32_t n);
 Float FrDielectric(Float cosTheta_i, Float eta);
+Float AbsDot(const Vec3& v1, const Vec3& v2);
 
 Vec2 SampleUniformDiskConcentric(Vec2 u);
 Vec2 SampleUniformDiskPolar(Vec2 u);

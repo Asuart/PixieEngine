@@ -6,10 +6,10 @@ public:
 	Vec3 p;
 	Vec3 n;
 	Vec2 uv;
-	Vec3 albedo;
+	Spectrum albedo;
 	bool set = false;
 
-	VisibleSurface(const SurfaceInteraction& si, Vec3 albedo);
+	VisibleSurface(const SurfaceInteraction& si, Spectrum albedo);
 
 	operator bool() const;
 };

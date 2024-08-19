@@ -124,7 +124,7 @@ void RayTracingRenderer::DrawUI() {
 		for (size_t i = 0; i < cameras.size(); i++) {
 			bool isSelected = m_scene->GetMainCamera() == &cameras[i];
 			if (ImGui::Selectable(("Camera " + std::to_string(i)).c_str(), isSelected)) {
-				m_scene->SetMainCamera(i);
+				m_scene->SetMainCamera((uint32_t)i);
 				m_rayTracer->Reset();
 			}
 			if (isSelected) {

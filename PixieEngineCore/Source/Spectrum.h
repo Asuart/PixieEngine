@@ -15,6 +15,8 @@ struct Spectrum {
 	Spectrum operator*(const Spectrum& value);
 	void operator*=(const Float& value);
 	void operator*=(const Spectrum& value);
+	void operator/=(const Float& value);
+	void operator/=(const Spectrum& value);
 	bool operator==(const Spectrum& value);
 	bool operator==(const glm::fvec3& value);
 	bool operator!=(const Spectrum& value);

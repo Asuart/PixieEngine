@@ -217,7 +217,10 @@ void PixieEngineApp::DrawMaterialsWindow() {
 			if (ImGui::ColorEdit3("Albedo", (float*)&material->m_albedo.GetRGB())) {
 				m_rayTracingRenderer->Reset();
 			}
-			if (ImGui::ColorEdit3("Emission", (float*)&material->m_emission.GetRGB())) {
+			if (ImGui::ColorEdit3("Emission Color", (float*)&material->m_emissionColor.GetRGB())) {
+				m_rayTracingRenderer->Reset();
+			}
+			if (ImGui::DragFloat("Emission Strength", (float*)&material->m_emissionStrength)) {
 				m_rayTracingRenderer->Reset();
 			}
 			if (ImGui::DragFloat("Roughness", &material->m_roughness, 0.01f, 0.0f, 1.0f)) {
