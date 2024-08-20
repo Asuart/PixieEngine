@@ -13,7 +13,7 @@
 #include "Scene.h"
 #include "BSDF.h"
 #include "Camera.h"
-#include "Shape.h"
+#include "TriangleCache.h"
 #include "PerlinNoise.h"
 #include "Primitive.h"
 #include "Light.h"

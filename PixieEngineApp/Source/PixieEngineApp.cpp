@@ -372,7 +372,7 @@ void PixieEngineApp::HandleUserInput() {
 				if (m_scene) {
 					Camera* camera = m_scene->GetMainCamera();
 					if (camera) {
-						camera->m_transform.AddRotationY(rotationSpeed * (Float)UserInput::mouseDeltaX);
+						camera->m_transform.AddRotationY(-rotationSpeed * (Float)UserInput::mouseDeltaX);
 					}
 				}
 			}

@@ -1,19 +1,22 @@
 #include "pch.h"
 #include "Primitive.h"
 
-BoundingPrimitive::BoundingPrimitive(const std::vector<Primitive*>& _children)
-	: children(_children) {
-	for (int32_t i = 0; i < children.size(); i++) {
-		bounds = Union(bounds, children[i]->bounds);
+const Bounds3f Primitive::GetBounds() const {
+	return m_bounds;
+}
+
+BoundingPrimitive::BoundingPrimitive(const std::vector<Primitive*>& children)
+	: m_children(children) {
+	for (size_t i = 0; i < children.size(); i++) {
+		m_bounds = Union(m_bounds, children[i]->GetBounds());
 	}
 }
 
 bool BoundingPrimitive::Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax) const {
-	if (!bounds.IntersectP(ray, stats, tMax)) return false;
+	if (!m_bounds.IntersectP(ray, stats, tMax)) return false;
 	bool intersected = false;
-	for (int32_t i = 0; i < children.size(); i++) {
-		bool intr = children[i]->Intersect(ray, outCollision, stats, tMax);
-		if (intr) {
+	for (size_t i = 0; i < m_children.size(); i++) {
+		if (m_children[i]->Intersect(ray, outCollision, stats, tMax)) {
 			intersected = true;
 			tMax = outCollision.distance;
 		}
@@ -22,31 +25,99 @@ bool BoundingPrimitive::Intersect(const Ray& ray, SurfaceInteraction& outCollisi
 }
 
 bool BoundingPrimitive::IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax) const {
-	if (!bounds.IntersectP(ray, stats, tMax)) return false;
-	for (int32_t i = 0; i < children.size(); i++) {
-		if (children[i]->IntersectP(ray, stats, tMax)) return true;
+	if (!m_bounds.IntersectP(ray, stats, tMax)) return false;
+	for (int32_t i = 0; i < m_children.size(); i++) {
+		if (m_children[i]->IntersectP(ray, stats, tMax)) return true;
 	}
 	return false;
 }
 
-ShapePrimitive::ShapePrimitive(Shape* _shape, const Material* _material, const AreaLight* _areaLight)
-	: shape(_shape), material(_material), areaLight(_areaLight) {
-	bounds = shape->Bounds();
+TrianglePrimitive::TrianglePrimitive(const TriangleCache& triangle, const Material* material, const AreaLight* areaLight)
+	: m_triangle(triangle), m_material(material), m_areaLight(areaLight) {
+	m_bounds = Bounds3f(glm::min(triangle.p0, triangle.p1, triangle.p2), glm::max(triangle.p0, triangle.p1, triangle.p2));
 }
 
-bool ShapePrimitive::Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax) const {
-	if (!bounds.IntersectP(ray, stats, tMax)) return false;
-	bool col = shape->Intersect(ray, outCollision, stats, tMax);
-	if (col) {
-		outCollision.material = material;
-		outCollision.areaLight = areaLight;
+bool TrianglePrimitive::Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax) const {
+	stats.m_triangleCheckStatBuffer.Increment(ray.x, ray.y);
+	Float NdotRayDirection = glm::dot(m_triangle.normal, ray.direction);
+	if (fabs(NdotRayDirection) < ShadowEpsilon) {
+		return false;
 	}
-	return col;
+
+	Float t = (m_triangle.d - glm::dot(m_triangle.normal, ray.origin)) / NdotRayDirection;
+	if (t < ShadowEpsilon || t > tMax) {
+		return false;
+	}
+
+	Vec3 P = ray.At(t);
+	Vec3 C;
+
+	Vec3 vp0 = P - m_triangle.p0;
+	C = glm::cross(m_triangle.edge0, vp0);
+	if (glm::dot(m_triangle.normal, C) < 0) {
+		return false;
+	}
+
+	Vec3 vp1 = P - m_triangle.p1;
+	C = glm::cross(m_triangle.edge1, vp1);
+	if (glm::dot(m_triangle.normal, C) < 0) {
+		return false;
+	}
+
+	Vec3 vp2 = P - m_triangle.p2;
+	C = glm::cross(m_triangle.edge2, vp2);
+	if (glm::dot(m_triangle.normal, C) < 0) {
+		return false;
+	}
+
+	outCollision.distance = t;
+	outCollision.backface = NdotRayDirection < 0;
+	outCollision.normal = outCollision.backface ? m_triangle.normal : -m_triangle.normal;
+	outCollision.position = P;
+	outCollision.uv = Vec3(0);
+	outCollision.area = m_triangle.area;
+	outCollision.dpdu = m_triangle.edge0;
+
+	outCollision.material = m_material;
+	outCollision.areaLight = m_areaLight;
+
+	return true;
 }
 
-bool ShapePrimitive::IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax) const {
-	if (!bounds.IntersectP(ray, stats, tMax)) return false;
-	return shape->IntersectP(ray, stats, tMax);
+bool TrianglePrimitive::IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax) const {
+	stats.m_triangleCheckStatBuffer.Increment(ray.x, ray.y);
+	Float NdotRayDirection = glm::dot(m_triangle.normal, ray.direction);
+	if (fabs(NdotRayDirection) < ShadowEpsilon) {
+		return false;
+	}
+
+	Float t = (m_triangle.d - glm::dot(m_triangle.normal, ray.origin)) / NdotRayDirection;
+	if (t < ShadowEpsilon || t > tMax) {
+		return false;
+	}
+
+	Vec3 P = ray.At(t);
+	Vec3 C;
+
+	Vec3 vp0 = P - m_triangle.p0;
+	C = glm::cross(m_triangle.edge0, vp0);
+	if (glm::dot(m_triangle.normal, C) < 0) {
+		return false;
+	}
+
+	Vec3 vp1 = P - m_triangle.p1;
+	C = glm::cross(m_triangle.edge1, vp1);
+	if (glm::dot(m_triangle.normal, C) < 0) {
+		return false;
+	}
+
+	Vec3 vp2 = P - m_triangle.p2;
+	C = glm::cross(m_triangle.edge2, vp2);
+	if (glm::dot(m_triangle.normal, C) < 0) {
+		return false;
+	}
+
+	return true;
 }
 
 BVHPrimitive::BVHPrimitive() {}
@@ -77,7 +148,7 @@ BVHAggregate::BVHAggregate(std::vector<Primitive*> prims, int32_t maxPrimsInNode
 	: maxPrimsInNode(std::min(255, maxPrimsInNode)), primitives(std::move(prims)) {
 	std::vector<BVHPrimitive> bvhPrimitives(primitives.size());
 	for (size_t i = 0; i < primitives.size(); ++i) {
-		bvhPrimitives[i] = BVHPrimitive(i, primitives[i]->bounds);
+		bvhPrimitives[i] = BVHPrimitive(i, primitives[i]->GetBounds());
 	}
 
 	std::vector<Primitive*> orderedPrims(primitives.size());

@@ -19,10 +19,11 @@ Spectrum SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 
 	while (beta) {
 		SurfaceInteraction isect;
-
 		if (!m_scene->Intersect(ray, isect, m_stats)) {
 			if (!m_sampleLights || specularBounce) {
-				L += m_scene->GetSkyColor(ray) * beta;
+				for (Light* light : m_scene->GetInfiniteLights()) {
+					L += beta * light->Le(ray);
+				}
 			}
 			break;
 		}
@@ -31,26 +32,24 @@ Spectrum SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 			L += beta * isect.Le(-ray.direction);
 		}
 
-		BSDF bsdf = isect.GetBSDF(ray, m_scene->GetMainCamera(), sampler);
-		if (!bsdf) {
-			//isect.SkipIntersection(&ray, si->tHit);
-			continue;
-		}
-
 		if (depth++ == m_maxDepth) {
 			break;
 		}
 
+		BSDF bsdf = isect.GetBSDF(ray, m_scene->GetMainCamera(), sampler);
+		if (!bsdf) {
+			specularBounce = true;
+			isect.SkipIntersection(ray);
+			continue;
+		}
+
 		Vec3 wo = -ray.direction;
 		if (m_sampleLights) {
-			Float u = sampler->Get();
-			std::optional<SampledLight> sampledLight = m_lightSampler.Sample(u);
+			std::optional<SampledLight> sampledLight = m_lightSampler.Sample(sampler->Get());
 			if (sampledLight) {
-				Vec2 uLight = sampler->Get2D();
-				std::optional<LightLiSample> ls = sampledLight->light->SampleLi(isect, uLight);
+				std::optional<LightLiSample> ls = sampledLight->light->SampleLi(isect, sampler->Get2D());
 				if (ls && ls->L && ls->pdf > 0) {
-					Vec3 wi = ls->wi;
-					Spectrum f = bsdf.f(wo, wi) * glm::abs(glm::dot(wi, isect.normal));
+					Spectrum f = bsdf.f(wo, ls->wi) * AbsDot(ls->wi, isect.normal);
 					if (f && Unoccluded(ray.x, ray.y, isect, ls->pLight)) {
 						L += beta * f * ls->L / (sampledLight->p * ls->pdf);
 					}
@@ -59,12 +58,11 @@ Spectrum SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 		}
 
 		if (m_sampleBSDF) {
-			Float u = sampler->Get();
-			std::optional<BSDFSample> bs = bsdf.Sample_f(wo, u, sampler->Get2D());
+			std::optional<BSDFSample> bs = bsdf.Sample_f(wo, sampler->Get(), sampler->Get2D());
 			if (!bs) {
 				break;
 			}
-			beta *= bs->f * glm::abs(glm::dot(bs->wi, isect.normal)) / bs->pdf;
+			beta *= bs->f * AbsDot(bs->wi, isect.normal) / bs->pdf;
 			specularBounce = bs->IsSpecular();
 			ray = Ray(ray.x, ray.y, isect.position, bs->wi);
 		}
@@ -86,7 +84,7 @@ Spectrum SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 					wi = -wi;
 				}
 			}
-			beta *= bsdf.f(wo, wi) * glm::abs(glm::dot(wi, isect.normal)) / pdf;
+			beta *= bsdf.f(wo, wi) * AbsDot(wi, isect.normal) / pdf;
 			specularBounce = false;
 			ray = Ray(ray.x, ray.y, isect.position, wi);
 		}

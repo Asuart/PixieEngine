@@ -2,41 +2,46 @@
 #include "Ray.h"
 #include "Interaction.h"
 #include "Bounds.h"
-#include "Shape.h"
+#include "TriangleCache.h"
 #include "RayTracingStatistics.h"
 
 class Primitive {
 public:
-	Bounds3f bounds;
-
 	virtual bool Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax = Infinity) const = 0;
 	virtual bool IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax = Infinity) const = 0;
+	
+	const Bounds3f GetBounds() const;
+
+protected:
+	Bounds3f m_bounds;
 };
 
 class BoundingPrimitive : public Primitive {
 public:
-	std::vector<Primitive*> children = std::vector<Primitive*>();
-
-	BoundingPrimitive(const std::vector<Primitive*>& _children);
+	BoundingPrimitive(const std::vector<Primitive*>& children);
 
 	bool Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax = Infinity) const override;
 	bool IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax = Infinity) const override;
+
+protected:
+	std::vector<Primitive*> m_children = std::vector<Primitive*>();
 };
 
-class ShapePrimitive : public Primitive {
+class TrianglePrimitive : public Primitive {
 public:
-	const Material* material;
-	const AreaLight* areaLight;
-	Shape* shape;
-
-	ShapePrimitive(Shape* _shape, const Material* _material, const AreaLight* _areaLight = nullptr);
+	TrianglePrimitive(const TriangleCache& triangle, const Material* material, const AreaLight* areaLight = nullptr);
 
 	bool Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax = Infinity) const override;
 	bool IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax = Infinity) const override;
+
+protected:
+	const TriangleCache m_triangle;
+	const Material* m_material = nullptr;
+	const AreaLight* m_areaLight = nullptr;
 };
 
 struct BVHSplitBucket {
-	int count = 0;
+	int32_t count = 0;
 	Bounds3f bounds;
 };
 

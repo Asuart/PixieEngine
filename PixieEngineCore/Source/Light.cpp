@@ -11,11 +11,11 @@ Spectrum Light::Le(const Ray& ray) {
 LightLiSample::LightLiSample(Spectrum L, Vec3 wi, Float pdf, const SurfaceInteraction& pLight)
 	: L(L), wi(wi), pdf(pdf), pLight(pLight) {}
 
-AreaLight::AreaLight(Shape* shape, const Material* material)
-	: shape(shape), material(material) {}
+AreaLight::AreaLight(TriangleCache triangle, const Material* material)
+	: triangle(triangle), material(material) {}
 
-DiffuseAreaLight::DiffuseAreaLight(Shape* shape, const Material* material)
-	: AreaLight(shape, material) {};
+DiffuseAreaLight::DiffuseAreaLight(TriangleCache triangle, const Material* material)
+	: AreaLight(triangle, material) {};
 
 Spectrum DiffuseAreaLight::L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const {
 	if (!twoSided && glm::dot(n, w) < 0.0f) {
@@ -25,24 +25,22 @@ Spectrum DiffuseAreaLight::L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const {
 }
 
 std::optional<LightLiSample> DiffuseAreaLight::SampleLi(SurfaceInteraction intr, Vec2 u) const {
-	std::optional<ShapeSample> ss = shape->Sample(u);
+	std::optional<ShapeSample> ss = triangle.Sample(u);
 	if (!ss || ss->pdf == 0 || length2(ss->intr.position - intr.position) == 0) {
 		return {};
 	}
 
 	Vec3 wi = glm::normalize(ss->intr.position - intr.position);
-	Spectrum Le = L(ss->intr.position, ss->intr.normal, ss->intr.uv, wi);
+	Spectrum Le = L(ss->intr.position, ss->intr.normal, ss->intr.uv, -wi);
 	if (!Le) {
 		return {};
 	}
 
-	Float solidAnglePDF = shape->SolidAngle(intr.position) * Inv2Pi;
-
-	return LightLiSample(Le, wi, ss->pdf / solidAnglePDF, ss->intr);
+	return LightLiSample(Le, wi, ss->pdf, ss->intr);
 }
 
 Float DiffuseAreaLight::PDF_Li(SurfaceInteraction ctx, Vec3 wi, bool allowIncompletePDF) const {
-	return shape->PDF(ctx, wi);
+	return triangle.samplePDF;
 }
 
 UniformLightSampler::UniformLightSampler(const std::vector<AreaLight*>& _lights)

@@ -1,7 +1,7 @@
 #pragma once
 #include "pch.h"
 #include "Interaction.h"
-#include "Shape.h"
+#include "TriangleCache.h"
 #include "Material.h"
 
 struct LightLiSample {
@@ -30,19 +30,19 @@ struct Light {
 
 class AreaLight : public Light {
 public:
-	Shape* shape = nullptr;
+	TriangleCache triangle;
 	const Material* material = nullptr;
 	bool twoSided = true;
 
 	virtual std::optional<LightLiSample> SampleLi(SurfaceInteraction intr, Vec2 u) const = 0;
 
 protected:
-	AreaLight(Shape* shape, const Material* material);
+	AreaLight(TriangleCache triangle, const Material* material);
 };
 
 class DiffuseAreaLight : public AreaLight {
 public:
-	DiffuseAreaLight(Shape* shape, const Material* material);
+	DiffuseAreaLight(TriangleCache triangle, const Material* material);
 
 	virtual Spectrum L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const;
 	virtual std::optional<LightLiSample> SampleLi(SurfaceInteraction intr, Vec2 u) const;

@@ -5,6 +5,7 @@
 #include "Light.h"
 #include "MeshComponent.h"
 #include "MaterialComponent.h"
+#include "TriangleCache.h"
 
 class GeometrySnapshot {
 public:
@@ -17,7 +18,6 @@ public:
 	std::vector<AreaLight*>& GetAreaLights();
 
 private:
-	std::vector<Shape*> m_shapes;
 	std::vector<AreaLight*> m_areaLights;
 	Primitive* m_rootPrimitive;
 };

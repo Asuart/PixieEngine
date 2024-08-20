@@ -38,3 +38,7 @@ Ray SurfaceInteraction::SpawnRay(const Ray& rayi, const BSDF& bsdf, Vec3 wi, int
     Ray rd = Ray(rayi.x, rayi.y, position, wi);
     return rd;
 }
+
+void SurfaceInteraction::SkipIntersection(Ray& ray) const {
+    ray = Ray(ray.x, ray.y, position + ray.direction * ShadowEpsilon, ray.direction);
+}
