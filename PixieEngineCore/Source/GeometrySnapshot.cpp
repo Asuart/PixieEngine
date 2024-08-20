@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "GeometrySnapshot.h"
 
 GeometrySnapshot::GeometrySnapshot(const std::vector<SceneObject*>& flatObjects, uint32_t maxPrimitivesPerLeaf, bool cacheTriangles) {

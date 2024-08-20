@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Skybox.h"
 
 SolidColorSkybox::SolidColorSkybox(glm::fvec3 color)

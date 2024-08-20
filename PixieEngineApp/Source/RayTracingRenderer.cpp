@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "RayTracingRenderer.h"
 
 std::string to_string(RayTracingMode mode) {

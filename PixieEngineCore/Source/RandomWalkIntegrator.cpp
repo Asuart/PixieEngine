@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "RandomWalkIntegrator.h"
 
 RandomWalkIntegrator::RandomWalkIntegrator(const glm::ivec2& resolution)

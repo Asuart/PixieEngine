@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Film.h"
 
 Film::Film(glm::ivec2 resolution)

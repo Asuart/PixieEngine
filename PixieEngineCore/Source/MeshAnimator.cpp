@@ -1,4 +1,4 @@
-
+#include "pch.h"
 #include "MeshAnimator.h"
 
 Bone::Bone(const std::string& name, int32_t ID)

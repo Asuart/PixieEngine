@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "PerlinNoise.h"
 
 PerlinNoise::PerlinNoise() {

@@ -1,4 +1,4 @@
-
+#include "pch.h"
 #include "BxDFTools.h"
 
 bool IsReflective(BxDFFlags f) {

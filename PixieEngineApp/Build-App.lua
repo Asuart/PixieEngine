@@ -5,6 +5,9 @@ project "PixieEngineApp"
    targetdir "Build/%{cfg.buildcfg}"
    staticruntime "off"
 
+   pchheader "pch.h"
+   pchsource "Source/pch.cpp"
+
    files 
    { 
       "Source/**.h", 
@@ -40,6 +43,9 @@ project "PixieEngineApp"
 
    targetdir ("../Build/" .. OutputDir .. "/%{prj.name}")
    objdir ("../Build/Intermediates/" .. OutputDir .. "/%{prj.name}")
+
+   filter { 'files:../Dependencies/**.cpp' }
+       flags { 'NoPCH' }
 
    filter "system:windows"
        systemversion "latest"

@@ -1,5 +1,5 @@
 #pragma once
-#include "PixieEngineCoreHeaders.h"
+#include "pch.h"
 
 struct Spectrum {
 	Spectrum(float r = 0.0f, float g = 0.0f, float b = 0.0f);

@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "RayTracingStatistics.h"
 
 RayTracingStatistics::RayTracingStatistics(glm::ivec2 resolution)

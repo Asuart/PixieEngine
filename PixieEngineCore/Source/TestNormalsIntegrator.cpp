@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "TestNormalsIntegrator.h"
 
 TestNormalsIntegrator::TestNormalsIntegrator(const glm::ivec2& resolution)

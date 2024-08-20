@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "RTMath.h"
 
 Float SafeSqrt(Float v) {

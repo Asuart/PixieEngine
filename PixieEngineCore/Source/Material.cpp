@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Material.h"
 
 Vec3 Refract(const Vec3& uv, const Vec3& n, Float etai_over_etat) {

@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Spectrum.h"
 
 Spectrum::Spectrum(float r, float g, float b) 

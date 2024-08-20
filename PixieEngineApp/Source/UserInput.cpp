@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "UserInput.h"
 
 GLFWwindow* UserInput::window = nullptr;

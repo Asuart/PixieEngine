@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Integrator.h"
 
 void clear(std::queue<int32_t>& q) {

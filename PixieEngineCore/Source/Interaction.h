@@ -1,5 +1,5 @@
 #pragma once
-#include "PixieEngineCoreHeaders.h"
+#include "pch.h"
 #include "Medium.h"
 #include "BSDF.h"
 #include "Sampler.h"

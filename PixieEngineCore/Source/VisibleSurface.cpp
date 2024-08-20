@@ -1,4 +1,4 @@
-
+#include "pch.h"
 #include "VisibleSurface.h"
 
 VisibleSurface::VisibleSurface(const SurfaceInteraction& si, Spectrum albedo)

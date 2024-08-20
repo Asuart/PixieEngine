@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Shape.h"
 
 Vec3 SampleUniformTriangle(Vec2 u) {

@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "SimplePathIntegrator.h"
 
 SimplePathIntegrator::SimplePathIntegrator(const glm::ivec2& resolution)

@@ -1,5 +1,5 @@
 #pragma once
-#include "PixieEngineCoreHeaders.h"
+#include "pch.h"
 
 static const uint32_t MaxBonesPerVertex = 4;
 

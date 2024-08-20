@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "PixieEngineApp.h"
 
 PixieEngineApp::PixieEngineApp() {

@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "SceneRenderer.h"
 
 SceneRenderer::SceneRenderer(const glm::ivec2& resolution, Scene* scene)

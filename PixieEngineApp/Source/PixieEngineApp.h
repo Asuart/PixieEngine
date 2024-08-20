@@ -1,5 +1,4 @@
 #pragma once
-#include "PixieEngineAppHeaders.h"
 #include "PixieEngineWindow.h"
 #include "RayTracingRenderer.h"
 

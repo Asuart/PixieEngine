@@ -1,4 +1,4 @@
-
+#include "pch.h"
 #include "TrowbridgeReitzDistribution.h"
 
 TrowbridgeReitzDistribution::TrowbridgeReitzDistribution(Float alpha_x, Float alpha_y)

@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Interaction.h"
 #include "Light.h"
 #include "Material.h"

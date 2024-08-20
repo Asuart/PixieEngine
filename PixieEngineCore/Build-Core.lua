@@ -5,7 +5,15 @@ project "PixieEngineCore"
    targetdir "Build/%{cfg.buildcfg}"
    staticruntime "off"
 
-   files { "Source/**.h", "Source/**.cpp", "Source/shaders/**.h", "../Dependencies/glad/src/**.c" }
+   pchheader "pch.h"
+   pchsource "Source/pch.cpp"
+
+   files { 
+      "Source/**.h",
+      "Source/**.cpp",
+      "Source/shaders/**.h",
+      "../Dependencies/glad/src/**.c"
+    }
 
    includedirs
    {
@@ -22,6 +30,9 @@ project "PixieEngineCore"
 
    targetdir ("../Build/" .. OutputDir .. "/%{prj.name}")
    objdir ("../Build/Intermediates/" .. OutputDir .. "/%{prj.name}")
+
+   filter { 'files:../Dependencies/glad/src/**.c' }
+       flags { 'NoPCH' }
 
    filter "system:windows"
        systemversion "latest"

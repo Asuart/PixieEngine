@@ -1,4 +1,4 @@
-
+#include "pch.h"
 #include "SceneObject.h"
 
 SceneObject::SceneObject(const std::string& name, Transform transform)

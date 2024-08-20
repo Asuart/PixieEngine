@@ -1,4 +1,4 @@
-
+#include "pch.h"
 #include "BxDF.h"
 
 Spectrum BxDF::rho(Vec3 wo, std::span<const Float> uc, std::span<const Vec2> u2) const {

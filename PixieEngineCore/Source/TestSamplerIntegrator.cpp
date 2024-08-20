@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "TestSamplerIntegrator.h"
 
 TestSamplerIntegrator::TestSamplerIntegrator(const glm::ivec2& resolution)

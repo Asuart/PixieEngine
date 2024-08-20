@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "SceneLoader.h"
 
 Scene* SceneLoader::LoadScene(const std::string& filePath) {

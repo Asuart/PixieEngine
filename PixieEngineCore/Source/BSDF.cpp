@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "BSDF.h"
 
 DiffuseBxDF::DiffuseBxDF(Spectrum spectrum)

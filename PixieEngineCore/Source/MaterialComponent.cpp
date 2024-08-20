@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "MaterialComponent.h"
 
 MaterialComponent::MaterialComponent(Material* material, SceneObject* parent)

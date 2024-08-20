@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Mesh.h"
 
 Vertex::Vertex(const Vec3& p, const Vec3& n, const Vec2& uv)

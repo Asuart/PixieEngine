@@ -1,4 +1,4 @@
-
+#include "pch.h"
 #include "BSDFSample.h"
 
 BSDFSample::BSDFSample(Spectrum f, Vec3 wi, Float pdf, BxDFFlags flags, Float eta, bool pdfIsProportional)

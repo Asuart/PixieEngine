@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "UID.h"
 
 std::atomic<uint64_t> UID::counter = 0;

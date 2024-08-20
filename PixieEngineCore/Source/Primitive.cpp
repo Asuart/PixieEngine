@@ -1,4 +1,4 @@
-
+#include "pch.h"
 #include "Primitive.h"
 
 BoundingPrimitive::BoundingPrimitive(const std::vector<Primitive*>& _children)

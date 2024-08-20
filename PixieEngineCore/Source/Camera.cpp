@@ -1,4 +1,4 @@
-
+#include "pch.h"
 #include "Camera.h"
 
 Camera::Camera(Vec3 lookFrom, Vec3 lookAt, Vec3 up, Float fovy, Float aspect, Float aperture, Float focusDistance, Float near, Float far)
