@@ -36,7 +36,7 @@ BSDF SurfaceInteraction::GetBSDF(const Ray& ray, const Camera* camera, Sampler* 
 }
 
 Ray SurfaceInteraction::SpawnRay(const Ray& rayi, const BSDF& bsdf, Vec3 wi, int32_t flags, Float eta) const {
-    Ray rd = Ray(rayi.x, rayi.y, position, wi);
+    Ray rd = Ray(rayi.x, rayi.y, position + normal * ShadowEpsilon, wi);
     return rd;
 }
 

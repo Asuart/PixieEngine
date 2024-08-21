@@ -5,8 +5,11 @@ PathIntegrator::PathIntegrator(const glm::ivec2& resolution)
 	: Integrator(resolution), m_lightSampler({}) {}
 
 void PathIntegrator::SetScene(Scene* scene) {
+	StopRender();
 	m_scene = scene;
 	m_lightSampler = UniformLightSampler(m_scene->GetGeometrySnapshot()->GetAreaLights());
+	Reset();
+	StartRender();
 }
 
 Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
@@ -50,7 +53,7 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 		BSDF bsdf = isect.GetBSDF(ray, m_scene->GetMainCamera(), sampler);
 		if (!bsdf) {
 			specularBounce = true;
-			//isect.SkipIntersection(&ray, si->tHit);
+			isect.SkipIntersection(ray);
 			continue;
 		}
 
@@ -89,21 +92,21 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 		}
 
 		Vec3 wo = -ray.direction;
-		std::optional<BSDFSample> bs = bsdf.SampleDirectionAndDistribution(isect.triangle->shadingFrame, wo, sampler->Get(), sampler->Get2D());
+		BSDFSample bs = bsdf.SampleDirectionAndDistribution(isect.triangle->shadingFrame, wo, sampler->Get(), sampler->Get2D());
 		if (!bs) {
 			break;
 		}
 
-		beta *= bs->f * AbsDot(bs->wi, isect.normal) / bs->pdf;
-		p_b = bs->pdfIsProportional ? bsdf.PDF(isect.triangle->shadingFrame, wo, bs->wi) : bs->pdf;
-		specularBounce = bs->IsSpecular();
-		anyNonSpecularBounces |= !bs->IsSpecular();
-		if (bs->IsTransmission()) {
-			etaScale *= Sqr(bs->eta);
+		beta *= bs.f * AbsDot(bs.wi, isect.normal) / bs.pdf;
+		p_b = bs.pdfIsProportional ? bsdf.PDF(isect.triangle->shadingFrame, wo, bs.wi) : bs.pdf;
+		specularBounce = bs.IsSpecular();
+		anyNonSpecularBounces |= !bs.IsSpecular();
+		if (bs.IsTransmission()) {
+			etaScale *= Sqr(bs.eta);
 		}
 		prevIntrCtx = isect;
 
-		ray = isect.SpawnRay(ray, bsdf, bs->wi, bs->flags, bs->eta);
+		ray = isect.SpawnRay(ray, bsdf, bs.wi, bs.flags, bs.eta);
 
 		glm::fvec3 rrBeta = beta.GetRGBValue() * etaScale;
 		if (MaxComponent(rrBeta) < 1.0f && depth > 1) {

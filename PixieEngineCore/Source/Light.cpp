@@ -25,7 +25,7 @@ Spectrum DiffuseAreaLight::L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const {
 }
 
 std::optional<LightLiSample> DiffuseAreaLight::SampleLi(SurfaceInteraction intr, Vec2 u) const {
-	std::optional<ShapeSample> ss = triangle.Sample(u);
+	std::optional<ShapeSample> ss = triangle.Sample(intr, u);
 	if (!ss || ss->pdf == 0 || length2(ss->intr.position - intr.position) == 0) {
 		return {};
 	}

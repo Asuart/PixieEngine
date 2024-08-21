@@ -36,7 +36,7 @@ Spectrum SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 			break;
 		}
 
-		const BSDF& bsdf = isect.GetBSDF(ray, m_scene->GetMainCamera(), sampler);
+		BSDF bsdf = isect.GetBSDF(ray, m_scene->GetMainCamera(), sampler);
 		if (!bsdf) {
 			specularBounce = true;
 			isect.SkipIntersection(ray);

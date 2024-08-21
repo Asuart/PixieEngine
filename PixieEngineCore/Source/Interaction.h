@@ -16,9 +16,9 @@ struct TriangleCache;
 
 struct Interaction {
 	Vec3 position = Vec3(0.0f);
-	Vec3 wo = Vec3(0.0f);
 	Vec3 normal = Vec3(0.0f);
 	Vec2 uv = Vec2(0.0f);
+	Vec3 wo = Vec3(0.0f);
 	Float distance = 0.0f;
 	bool backface = false;
 	const TriangleCache* triangle = nullptr;

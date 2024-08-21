@@ -35,8 +35,11 @@ ShapeSample TriangleCache::Sample(const SurfaceInteraction& intr, Vec2 u) const 
 		if (distanceSquared == 0) {
 			return ShapeSample();
 		}
-		ss.pdf /= AbsDot(ss.intr.normal, -wi) / distanceSquared;
 		wi = glm::normalize(wi);
+		ss.pdf /= AbsDot(ss.intr.normal, -wi) / distanceSquared;
+		if (ss.pdf == Infinity) {
+			return ShapeSample();
+		}
 		return ss;
 	}
 
@@ -62,7 +65,8 @@ ShapeSample TriangleCache::Sample(const SurfaceInteraction& intr, Vec2 u) const 
 	pdf *= triPDF;
 
 	Vec3 p = b[0] * p0 + b[1] * p1 + b[2] * p1;
+	Vec3 n = glm::normalize(glm::cross(p1 - p0, p2 - p0));
 	Vec2 uvSample = b[0] * uv0 + b[1] * uv1 + b[2] * uv2;
 
-	return ShapeSample{ intr, pdf };
+	return ShapeSample{ SurfaceInteraction({p, n, uvSample}), pdf };
 }
