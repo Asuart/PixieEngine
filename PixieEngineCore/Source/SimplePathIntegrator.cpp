@@ -36,7 +36,7 @@ Spectrum SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 			break;
 		}
 
-		BSDF bsdf = isect.GetBSDF(ray, m_scene->GetMainCamera(), sampler);
+		const BSDF& bsdf = isect.GetBSDF(ray, m_scene->GetMainCamera(), sampler);
 		if (!bsdf) {
 			specularBounce = true;
 			isect.SkipIntersection(ray);
@@ -49,7 +49,7 @@ Spectrum SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 			if (sampledLight) {
 				std::optional<LightLiSample> ls = sampledLight->light->SampleLi(isect, sampler->Get2D());
 				if (ls && ls->L && ls->pdf > 0) {
-					Spectrum f = bsdf.f(wo, ls->wi) * AbsDot(ls->wi, isect.normal);
+					Spectrum f = bsdf.SampleDistribution(isect.triangle->shadingFrame, wo, ls->wi) * AbsDot(ls->wi, isect.normal);
 					if (f && Unoccluded(ray.x, ray.y, isect, ls->pLight)) {
 						L += beta * f * ls->L / (sampledLight->p * ls->pdf);
 					}
@@ -58,7 +58,7 @@ Spectrum SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 		}
 
 		if (m_sampleBSDF) {
-			std::optional<BSDFSample> bs = bsdf.Sample_f(wo, sampler->Get(), sampler->Get2D());
+			std::optional<BSDFSample> bs = bsdf.SampleDirectionAndDistribution(isect.triangle->shadingFrame, wo, sampler->Get(), sampler->Get2D());
 			if (!bs) {
 				break;
 			}
@@ -72,11 +72,11 @@ Spectrum SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 			BxDFFlags flags = bsdf.Flags();
 			if (IsReflective(flags) && IsTransmissive(flags)) {
 				wi = SampleUniformSphere(sampler->Get2D());
-				pdf = UniformSpherePDF();
+				pdf = UniformSpherePDF;
 			}
 			else {
 				wi = SampleUniformHemisphere(sampler->Get2D());
-				pdf = UniformHemispherePDF();
+				pdf = UniformHemispherePDF;
 				if (IsReflective(flags) && glm::dot(wo, isect.normal) * glm::dot(wi, isect.normal) < 0.0f) {
 					wi = -wi;
 				}
@@ -84,7 +84,7 @@ Spectrum SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 					wi = -wi;
 				}
 			}
-			beta *= bsdf.f(wo, wi) * AbsDot(wi, isect.normal) / pdf;
+			beta *= bsdf.SampleDistribution(isect.triangle->shadingFrame, wo, wi) * AbsDot(wi, isect.normal) / pdf;
 			specularBounce = false;
 			ray = Ray(ray.x, ray.y, isect.position, wi);
 		}

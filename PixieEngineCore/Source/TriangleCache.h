@@ -4,6 +4,9 @@
 #include "Mesh.h"
 #include "ShapeSample.h"
 
+struct Interaction;
+struct SurfaceInteraction;
+
 struct TriangleCache {
 	Vec3 p0 = Vec3(0.0f, 0.0f, 0.0f), p1 = Vec3(0.0f, 0.0f, 0.0f), p2 = Vec3(0.0f, 0.0f, 0.0f);
 	Vec3 normal = Vec3(0.0f, 0.0f, 0.0f);
@@ -12,6 +15,7 @@ struct TriangleCache {
 	Float area = 0.0f;
 	Float d = 0.0f;
 	Float samplePDF = 0.0f;
+	Frame shadingFrame;
 
 	TriangleCache(const Vertex& v0, const Vertex& v1, const Vertex& v2);
 
@@ -19,5 +23,3 @@ struct TriangleCache {
 	ShapeSample Sample(Vec2 u) const;
 	ShapeSample Sample(const SurfaceInteraction& intr, Vec2 u) const;
 };
-
-Vec3 SampleUniformTriangle(Vec2 u);

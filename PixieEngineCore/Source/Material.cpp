@@ -69,28 +69,6 @@ Spectrum Material::Sample(const Ray& ray, const SurfaceInteraction& collision, R
 	return (cosTheta * Evaluate(collision)) / Pdf();
 }
 
-BxDF* Material::GetBxDF(const SurfaceInteraction& intr) const {
-	if (RandomFloat() > m_transparency) {
-		return new DiffuseBxDF(Evaluate(intr));
-	}
-	else {
-		const glm::fvec2 anisotropicRoughness = glm::fvec2(1.0f, 1.0f);
-		const bool normalizeAnisotropicRoughness = false;
-
-		float urough = m_roughness * anisotropicRoughness.x;
-		float vrough = m_roughness * anisotropicRoughness.y;
-		if (normalizeAnisotropicRoughness) {
-			urough = TrowbridgeReitzDistribution::RoughnessToAlpha(urough);
-			vrough = TrowbridgeReitzDistribution::RoughnessToAlpha(vrough);
-		}
-
-		TrowbridgeReitzDistribution distrib(urough, vrough);
-		return new DielectricBxDF(m_refraction, distrib);
-	}
-	//return new DiffuseTransmissionBxDF(reflectance * scale, transmittance * scale);
-}
-
 BSDF Material::GetBSDF(const SurfaceInteraction& intr) const {
-	BxDF* bxdf = GetBxDF(intr);
-	return BSDF(intr.normal, intr.dpdu, bxdf);
+	return BSDF(*this);
 }

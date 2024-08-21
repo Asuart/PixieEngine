@@ -1,18 +1,6 @@
 #include "pch.h"
 #include "TriangleCache.h"
-
-Vec3 SampleUniformTriangle(Vec2 u) {
-	Float b0, b1;
-	if (u[0] < u[1]) {
-		b0 = u[0] / 2;
-		b1 = u[1] - b0;
-	}
-	else {
-		b1 = u[1] / 2;
-		b0 = u[0] - b1;
-	}
-	return { b0, b1, 1 - b0 - b1 };
-}
+#include "Interaction.h"
 
 TriangleCache::TriangleCache(const Vertex& v0, const Vertex& v1, const Vertex& v2)
 	: p0(v0.position), p1(v1.position), p2(v2.position), uv0(v0.uv), uv1(v1.uv), uv2(v2.uv) {
@@ -23,6 +11,7 @@ TriangleCache::TriangleCache(const Vertex& v0, const Vertex& v1, const Vertex& v
 	area = glm::length(glm::cross(p1 - p0, p2 - p0)) * 0.5f;
 	d = glm::dot(normal, p0);
 	samplePDF = 1.0f / area;
+	shadingFrame = Frame::FromZ(normal);
 }
 
 Float TriangleCache::GetSolidAngle(const Vec3& point) const {
@@ -56,10 +45,10 @@ ShapeSample TriangleCache::Sample(const SurfaceInteraction& intr, Vec2 u) const 
 		Vec3 rp = intr.position;
 		Vec3 wi[3] = { glm::normalize(p0 - rp), glm::normalize(p1 - rp), glm::normalize(p2 - rp) };
 		std::array<Float, 4> w = std::array<Float, 4> {
-			std::max<Float>(0.01, AbsDot(intr.normal, wi[1])),
-				std::max<Float>(0.01, AbsDot(intr.normal, wi[1])),
-				std::max<Float>(0.01, AbsDot(intr.normal, wi[0])),
-				std::max<Float>(0.01, AbsDot(intr.normal, wi[2]))
+			std::max<Float>(0.01f, AbsDot(intr.normal, wi[1])),
+				std::max<Float>(0.01f, AbsDot(intr.normal, wi[1])),
+				std::max<Float>(0.01f, AbsDot(intr.normal, wi[0])),
+				std::max<Float>(0.01f, AbsDot(intr.normal, wi[2]))
 		};
 		u = SampleBilinear(u, w);
 		pdf = BilinearPDF(u, w);

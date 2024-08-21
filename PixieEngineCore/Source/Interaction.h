@@ -12,6 +12,7 @@ struct Mesh;
 struct Light;
 class AreaLight;
 struct ShapeSample;
+struct TriangleCache;
 
 struct Interaction {
 	Vec3 position = Vec3(0.0f);
@@ -19,13 +20,14 @@ struct Interaction {
 	Vec3 normal = Vec3(0.0f);
 	Vec2 uv = Vec2(0.0f);
 	Float distance = 0.0f;
-	Medium* medium = nullptr;
-	MediumInterface* mediumInterface = nullptr;
-    bool backface = false;
+	bool backface = false;
+	const TriangleCache* triangle = nullptr;
+	const Medium* medium = nullptr;
+	const MediumInterface* mediumInterface = nullptr;
 
 	Vec3 OffsetRayOrigin(Vec3 origin) const;
-	Medium* GetMedium(Vec3 direction) const;
-	Medium* GetMedium() const;
+	const Medium* GetMedium(Vec3 direction) const;
+	const Medium* GetMedium() const;
 	bool IsSurfaceInteraction() const;
 	bool IsMediumInteraction() const;
 };

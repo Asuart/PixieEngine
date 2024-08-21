@@ -35,6 +35,4 @@ struct Material {
 	BSDF GetBSDF(const SurfaceInteraction& intr) const;
 	float Pdf() const;
 
-protected:
-	virtual BxDF* GetBxDF(const SurfaceInteraction& intr) const;
 };

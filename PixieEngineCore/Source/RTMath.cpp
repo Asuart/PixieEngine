@@ -7,8 +7,9 @@ Float SafeSqrt(Float v) {
 
 Float PowerHeuristic(int32_t nf, Float fPdf, int32_t ng, Float gPdf) {
 	Float f = nf * fPdf, g = ng * gPdf;
-	if (std::isinf(Sqr(f)))
+	if (std::isinf(Sqr(f))) {
 		return 1;
+	}
 	return Sqr(f) / (Sqr(f) + Sqr(g));
 }
 
@@ -18,14 +19,6 @@ Float SphericalTriangleArea(Vec3 a, Vec3 b, Vec3 c) {
 
 Float MaxComponent(const Vec3& v) {
 	return glm::max(v.x, glm::max(v.y, v.z));
-}
-
-Float UniformSpherePDF() {
-	return Inv4Pi;
-}
-
-Float UniformHemispherePDF() {
-	return Inv2Pi;
 }
 
 Float CosineHemispherePDF(Float cosTheta) {
@@ -172,14 +165,16 @@ bool Refract(Vec3 wi, Vec3 n, Float eta, Float* etap, Vec3* wt) {
 	Float sin2Theta_i = std::max<Float>(0, 1 - Sqr(cosTheta_i));
 	Float sin2Theta_t = sin2Theta_i / Sqr(eta);
 
-	if (sin2Theta_t >= 1)
+	if (sin2Theta_t >= 1) {
 		return false;
+	}
 
 	Float cosTheta_t = std::sqrt(1 - sin2Theta_t);
 
 	*wt = -wi / eta + (cosTheta_i / eta - cosTheta_t) * Vec3(n);
-	if (etap)
+	if (etap) {
 		*etap = eta;
+	}
 
 	return true;
 }
@@ -202,15 +197,18 @@ Float DifferenceOfProducts(Float a, Float b, Float c, Float d) {
 	Float error = std::fma(-c, d, cd);
 	return differenceOfProducts + error;
 }
+
 Float SumOfProducts(Float a, Float b, Float c, Float d) {
 	Float cd = c * d;
 	Float sumOfProducts = std::fma(a, b, cd);
 	Float error = std::fma(c, d, -cd);
 	return sumOfProducts + error;
 }
+
 Float SafeASin(Float x) {
 	return std::asin(Clamp(x, -1, 1));
 }
+
 Float AngleBetween(Vec3 v1, Vec3 v2) {
 	if (glm::dot(v1, v2) < 0) {
 		return Pi - 2 * SafeASin(glm::length(v1 + v2) / 2);
@@ -219,6 +217,7 @@ Float AngleBetween(Vec3 v1, Vec3 v2) {
 		return 2 * SafeASin(glm::length(v2 - v1) / 2);
 	}
 }
+
 Float SampleLinear(Float u, Float a, Float b) {
 	if (u == 0 && a == 0) {
 		return 0;
@@ -226,12 +225,14 @@ Float SampleLinear(Float u, Float a, Float b) {
 	Float x = u * (a + b) / (a + std::sqrt(Lerp(u, Sqr(a), Sqr(b))));
 	return std::min(x, OneMinusEpsilon);
 }
+
 Vec2 SampleBilinear(Vec2 u, const std::array<Float, 4>& w) {
 	Vec2 p;
 	p.y = SampleLinear(u[1], w[0] + w[1], w[2] + w[3]);
 	p.x = SampleLinear(u[0], Lerp(p.y, w[0], w[2]), Lerp(p.y, w[1], w[3]));
 	return p;
 }
+
 Float BilinearPDF(Vec2 p, const std::array<Float, 4>& w) {
 	if (p.x < 0 || p.x > 1 || p.y < 0 || p.y > 1) {
 		return 0;
@@ -241,9 +242,24 @@ Float BilinearPDF(Vec2 p, const std::array<Float, 4>& w) {
 	}
 	return 4 * ((1 - p[0]) * (1 - p[1]) * w[0] + p[0] * (1 - p[1]) * w[1] + (1 - p[0]) * p[1] * w[2] + p[0] * p[1] * w[3]) / (w[0] + w[1] + w[2] + w[3]);
 }
+
 Vec3 GramSchmidt(Vec3 v, Vec3 w) {
 	return v - glm::dot(v, w) * w;
 }
+
+Vec3 SampleUniformTriangle(Vec2 u) {
+	Float b0, b1;
+	if (u[0] < u[1]) {
+		b0 = u[0] / 2;
+		b1 = u[1] - b0;
+	}
+	else {
+		b1 = u[1] / 2;
+		b0 = u[0] - b1;
+	}
+	return { b0, b1, 1 - b0 - b1 };
+}
+
 std::array<Float, 3> SampleSphericalTriangle(const std::array<Vec3, 3>& v, Vec3 p, Vec2 u, Float* pdf) {
 	if (pdf) *pdf = 0;
 	Vec3 a = glm::normalize(v[0] - p), b = glm::normalize(v[1] - p), c = glm::normalize(v[2] - p);

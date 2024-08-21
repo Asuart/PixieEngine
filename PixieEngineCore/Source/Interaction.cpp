@@ -4,17 +4,18 @@
 #include "Material.h"
 #include "Ray.h"
 #include "Camera.h"
+#include "TriangleCache.h"
 
 Vec3 Interaction::OffsetRayOrigin(Vec3 origin) const {
     return origin + normal * ShadowEpsilon;
 }
 
-Medium* Interaction::GetMedium(Vec3 direction) const {
+const Medium* Interaction::GetMedium(Vec3 direction) const {
     if (mediumInterface) return glm::dot(direction, normal) > 0 ? mediumInterface->outside : mediumInterface->inside;
     return medium;
 }
 
-Medium* Interaction::GetMedium() const {
+const Medium* Interaction::GetMedium() const {
     return mediumInterface ? mediumInterface->inside : medium;
 }
 

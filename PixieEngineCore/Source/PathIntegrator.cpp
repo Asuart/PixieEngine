@@ -55,14 +55,13 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 		}
 
 		if (depth == 0 && visibleSurf) {
-			constexpr int32_t nRhoSamples = 16;
-			const Float ucRho[nRhoSamples] = {
+			const std::vector<Float> ucRho = {
 				0.75741637f, 0.37870818f, 0.7083487f, 0.189354090f,
 				0.91493630f, 0.35417435f, 0.5990858f, 0.094677030f,
 				0.85787250f, 0.45746812f, 0.6867590f, 0.177087160f,
 				0.96745180f, 0.29954290f, 0.5083201f, 0.047338516f
 			};
-			const glm::vec2 uRho[nRhoSamples] = {
+			const std::vector<Vec2> uRho = {
 				glm::vec2(0.855985f, 0.570367f), glm::vec2(0.381823f, 0.851844f),
 				glm::vec2(0.285328f, 0.764262f), glm::vec2(0.733380f, 0.114073f),
 				glm::vec2(0.542663f, 0.344465f), glm::vec2(0.127274f, 0.414848f),
@@ -72,7 +71,7 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 				glm::vec2(0.756135f, 0.731258f), glm::vec2(0.516165f, 0.152852f),
 				glm::vec2(0.180888f, 0.214174f), glm::vec2(0.898579f, 0.503897f)
 			};
-			Spectrum albedo = bsdf.rho(isect.wo, ucRho, uRho);
+			Spectrum albedo = bsdf.rho(isect.triangle->shadingFrame, isect.wo, ucRho, uRho);
 			visibleSurf = std::make_shared<VisibleSurface>(isect, albedo);
 		}
 
@@ -90,13 +89,13 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 		}
 
 		Vec3 wo = -ray.direction;
-		std::optional<BSDFSample> bs = bsdf.Sample_f(wo, sampler->Get(), sampler->Get2D());
+		std::optional<BSDFSample> bs = bsdf.SampleDirectionAndDistribution(isect.triangle->shadingFrame, wo, sampler->Get(), sampler->Get2D());
 		if (!bs) {
 			break;
 		}
 
 		beta *= bs->f * AbsDot(bs->wi, isect.normal) / bs->pdf;
-		p_b = bs->pdfIsProportional ? bsdf.PDF(wo, bs->wi) : bs->pdf;
+		p_b = bs->pdfIsProportional ? bsdf.PDF(isect.triangle->shadingFrame, wo, bs->wi) : bs->pdf;
 		specularBounce = bs->IsSpecular();
 		anyNonSpecularBounces |= !bs->IsSpecular();
 		if (bs->IsTransmission()) {
@@ -145,13 +144,13 @@ Spectrum PathIntegrator::SampleLd(uint32_t x, uint32_t y, const SurfaceInteracti
 	}
 
 	Vec3 wo = intr.wo, wi = ls->wi;
-	Spectrum f = bsdf->f(wo, wi) * glm::abs(glm::dot(wi, intr.normal));
+	Spectrum f = bsdf->SampleDistribution(intr.triangle->shadingFrame, wo, wi) * glm::abs(glm::dot(wi, intr.normal));
 	if (!f || !Unoccluded(x, y, intr, ls->pLight)) {
 		return {};
 	}
 
 	Float p_l = sampledLight->p * ls->pdf;
-	Float p_b = bsdf->PDF(wo, wi);
+	Float p_b = bsdf->PDF(intr.triangle->shadingFrame, wo, wi);
 	Float w_l = PowerHeuristic(1, p_l, 1, p_b);
 	return w_l * ls->L * f / p_l;
 }

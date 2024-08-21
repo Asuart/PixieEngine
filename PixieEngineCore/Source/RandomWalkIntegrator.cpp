@@ -29,7 +29,7 @@ Spectrum RandomWalkIntegrator::IntegrateRandomWalk(Ray ray, Sampler* sampler, ui
 
 	Vec3 wp = SampleUniformSphere(sampler->Get2D());
 
-	Spectrum fcos = bsdf.f(wo, wp) * AbsDot(wp, isect.normal);
+	Spectrum fcos = bsdf.SampleDistribution(isect.triangle->shadingFrame, wo, wp) * AbsDot(wp, isect.normal);
 	if (!fcos) {
 		return Le;
 	}

@@ -70,6 +70,7 @@ bool TrianglePrimitive::Intersect(const Ray& ray, SurfaceInteraction& outCollisi
 		return false;
 	}
 
+	outCollision.triangle = &m_triangle;
 	outCollision.distance = t;
 	outCollision.backface = NdotRayDirection < 0;
 	outCollision.normal = outCollision.backface ? m_triangle.normal : -m_triangle.normal;
