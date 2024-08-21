@@ -1,7 +1,9 @@
 #pragma once
 #include "PixieEngineWindow.h"
 #include "RayTracingRenderer.h"
+#include "PixieEngineInterface.h"
 
+class PixieEngineInterface;
 class RayTracingRenderer;
 
 class PixieEngineApp {
@@ -17,6 +19,7 @@ protected:
 	static const uint32_t m_maxScenePathLength = 1024;
 	char m_scenePath[m_maxScenePathLength] = "../Scenes/default.obj";
 	PixieEngineWindow m_window;
+	PixieEngineInterface m_interface;
 	Scene* m_scene;
 	RayTracingRenderer* m_rayTracingRenderer;
 	SceneRenderer* m_sceneRenderer;
@@ -25,7 +28,6 @@ protected:
 	SceneObject* m_selectedObject = nullptr;
 	bool m_rayTracingViewport = true;
 
-	void DrawUI();
 	void DrawSettingsWindow();
 	void DrawViewportWindow();
 	void DrawSceneWindow();
@@ -38,4 +40,5 @@ protected:
 	void HandleUserInput();
 
 	friend class RayTracingRenderer;
+	friend class PixieEngineInterface;
 };
