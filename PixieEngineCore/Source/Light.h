@@ -6,6 +6,7 @@
 #include "Bounds.h"
 #include "LightSampleContext.h"
 #include "LightLiSample.h"
+#include "Transform.h"
 
 enum class LightType : uint32_t {
 	DeltaPosition,
@@ -19,12 +20,12 @@ bool IsDeltaLight(LightType type);
 
 class Light {
 public:
-	Light(LightType type, MediumInterface mediumInterface);
+	Light(LightType type, Transform transform, MediumInterface* mediumInterface);
 
 	// Amount of light emitted by light source.
 	virtual Spectrum Phi() const = 0;
 	// Returns incident radiance from the light at a point and direction from which it is arriving.
-	virtual LightLiSample SampleLi(LightSampleContext context, Vec2 u, bool allowIncompletePDF = false) const = 0;
+	virtual std::optional<LightLiSample> SampleLi(LightSampleContext context, Vec2 u, bool allowIncompletePDF = false) const = 0;
 	// Probabilty of light arriving at a point from specified direction.
 	virtual Float SampleLiPDF(LightSampleContext context, Vec3 wi, bool allowIncompletePDF = false) const = 0;
 	// Sample light that has geometry.
@@ -37,7 +38,8 @@ public:
 
 protected:
 	LightType m_type;
-	MediumInterface m_mediumInterface;
+	Transform m_transform;
+	MediumInterface* m_mediumInterface;
 };
 
 class AreaLight : public Light {

@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "Light.h"
 
-Light::Light(LightType type, MediumInterface mediumInterface)
-	: m_type(type), m_mediumInterface(mediumInterface) {}
+Light::Light(LightType type, Transform transform, MediumInterface* mediumInterface)
+	: m_type(type), m_transform(transform), m_mediumInterface(mediumInterface) {}
 
 Spectrum Light::L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const {
 	return Spectrum();

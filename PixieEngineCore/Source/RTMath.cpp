@@ -86,6 +86,12 @@ Float AbsDot(const Vec3& v1, const Vec3& v2) {
 	return glm::abs(glm::dot(v1, v2));
 }
 
+Float SmoothStep(Float x, Float a, Float b) {
+	if (a == b) return (x < a) ? 0 : 1;
+	Float t = Clamp((x - a) / (b - a), 0, 1);
+	return t * t * (3 - 2 * t);
+}
+
 Float length2(const Vec2& v) {
 	return v.x * v.x + v.y * v.y;
 }

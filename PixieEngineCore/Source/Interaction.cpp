@@ -6,6 +6,9 @@
 #include "Camera.h"
 #include "TriangleCache.h"
 
+Interaction::Interaction(Vec3 position, MediumInterface* mediumInterface)
+	: position(position), mediumInterface(mediumInterface) {}
+
 const Medium* Interaction::GetMedium(Vec3 direction) const {
 	if (mediumInterface) return glm::dot(direction, normal) > 0 ? mediumInterface->outside : mediumInterface->inside;
 	return medium;
@@ -22,6 +25,9 @@ bool Interaction::IsSurfaceInteraction() const {
 bool Interaction::IsMediumInteraction() const {
 	return !IsSurfaceInteraction();
 }
+
+SurfaceInteraction::SurfaceInteraction(Vec3 position, MediumInterface* mediumInterface)
+	: Interaction(position, mediumInterface) {}
 
 Spectrum SurfaceInteraction::Le(const glm::vec3& wo) const {
 	return areaLight ? areaLight->L(position, normal, uv, wo) : Spectrum();
