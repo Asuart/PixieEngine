@@ -8,6 +8,7 @@
 
 class Integrator : public Renderer {
 public:
+	RayTracingStatistics m_stats;
 	Film m_film;
 	int32_t m_maxDepth = 1024;
 	int32_t m_maxThreads = 2;
@@ -28,7 +29,6 @@ protected:
 	Integrator(const glm::ivec2& resolution);
 
 	Scene* m_scene = nullptr;
-	RayTracingStatistics m_stats;
 	bool m_isRendering = false;
 	uint32_t m_samples = 1;
 	int32_t m_threadsCount = 0;

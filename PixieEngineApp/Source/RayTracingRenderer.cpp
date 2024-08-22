@@ -1,9 +1,18 @@
 #include "pch.h"
 #include "RayTracingRenderer.h"
 
+std::string to_string(RayTracingVisualization mode) {
+	switch (mode) {
+	case RayTracingVisualization::Integration: return "Integration";
+	case RayTracingVisualization::BoxChecksStatistics: return "Box Checks Statistics";
+	case RayTracingVisualization::TriangleChecksStatistics: return "Triangle Checks Statistics";
+	default: return "Undefined Visualization Mode";
+	}
+}
+
 std::string to_string(RayTracingMode mode) {
 	switch (mode) {
-	case RayTracingMode::RandomWalk: return "Random Walk ";
+	case RayTracingMode::RandomWalk: return "Random Walk";
 	case RayTracingMode::SimplePathTracing: return "Simple Path Tracing";
 	case RayTracingMode::PathTracing: return "Path Tracing";
 	case RayTracingMode::TestNormals: return "Test Normals";
@@ -44,14 +53,29 @@ void RayTracingRenderer::DrawFrame() {
 		posY = (1.0f - sizeY) * 0.5f;
 	}
 
-	m_rayTracer->m_film.texture->Upload();
-
 	glUseProgram(program);
 	glUniform2f(posLoc, posX, posY);
 	glUniform2f(sizeLoc, sizeX, sizeY);
-	glUniform1f(samplesLoc, (float)m_rayTracer->GetSamplesCount());
+
 	glActiveTexture(GL_TEXTURE0);
-	m_rayTracer->m_film.texture->Bind(GL_TEXTURE0);
+	switch (m_visualizationMode) {
+	case RayTracingVisualization::Integration:
+		m_rayTracer->m_film.texture->Upload();
+		glUniform1f(samplesLoc, (float)m_rayTracer->GetSamplesCount());
+		m_rayTracer->m_film.texture->Bind(GL_TEXTURE0);
+		break;
+	case RayTracingVisualization::BoxChecksStatistics:
+		m_rayTracer->m_stats.UploadBoxTestsTextureLinear();
+		glUniform1f(samplesLoc, 1.0f);
+		m_rayTracer->m_stats.BindBoxTestsTexture();
+		break;
+	case RayTracingVisualization::TriangleChecksStatistics:
+		m_rayTracer->m_stats.UploadTriangleTestsTextureLinear();
+		glUniform1f(samplesLoc, 1.0f);
+		m_rayTracer->m_stats.BindTriangleTestsTexture();
+		break;
+	}
+
 	m_rayTracer->m_film.mesh->Draw();
 }
 
@@ -76,9 +100,25 @@ void RayTracingRenderer::StopRender() {
 }
 
 void RayTracingRenderer::DrawUI() {
+	ImGui::Text("Visualization Mode");
+	if (ImGui::BeginCombo("##visualization_mode", to_string(m_visualizationMode).c_str())) {
+		for (int32_t n = 0; n < (int32_t)RayTracingVisualization::COUNT; n++) {
+			RayTracingVisualization mode = RayTracingVisualization(n);
+			bool isSelected = (m_visualizationMode == mode);
+			if (ImGui::Selectable(to_string(mode).c_str(), isSelected)) {
+				SetVisualizationMode(mode);
+			}
+			if (isSelected) {
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+		ImGui::EndCombo();
+	}
+	ImGui::Spacing();
+
 	ImGui::Text("Ray Tracing Mode");
 	if (ImGui::BeginCombo("##ray_tracing_mode", to_string(m_rayTracingMode).c_str())) {
-		for (int n = 0; n < (int32_t)RayTracingMode::COUNT; n++) {
+		for (int32_t n = 0; n < (int32_t)RayTracingMode::COUNT; n++) {
 			RayTracingMode mode = RayTracingMode(n);
 			bool isSelected = (m_rayTracingMode == mode);
 			if (ImGui::Selectable(to_string(mode).c_str(), isSelected)) {
@@ -153,7 +193,7 @@ void RayTracingRenderer::DrawUI() {
 			Reset();
 		}
 		ImGui::Spacing();
-	} 
+	}
 	else if (m_rayTracingMode == RayTracingMode::PathTracing) {
 		PathIntegrator* integrator = dynamic_cast<PathIntegrator*>(m_rayTracer);
 		if (ImGui::Checkbox("Regularize BSDF", &integrator->m_regularize)) {
@@ -164,15 +204,27 @@ void RayTracingRenderer::DrawUI() {
 
 	std::string threadsText = std::string("Threads: ") + std::to_string(m_rayTracer->GetThreadsCount());
 	ImGui::Text(threadsText.c_str());
-	
+
 	std::string samplesText = std::string("Samples: ") + std::to_string(m_rayTracer->GetSamplesCount());
 	ImGui::Text(samplesText.c_str());
-	
+
 	std::string renderTimeText = std::string("Render Time: ") + std::to_string(m_rayTracer->GetRenderTime());
 	ImGui::Text(renderTimeText.c_str());
-	
+
 	std::string lastSampleTimeText = std::string("Last Sample Time: ") + std::to_string(m_rayTracer->GetLastSampleTime());
 	ImGui::Text(lastSampleTimeText.c_str());
+
+	uint64_t totalRays = m_rayTracer->m_stats.GetTotalRays();
+	std::string totalRaysText = std::string("Rays: ") + std::to_string(totalRays);
+	ImGui::Text(totalRaysText.c_str());
+
+	uint64_t totalBoxes = m_rayTracer->m_stats.GetTotalBoxTests();
+	std::string totalBoxesText = std::string("Box checks: ") + std::to_string(totalBoxes);
+	ImGui::Text(totalBoxesText.c_str());
+
+	uint64_t totalTriangles = m_rayTracer->m_stats.GetTotalTriangleTests();
+	std::string totalTrianglesText = std::string("Triangle checks: ") + std::to_string(totalTriangles);
+	ImGui::Text(totalTrianglesText.c_str());
 }
 
 void RayTracingRenderer::SetViewportSize(glm::ivec2 resolution) {
@@ -185,6 +237,10 @@ void RayTracingRenderer::SetViewportSize(glm::ivec2 resolution) {
 			cameras[i].SetAspect((float)resolution.x / resolution.y);
 		}
 	}
+}
+
+void RayTracingRenderer::SetVisualizationMode(RayTracingVisualization mode) {
+	m_visualizationMode = mode;
 }
 
 void RayTracingRenderer::SetRayTracingMode(RayTracingMode mode) {

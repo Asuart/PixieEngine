@@ -9,6 +9,7 @@ Spectrum RandomWalkIntegrator::Integrate(Ray ray, Sampler* sampler) {
 }
 
 Spectrum RandomWalkIntegrator::IntegrateRandomWalk(Ray ray, Sampler* sampler, uint32_t depth) {
+	m_stats.m_rayCountBuffer.Increment(ray.x, ray.y);
 	SurfaceInteraction isect;
 	if (!m_scene->Intersect(ray, isect, m_stats)) {
 		Spectrum Le;

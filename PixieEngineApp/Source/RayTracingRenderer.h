@@ -4,6 +4,13 @@
 
 class PixieEngineApp;
 
+enum class RayTracingVisualization : uint32_t {
+	Integration = 0,
+	BoxChecksStatistics,
+	TriangleChecksStatistics,
+	COUNT
+};
+
 enum class RayTracingMode : uint32_t {
 	RandomWalk = 0,
 	SimplePathTracing,
@@ -13,6 +20,7 @@ enum class RayTracingMode : uint32_t {
 	COUNT
 };
 
+std::string to_string(RayTracingVisualization mode);
 std::string to_string(RayTracingMode mode);
 
 class RayTracingRenderer {
@@ -33,9 +41,11 @@ public:
 	void StopRender();
 	void DrawUI();
 	void SetViewportSize(glm::ivec2 resolution);
+	void SetVisualizationMode(RayTracingVisualization mode);
 	void SetRayTracingMode(RayTracingMode mode);
 
 protected:
 	PixieEngineApp* m_parent;
 	RayTracingMode m_rayTracingMode = RayTracingMode::RandomWalk;
+	RayTracingVisualization m_visualizationMode = RayTracingVisualization::Integration;
 };

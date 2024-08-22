@@ -20,10 +20,19 @@ struct Texture {
 		return (int32_t)pixels.size() * sizeof(T);
 	}
 
+	std::vector<T>& GetPixels() {
+		return pixels;
+	}
+
 	T GetPixel(int32_t x, int32_t y) {
 		uint32_t pixelIndex = y * resolution.x + x;
 		if (pixelIndex >= pixels.size()) return T();
 		return pixels[pixelIndex];
+	}
+
+	T GetPixel(int32_t index) {
+		if (index >= pixels.size()) return T();
+		return pixels[index];
 	}
 
 	T GetPixel(const glm::ivec2& coord) {
@@ -36,6 +45,11 @@ struct Texture {
 		uint32_t pixelIndex = y * resolution.x + x;
 		if (pixelIndex >= pixels.size()) return;
 		pixels[pixelIndex] = p;
+	}
+
+	void SetPixel(int32_t index, T p) {
+		if (index >= pixels.size()) return;
+		pixels[index] = p;
 	}
 
 	void AccumulatePixel(int32_t x, int32_t y, T p) {

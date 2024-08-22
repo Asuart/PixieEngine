@@ -93,6 +93,7 @@ void Integrator::StopRender() {
 }
 
 void Integrator::PerPixel(uint32_t x, uint32_t y, Sampler* sampler) {
+	m_stats.m_sampleCountBuffer.Increment(x, y);
 	Vec2 uv = m_film.GetUV(x, y, sampler->Get2D());
 	Ray ray = m_scene->GetMainCamera()->GetRay(x, y, uv);
 	Spectrum color = Integrate(ray, sampler);
@@ -100,6 +101,7 @@ void Integrator::PerPixel(uint32_t x, uint32_t y, Sampler* sampler) {
 }
 
 bool Integrator::Unoccluded(uint32_t x, uint32_t y, const SurfaceInteraction& p0, const SurfaceInteraction& p1) {
+	m_stats.m_rayCountBuffer.Increment(x, y);
 	Vec3 dir = p1.position - p0.position;
 	Float tMax = glm::length(dir);
 	return !m_scene->IntersectP(Ray(x, y, p0.position, glm::normalize(dir)), m_stats, tMax - ShadowEpsilon);

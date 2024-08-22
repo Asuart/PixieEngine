@@ -18,6 +18,7 @@ Spectrum SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 	int32_t depth = 0;
 
 	while (beta) {
+		m_stats.m_rayCountBuffer.Increment(ray.x, ray.y);
 		SurfaceInteraction isect;
 		if (!m_scene->Intersect(ray, isect, m_stats)) {
 			if (!m_sampleLights || specularBounce) {

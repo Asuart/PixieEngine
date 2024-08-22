@@ -15,3 +15,8 @@ template <>
 void Texture<Spectrum>::TexImage2D() {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, resolution.x, resolution.y, 0, GL_RGB, GL_FLOAT, &pixels[0]);
 }
+
+template <>
+void Texture<float>::TexImage2D() {
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, resolution.x, resolution.y, 0, GL_RED, GL_FLOAT, &pixels[0]);
+}

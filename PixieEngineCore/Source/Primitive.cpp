@@ -38,7 +38,7 @@ TrianglePrimitive::TrianglePrimitive(const TriangleCache& triangle, const Materi
 }
 
 bool TrianglePrimitive::Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax) const {
-	stats.m_triangleCheckStatBuffer.Increment(ray.x, ray.y);
+	stats.m_triangleChecksBuffer.Increment(ray.x, ray.y);
 	Float NdotRayDirection = glm::dot(m_triangle.normal, ray.direction);
 	if (fabs(NdotRayDirection) < ShadowEpsilon) {
 		return false;
@@ -86,7 +86,7 @@ bool TrianglePrimitive::Intersect(const Ray& ray, SurfaceInteraction& outCollisi
 }
 
 bool TrianglePrimitive::IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax) const {
-	stats.m_triangleCheckStatBuffer.Increment(ray.x, ray.y);
+	stats.m_triangleChecksBuffer.Increment(ray.x, ray.y);
 	Float NdotRayDirection = glm::dot(m_triangle.normal, ray.direction);
 	if (fabs(NdotRayDirection) < ShadowEpsilon) {
 		return false;
