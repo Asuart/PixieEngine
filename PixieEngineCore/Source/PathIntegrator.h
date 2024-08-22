@@ -16,5 +16,5 @@ public:
 protected:
 	UniformLightSampler m_lightSampler;
 
-	Spectrum SampleLd(uint32_t x, uint32_t y, const SurfaceInteraction& intr, const BSDF* bsdf);
+	Spectrum SampleLd(uint32_t x, uint32_t y, const SurfaceInteraction& intr, const BSDF& bsdf, Sampler* sampler);
 };

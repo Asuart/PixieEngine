@@ -18,9 +18,6 @@ DiffuseAreaLight::DiffuseAreaLight(TriangleCache triangle, const Material* mater
 	: AreaLight(triangle, material) {};
 
 Spectrum DiffuseAreaLight::L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const {
-	if (!twoSided && glm::dot(n, w) < 0.0f) {
-		return Spectrum();
-	}
 	return material->GetEmission();
 }
 

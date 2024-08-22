@@ -78,6 +78,7 @@ bool TrianglePrimitive::Intersect(const Ray& ray, SurfaceInteraction& outCollisi
 	outCollision.uv = Vec3(0);
 	outCollision.area = m_triangle.area;
 	outCollision.dpdu = m_triangle.edge0;
+	outCollision.wo = -ray.direction;
 
 	outCollision.material = m_material;
 	outCollision.areaLight = m_areaLight;

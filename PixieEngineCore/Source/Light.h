@@ -32,7 +32,6 @@ class AreaLight : public Light {
 public:
 	TriangleCache triangle;
 	const Material* material = nullptr;
-	bool twoSided = true;
 
 	virtual std::optional<LightLiSample> SampleLi(SurfaceInteraction intr, Vec2 u) const = 0;
 

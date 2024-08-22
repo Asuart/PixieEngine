@@ -17,9 +17,8 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 	int32_t depth = 0;
 	Float p_b = 0.0f, etaScale = 1.0f;
 	bool specularBounce = false, anyNonSpecularBounces = false;
+	VisibleSurface visibleSurface = VisibleSurface(SurfaceInteraction(), Spectrum());
 	SurfaceInteraction prevIntrCtx;
-
-	std::shared_ptr<VisibleSurface> visibleSurf = nullptr;
 
 	while (true) {
 		SurfaceInteraction isect;
@@ -57,7 +56,7 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 			continue;
 		}
 
-		if (depth == 0 && visibleSurf) {
+		if (depth == 0) {
 			const std::vector<Float> ucRho = {
 				0.75741637f, 0.37870818f, 0.7083487f, 0.189354090f,
 				0.91493630f, 0.35417435f, 0.5990858f, 0.094677030f,
@@ -75,7 +74,7 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 				glm::vec2(0.180888f, 0.214174f), glm::vec2(0.898579f, 0.503897f)
 			};
 			Spectrum albedo = bsdf.rho(isect.triangle->shadingFrame, isect.wo, ucRho, uRho);
-			visibleSurf = std::make_shared<VisibleSurface>(isect, albedo);
+			visibleSurface = VisibleSurface(isect, albedo);
 		}
 
 		if (m_regularize && anyNonSpecularBounces) {
@@ -87,7 +86,7 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 		}
 
 		if (IsNonSpecular(bsdf.Flags())) {
-			Spectrum Ld = SampleLd(ray.x, ray.y, isect, &bsdf);
+			Spectrum Ld = SampleLd(ray.x, ray.y, isect, bsdf, sampler);
 			L += beta * Ld;
 		}
 
@@ -116,44 +115,30 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 			}
 			beta /= 1.0f - q;
 		}
-		break;
 	}
 
 	return L;
 }
 
-Spectrum PathIntegrator::SampleLd(uint32_t x, uint32_t y, const SurfaceInteraction& intr, const BSDF* bsdf) {
-	LightSampleContext ctx(intr.position, intr.normal);
-
-	BxDFFlags flags = bsdf->Flags();
-	if (IsReflective(flags) && !IsTransmissive(flags)) {
-		ctx.p += intr.wo * ShadowEpsilon;
-	}
-	else if (IsTransmissive(flags) && !IsReflective(flags)) {
-		ctx.p -= intr.wo * ShadowEpsilon;
-	}
-
-	Float u = RandomFloat();
-	std::optional<SampledLight> sampledLight = m_lightSampler.Sample(u);
-	Vec2 uLight = Vec2(RandomFloat(), RandomFloat());
+Spectrum PathIntegrator::SampleLd(uint32_t x, uint32_t y, const SurfaceInteraction& intr, const BSDF& bsdf, Sampler* sampler) {
+	std::optional<SampledLight> sampledLight = m_lightSampler.Sample(sampler->Get());
 	if (!sampledLight) {
-		return {};
+		return Spectrum();
 	}
 
-	AreaLight* light = sampledLight->light;
-	std::optional<LightLiSample> ls = light->SampleLi(intr, uLight);
-	if (!ls || ls->L == glm::fvec3(0) || ls->pdf == 0) {
-		return {};
+	std::optional<LightLiSample> ls = sampledLight->light->SampleLi(intr, sampler->Get2D());
+	if (!ls || !ls->L || ls->pdf == 0) {
+		return Spectrum();
 	}
 
 	Vec3 wo = intr.wo, wi = ls->wi;
-	Spectrum f = bsdf->SampleDistribution(intr.triangle->shadingFrame, wo, wi) * glm::abs(glm::dot(wi, intr.normal));
+	Spectrum f = bsdf.SampleDistribution(intr.triangle->shadingFrame, wo, wi) * AbsDot(wi, intr.normal);
 	if (!f || !Unoccluded(x, y, intr, ls->pLight)) {
-		return {};
+		return Spectrum();
 	}
 
 	Float p_l = sampledLight->p * ls->pdf;
-	Float p_b = bsdf->PDF(intr.triangle->shadingFrame, wo, wi);
+	Float p_b = bsdf.PDF(intr.triangle->shadingFrame, wo, wi);
 	Float w_l = PowerHeuristic(1, p_l, 1, p_b);
 	return w_l * ls->L * f / p_l;
 }
