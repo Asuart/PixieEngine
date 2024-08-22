@@ -3,29 +3,41 @@
 #include "Interaction.h"
 #include "TriangleCache.h"
 #include "Material.h"
+#include "Bounds.h"
+#include "LightSampleContext.h"
+#include "LightLiSample.h"
 
-struct LightLiSample {
-	Spectrum L = Spectrum();
-	Vec3 wi = Vec3(0.0f);
-	Float pdf = 0;
-	SurfaceInteraction pLight;
-
-	LightLiSample(Spectrum L, Vec3 wi, Float pdf, const SurfaceInteraction& pLight);
+enum class LightType : uint32_t {
+	DeltaPosition,
+	DeltaDirection,
+	Area,
+	Infinite
 };
 
-struct LightSampleContext {
-	Vec3 p;
-	Vec3 n;
-};
+// Checks if a light is defined using a Dirac delta distribution.
+bool IsDeltaLight(LightType type);
 
-struct Light {
-	Spectrum m_emission;
+class Light {
+public:
+	Light(LightType type, MediumInterface mediumInterface);
 
-	Light(Spectrum emission = Spectrum());
+	// Amount of light emitted by light source.
+	virtual Spectrum Phi() const = 0;
+	// Returns incident radiance from the light at a point and direction from which it is arriving.
+	virtual LightLiSample SampleLi(LightSampleContext context, Vec2 u, bool allowIncompletePDF = false) const = 0;
+	// Probabilty of light arriving at a point from specified direction.
+	virtual Float SampleLiPDF(LightSampleContext context, Vec3 wi, bool allowIncompletePDF = false) const = 0;
+	// Sample light that has geometry.
+	virtual Spectrum L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const;
+	// Sample infinite area light.
+	virtual Spectrum Le(const Ray& ray) const;
+	virtual Bounds3f Bounds() const = 0;
+	virtual LightType Type() const;
+	virtual void Preprocess(const Bounds3f& sceneBounds);
 
-	virtual Spectrum L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const = 0;
-	virtual Spectrum Le(const Ray& ray);
-	virtual Float PDF_Li(SurfaceInteraction ctx, Vec3 wi, bool allowIncompletePDF = false) const = 0;
+protected:
+	LightType m_type;
+	MediumInterface m_mediumInterface;
 };
 
 class AreaLight : public Light {

@@ -1,15 +1,26 @@
 #include "pch.h"
 #include "Light.h"
 
-Light::Light(Spectrum emission) 
-	: m_emission(emission) {}
+Light::Light(LightType type, MediumInterface mediumInterface)
+	: m_type(type), m_mediumInterface(mediumInterface) {}
 
-Spectrum Light::Le(const Ray& ray) {
-	return m_emission;
+Spectrum Light::L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const {
+	return Spectrum();
 }
 
-LightLiSample::LightLiSample(Spectrum L, Vec3 wi, Float pdf, const SurfaceInteraction& pLight)
-	: L(L), wi(wi), pdf(pdf), pLight(pLight) {}
+Spectrum Light::Le(const Ray& ray) const {
+	return Spectrum();
+}
+
+LightType Light::Type() const {
+	return m_type;
+}
+
+bool IsDeltaLight(LightType type) {
+	return (type == LightType::DeltaPosition || type == LightType::DeltaDirection);
+}
+
+void Light::Preprocess(const Bounds3f& sceneBounds) {}
 
 AreaLight::AreaLight(TriangleCache triangle, const Material* material)
 	: triangle(triangle), material(material) {}
