@@ -179,8 +179,7 @@ void RayTracingRenderer::DrawUI() {
 	ImGui::Text("Max Render Threads");
 	if (ImGui::InputInt("##max_render_threads", &m_rayTracer->m_maxThreads)) {
 		m_rayTracer->m_maxThreads = Clamp(m_rayTracer->m_maxThreads, 1, 128);
-		m_rayTracer->StopRender();
-		m_rayTracer->StartRender();
+		m_rayTracer->Reset();
 	}
 	ImGui::Spacing();
 

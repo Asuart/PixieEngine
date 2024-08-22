@@ -11,7 +11,7 @@ public:
 	RayTracingStatistics m_stats;
 	Film m_film;
 	int32_t m_maxDepth = 1024;
-	int32_t m_maxThreads = 2;
+	int32_t m_maxThreads = 1;
 
 	virtual void SetScene(Scene* scene);
 	virtual void SetResolution(const glm::ivec2& resolution) override;

@@ -9,7 +9,7 @@
 
 class GeometrySnapshot {
 public:
-	GeometrySnapshot(const std::vector<SceneObject*>& flatObjects, uint32_t maxPrimitivesPerLeaf = 4, bool cacheTriangles = true);
+	GeometrySnapshot(const std::vector<SceneObject*>& flatObjects, uint32_t maxPrimitivesPerLeaf = 6);
 	~GeometrySnapshot();
 
 	bool Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax = Infinity) const;
