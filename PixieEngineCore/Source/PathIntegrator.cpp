@@ -17,10 +17,10 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 	int32_t depth = 0;
 	Float p_b = 0.0f, etaScale = 1.0f;
 	bool specularBounce = false, anyNonSpecularBounces = false;
-	VisibleSurface visibleSurface = VisibleSurface(SurfaceInteraction(), Spectrum());
 	SurfaceInteraction prevIntrCtx;
 
 	while (true) {
+		m_stats.m_rayCountBuffer.Increment(ray.x, ray.y);
 		SurfaceInteraction isect;
 		if (!m_scene->Intersect(ray, isect, m_stats)) {
 			for (Light* light : m_scene->GetInfiniteLights()) {
@@ -49,6 +49,10 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 			}
 		}
 
+		if (depth++ == m_maxDepth) {
+			break;
+		}
+
 		BSDF bsdf = isect.GetBSDF(ray, m_scene->GetMainCamera(), sampler);
 		if (!bsdf) {
 			specularBounce = true;
@@ -56,33 +60,8 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 			continue;
 		}
 
-		if (depth == 0) {
-			const std::vector<Float> ucRho = {
-				0.75741637f, 0.37870818f, 0.7083487f, 0.189354090f,
-				0.91493630f, 0.35417435f, 0.5990858f, 0.094677030f,
-				0.85787250f, 0.45746812f, 0.6867590f, 0.177087160f,
-				0.96745180f, 0.29954290f, 0.5083201f, 0.047338516f
-			};
-			const std::vector<Vec2> uRho = {
-				glm::vec2(0.855985f, 0.570367f), glm::vec2(0.381823f, 0.851844f),
-				glm::vec2(0.285328f, 0.764262f), glm::vec2(0.733380f, 0.114073f),
-				glm::vec2(0.542663f, 0.344465f), glm::vec2(0.127274f, 0.414848f),
-				glm::vec2(0.964700f, 0.947162f), glm::vec2(0.594089f, 0.643463f),
-				glm::vec2(0.095109f, 0.170369f), glm::vec2(0.825444f, 0.263359f),
-				glm::vec2(0.429467f, 0.454469f), glm::vec2(0.244460f, 0.816459f),
-				glm::vec2(0.756135f, 0.731258f), glm::vec2(0.516165f, 0.152852f),
-				glm::vec2(0.180888f, 0.214174f), glm::vec2(0.898579f, 0.503897f)
-			};
-			Spectrum albedo = bsdf.rho(isect.triangle->shadingFrame, isect.wo, ucRho, uRho);
-			visibleSurface = VisibleSurface(isect, albedo);
-		}
-
 		if (m_regularize && anyNonSpecularBounces) {
 			bsdf.Regularize();
-		}
-
-		if (depth++ == m_maxDepth) {
-			break;
 		}
 
 		if (IsNonSpecular(bsdf.Flags())) {
@@ -103,18 +82,19 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 		if (bs.IsTransmission()) {
 			etaScale *= Sqr(bs.eta);
 		}
-		prevIntrCtx = isect;
 
-		ray = isect.SpawnRay(ray, bsdf, bs.wi, bs.flags, bs.eta);
-
-		glm::fvec3 rrBeta = beta.GetRGBValue() * etaScale;
-		if (MaxComponent(rrBeta) < 1.0f && depth > 1) {
-			Float q = std::max<Float>(0.0f, 1.0f - MaxComponent(rrBeta));
+		Float rrBeta = MaxComponent(beta.GetRGBValue() * etaScale);
+		if (rrBeta < 1.0f && depth > 1) {
+			Float q = std::max<Float>(0.0f, 1.0f - rrBeta);
 			if (RandomFloat() < q) {
 				break;
 			}
 			beta /= 1.0f - q;
 		}
+
+		prevIntrCtx = isect;
+
+		ray = isect.SpawnRay(ray, bsdf, bs.wi, bs.flags, bs.eta);
 	}
 
 	return L;
@@ -127,7 +107,7 @@ Spectrum PathIntegrator::SampleLd(uint32_t x, uint32_t y, const SurfaceInteracti
 	}
 
 	std::optional<LightLiSample> ls = sampledLight->light->SampleLi(intr, sampler->Get2D());
-	if (!ls || !ls->L || ls->pdf == 0) {
+	if (!ls || !ls->L || ls->pdf <= 0) {
 		return Spectrum();
 	}
 

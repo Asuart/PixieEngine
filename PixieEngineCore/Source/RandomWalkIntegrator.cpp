@@ -35,6 +35,6 @@ Spectrum RandomWalkIntegrator::IntegrateRandomWalk(Ray ray, Sampler* sampler, ui
 		return Le;
 	}
 
-	ray = Ray(ray.x, ray.y, isect.position + isect.normal * ShadowEpsilon, wp);
+	ray = Ray(ray.x, ray.y, isect.position, wp);
 	return Le + fcos * IntegrateRandomWalk(ray, sampler, depth + 1) / (1 / (4 * Pi));
 }

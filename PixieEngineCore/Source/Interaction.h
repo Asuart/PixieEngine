@@ -25,7 +25,6 @@ struct Interaction {
 	const Medium* medium = nullptr;
 	const MediumInterface* mediumInterface = nullptr;
 
-	Vec3 OffsetRayOrigin(Vec3 origin) const;
 	const Medium* GetMedium(Vec3 direction) const;
 	const Medium* GetMedium() const;
 	bool IsSurfaceInteraction() const;
@@ -45,7 +44,7 @@ struct SurfaceInteraction : public Interaction {
 
 	Spectrum Le(const glm::vec3& wo) const;
 	BSDF GetBSDF(const Ray& ray, const Camera* camera, Sampler* sampler);
-	Ray SpawnRay(const Ray& rayi, const BSDF& bsdf, Vec3 wi, int32_t flags, Float eta) const;
+	Ray SpawnRay(const Ray& rayi, const BSDF& bsdf, Vec3 wi, BxDFFlags flags, Float eta) const;
 	void SkipIntersection(Ray& ray) const;
 };
 
