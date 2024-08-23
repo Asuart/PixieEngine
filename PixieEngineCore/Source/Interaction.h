@@ -26,7 +26,7 @@ struct Interaction {
 	const MediumInterface* mediumInterface;
 
 	Interaction() = default;
-	Interaction(Vec3 position, MediumInterface* mediumInterface);
+	Interaction(Vec3 position, const MediumInterface* mediumInterface);
 
 	const Medium* GetMedium(Vec3 direction) const;
 	const Medium* GetMedium() const;
@@ -46,7 +46,7 @@ struct SurfaceInteraction : public Interaction {
 	Mesh* mesh = nullptr;
 
 	SurfaceInteraction() = default;
-	SurfaceInteraction(Vec3 position, MediumInterface* mediumInterface);
+	SurfaceInteraction(Vec3 position, const MediumInterface* mediumInterface);
 
 	Spectrum Le(const glm::vec3& wo) const;
 	BSDF GetBSDF(const Ray& ray, const Camera* camera, Sampler* sampler);

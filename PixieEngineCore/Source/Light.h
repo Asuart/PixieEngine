@@ -4,8 +4,6 @@
 #include "TriangleCache.h"
 #include "Material.h"
 #include "Bounds.h"
-#include "LightSampleContext.h"
-#include "LightLiSample.h"
 #include "Transform.h"
 
 enum class LightType : uint32_t {
@@ -18,9 +16,35 @@ enum class LightType : uint32_t {
 // Checks if a light is defined using a Dirac delta distribution.
 bool IsDeltaLight(LightType type);
 
+struct LightSampleContext {
+	Vec3 position;
+	Vec3 normal;
+
+	LightSampleContext(const Vec3& position, const Vec3& normal = Vec3(0));
+	LightSampleContext(const SurfaceInteraction& intr);
+};
+
+struct LightLiSample {
+	Spectrum L; // Amount of radiance.
+	Vec3 wi; // Direction from light.
+	Float pdf; // Probability to sample light point relatively to previously specified point.
+	SurfaceInteraction pLight; // Point light.
+
+	LightLiSample(Spectrum L, Vec3 wi, Float pdf, const SurfaceInteraction& pLight);
+};
+
+struct LightLeSample {
+	Spectrum spectrum; // Radiance coming along the ray.
+	Ray ray; // Random ray directed from light.
+	Float pPosition; // Prpbability of sampling position.
+	Float pDirection; // Probability of sampling direction.
+
+	LightLeSample(Spectrum spectrum, Ray ray, Float pPosition, Float pDirection);
+};
+
 class Light {
 public:
-	Light(LightType type, Transform transform, MediumInterface* mediumInterface);
+	Light(LightType type, const Transform& transform, const MediumInterface* mediumInterface);
 
 	// Amount of light emitted by light source.
 	virtual Spectrum Phi() const = 0;
@@ -28,6 +52,10 @@ public:
 	virtual std::optional<LightLiSample> SampleLi(LightSampleContext context, Vec2 u, bool allowIncompletePDF = false) const = 0;
 	// Probabilty of light arriving at a point from specified direction.
 	virtual Float SampleLiPDF(LightSampleContext context, Vec3 wi, bool allowIncompletePDF = false) const = 0;
+	// Sample spectrum and random ray coming from light source.
+	virtual std::optional<LightLeSample> SampleLe(Vec2 u1, Vec2 u2) const = 0;
+	// Sample probabilities of light coming from light along specified ray.
+	virtual void SampleLePDF(const Ray& ray, Float* pdfPos, Float* pdfDir) const = 0;
 	// Sample light that has geometry.
 	virtual Spectrum L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const;
 	// Sample infinite area light.
@@ -39,41 +67,5 @@ public:
 protected:
 	LightType m_type;
 	Transform m_transform;
-	MediumInterface* m_mediumInterface;
-};
-
-class AreaLight : public Light {
-public:
-	TriangleCache triangle;
-	const Material* material = nullptr;
-
-	virtual std::optional<LightLiSample> SampleLi(SurfaceInteraction intr, Vec2 u) const = 0;
-
-protected:
-	AreaLight(TriangleCache triangle, const Material* material);
-};
-
-class DiffuseAreaLight : public AreaLight {
-public:
-	DiffuseAreaLight(TriangleCache triangle, const Material* material);
-
-	virtual Spectrum L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const;
-	virtual std::optional<LightLiSample> SampleLi(SurfaceInteraction intr, Vec2 u) const;
-	virtual Float PDF_Li(SurfaceInteraction ctx, Vec3 wi, bool allowIncompletePDF = false) const;
-};
-
-struct SampledLight {
-	AreaLight* light;
-	Float p = 0;
-};
-
-class UniformLightSampler {
-	std::vector<AreaLight*> lights;
-public:
-
-	UniformLightSampler(const std::vector<AreaLight*>& _lights);
-
-	std::optional<SampledLight> Sample(Float u) const;
-	Float PMF(const Light* light) const;
-	Float PMF(const SurfaceInteraction& ctx, const Light* light) const;
+	const MediumInterface* m_mediumInterface;
 };
