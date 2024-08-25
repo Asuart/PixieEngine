@@ -18,6 +18,7 @@
 #include <thread>
 #include <optional>
 #include <mutex>
+#include <numeric>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>

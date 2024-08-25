@@ -7,6 +7,7 @@ struct Spectrum {
 
 	glm::fvec3& GetRGB();
 	const glm::fvec3& GetRGBValue() const;
+	Float Average() const;
 
 	Spectrum& operator=(const Spectrum& other);
 	Spectrum operator+(const Spectrum& other);

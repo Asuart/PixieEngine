@@ -5,7 +5,7 @@ SpotLight::SpotLight(Spectrum spectrum, Float scale, Float totalWidth, Float fal
 	: Light(LightType::DeltaPosition, transform, mediumInterface), m_spectrum(spectrum), m_scale(scale), m_cosFalloffStart(falloffStart), m_cosFalloffEnd(totalWidth) {}
 
 Spectrum SpotLight::Phi() const {
-    return m_scale * m_spectrum * 2.0f * Pi * ((1 - m_cosFalloffStart) + (m_cosFalloffStart - m_cosFalloffEnd) / 2);
+    return m_scale * m_spectrum * 2.0f * Pi * ((1.0f - m_cosFalloffStart) + (m_cosFalloffStart - m_cosFalloffEnd) / 2.0f);
 }
 
 std::optional<LightLiSample> SpotLight::SampleLi(LightSampleContext context, Vec2 u, bool allowIncompletePDF) const {

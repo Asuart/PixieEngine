@@ -15,6 +15,10 @@ const glm::fvec3& Spectrum::GetRGBValue() const {
 	return m_rgb;
 }
 
+Float Spectrum::Average() const {
+	return (m_rgb.x + m_rgb.y + m_rgb.z) / 3.0;
+}
+
 Spectrum& Spectrum::operator=(const Spectrum& other) {
 	m_rgb = other.m_rgb;
 	return *this;

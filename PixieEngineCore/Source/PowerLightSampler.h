@@ -1,6 +1,7 @@
 #pragma once
 #include "pch.h"
 #include "LightSampler.h"
+#include "AliasTable.h"
 
 class PowerLightSampler : public LightSampler {
 public:
@@ -13,7 +14,8 @@ public:
 
 protected:
 	const std::vector<Light*>& m_lights;
-	std::map<Light*, int32_t> m_lightToIndex;
+	std::map<const Light*, int32_t> m_lightToIndex;
+	AliasTable m_aliasTable;
 
-	int32_t LightToIndex(Light* light);
+	int32_t LightToIndex(const Light* light) const;
 };
