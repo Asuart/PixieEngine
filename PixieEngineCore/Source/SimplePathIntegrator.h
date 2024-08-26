@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "Integrator.h"
 #include "Random.h"
+#include "UniformLightSampler.h"
 
 class SimplePathIntegrator : public Integrator {
 public:
@@ -9,10 +10,11 @@ public:
 	bool m_sampleBSDF = true;
 
 	SimplePathIntegrator(const glm::ivec2& resolution);
+	~SimplePathIntegrator();
 
 	virtual void SetScene(Scene* scene) override;
 	virtual Spectrum Integrate(Ray ray, Sampler* sampler) override;
 
 protected:
-	UniformLightSampler m_lightSampler;
+	LightSampler* m_lightSampler;
 };

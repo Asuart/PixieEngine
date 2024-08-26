@@ -4,11 +4,12 @@
 #include "Bounds.h"
 #include "TriangleCache.h"
 #include "RayTracingStatistics.h"
+#include "DiffuseAreaLight.h"
 
 class Primitive {
 public:
-	virtual bool Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax = Infinity) const = 0;
-	virtual bool IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax = Infinity) const = 0;
+	virtual std::optional<ShapeIntersection> Intersect(const Ray& ray, Float tMax = Infinity) const = 0;
+	virtual bool IntersectP(const Ray& ray, Float tMax = Infinity) const = 0;
 	
 	const Bounds3f GetBounds() const;
 
@@ -20,24 +21,24 @@ class BoundingPrimitive : public Primitive {
 public:
 	BoundingPrimitive(const std::vector<Primitive*>& children);
 
-	bool Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax = Infinity) const override;
-	bool IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax = Infinity) const override;
+	std::optional<ShapeIntersection> Intersect(const Ray& ray, Float tMax = Infinity) const override;
+	bool IntersectP(const Ray& ray, Float tMax = Infinity) const override;
 
 protected:
 	std::vector<Primitive*> m_children = std::vector<Primitive*>();
 };
 
-class TrianglePrimitive : public Primitive {
+class ShapePrimitive : public Primitive {
 public:
-	TrianglePrimitive(const TriangleCache& triangle, const Material* material, const AreaLight* areaLight = nullptr);
+	ShapePrimitive(const Shape* shape, const Material* material, const DiffuseAreaLight* areaLight = nullptr);
 
-	bool Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax = Infinity) const override;
-	bool IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax = Infinity) const override;
+	std::optional<ShapeIntersection> Intersect(const Ray& ray, Float tMax = Infinity) const override;
+	bool IntersectP(const Ray& ray, Float tMax = Infinity) const override;
 
 protected:
-	const TriangleCache m_triangle;
+	const Shape* m_shape = nullptr;
 	const Material* m_material = nullptr;
-	const AreaLight* m_areaLight = nullptr;
+	const DiffuseAreaLight* m_areaLight = nullptr;
 };
 
 struct BVHSplitBucket {
@@ -79,8 +80,8 @@ public:
 	BVHAggregate(std::vector<Primitive*> p, int32_t maxPrimsInNode = 1);
 
 	Bounds3f Bounds() const;
-	bool Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax = Infinity) const override;
-	bool IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax = Infinity) const override;
+	std::optional<ShapeIntersection> Intersect(const Ray& ray, Float tMax = Infinity) const override;
+	bool IntersectP(const Ray& ray, Float tMax = Infinity) const override;
 
 	int32_t maxPrimsInNode;
 	std::vector<Primitive*> primitives;

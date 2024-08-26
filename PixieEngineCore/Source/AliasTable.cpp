@@ -54,8 +54,8 @@ AliasTable::AliasTable(const std::vector<Float> weights)
     }
 }
 
-int32_t AliasTable::Sample(Float u, Float* pmf = nullptr, Float* uRemapped = nullptr) const {
-    int32_t offset = std::min<int>(u * m_bins.size(), m_bins.size() - 1);
+int32_t AliasTable::Sample(Float u, Float* pmf, Float* uRemapped) const {
+    int32_t offset = std::min<int32_t>((int32_t)(u * m_bins.size()), m_bins.size() - 1);
     double up = std::min<double>(u * m_bins.size() - offset, OneMinusEpsilon);
 
     if (up < m_bins[offset].q) {
@@ -73,7 +73,7 @@ int32_t AliasTable::Sample(Float u, Float* pmf = nullptr, Float* uRemapped = nul
             *pmf = m_bins[alias].p;
         }
         if (uRemapped) {
-            *uRemapped = std::min<Float>((up - m_bins[offset].q) / (1 - m_bins[offset].q), OneMinusEpsilon);
+            *uRemapped = std::min<Float>((up - m_bins[offset].q) / (1.0f - m_bins[offset].q), OneMinusEpsilon);
         }
         return alias;
     }
@@ -84,5 +84,5 @@ size_t AliasTable::size() const {
 }
 
 Float AliasTable::PMF(int32_t index) const {
-	return m_bins[index].p; 
+	return (Float)m_bins[index].p; 
 }

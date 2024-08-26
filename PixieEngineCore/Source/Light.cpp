@@ -17,6 +17,9 @@ LightLiSample::LightLiSample(Spectrum L, Vec3 wi, Float pdf, const SurfaceIntera
 LightLeSample::LightLeSample(Spectrum spectrum, Ray ray, Float pPosition, Float pDirection)
 	: spectrum(spectrum), ray(ray), pPosition(pPosition), pDirection(pDirection) {}
 
+LightLeSample::LightLeSample(Spectrum spectrum, Ray ray, SurfaceInteraction intr, Float pPosition, Float pDirection)
+	: spectrum(spectrum), ray(ray), intr(intr), pPosition(pPosition), pDirection(pDirection) {}
+
 Light::Light(LightType type, const Transform& transform, const MediumInterface* mediumInterface)
 	: m_type(type), m_transform(transform), m_mediumInterface(mediumInterface) {}
 

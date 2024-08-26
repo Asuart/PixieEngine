@@ -1,8 +1,9 @@
 #pragma once
 #include "pch.h"
+#include "Spectrum.h"
+#include "Ray.h"
 #include "Interaction.h"
 #include "TriangleCache.h"
-#include "Material.h"
 #include "Bounds.h"
 #include "Transform.h"
 
@@ -38,8 +39,10 @@ struct LightLeSample {
 	Ray ray; // Random ray directed from light.
 	Float pPosition; // Prpbability of sampling position.
 	Float pDirection; // Probability of sampling direction.
+	std::optional<SurfaceInteraction> intr;
 
 	LightLeSample(Spectrum spectrum, Ray ray, Float pPosition, Float pDirection);
+	LightLeSample(Spectrum spectrum, Ray ray, SurfaceInteraction intr, Float pPosition, Float pDirection);
 };
 
 class Light {
@@ -56,6 +59,7 @@ public:
 	virtual std::optional<LightLeSample> SampleLe(Vec2 u1, Vec2 u2) const = 0;
 	// Sample probabilities of light coming from light along specified ray.
 	virtual void SampleLePDF(const Ray& ray, Float* pdfPos, Float* pdfDir) const = 0;
+	virtual void SampleLePDF(const SurfaceInteraction& intr, Vec3 w, Float* pdfPos, Float* pdfDir) const = 0;
 	// Sample light that has geometry.
 	virtual Spectrum L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const;
 	// Sample infinite area light.

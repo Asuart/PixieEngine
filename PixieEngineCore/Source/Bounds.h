@@ -28,8 +28,8 @@ public:
 	void BoundingSphere(Vec3* center, Float* radius) const;
 	bool IsEmpty() const;
 	bool IsDegenerate() const;
-	bool IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax = Infinity, Float* hitt0 = nullptr, Float* hitt1 = nullptr) const;
-	bool IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax, Vec3 invDir, const int32_t dirIsNeg[3]) const;
+	bool IntersectP(const Ray& ray, Float tMax = Infinity, Float* hitt0 = nullptr, Float* hitt1 = nullptr) const;
+	bool IntersectP(const Ray& ray, Float tMax, Vec3 invDir, const int32_t dirIsNeg[3]) const;
 
 	Vec3 operator[](int32_t i) const;
 	Vec3 operator[](int32_t i);

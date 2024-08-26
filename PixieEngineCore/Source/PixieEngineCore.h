@@ -10,3 +10,4 @@
 #include "SimplePathIntegrator.h"
 #include "PathIntegrator.h"
 #include "SceneRenderer.h"
+#include "RayTracingStatistics.h"

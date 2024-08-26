@@ -5,7 +5,10 @@ TestNormalsIntegrator::TestNormalsIntegrator(const glm::ivec2& resolution)
 	: Integrator(resolution) {}
 
 Spectrum TestNormalsIntegrator::Integrate(Ray ray, Sampler* sampler) {
-	SurfaceInteraction intr;
-	m_scene->Intersect(ray, intr, m_stats);
-	return Spectrum(glm::abs(intr.normal));
+	RayTracingStatistics::IncrementRays();
+	std::optional<ShapeIntersection> si = m_scene->Intersect(ray);
+	if (!si) {
+		return Spectrum();
+	}
+	return Spectrum(glm::abs(si->intr.normal));
 }

@@ -75,9 +75,8 @@ bool Bounds3f::IsDegenerate() const {
 	return pMin.x > pMax.x || pMin.y > pMax.y || pMin.z > pMax.z;
 }
 
-bool Bounds3f::IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax, Float* hitt0, Float* hitt1) const {
-	stats.m_boxChecksBuffer.Increment(ray.x, ray.y);
-
+bool Bounds3f::IntersectP(const Ray& ray, Float tMax, Float* hitt0, Float* hitt1) const {
+	RayTracingStatistics::IncrementBoxTests();
 	Float t0 = 0, t1 = tMax;
 	for (int32_t i = 0; i < 3; ++i) {
 		Float invRayDir = 1 / ray.direction[i];
@@ -96,8 +95,8 @@ bool Bounds3f::IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMa
 	return true;
 }
 
-bool Bounds3f::IntersectP(const Ray& ray, RayTracingStatistics& stats, Float raytMax, Vec3 invDir, const int32_t dirIsNeg[3]) const {
-	stats.m_boxChecksBuffer.Increment(ray.x, ray.y);
+bool Bounds3f::IntersectP(const Ray& ray, Float raytMax, Vec3 invDir, const int32_t dirIsNeg[3]) const {
+	RayTracingStatistics::IncrementBoxTests();
 	const Bounds3f& bounds = *this;
 	Float tMin = (bounds[dirIsNeg[0]].x - ray.origin.x) * invDir.x;
 	Float tMax = (bounds[1 - dirIsNeg[0]].x - ray.origin.x) * invDir.x;

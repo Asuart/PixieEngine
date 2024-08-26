@@ -4,26 +4,37 @@
 #include "Texture.h"
 
 struct RayTracingStatistics {
-	RayTracingStatistics(glm::ivec2 resolution);
+	static void Resize(glm::ivec2 resolution);
+	static void Reset();
 
-	void Resize(glm::ivec2 resolution);
-	void Clear();
+	static uint64_t GetTotalRays();
+	//static const Buffer2D<uint64_t>& GetRays();
+	static void IncrementRays();
+	static uint64_t GetTotalBoxTests();
+	//static const Buffer2D<uint64_t>& GetBoxTests();
+	static void IncrementBoxTests();
+	static uint64_t GetTotalTriangleTests();
+	//static const Buffer2D<uint64_t>& GetTriangleTests();
+	static void IncrementTriangleTests();
+	static uint64_t GetTotalPixelSamples();
+	//static const Buffer2D<uint64_t>& GetPixelSamples();
+	static void IncrementPixelSamples();
 
-	glm::ivec2 m_resolution;
-	Buffer2D<uint64_t> m_rayCountBuffer;
-	Buffer2D<uint64_t> m_sampleCountBuffer;
-	Buffer2D<uint64_t> m_boxChecksBuffer;
-	Buffer2D<uint64_t> m_triangleChecksBuffer;
-	Texture<glm::fvec3> m_boxChecksTexture;
-	Texture<glm::fvec3> m_triangleChecksTexture;
+	static void UploadBoxTestsTextureLinear();
+	static void UploadTriangleTestsTextureLinear();
 
-	uint64_t GetTotalRays();
-	uint64_t GetTotalBoxTests();
-	uint64_t GetTotalTriangleTests();
+	static void BindBoxTestsTexture();
+	static void BindTriangleTestsTexture();
 
-	void UploadBoxTestsTextureLinear();
-	void UploadTriangleTestsTextureLinear();
-
-	void BindBoxTestsTexture();
-	void BindTriangleTestsTexture();
+protected:
+	static glm::ivec2 m_resolution;
+	static Buffer2D<uint64_t> m_rayCountBuffer;
+	static Buffer2D<uint64_t> m_sampleCountBuffer;
+	static Buffer2D<uint64_t> m_boxChecksBuffer;
+	static Buffer2D<uint64_t> m_triangleChecksBuffer;
+	static Texture<glm::fvec3> m_boxChecksTexture;
+	static Texture<glm::fvec3> m_triangleChecksTexture;
 };
+
+extern thread_local uint32_t g_threadPixelCoordX;
+extern thread_local uint32_t g_threadPixelCoordY;

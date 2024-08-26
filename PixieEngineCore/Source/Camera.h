@@ -11,7 +11,7 @@ public:
 	void LookAt(const Vec3& lookFrom, const Vec3& lookAt, const Vec3& up);
 	void SetAspect(float aspect);
 	void SetFieldOfViewY(float fovy);
-	Ray GetRay(uint32_t x, uint32_t y, const Vec2& uv) const;
+	Ray GetRay(const Vec2& uv) const;
 
 	const Mat4& GetViewMatrix() const;
 	const Mat4& GetInverseViewMatrix() const;

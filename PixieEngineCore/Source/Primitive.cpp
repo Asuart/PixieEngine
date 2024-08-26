@@ -12,114 +12,44 @@ BoundingPrimitive::BoundingPrimitive(const std::vector<Primitive*>& children)
 	}
 }
 
-bool BoundingPrimitive::Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax) const {
-	if (!m_bounds.IntersectP(ray, stats, tMax)) return false;
-	bool intersected = false;
+std::optional<ShapeIntersection> BoundingPrimitive::Intersect(const Ray& ray, Float tMax) const {
+	if (!m_bounds.IntersectP(ray, tMax)) return {};
+	std::optional<ShapeIntersection> intersection;
 	for (size_t i = 0; i < m_children.size(); i++) {
-		if (m_children[i]->Intersect(ray, outCollision, stats, tMax)) {
-			intersected = true;
-			tMax = outCollision.distance;
+		if (auto si = m_children[i]->Intersect(ray, tMax)) {
+			intersection = si;
+			tMax = si->tHit;
 		}
 	}
-	return intersected;
+	return intersection;
 }
 
-bool BoundingPrimitive::IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax) const {
-	if (!m_bounds.IntersectP(ray, stats, tMax)) return false;
+bool BoundingPrimitive::IntersectP(const Ray& ray, Float tMax) const {
+	if (!m_bounds.IntersectP(ray, tMax)) return false;
 	for (int32_t i = 0; i < m_children.size(); i++) {
-		if (m_children[i]->IntersectP(ray, stats, tMax)) return true;
+		if (m_children[i]->IntersectP(ray, tMax)) return true;
 	}
 	return false;
 }
 
-TrianglePrimitive::TrianglePrimitive(const TriangleCache& triangle, const Material* material, const AreaLight* areaLight)
-	: m_triangle(triangle), m_material(material), m_areaLight(areaLight) {
-	m_bounds = Bounds3f(glm::min(triangle.p0, triangle.p1, triangle.p2), glm::max(triangle.p0, triangle.p1, triangle.p2));
+ShapePrimitive::ShapePrimitive(const Shape* shape, const Material* material, const DiffuseAreaLight* areaLight)
+	: m_shape(shape), m_material(material), m_areaLight(areaLight) {
+	m_bounds = m_shape->Bounds();
 }
 
-bool TrianglePrimitive::Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax) const {
-	stats.m_triangleChecksBuffer.Increment(ray.x, ray.y);
-	Float NdotRayDirection = glm::dot(m_triangle.normal, ray.direction);
-	if (fabs(NdotRayDirection) < ShadowEpsilon) {
-		return false;
+std::optional<ShapeIntersection> ShapePrimitive::Intersect(const Ray& ray, Float tMax) const {
+	RayTracingStatistics::IncrementTriangleTests();
+	std::optional<ShapeIntersection> si = m_shape->Intersect(ray, tMax);
+	if (si) {
+		si->intr.material = m_material;
+		si->intr.areaLight = m_areaLight;
 	}
-
-	Float t = (m_triangle.d - glm::dot(m_triangle.normal, ray.origin)) / NdotRayDirection;
-	if (t < ShadowEpsilon || t > tMax) {
-		return false;
-	}
-
-	Vec3 P = ray.At(t);
-	Vec3 C;
-
-	Vec3 vp0 = P - m_triangle.p0;
-	C = glm::cross(m_triangle.edge0, vp0);
-	if (glm::dot(m_triangle.normal, C) < 0) {
-		return false;
-	}
-
-	Vec3 vp1 = P - m_triangle.p1;
-	C = glm::cross(m_triangle.edge1, vp1);
-	if (glm::dot(m_triangle.normal, C) < 0) {
-		return false;
-	}
-
-	Vec3 vp2 = P - m_triangle.p2;
-	C = glm::cross(m_triangle.edge2, vp2);
-	if (glm::dot(m_triangle.normal, C) < 0) {
-		return false;
-	}
-
-	outCollision.triangle = &m_triangle;
-	outCollision.distance = t;
-	outCollision.backface = NdotRayDirection < 0;
-	outCollision.normal = outCollision.backface ? m_triangle.normal : -m_triangle.normal;
-	outCollision.position = P;
-	outCollision.uv = Vec3(0);
-	outCollision.area = m_triangle.area;
-	outCollision.dpdu = m_triangle.edge0;
-	outCollision.wo = -ray.direction;
-
-	outCollision.material = m_material;
-	outCollision.areaLight = m_areaLight;
-
-	return true;
+	return si;
 }
 
-bool TrianglePrimitive::IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax) const {
-	stats.m_triangleChecksBuffer.Increment(ray.x, ray.y);
-	Float NdotRayDirection = glm::dot(m_triangle.normal, ray.direction);
-	if (fabs(NdotRayDirection) < ShadowEpsilon) {
-		return false;
-	}
-
-	Float t = (m_triangle.d - glm::dot(m_triangle.normal, ray.origin)) / NdotRayDirection;
-	if (t < ShadowEpsilon || t > tMax) {
-		return false;
-	}
-
-	Vec3 P = ray.At(t);
-	Vec3 C;
-
-	Vec3 vp0 = P - m_triangle.p0;
-	C = glm::cross(m_triangle.edge0, vp0);
-	if (glm::dot(m_triangle.normal, C) < 0) {
-		return false;
-	}
-
-	Vec3 vp1 = P - m_triangle.p1;
-	C = glm::cross(m_triangle.edge1, vp1);
-	if (glm::dot(m_triangle.normal, C) < 0) {
-		return false;
-	}
-
-	Vec3 vp2 = P - m_triangle.p2;
-	C = glm::cross(m_triangle.edge2, vp2);
-	if (glm::dot(m_triangle.normal, C) < 0) {
-		return false;
-	}
-
-	return true;
+bool ShapePrimitive::IntersectP(const Ray& ray, Float tMax) const {
+	RayTracingStatistics::IncrementTriangleTests();
+	return m_shape->IntersectP(ray, tMax);
 }
 
 BVHPrimitive::BVHPrimitive() {}
@@ -155,7 +85,6 @@ BVHAggregate::BVHAggregate(std::vector<Primitive*> prims, int32_t maxPrimsInNode
 
 	std::vector<Primitive*> orderedPrims(primitives.size());
 	BVHBuildNode* root;
-	// Build BVH according to selected _splitMethod_
 	std::atomic<int32_t> totalNodes{ 0 };
 
 	std::atomic<int32_t> orderedPrimsOffset{ 0 };
@@ -163,7 +92,6 @@ BVHAggregate::BVHAggregate(std::vector<Primitive*> prims, int32_t maxPrimsInNode
 
 	primitives.swap(orderedPrims);
 
-	// Convert BVH into compact representation in _nodes_ array
 	bvhPrimitives.resize(0);
 	nodes = new LinearBVHNode[totalNodes];
 	int32_t offset = 0;
@@ -174,22 +102,24 @@ Bounds3f BVHAggregate::Bounds() const {
 	return nodes[0].bounds;
 }
 
-bool BVHAggregate::Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax) const {
-	if (!nodes) return false;
+std::optional<ShapeIntersection> BVHAggregate::Intersect(const Ray& ray, Float tMax) const {
+	if (!nodes) {
+		return {};
+	}
 	Vec3 invDir(1 / ray.direction.x, 1 / ray.direction.y, 1 / ray.direction.z);
 	int32_t dirIsNeg[3] = { int32_t(invDir.x < 0), int32_t(invDir.y < 0), int32_t(invDir.z < 0) };
 	int32_t toVisitOffset = 0, currentNodeIndex = 0;
 	int32_t nodesToVisit[64];
-	bool collided = false;
+	std::optional<ShapeIntersection> intersection;
 	while (true) {
 		const LinearBVHNode* node = &nodes[currentNodeIndex];
-		if (node->bounds.IntersectP(ray, stats, tMax)) {
+		if (node->bounds.IntersectP(ray, tMax)) {
 			if (node->nPrimitives > 0) {
 				for (int32_t i = 0; i < node->nPrimitives; ++i) {
-					bool col = primitives[node->primitivesOffset + i]->Intersect(ray, outCollision, stats, tMax);
-					if (col) {
-						collided = true;
-						tMax = outCollision.distance;
+					std::optional<ShapeIntersection> si = primitives[node->primitivesOffset + i]->Intersect(ray, tMax);
+					if (si) {
+						intersection = si;
+						tMax = si->tHit;
 					}
 				}
 				if (toVisitOffset == 0) break;
@@ -211,10 +141,10 @@ bool BVHAggregate::Intersect(const Ray& ray, SurfaceInteraction& outCollision, R
 			currentNodeIndex = nodesToVisit[--toVisitOffset];
 		}
 	}
-	return collided;
+	return intersection;
 }
 
-bool BVHAggregate::IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax) const {
+bool BVHAggregate::IntersectP(const Ray& ray, Float tMax) const {
 	if (!nodes) return false;
 	Vec3 invDir(1.f / ray.direction.x, 1.f / ray.direction.y, 1.f / ray.direction.z);
 	int32_t dirIsNeg[3] = { int32_t(invDir.x < 0), int32_t(invDir.y < 0), int32_t(invDir.z < 0) };
@@ -223,11 +153,10 @@ bool BVHAggregate::IntersectP(const Ray& ray, RayTracingStatistics& stats, Float
 
 	while (true) {
 		const LinearBVHNode* node = &nodes[currentNodeIndex];
-		if (node->bounds.IntersectP(ray, stats, tMax)) {
-			// Process BVH node _node_ for traversal
+		if (node->bounds.IntersectP(ray, tMax)) {
 			if (node->nPrimitives > 0) {
 				for (int32_t i = 0; i < node->nPrimitives; ++i) {
-					if (primitives[node->primitivesOffset + i]->IntersectP(ray, stats, tMax)) {
+					if (primitives[node->primitivesOffset + i]->IntersectP(ray, tMax)) {
 						return true;
 					}
 				}
@@ -236,7 +165,6 @@ bool BVHAggregate::IntersectP(const Ray& ray, RayTracingStatistics& stats, Float
 			}
 			else {
 				if (dirIsNeg[node->axis] != 0) {
-					/// second child first
 					nodesToVisit[toVisitOffset++] = currentNodeIndex + 1;
 					currentNodeIndex = node->secondChildOffset;
 				}

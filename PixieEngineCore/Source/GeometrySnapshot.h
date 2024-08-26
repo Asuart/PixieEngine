@@ -6,18 +6,19 @@
 #include "MeshComponent.h"
 #include "MaterialComponent.h"
 #include "TriangleCache.h"
+#include "DiffuseAreaLight.h"
 
 class GeometrySnapshot {
 public:
 	GeometrySnapshot(const std::vector<SceneObject*>& flatObjects, uint32_t maxPrimitivesPerLeaf = 6);
 	~GeometrySnapshot();
 
-	bool Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax = Infinity) const;
-	bool IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax = Infinity) const;
+	std::optional<ShapeIntersection> Intersect(const Ray& ray, Float tMax = Infinity) const;
+	bool IntersectP(const Ray& ray, Float tMax = Infinity) const;
 
-	std::vector<AreaLight*>& GetAreaLights();
+	std::vector<DiffuseAreaLight*>& GetAreaLights();
 
 private:
-	std::vector<AreaLight*> m_areaLights;
+	std::vector<DiffuseAreaLight*> m_areaLights;
 	Primitive* m_rootPrimitive;
 };

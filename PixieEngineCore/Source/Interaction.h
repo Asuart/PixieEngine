@@ -1,31 +1,24 @@
 #pragma once
 #include "pch.h"
+#include "Ray.h"
 #include "Medium.h"
 #include "BSDF.h"
 #include "Sampler.h"
 
-struct Material;
-class Shape;
 class Camera;
-struct Ray;
-struct Mesh;
-struct Light;
-class AreaLight;
-struct ShapeSample;
-struct TriangleCache;
+struct Material;
+class Light;
 
 struct Interaction {
 	Vec3 position = Vec3(0.0f);
+	Vec3 wo = Vec3(0.0f);
 	Vec3 normal = Vec3(0.0f);
 	Vec2 uv = Vec2(0.0f);
-	Vec3 wo = Vec3(0.0f);
-	Float distance = 0.0f;
-	bool backface = false;
-	const TriangleCache* triangle = nullptr;
 	const Medium* medium = nullptr;
-	const MediumInterface* mediumInterface;
+	const MediumInterface* mediumInterface = nullptr;
 
 	Interaction() = default;
+	Interaction(Vec3 position, Vec3 normal, Vec2 uv);
 	Interaction(Vec3 position, const MediumInterface* mediumInterface);
 
 	const Medium* GetMedium(Vec3 direction) const;
@@ -39,13 +32,11 @@ struct SurfaceInteraction : public Interaction {
 	Vec3 dndu = Vec3(0.0f), dndv = Vec3(0.0f);
 	Vec3 dpdx = Vec3(0.0f), dpdy = Vec3(0.0f);
 	Float dudx = 0.0f, dvdx = 0.0f, dudy = 0.0f, dvdy = 0.0f;
-	Float area = 0.0f;
-	int32_t faceIndex = 0;
 	const Material* material = nullptr;
-	const AreaLight* areaLight = nullptr;
-	Mesh* mesh = nullptr;
+	const Light* areaLight = nullptr;
 
 	SurfaceInteraction() = default;
+	SurfaceInteraction(Vec3 position, Vec3 normal, Vec2 uv);
 	SurfaceInteraction(Vec3 position, const MediumInterface* mediumInterface);
 
 	Spectrum Le(const glm::vec3& wo) const;

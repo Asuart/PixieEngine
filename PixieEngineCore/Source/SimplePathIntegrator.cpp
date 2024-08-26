@@ -2,12 +2,17 @@
 #include "SimplePathIntegrator.h"
 
 SimplePathIntegrator::SimplePathIntegrator(const glm::ivec2& resolution)
-	: Integrator(resolution), m_lightSampler({}) {}
+	: Integrator(resolution), m_lightSampler(new UniformLightSampler()) {}
+
+SimplePathIntegrator::~SimplePathIntegrator() {
+	delete m_lightSampler;
+}
 
 void SimplePathIntegrator::SetScene(Scene* scene) {
 	StopRender();
 	m_scene = scene;
-	m_lightSampler = UniformLightSampler(m_scene->GetGeometrySnapshot()->GetAreaLights());
+	if (m_lightSampler) delete m_lightSampler;
+	m_lightSampler = new UniformLightSampler((const std::vector<Light*>&)m_scene->GetGeometrySnapshot()->GetAreaLights());
 	Reset();
 	StartRender();
 }
@@ -18,9 +23,9 @@ Spectrum SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 	int32_t depth = 0;
 
 	while (beta) {
-		m_stats.m_rayCountBuffer.Increment(ray.x, ray.y);
-		SurfaceInteraction isect;
-		if (!m_scene->Intersect(ray, isect, m_stats)) {
+		RayTracingStatistics::IncrementRays();
+		std::optional<ShapeIntersection> si = m_scene->Intersect(ray);
+		if (!si) {
 			if (!m_sampleLights || specularBounce) {
 				for (Light* light : m_scene->GetInfiniteLights()) {
 					L += beta * light->Le(ray);
@@ -29,29 +34,30 @@ Spectrum SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 			break;
 		}
 
+		SurfaceInteraction intr = si->intr;
 		if (!m_sampleLights || specularBounce) {
-			L += beta * isect.Le(-ray.direction);
+			L += beta * intr.Le(-ray.direction);
 		}
 
 		if (depth++ == m_maxDepth) {
 			break;
 		}
 
-		BSDF bsdf = isect.GetBSDF(ray, m_scene->GetMainCamera(), sampler);
+		BSDF bsdf = intr.GetBSDF(ray, m_scene->GetMainCamera(), sampler);
 		if (!bsdf) {
 			specularBounce = true;
-			isect.SkipIntersection(ray);
+			intr.SkipIntersection(ray);
 			continue;
 		}
 
 		Vec3 wo = -ray.direction;
 		if (m_sampleLights) {
-			std::optional<SampledLight> sampledLight = m_lightSampler.Sample(sampler->Get());
+			std::optional<SampledLight> sampledLight = m_lightSampler->Sample(sampler->Get());
 			if (sampledLight) {
-				std::optional<LightLiSample> ls = sampledLight->light->SampleLi(isect, sampler->Get2D());
+				std::optional<LightLiSample> ls = sampledLight->light->SampleLi(intr, sampler->Get2D());
 				if (ls && ls->L && ls->pdf > 0) {
-					Spectrum f = bsdf.SampleDistribution(isect.triangle->shadingFrame, wo, ls->wi) * AbsDot(ls->wi, isect.normal);
-					if (f && Unoccluded(ray.x, ray.y, isect, ls->pLight)) {
+					Spectrum f = bsdf.SampleDistribution(wo, ls->wi) * AbsDot(ls->wi, intr.normal);
+					if (f && Unoccluded(intr, ls->pLight)) {
 						L += beta * f * ls->L / (sampledLight->p * ls->pdf);
 					}
 				}
@@ -59,13 +65,13 @@ Spectrum SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 		}
 
 		if (m_sampleBSDF) {
-			BSDFSample bs = bsdf.SampleDirectionAndDistribution(isect.triangle->shadingFrame, wo, sampler->Get(), sampler->Get2D());
+			BSDFSample bs = bsdf.SampleDirectionAndDistribution(wo, sampler->Get(), sampler->Get2D());
 			if (!bs) {
 				break;
 			}
-			beta *= bs.f * AbsDot(bs.wi, isect.normal) / bs.pdf;
+			beta *= bs.f * AbsDot(bs.wi, intr.normal) / bs.pdf;
 			specularBounce = bs.IsSpecular();
-			ray = Ray(ray.x, ray.y, isect.position, bs.wi);
+			ray = Ray(intr.position, bs.wi);
 		}
 		else {
 			Float pdf;
@@ -78,16 +84,16 @@ Spectrum SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 			else {
 				wi = SampleUniformHemisphere(sampler->Get2D());
 				pdf = UniformHemispherePDF;
-				if (IsReflective(flags) && glm::dot(wo, isect.normal) * glm::dot(wi, isect.normal) < 0.0f) {
+				if (IsReflective(flags) && glm::dot(wo, intr.normal) * glm::dot(wi, intr.normal) < 0.0f) {
 					wi = -wi;
 				}
-				else if (IsTransmissive(flags) && glm::dot(wo, isect.normal) * glm::dot(wi, isect.normal) > 0.0f) {
+				else if (IsTransmissive(flags) && glm::dot(wo, intr.normal) * glm::dot(wi, intr.normal) > 0.0f) {
 					wi = -wi;
 				}
 			}
-			beta *= bsdf.SampleDistribution(isect.triangle->shadingFrame, wo, wi) * AbsDot(wi, isect.normal) / pdf;
+			beta *= bsdf.SampleDistribution(wo, wi) * AbsDot(wi, intr.normal) / pdf;
 			specularBounce = false;
-			ray = Ray(ray.x, ray.y, isect.position, wi);
+			ray = Ray(intr.position, wi);
 		}
 	}
 

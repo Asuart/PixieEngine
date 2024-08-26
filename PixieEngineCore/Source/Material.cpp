@@ -29,10 +29,10 @@ Spectrum Material::GetEmission() const {
 	return m_emissionColor * m_emissionStrength;
 }
 
-Spectrum Material::Evaluate(const SurfaceInteraction& collision) const {
+Spectrum Material::Evaluate(const SurfaceInteraction& intr) const {
 	glm::fvec3 color = m_albedo.GetRGBValue();
 	if (m_albedoTexture) {
-		color *= m_albedoTexture->Sample(collision);
+		color *= m_albedoTexture->Sample(intr);
 	}
 	return color / Pi;
 }
@@ -41,34 +41,6 @@ float Material::Pdf() const {
 	return Inv2Pi;
 }
 
-Spectrum Material::Sample(const Ray& ray, const SurfaceInteraction& collision, Ray& scatteredRay) const {
-	Vec3 scatteredDirection;
-
-	if (m_transparency > RandomFloat()) {
-		Float refraction = !collision.backface ? m_refraction : (1.0f / m_refraction);
-
-		Float cosTheta = glm::dot(-ray.direction, collision.normal);
-		Float sinTheta = sqrt(1.0f - cosTheta * cosTheta);
-
-		bool cannotRefract = refraction * sinTheta > 1.0f;
-		if (cannotRefract || Reflectance(cosTheta, refraction) > RandomFloat()) {
-			scatteredDirection = glm::reflect(ray.direction, collision.normal);
-		}
-		else {
-			scatteredDirection = glm::refract(ray.direction, collision.normal, refraction);
-		}
-	}
-	else {
-		Frame shadingFrame = Frame::FromZ(collision.normal);
-		scatteredDirection = shadingFrame.FromLocal(SampleUniformHemisphere(Vec2(RandomFloat(), RandomFloat())));
-	}
-
-	scatteredRay.origin = collision.position;
-	scatteredRay.direction = scatteredDirection;
-	Float cosTheta = glm::abs(glm::dot(collision.normal, scatteredRay.direction));
-	return (cosTheta * Evaluate(collision)) / Pdf();
-}
-
 BSDF Material::GetBSDF(const SurfaceInteraction& intr) const {
-	return BSDF(*this);
+	return BSDF(*this, intr);
 }

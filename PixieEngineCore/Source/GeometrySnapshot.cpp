@@ -4,7 +4,6 @@
 GeometrySnapshot::GeometrySnapshot(const std::vector<SceneObject*>& flatObjects, uint32_t maxPrimitivesPerLeaf) {
 	uint64_t trianglesCount = 0, invalidTrianglesCount = 0;
 
-
 	std::vector<Primitive*> agregatePrimitives;
 	for (size_t sceneObjectIndex = 0; sceneObjectIndex < flatObjects.size(); sceneObjectIndex++) {
 		SceneObject* object = flatObjects[sceneObjectIndex];
@@ -19,24 +18,24 @@ GeometrySnapshot::GeometrySnapshot(const std::vector<SceneObject*>& flatObjects,
 
 		std::vector<Primitive*> shapePrimitives;
 		for (size_t i = 0; i < mesh->indices.size(); i += 3) {
-			TriangleCache triangle = TriangleCache(
+			TriangleCache* triangle = new TriangleCache(
 				mesh->vertices[mesh->indices[i + 0]],
 				mesh->vertices[mesh->indices[i + 1]],
 				mesh->vertices[mesh->indices[i + 2]]
 			);
 
 			trianglesCount++;
-			if (isnan(triangle.normal)) {
+			if (!triangle->area || isnan(triangle->normal)) {
 				invalidTrianglesCount++;
 				continue;
 			}
 
-			AreaLight* areaLight = nullptr;
+			DiffuseAreaLight* areaLight = nullptr;
 			if (material->m_emissionStrength) {
 				areaLight = new DiffuseAreaLight(triangle, material);
 				m_areaLights.push_back(areaLight);
 			}
-			shapePrimitives.push_back(new TrianglePrimitive(triangle, material, areaLight));
+			shapePrimitives.push_back(new ShapePrimitive(triangle, material, areaLight));
 		}
 		agregatePrimitives.push_back(new BVHAggregate(shapePrimitives, maxPrimitivesPerLeaf));
 	}
@@ -53,14 +52,14 @@ GeometrySnapshot::~GeometrySnapshot() {
 	}
 }
 
-bool GeometrySnapshot::Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax) const {
-	return m_rootPrimitive->Intersect(ray, outCollision, stats, tMax);
+std::optional<ShapeIntersection> GeometrySnapshot::Intersect(const Ray& ray, Float tMax) const {
+	return m_rootPrimitive->Intersect(ray, tMax);
 }
 
-bool GeometrySnapshot::IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax) const {
-	return m_rootPrimitive->IntersectP(ray, stats, tMax);
+bool GeometrySnapshot::IntersectP(const Ray& ray, Float tMax) const {
+	return m_rootPrimitive->IntersectP(ray, tMax);
 }
 
-std::vector<AreaLight*>& GeometrySnapshot::GetAreaLights() {
+std::vector<DiffuseAreaLight*>& GeometrySnapshot::GetAreaLights() {
 	return m_areaLights;
 }

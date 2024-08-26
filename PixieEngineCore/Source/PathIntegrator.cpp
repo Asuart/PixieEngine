@@ -2,12 +2,17 @@
 #include "PathIntegrator.h"
 
 PathIntegrator::PathIntegrator(const glm::ivec2& resolution)
-	: Integrator(resolution), m_lightSampler({}) {}
+	: Integrator(resolution), m_lightSampler(new UniformLightSampler()){}
+
+PathIntegrator::~PathIntegrator() {
+	delete m_lightSampler;
+}
 
 void PathIntegrator::SetScene(Scene* scene) {
 	StopRender();
 	m_scene = scene;
-	m_lightSampler = UniformLightSampler(m_scene->GetGeometrySnapshot()->GetAreaLights());
+	if (m_lightSampler) delete m_lightSampler;
+	m_lightSampler = new UniformLightSampler((const std::vector<Light*>&)m_scene->GetGeometrySnapshot()->GetAreaLights());
 	Reset();
 	StartRender();
 }
@@ -20,16 +25,16 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 	SurfaceInteraction prevIntrCtx;
 
 	while (true) {
-		m_stats.m_rayCountBuffer.Increment(ray.x, ray.y);
-		SurfaceInteraction isect;
-		if (!m_scene->Intersect(ray, isect, m_stats)) {
+		RayTracingStatistics::IncrementRays();
+		std::optional<ShapeIntersection> si = m_scene->Intersect(ray);
+		if (!si) {
 			for (Light* light : m_scene->GetInfiniteLights()) {
 				Spectrum Le = light->Le(ray);
 				if (depth == 0 || specularBounce) {
 					L += beta * Le;
 				}
 				else {
-					Float p_l = m_lightSampler.PMF(prevIntrCtx, light) * light->PDF_Li(prevIntrCtx, ray.direction, true);
+					Float p_l = m_lightSampler->PMF(prevIntrCtx, light) * light->SampleLiPDF(prevIntrCtx, ray.direction, true);
 					Float w_b = PowerHeuristic(1, p_b, 1, p_l);
 					L += beta * w_b * Le;
 				}
@@ -37,13 +42,14 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 			break;
 		}
 
-		Spectrum Le = isect.Le(-ray.direction);
+		SurfaceInteraction intr = si->intr;
+		Spectrum Le = intr.Le(-ray.direction);
 		if (Le) {
 			if (depth == 0 || specularBounce) {
 				L += beta * Le;
 			}
 			else {
-				Float p_l = m_lightSampler.PMF(prevIntrCtx, isect.areaLight) * isect.areaLight->PDF_Li(prevIntrCtx, ray.direction, true);
+				Float p_l = m_lightSampler->PMF(prevIntrCtx, intr.areaLight) * intr.areaLight->SampleLiPDF(prevIntrCtx, ray.direction, true);
 				Float w_l = PowerHeuristic(1, p_b, 1, p_l);
 				L += beta * w_l * Le;
 			}
@@ -53,10 +59,10 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 			break;
 		}
 
-		BSDF bsdf = isect.GetBSDF(ray, m_scene->GetMainCamera(), sampler);
+		BSDF bsdf = intr.GetBSDF(ray, m_scene->GetMainCamera(), sampler);
 		if (!bsdf) {
 			specularBounce = true;
-			isect.SkipIntersection(ray);
+			intr.SkipIntersection(ray);
 			continue;
 		}
 
@@ -65,18 +71,18 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 		}
 
 		if (IsNonSpecular(bsdf.Flags())) {
-			Spectrum Ld = SampleLd(ray.x, ray.y, isect, bsdf, sampler);
+			Spectrum Ld = SampleLd(intr, bsdf, sampler);
 			L += beta * Ld;
 		}
 
 		Vec3 wo = -ray.direction;
-		BSDFSample bs = bsdf.SampleDirectionAndDistribution(isect.triangle->shadingFrame, wo, sampler->Get(), sampler->Get2D());
+		BSDFSample bs = bsdf.SampleDirectionAndDistribution(wo, sampler->Get(), sampler->Get2D());
 		if (!bs) {
 			break;
 		}
 
-		beta *= bs.f * AbsDot(bs.wi, isect.normal) / bs.pdf;
-		p_b = bs.pdfIsProportional ? bsdf.PDF(isect.triangle->shadingFrame, wo, bs.wi) : bs.pdf;
+		beta *= bs.f * AbsDot(bs.wi, intr.normal) / bs.pdf;
+		p_b = bs.pdfIsProportional ? bsdf.PDF(wo, bs.wi) : bs.pdf;
 		specularBounce = bs.IsSpecular();
 		anyNonSpecularBounces |= !bs.IsSpecular();
 		if (bs.IsTransmission()) {
@@ -92,16 +98,16 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 			beta /= 1.0f - q;
 		}
 
-		prevIntrCtx = isect;
+		prevIntrCtx = intr;
 
-		ray = isect.SpawnRay(ray, bsdf, bs.wi, bs.flags, bs.eta);
+		ray = intr.SpawnRay(ray, bsdf, bs.wi, bs.flags, bs.eta);
 	}
 
 	return L;
 }
 
-Spectrum PathIntegrator::SampleLd(uint32_t x, uint32_t y, const SurfaceInteraction& intr, const BSDF& bsdf, Sampler* sampler) {
-	std::optional<SampledLight> sampledLight = m_lightSampler.Sample(sampler->Get());
+Spectrum PathIntegrator::SampleLd(const SurfaceInteraction& intr, const BSDF& bsdf, Sampler* sampler) {
+	std::optional<SampledLight> sampledLight = m_lightSampler->Sample(sampler->Get());
 	if (!sampledLight) {
 		return Spectrum();
 	}
@@ -112,13 +118,13 @@ Spectrum PathIntegrator::SampleLd(uint32_t x, uint32_t y, const SurfaceInteracti
 	}
 
 	Vec3 wo = intr.wo, wi = ls->wi;
-	Spectrum f = bsdf.SampleDistribution(intr.triangle->shadingFrame, wo, wi) * AbsDot(wi, intr.normal);
-	if (!f || !Unoccluded(x, y, intr, ls->pLight)) {
+	Spectrum f = bsdf.SampleDistribution(wo, wi) * AbsDot(wi, intr.normal);
+	if (!f || !Unoccluded(intr, ls->pLight)) {
 		return Spectrum();
 	}
 
 	Float p_l = sampledLight->p * ls->pdf;
-	Float p_b = bsdf.PDF(intr.triangle->shadingFrame, wo, wi);
+	Float p_b = bsdf.PDF(wo, wi);
 	Float w_l = PowerHeuristic(1, p_l, 1, p_b);
 	return w_l * ls->L * f / p_l;
 }

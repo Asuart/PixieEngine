@@ -320,3 +320,43 @@ std::array<Float, 3> SampleSphericalTriangle(const std::array<Vec3, 3>& v, Vec3 
 	}
 	return { Float(1 - b1 - b2), Float(b1), Float(b2) };
 }
+
+Vec2 InvertSphericalTriangleSample(const std::array<Vec3, 3>& v, Vec3 p, Vec3 w) {
+	Vec3 a = glm::normalize(v[0] - p), b = glm::normalize(v[1] - p), c = glm::normalize(v[2] - p);
+	Vec3 n_ab = glm::cross(a, b), n_bc = glm::cross(b, c), n_ca = glm::cross(c, a);
+	if (length2(n_ab) == 0 || length2(n_bc) == 0 || length2(n_ca) == 0) {
+		return Vec2();
+	}
+	n_ab = glm::normalize(n_ab);
+	n_bc = glm::normalize(n_bc);
+	n_ca = glm::normalize(n_ca);
+
+	Float alpha = AngleBetween(n_ab, -n_ca);
+	Float beta = AngleBetween(n_bc, -n_ab);
+	Float gamma = AngleBetween(n_ca, -n_bc);
+
+	Vec3 cp = glm::normalize(glm::cross(glm::cross(b, w), glm::cross(c, a)));
+	if (glm::dot(cp, a + c) < 0) {
+		cp = -cp;
+	}
+
+	Float u0;
+	if (glm::dot(a, cp) > 0.99999847691f) {
+		u0 = 0;
+	}
+	else {
+		Vec3 n_cpb = glm::cross(cp, b), n_acp = glm::cross(a, cp);
+		if (length2(n_cpb) == 0 || length2(n_acp) == 0) {
+			return Vec2(0.5, 0.5);
+		}
+		n_cpb = glm::normalize(n_cpb);
+		n_acp = glm::normalize(n_acp);
+		Float Ap = alpha + AngleBetween(n_ab, n_cpb) + AngleBetween(n_acp, -n_cpb) - Pi;
+
+		Float A = alpha + beta + gamma - Pi;
+		u0 = Ap / A;
+	}
+
+	Float u1 = (1 - glm::dot(w, b)) / (1 - glm::dot(cp, b));
+	return Vec2(Clamp(u0, 0, 1), Clamp(u1, 0, 1));
+}

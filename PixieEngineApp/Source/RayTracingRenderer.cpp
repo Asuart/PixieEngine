@@ -65,14 +65,14 @@ void RayTracingRenderer::DrawFrame() {
 		m_rayTracer->m_film.texture->Bind(GL_TEXTURE0);
 		break;
 	case RayTracingVisualization::BoxChecksStatistics:
-		m_rayTracer->m_stats.UploadBoxTestsTextureLinear();
+		RayTracingStatistics::UploadBoxTestsTextureLinear();
 		glUniform1f(samplesLoc, 1.0f);
-		m_rayTracer->m_stats.BindBoxTestsTexture();
+		RayTracingStatistics::BindBoxTestsTexture();
 		break;
 	case RayTracingVisualization::TriangleChecksStatistics:
-		m_rayTracer->m_stats.UploadTriangleTestsTextureLinear();
+		RayTracingStatistics::UploadTriangleTestsTextureLinear();
 		glUniform1f(samplesLoc, 1.0f);
-		m_rayTracer->m_stats.BindTriangleTestsTexture();
+		RayTracingStatistics::BindTriangleTestsTexture();
 		break;
 	}
 
@@ -213,15 +213,15 @@ void RayTracingRenderer::DrawUI() {
 	std::string lastSampleTimeText = std::string("Last Sample Time: ") + std::to_string(m_rayTracer->GetLastSampleTime());
 	ImGui::Text(lastSampleTimeText.c_str());
 
-	uint64_t totalRays = m_rayTracer->m_stats.GetTotalRays();
+	uint64_t totalRays = RayTracingStatistics::GetTotalRays();
 	std::string totalRaysText = std::string("Rays: ") + std::to_string(totalRays);
 	ImGui::Text(totalRaysText.c_str());
 
-	uint64_t totalBoxes = m_rayTracer->m_stats.GetTotalBoxTests();
+	uint64_t totalBoxes = RayTracingStatistics::GetTotalBoxTests();
 	std::string totalBoxesText = std::string("Box checks: ") + std::to_string(totalBoxes);
 	ImGui::Text(totalBoxesText.c_str());
 
-	uint64_t totalTriangles = m_rayTracer->m_stats.GetTotalTriangleTests();
+	uint64_t totalTriangles = RayTracingStatistics::GetTotalTriangleTests();
 	std::string totalTrianglesText = std::string("Triangle checks: ") + std::to_string(totalTriangles);
 	ImGui::Text(totalTrianglesText.c_str());
 }

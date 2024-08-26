@@ -65,6 +65,7 @@ Float BilinearPDF(Vec2 p, const std::array<Float, 4>& w);
 Vec3 GramSchmidt(Vec3 v, Vec3 w);
 Vec3 SampleUniformTriangle(Vec2 u);
 std::array<Float, 3> SampleSphericalTriangle(const std::array<Vec3, 3>& v, Vec3 p, Vec2 u, Float* pdf);
+Vec2 InvertSphericalTriangleSample(const std::array<Vec3, 3>& v, Vec3 p, Vec3 w);
 
 template<typename T>
 T Lerp(Float t, T from, T to) {

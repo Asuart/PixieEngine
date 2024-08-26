@@ -1,11 +1,19 @@
 #include "pch.h"
 #include "RayTracingStatistics.h"
 
-RayTracingStatistics::RayTracingStatistics(glm::ivec2 resolution)
-	: m_resolution(resolution), m_rayCountBuffer(resolution), m_sampleCountBuffer(resolution), m_boxChecksBuffer(resolution), m_triangleChecksBuffer(resolution),
-	m_triangleChecksTexture(resolution), m_boxChecksTexture(resolution) {}
+thread_local uint32_t g_threadPixelCoordX = 0;
+thread_local uint32_t g_threadPixelCoordY = 0;
+
+glm::ivec2 RayTracingStatistics::m_resolution = glm::ivec2(0);
+Buffer2D<uint64_t> RayTracingStatistics::m_rayCountBuffer = Buffer2D<uint64_t>(glm::ivec2(0));
+Buffer2D<uint64_t> RayTracingStatistics::m_sampleCountBuffer = Buffer2D<uint64_t>(glm::ivec2(0));
+Buffer2D<uint64_t> RayTracingStatistics::m_boxChecksBuffer = Buffer2D<uint64_t>(glm::ivec2(0));
+Buffer2D<uint64_t> RayTracingStatistics::m_triangleChecksBuffer = Buffer2D<uint64_t>(glm::ivec2(0));
+Texture<glm::fvec3> RayTracingStatistics::m_boxChecksTexture = Texture<glm::fvec3>(glm::ivec2(0));
+Texture<glm::fvec3> RayTracingStatistics::m_triangleChecksTexture = Texture<glm::fvec3>(glm::ivec2(0));
 
 void RayTracingStatistics::Resize(glm::ivec2 resolution) {
+	m_resolution = resolution;
 	m_rayCountBuffer.Resize(resolution);
 	m_boxChecksBuffer.Resize(resolution);
 	m_triangleChecksBuffer.Resize(resolution);
@@ -14,7 +22,7 @@ void RayTracingStatistics::Resize(glm::ivec2 resolution) {
 	m_boxChecksTexture.Resize(resolution);
 }
 
-void RayTracingStatistics::Clear() {
+void RayTracingStatistics::Reset() {
 	m_rayCountBuffer.Clear();
 	m_boxChecksBuffer.Clear();
 	m_triangleChecksBuffer.Clear();
@@ -31,6 +39,10 @@ uint64_t RayTracingStatistics::GetTotalRays() {
 	return total;
 }
 
+void RayTracingStatistics::IncrementRays() {
+	m_rayCountBuffer.Increment(g_threadPixelCoordX, g_threadPixelCoordY);
+}
+
 uint64_t RayTracingStatistics::GetTotalBoxTests() {
 	uint64_t total = 0;
 	for (size_t i = 0; i < m_boxChecksBuffer.GetSize(); i++) {
@@ -39,12 +51,32 @@ uint64_t RayTracingStatistics::GetTotalBoxTests() {
 	return total;
 }
 
+void RayTracingStatistics::IncrementBoxTests() {
+	m_boxChecksBuffer.Increment(g_threadPixelCoordX, g_threadPixelCoordY);
+}
+
 uint64_t RayTracingStatistics::GetTotalTriangleTests() {
 	uint64_t total = 0;
 	for (size_t i = 0; i < m_triangleChecksBuffer.GetSize(); i++) {
 		total += m_triangleChecksBuffer.GetValue((uint32_t)i);
 	}
 	return total;
+}
+
+void RayTracingStatistics::IncrementTriangleTests() {
+	m_triangleChecksBuffer.Increment(g_threadPixelCoordX, g_threadPixelCoordY);
+}
+
+uint64_t RayTracingStatistics::GetTotalPixelSamples() {
+	uint64_t total = 0;
+	for (size_t i = 0; i < m_sampleCountBuffer.GetSize(); i++) {
+		total += m_sampleCountBuffer.GetValue((uint32_t)i);
+	}
+	return total;
+}
+
+void RayTracingStatistics::IncrementPixelSamples() {
+	m_sampleCountBuffer.Increment(g_threadPixelCoordX, g_threadPixelCoordY);
 }
 
 void RayTracingStatistics::UploadBoxTestsTextureLinear() {

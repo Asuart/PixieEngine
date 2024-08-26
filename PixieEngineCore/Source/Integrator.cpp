@@ -7,7 +7,9 @@ void clear(std::queue<int32_t>& q) {
 }
 
 Integrator::Integrator(const glm::ivec2& resolution)
-	: Renderer(resolution), m_film(Film(resolution)), m_stats(resolution) {}
+	: Renderer(resolution), m_film(Film(resolution)) {
+	RayTracingStatistics::Resize(resolution);
+}
 
 void Integrator::SetScene(Scene* scene) {
 	bool wasRendering = m_isRendering;
@@ -22,7 +24,7 @@ void Integrator::SetResolution(const glm::ivec2& resolution) {
 	StopRender();
 	m_resolution = resolution;
 	m_film.Resize(resolution);
-	m_stats.Resize(resolution);
+	RayTracingStatistics::Resize(resolution);
 	Reset();
 	if (wasRendering) StartRender();
 }
@@ -31,7 +33,7 @@ void Integrator::Reset() {
 	bool wasRendering = m_isRendering;
 	StopRender();
 	m_film.Reset();
-	m_stats.Clear();
+	RayTracingStatistics::Reset();
 	GenerateTiles();
 	m_samples = 1;
 	if (wasRendering) StartRender();
@@ -93,18 +95,20 @@ void Integrator::StopRender() {
 }
 
 void Integrator::PerPixel(uint32_t x, uint32_t y, Sampler* sampler) {
-	m_stats.m_sampleCountBuffer.Increment(x, y);
+	g_threadPixelCoordX = x;
+	g_threadPixelCoordY = y;
+	RayTracingStatistics::IncrementPixelSamples();
 	Vec2 uv = m_film.GetUV(x, y, sampler->Get2D());
-	Ray ray = m_scene->GetMainCamera()->GetRay(x, y, uv);
+	Ray ray = m_scene->GetMainCamera()->GetRay(uv);
 	Spectrum color = Integrate(ray, sampler);
 	m_film.AddPixel(x, y, glm::vec4(color.GetRGBValue(), 1.0));
 }
 
-bool Integrator::Unoccluded(uint32_t x, uint32_t y, const SurfaceInteraction& p0, const SurfaceInteraction& p1) {
-	m_stats.m_rayCountBuffer.Increment(x, y);
+bool Integrator::Unoccluded(const SurfaceInteraction& p0, const SurfaceInteraction& p1) {
+	RayTracingStatistics::IncrementRays();
 	Vec3 dir = p1.position - p0.position;
 	Float tMax = glm::length(dir);
-	return !m_scene->IntersectP(Ray(x, y, p0.position, glm::normalize(dir)), m_stats, tMax - ShadowEpsilon);
+	return !m_scene->IntersectP(Ray(p0.position, glm::normalize(dir)), tMax - ShadowEpsilon);
 }
 
 void Integrator::GenerateTiles() {

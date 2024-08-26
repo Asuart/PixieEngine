@@ -35,8 +35,8 @@ public:
 	// Ray tracing finctionality
 	void MakeGeometrySnapshot();
 	GeometrySnapshot* GetGeometrySnapshot();
-	bool Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax = Infinity) const;
-	bool IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax = Infinity) const;
+	std::optional<ShapeIntersection> Intersect(const Ray& ray, Float tMax = Infinity) const;
+	bool IntersectP(const Ray& ray, Float tMax = Infinity) const;
 	Vec3 GetSkyColor(const Ray& ray);
 
 protected:

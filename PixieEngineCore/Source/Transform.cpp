@@ -212,7 +212,7 @@ Ray Transform::ApplyRay(const Ray& r, Float* tMax) const {
 		o += d * MachineEpsilon;
 	}
 
-	return Ray(r.x, r.y, o, d);
+	return Ray(o, d);
 }
 
 SurfaceInteraction Transform::ApplyInteraction(const SurfaceInteraction& in) const {
@@ -264,7 +264,7 @@ Ray Transform::ApplyInverseRay(const Ray& r, Float* tMax) const {
 		o -= d * MachineEpsilon;
 	}
 
-	return Ray(r.x, r.y, o, d);
+	return Ray(o, d);
 }
 
 SurfaceInteraction Transform::ApplyInverseInteraction(const SurfaceInteraction& in) const {

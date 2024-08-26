@@ -30,8 +30,7 @@ struct Material {
 	bool IsEmissive();
 	bool IsTranslucent();
 	Spectrum GetEmission() const;
-	Spectrum Sample(const Ray& ray, const SurfaceInteraction& collision, Ray& scatteredRay) const;
-	Spectrum Evaluate(const SurfaceInteraction& collision) const;
+	Spectrum Evaluate(const SurfaceInteraction& intr) const;
 	BSDF GetBSDF(const SurfaceInteraction& intr) const;
 	float Pdf() const;
 

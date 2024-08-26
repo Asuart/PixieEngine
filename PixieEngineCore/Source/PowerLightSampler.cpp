@@ -7,7 +7,7 @@ PowerLightSampler::PowerLightSampler(const std::vector<Light*>& lights)
         return;
     }
     for (size_t i = 0; i < lights.size(); ++i) {
-        m_lightToIndex[lights[i]] = i;
+        m_lightToIndex[lights[i]] = (int32_t)i;
     }
     std::vector<Float> lightPower;
     for (const auto& light : lights) {

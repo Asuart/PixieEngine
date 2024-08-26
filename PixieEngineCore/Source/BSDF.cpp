@@ -2,7 +2,8 @@
 #include "BSDF.h"
 #include "Material.h"
 
-BSDF::BSDF(const Material& material) {
+BSDF::BSDF(const Material& material, const SurfaceInteraction& intr)
+	: m_frame(Frame::FromZ(intr.normal)) {
 	AddBxDF(new DiffuseBxDF(material.m_albedo), 1.0f - material.m_transparency);
 	if (material.m_transparency) {
 		const glm::fvec2 anisotropicRoughness = glm::fvec2(1.0f, 1.0f);
@@ -32,31 +33,31 @@ BxDFFlags BSDF::Flags() const {
 	return m_flags;
 }
 
-Spectrum BSDF::SampleDistribution(const Frame& frame, Vec3 wo, Vec3 wi, TransportMode mode) const {
-	wo = frame.ToLocal(wo);
-	wi = frame.ToLocal(wi);
+Spectrum BSDF::SampleDistribution(Vec3 wo, Vec3 wi, TransportMode mode) const {
+	wo = m_frame.ToLocal(wo);
+	wi = m_frame.ToLocal(wi);
 	BxDF* bxdf = GetRandomBxDF();
 	return bxdf->SampleDistribution(wo, wi, mode);
 }
 
-BSDFSample BSDF::SampleDirectionAndDistribution(const Frame& frame, Vec3 wo, Float u, Vec2 u2, TransportMode mode, BxDFReflTransFlags sampleFlags) const {
+BSDFSample BSDF::SampleDirectionAndDistribution(Vec3 wo, Float u, Vec2 u2, TransportMode mode, BxDFReflTransFlags sampleFlags) const {
 	if (!(m_flags & (int32_t)sampleFlags)) return BSDFSample();
-	wo = frame.ToLocal(wo);
+	wo = m_frame.ToLocal(wo);
 	BxDF* bxdf = GetRandomBxDF();
 	BSDFSample sample = bxdf->SampleDirectionAndDistribution(wo, u, u2, mode, sampleFlags);
-	sample.wi = frame.FromLocal(sample.wi);
+	sample.wi = m_frame.FromLocal(sample.wi);
 	return sample;
 }
 
-Float BSDF::PDF(const Frame& frame, Vec3 wo, Vec3 wi, TransportMode mode, BxDFReflTransFlags sampleFlags) const {
-	wo = frame.ToLocal(wo);
-	wi = frame.ToLocal(wi);
+Float BSDF::PDF(Vec3 wo, Vec3 wi, TransportMode mode, BxDFReflTransFlags sampleFlags) const {
+	wo = m_frame.ToLocal(wo);
+	wi = m_frame.ToLocal(wi);
 	BxDF* bxdf = GetRandomBxDF();
 	return bxdf->PDF(wo, wi, mode, sampleFlags);
 }
 
-Spectrum BSDF::rho(const Frame& frame, Vec3 wo, const std::vector<Float>& uc, const std::vector<Vec2>& u) const {
-	wo = frame.ToLocal(wo);
+Spectrum BSDF::rho(Vec3 wo, const std::vector<Float>& uc, const std::vector<Vec2>& u) const {
+	wo = m_frame.ToLocal(wo);
 	BxDF* bxdf = GetRandomBxDF();
 	return bxdf->rho(wo, uc, u);
 }

@@ -8,7 +8,6 @@
 
 class Integrator : public Renderer {
 public:
-	RayTracingStatistics m_stats;
 	Film m_film;
 	int32_t m_maxDepth = 1024;
 	int32_t m_maxThreads = 1;
@@ -41,6 +40,6 @@ protected:
 	std::chrono::microseconds m_sampleStartTime;
 	std::chrono::microseconds m_lastSampleTime;
 
-	bool Unoccluded(uint32_t x, uint32_t y, const SurfaceInteraction& p0, const SurfaceInteraction& p1);
+	bool Unoccluded(const SurfaceInteraction& p0, const SurfaceInteraction& p1);
 	void GenerateTiles();
 };

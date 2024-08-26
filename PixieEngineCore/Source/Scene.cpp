@@ -199,12 +199,12 @@ GeometrySnapshot* Scene::GetGeometrySnapshot() {
 	return geometrySnapshot;
 }
 
-bool Scene::Intersect(const Ray& ray, SurfaceInteraction& outCollision, RayTracingStatistics& stats, Float tMax) const {
-	return geometrySnapshot->Intersect(ray, outCollision, stats, tMax);
+std::optional<ShapeIntersection> Scene::Intersect(const Ray& ray, Float tMax) const {
+	return geometrySnapshot->Intersect(ray, tMax);
 }
 
-bool Scene::IntersectP(const Ray& ray, RayTracingStatistics& stats, Float tMax) const {
-	return geometrySnapshot->IntersectP(ray, stats, tMax);
+bool Scene::IntersectP(const Ray& ray, Float tMax) const {
+	return geometrySnapshot->IntersectP(ray, tMax);
 }
 
 Vec3 Scene::GetSkyColor(const Ray& ray) {
