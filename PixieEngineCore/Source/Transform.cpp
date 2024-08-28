@@ -359,3 +359,30 @@ Transform RotateFromTo(Vec3 from, Vec3 to) {
 
 	return Transform(r, glm::transpose(r));
 }
+
+Transform Rotate(Float sinTheta, Float cosTheta, Vec3 axis) {
+	Vec3 a = glm::normalize(axis);
+	glm::mat4 m;
+	m[0][0] = a.x * a.x + (1 - a.x * a.x) * cosTheta;
+	m[0][1] = a.x * a.y * (1 - cosTheta) - a.z * sinTheta;
+	m[0][2] = a.x * a.z * (1 - cosTheta) + a.y * sinTheta;
+	m[0][3] = 0;
+
+	m[1][0] = a.x * a.y * (1 - cosTheta) + a.z * sinTheta;
+	m[1][1] = a.y * a.y + (1 - a.y * a.y) * cosTheta;
+	m[1][2] = a.y * a.z * (1 - cosTheta) - a.x * sinTheta;
+	m[1][3] = 0;
+
+	m[2][0] = a.x * a.z * (1 - cosTheta) - a.y * sinTheta;
+	m[2][1] = a.y * a.z * (1 - cosTheta) + a.x * sinTheta;
+	m[2][2] = a.z * a.z + (1 - a.z * a.z) * cosTheta;
+	m[2][3] = 0;
+
+	return Transform(m);
+}
+
+Transform Rotate(Float theta, Vec3 axis) {
+	Float sinTheta = std::sin(glm::radians(theta));
+	Float cosTheta = std::cos(glm::radians(theta));
+	return Rotate(sinTheta, cosTheta, axis);
+}

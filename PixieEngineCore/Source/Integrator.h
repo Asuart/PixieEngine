@@ -5,6 +5,7 @@
 #include "Film.h"
 #include "Scene.h"
 #include "Bounds.h"
+#include "IndependentSampler.h"
 
 class Integrator : public Renderer {
 public:

@@ -76,7 +76,7 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 		}
 
 		Vec3 wo = -ray.direction;
-		BSDFSample bs = bsdf.SampleDirectionAndDistribution(wo, sampler->Get(), sampler->Get2D());
+		BSDFSample bs = bsdf.SampleDirectionAndDistribution(wo, sampler->Get1D(), sampler->Get2D());
 		if (!bs) {
 			break;
 		}
@@ -107,7 +107,7 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 }
 
 Spectrum PathIntegrator::SampleLd(const SurfaceInteraction& intr, const BSDF& bsdf, Sampler* sampler) {
-	std::optional<SampledLight> sampledLight = m_lightSampler->Sample(sampler->Get());
+	std::optional<SampledLight> sampledLight = m_lightSampler->Sample(sampler->Get1D());
 	if (!sampledLight) {
 		return Spectrum();
 	}

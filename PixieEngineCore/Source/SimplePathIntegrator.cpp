@@ -52,7 +52,7 @@ Spectrum SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 
 		Vec3 wo = -ray.direction;
 		if (m_sampleLights) {
-			std::optional<SampledLight> sampledLight = m_lightSampler->Sample(sampler->Get());
+			std::optional<SampledLight> sampledLight = m_lightSampler->Sample(sampler->Get1D());
 			if (sampledLight) {
 				std::optional<LightLiSample> ls = sampledLight->light->SampleLi(intr, sampler->Get2D());
 				if (ls && ls->L && ls->pdf > 0) {
@@ -65,7 +65,7 @@ Spectrum SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 		}
 
 		if (m_sampleBSDF) {
-			BSDFSample bs = bsdf.SampleDirectionAndDistribution(wo, sampler->Get(), sampler->Get2D());
+			BSDFSample bs = bsdf.SampleDirectionAndDistribution(wo, sampler->Get1D(), sampler->Get2D());
 			if (!bs) {
 				break;
 			}

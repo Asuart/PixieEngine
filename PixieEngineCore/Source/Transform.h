@@ -85,3 +85,5 @@ protected:
 Transform Inverse(const Transform& t);
 Transform Transpose(const Transform& t);
 Transform RotateFromTo(Vec3 from, Vec3 to);
+Transform Rotate(Float sinTheta, Float cosTheta, Vec3 axis);
+Transform Rotate(Float theta, Vec3 axis);

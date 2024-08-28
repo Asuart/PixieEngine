@@ -20,7 +20,8 @@ DirectionCone Union(const DirectionCone& a, const DirectionCone& b) {
     if (a.IsEmpty()) return b;
     if (b.IsEmpty()) return a;
 
-    Float theta_a = SafeACos(a.cosTheta), theta_b = SafeACos(b.cosTheta);
+    Float theta_a = SafeACos(a.cosTheta);
+    Float theta_b = SafeACos(b.cosTheta);
     Float theta_d = AngleBetween(a.w, b.w);
     if (std::min(theta_d + theta_b, Pi) <= theta_a) {
         return a;
@@ -40,6 +41,6 @@ DirectionCone Union(const DirectionCone& a, const DirectionCone& b) {
         return DirectionCone::EntireSphere();
     }
 
-    Vec3 w = Rotate(glm::degrees(theta_r), wr) * a.w;
+    Vec3 w = Rotate(glm::degrees(theta_r), wr).ApplyVector(a.w);
     return DirectionCone(w, std::cos(theta_o));
 }

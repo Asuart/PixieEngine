@@ -39,6 +39,8 @@ Float gamma(int32_t n);
 Float FrDielectric(Float cosTheta_i, Float eta);
 Float AbsDot(const Vec3& v1, const Vec3& v2);
 Float SmoothStep(Float x, Float a, Float b);
+Float SafeASin(Float x);
+Float SafeACos(Float x);
 
 Vec2 SampleUniformDiskConcentric(Vec2 u);
 Vec2 SampleUniformDiskPolar(Vec2 u);
@@ -57,7 +59,6 @@ void CoordinateSystem(Vec3 v1, Vec3* v2, Vec3* v3);
 
 Float DifferenceOfProducts(Float a, Float b, Float c, Float d);
 Float SumOfProducts(Float a, Float b, Float c, Float d);
-Float SafeASin(Float x);
 Float AngleBetween(Vec3 v1, Vec3 v2);
 Float SampleLinear(Float u, Float a, Float b);
 Vec2 SampleBilinear(Vec2 u, const std::array<Float, 4>& w);

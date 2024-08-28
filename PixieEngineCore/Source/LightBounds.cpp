@@ -9,7 +9,7 @@ Vec3 LightBounds::Centroid() const {
 }
 
 Float LightBounds::Importance(Vec3 p, Vec3 n) const {
-
+    return 0;
 }
 
 LightBounds Union(const LightBounds& a, const LightBounds& b) {

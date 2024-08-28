@@ -1,6 +1,7 @@
 #pragma once
 #include "pch.h"
 #include "Bounds.h"
+#include "DirectionCone.h"
 
 struct LightBounds {
     Bounds3f bounds;

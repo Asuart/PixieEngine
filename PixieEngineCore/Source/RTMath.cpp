@@ -92,6 +92,14 @@ Float SmoothStep(Float x, Float a, Float b) {
 	return t * t * (3 - 2 * t);
 }
 
+Float SafeASin(Float x) {
+	return std::asin(Clamp(x, -1, 1)); 
+}
+
+Float SafeACos(Float x) { 
+	return std::acos(Clamp(x, -1, 1)); 
+}
+
 Float length2(const Vec2& v) {
 	return v.x * v.x + v.y * v.y;
 }
@@ -209,10 +217,6 @@ Float SumOfProducts(Float a, Float b, Float c, Float d) {
 	Float sumOfProducts = std::fma(a, b, cd);
 	Float error = std::fma(c, d, -cd);
 	return sumOfProducts + error;
-}
-
-Float SafeASin(Float x) {
-	return std::asin(Clamp(x, -1, 1));
 }
 
 Float AngleBetween(Vec3 v1, Vec3 v2) {

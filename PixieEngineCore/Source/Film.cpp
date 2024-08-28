@@ -29,12 +29,16 @@ void Film::Resize(glm::ivec2 resolution) {
 	texture->Resize(resolution);
 }
 
-void Film::SetPixel(int32_t x, int32_t y, const glm::vec4& color) {
-	texture->SetPixel(x, y, color);
+void Film::SetPixel(int32_t x, int32_t y, glm::fvec3 color) {
+	texture->SetPixel(x, y, glm::fvec4(color, 1.0));
 }
 
-void Film::AddPixel(int32_t x, int32_t y, const glm::vec4& color) {
-	texture->AccumulatePixel(x, y, glm::clamp(color, 0.0f, 1000.0f));
+void Film::AddPixel(int32_t x, int32_t y, glm::fvec3 color) {
+	Float max = MaxComponent(color);
+	if (max > m_maxSampleBrightness) {
+		color *= m_maxSampleBrightness / max;
+	}
+	texture->AccumulatePixel(x, y, glm::fvec4(color, 1.0));
 }
 
 Vec2 Film::GetUV(int32_t x, int32_t y) const {

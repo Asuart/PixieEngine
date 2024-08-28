@@ -55,6 +55,7 @@ void Integrator::StartRender() {
 
 	for (int32_t i = 0; i < m_threadsCount; i++) {
 		m_renderThreads.push_back(new std::thread([&]() {
+			Sampler* sampler = new IndependentSampler(1);
 			while (m_isRendering) {
 				m_tileQueueMutex.lock();
 				if (m_tileQueue.empty()) {
@@ -71,13 +72,13 @@ void Integrator::StartRender() {
 				m_tileQueue.pop();
 				m_tileQueueMutex.unlock();
 				Bounds2i quad = m_tiles[index];
-				Sampler sampler;
 				for (int32_t y = quad.pMin.y; y < quad.pMax.y; y++) {
 					for (int32_t x = quad.pMin.x; x < quad.pMax.x; x++) {
-						PerPixel(x, y, &sampler);
+						PerPixel(x, y, sampler);
 					}
 				}
 			}
+			delete sampler;
 			}));
 	}
 }

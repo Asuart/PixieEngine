@@ -52,3 +52,50 @@ Vec3 RandomCosineDirection() {
 
 	return Vec3(x, y, z);
 }
+
+uint64_t MixBits(uint64_t v) {
+	v ^= (v >> 31);
+	v *= 0x7fb5d329728ea185;
+	v ^= (v >> 27);
+	v *= 0x81dadef4bc2dd44d;
+	v ^= (v >> 33);
+	return v;
+}
+
+RNG::RNG() 
+	: m_state(PCG32_DEFAULT_STATE), m_inc(PCG32_DEFAULT_STREAM) {}
+
+RNG::RNG(uint64_t seqIndex, uint64_t seed) { 
+	SetSequence(seqIndex, seed); 
+}
+
+RNG::RNG(uint64_t seqIndex) { 
+	SetSequence(seqIndex);
+}
+
+void RNG::SetSequence(uint64_t sequenceIndex, uint64_t seed) {
+	m_state = 0u;
+	m_inc = (sequenceIndex << 1u) | 1u;
+	Uniform<uint32_t>();
+	m_state += seed;
+	Uniform<uint32_t>();
+}
+
+void RNG::SetSequence(uint64_t sequenceIndex) {
+	SetSequence(sequenceIndex, MixBits(sequenceIndex));
+}
+
+void RNG::Advance(int64_t idelta) {
+	uint64_t curMult = PCG32_MULT, curPlus = m_inc, accMult = 1u;
+	uint64_t accPlus = 0u, delta = (uint64_t)idelta;
+	while (delta > 0) {
+		if (delta & 1) {
+			accMult *= curMult;
+			accPlus = accPlus * curMult + curPlus;
+		}
+		curPlus = (curMult + 1) * curPlus;
+		curMult *= curMult;
+		delta /= 2;
+	}
+	m_state = accMult * m_state + accPlus;
+}
