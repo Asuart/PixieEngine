@@ -21,8 +21,24 @@ std::string to_string(RayTracingMode mode) {
 	}
 }
 
-RayTracingRenderer::RayTracingRenderer(PixieEngineApp* parent, glm::ivec2 resolution, Scene* scene)
-	: m_parent(parent), m_resolution(resolution), m_rayTracer(new PathIntegrator(resolution)), m_scene(scene), m_viewportResolution(resolution) {
+Integrator* CreateIntegrator(RayTracingMode mode, const glm::ivec2& resolution) {
+	switch (mode) {
+	case RayTracingMode::SimplePathTracing:
+		return new SimplePathIntegrator(resolution);
+	case RayTracingMode::PathTracing:
+		return new PathIntegrator(resolution);
+	case RayTracingMode::TestNormals:
+		return new TestNormalsIntegrator(resolution);
+	case RayTracingMode::TestSampler:
+		return new TestSamplerIntegrator(resolution);
+	case RayTracingMode::RandomWalk:
+	default:
+		return new RandomWalkIntegrator(resolution);
+	}
+}
+
+RayTracingRenderer::RayTracingRenderer(PixieEngineApp* parent, glm::ivec2 resolution, Scene* scene, RayTracingMode mode)
+	: m_parent(parent), m_resolution(resolution), m_rayTracingMode(mode), m_rayTracer(CreateIntegrator(mode, resolution)), m_scene(scene), m_viewportResolution(resolution) {
 	SetScene(scene);
 }
 
@@ -36,7 +52,7 @@ void RayTracingRenderer::DrawFrame() {
 	GLuint sizeLoc = glGetUniformLocation(program, "uSize");
 	GLuint samplesLoc = glGetUniformLocation(program, "uSamples");
 
-	float textureAspect = (float)m_resolution.x / m_resolution.y;
+	float textureAspect = (float)m_rayTracer->m_film.m_resolution.x / m_rayTracer->m_film.m_resolution.y;
 	float viewportAspect = (float)m_viewportResolution.x / m_viewportResolution.y;
 	float posX, posY;
 	float sizeX, sizeY;

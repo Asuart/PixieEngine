@@ -11,5 +11,5 @@ struct FrameBuffer {
 
 	GLuint m_frameBuffer;
 	GLuint m_texture, m_depth;
-	glm::ivec2 m_resolution = {1280, 720};
+	glm::ivec2 m_resolution;
 };

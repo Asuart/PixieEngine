@@ -27,14 +27,14 @@ PixieEngineApp::PixieEngineApp()
 	m_scene = sceneLoader.LoadScene(m_scenePath);
 	m_scene->MakeGeometrySnapshot();
 
-	m_sceneRenderer = new SceneRenderer(glm::ivec2(1280, 720), m_scene);
+	m_sceneRenderer = new SceneRenderer(glm::ivec2(640, 640), m_scene);
 
-	m_rayTracingRenderer = new RayTracingRenderer(this, glm::ivec2(1280, 720), m_scene);
+	m_rayTracingRenderer = new RayTracingRenderer(this, glm::ivec2(640, 640), m_scene);
 	if (m_rayTracingViewport) {
 		m_rayTracingRenderer->StartRender();
 	}
 
-	m_viewportFrameBuffer = new FrameBuffer(1280, 720);
+	m_viewportFrameBuffer = new FrameBuffer(640, 640);
 }
 
 PixieEngineApp::~PixieEngineApp() {
@@ -81,9 +81,11 @@ void PixieEngineApp::HandleResize(uint32_t width, uint32_t height) {
 
 void PixieEngineApp::UpdateViewportResolution(glm::ivec2 resolution) {
 	m_viewportResolution = resolution;
-	m_sceneRenderer->SetResolution(resolution);
 	m_rayTracingRenderer->SetViewportSize(resolution);
-	m_viewportFrameBuffer->Resize(resolution.x, resolution.y);
+	if (m_rayTracingRenderer->m_resizeRendererToVieport) {
+		m_sceneRenderer->SetResolution(resolution);
+		m_viewportFrameBuffer->Resize(resolution.x, resolution.y);
+	}
 }
 
 void PixieEngineApp::ReloadScene() {

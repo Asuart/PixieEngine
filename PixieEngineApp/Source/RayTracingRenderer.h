@@ -23,15 +23,17 @@ enum class RayTracingMode : uint32_t {
 std::string to_string(RayTracingVisualization mode);
 std::string to_string(RayTracingMode mode);
 
+Integrator* CreateIntegrator(RayTracingMode mode, const glm::ivec2& resolution);
+
 class RayTracingRenderer {
 public:
 	glm::ivec2 m_resolution;
 	glm::ivec2 m_viewportResolution;
 	Integrator* m_rayTracer;
 	Scene* m_scene = nullptr;
-	bool m_resizeRendererToVieport = true;
+	bool m_resizeRendererToVieport = false;
 
-	RayTracingRenderer(PixieEngineApp* parent, glm::ivec2 resolution, Scene* scene);
+	RayTracingRenderer(PixieEngineApp* parent, glm::ivec2 resolution, Scene* scene, RayTracingMode mode = RayTracingMode::RandomWalk);
 	~RayTracingRenderer();
 
 	void DrawFrame();
@@ -46,6 +48,6 @@ public:
 
 protected:
 	PixieEngineApp* m_parent;
-	RayTracingMode m_rayTracingMode = RayTracingMode::PathTracing;
+	RayTracingMode m_rayTracingMode;
 	RayTracingVisualization m_visualizationMode = RayTracingVisualization::Integration;
 };

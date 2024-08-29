@@ -1,7 +1,8 @@
 #include "pch.h"
 #include "FrameBuffer.h"
 
-FrameBuffer::FrameBuffer(uint32_t width, uint32_t height) {
+FrameBuffer::FrameBuffer(uint32_t width, uint32_t height)
+	: m_resolution(width, height) {
 	glGenFramebuffers(1, &m_frameBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer);
 

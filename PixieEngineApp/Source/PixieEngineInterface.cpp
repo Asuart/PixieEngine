@@ -166,6 +166,7 @@ void PixieEngineInterface::DrawInspectorWindow() {
 		ImGui::Text("Main Camera");
 		ImGui::Spacing();
 		DrawTransform(mainCamera->m_transform);
+		ImGui::Spacing();
 	}
 
 	if (m_app.m_selectedObject) {
