@@ -15,8 +15,8 @@ public:
 
 	std::optional<ShapeIntersection> Intersect(const Ray& ray, Float tMax = Infinity) const;
 	bool IntersectP(const Ray& ray, Float tMax = Infinity) const;
-
 	std::vector<DiffuseAreaLight*>& GetAreaLights();
+	Bounds3f GetBounds();
 
 private:
 	std::vector<DiffuseAreaLight*> m_areaLights;

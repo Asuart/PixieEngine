@@ -184,6 +184,10 @@ void Scene::SetMainCamera(Camera* camera) {
 	mainCamera = camera;
 }
 
+Bounds3f Scene::GetBounds() {
+	return geometrySnapshot->GetBounds();
+}
+
 void Scene::Start() {}
 
 void Scene::Update() {}

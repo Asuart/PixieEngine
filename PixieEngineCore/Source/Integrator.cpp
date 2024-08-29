@@ -16,7 +16,7 @@ void Integrator::SetScene(Scene* scene) {
 	StopRender();
 	m_scene = scene;
 	Reset();
-	if(wasRendering) StartRender();
+	if (wasRendering) StartRender();
 }
 
 void Integrator::SetResolution(const glm::ivec2& resolution) {
@@ -32,10 +32,22 @@ void Integrator::SetResolution(const glm::ivec2& resolution) {
 void Integrator::Reset() {
 	bool wasRendering = m_isRendering;
 	StopRender();
+
 	m_film.Reset();
 	RayTracingStatistics::Reset();
 	GenerateTiles();
 	m_samples = 1;
+
+	Bounds3f sceneBounds = m_scene->GetBounds();
+	const std::vector<DiffuseAreaLight*>& areaLights = m_scene->GetGeometrySnapshot()->GetAreaLights();
+	for (size_t i = 0; i < areaLights.size(); i++) {
+		areaLights[i]->Preprocess(sceneBounds);
+	}
+	const std::vector<Light*>& lights = m_scene->GetInfiniteLights();
+	for (size_t i = 0; i < lights.size(); i++) {
+		lights[i]->Preprocess(sceneBounds);
+	}
+
 	if (wasRendering) StartRender();
 }
 
@@ -47,34 +59,43 @@ void Integrator::StartRender() {
 	m_sampleStartTime = m_renderStartTime;
 
 	clear(m_tileQueue);
-	for (size_t i = 0; i < m_tileQueue.size(); i++) {
+	for (size_t i = 0; i < m_tiles.size(); i++) {
 		m_tileQueue.push((int32_t)i);
 	}
 
 	m_threadsCount = std::min(m_maxThreads, (int32_t)m_tiles.size());
 
+	m_spp = 8192, m_waveStart = 0, m_waveEnd = 1, m_nextWaveSize = 1;
 	for (int32_t i = 0; i < m_threadsCount; i++) {
 		m_renderThreads.push_back(new std::thread([&]() {
-			Sampler* sampler = new IndependentSampler(1);
-			while (m_isRendering) {
+			Sampler* sampler = new IndependentSampler(m_spp);
+			while (m_isRendering && m_waveStart < m_spp) {
 				m_tileQueueMutex.lock();
 				if (m_tileQueue.empty()) {
 					std::chrono::microseconds currrentTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
 					m_lastSampleTime = currrentTime - m_sampleStartTime;
 					m_sampleStartTime = currrentTime;
 
-					m_samples++;
+					m_samples += m_nextWaveSize;
+					m_waveStart = m_waveEnd;
+					m_waveEnd = std::min(m_spp, m_waveEnd + m_nextWaveSize);
+					m_nextWaveSize = std::min(2 * m_nextWaveSize, m_maxWaveSize);
+
 					for (size_t i = 0; i < m_tiles.size(); i++) {
 						m_tileQueue.push((int32_t)i);
 					}
 				}
 				int32_t index = m_tileQueue.front();
 				m_tileQueue.pop();
+
 				m_tileQueueMutex.unlock();
 				Bounds2i quad = m_tiles[index];
 				for (int32_t y = quad.pMin.y; y < quad.pMax.y; y++) {
 					for (int32_t x = quad.pMin.x; x < quad.pMax.x; x++) {
-						PerPixel(x, y, sampler);
+						for (int32_t sampleIndex = m_waveStart; sampleIndex < m_waveEnd; sampleIndex++) {
+							sampler->StartPixelSample(glm::ivec2(x, y), sampleIndex);
+							PerPixel(x, y, sampler);
+						}
 					}
 				}
 			}

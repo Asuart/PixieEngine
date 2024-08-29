@@ -15,6 +15,7 @@ Vec3 RandomInUnitDisk();
 Vec3 RandomCosineDirection();
 
 uint64_t MixBits(uint64_t v);
+int32_t PermutationElement(uint32_t i, uint32_t l, uint32_t p);
 
 class RNG {
 	static constexpr uint64_t PCG32_DEFAULT_STATE = 0x853c49e6748fea9bULL;

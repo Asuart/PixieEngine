@@ -4,11 +4,15 @@
 IndependentSampler::IndependentSampler(int32_t samplesPerPixel, int32_t seed)
 	: m_samplesPerPixel(samplesPerPixel), m_seed(seed) {}
 
+Sampler* IndependentSampler::Clone() const {
+	return new IndependentSampler(m_samplesPerPixel, m_seed);
+}
+
 int32_t IndependentSampler::SamplesPerPixel() const {
 	return m_samplesPerPixel;
 }
 
-void IndependentSampler::StartPixelSample(Vec2 p, int32_t sampleIndex, int32_t dimension) {
+void IndependentSampler::StartPixelSample(glm::ivec2 p, int32_t sampleIndex, int32_t dimension) {
 	m_rng.SetSequence(Hash(p, m_seed));
 	m_rng.Advance(sampleIndex * 65536ull + dimension);
 }

@@ -63,3 +63,7 @@ bool GeometrySnapshot::IntersectP(const Ray& ray, Float tMax) const {
 std::vector<DiffuseAreaLight*>& GeometrySnapshot::GetAreaLights() {
 	return m_areaLights;
 }
+
+Bounds3f GeometrySnapshot::GetBounds() {
+	return m_rootPrimitive->GetBounds();
+}

@@ -6,6 +6,7 @@
 #include "Scene.h"
 #include "Bounds.h"
 #include "IndependentSampler.h"
+#include "StratifiedSampler.h"
 
 class Integrator : public Renderer {
 public:
@@ -40,6 +41,11 @@ protected:
 	std::chrono::microseconds m_renderStartTime;
 	std::chrono::microseconds m_sampleStartTime;
 	std::chrono::microseconds m_lastSampleTime;
+	int32_t m_spp = 0;
+	int32_t m_waveStart = 0;
+	int32_t m_waveEnd = 0;
+	int32_t m_nextWaveSize = 0;
+	int32_t m_maxWaveSize = 1;
 
 	bool Unoccluded(const SurfaceInteraction& p0, const SurfaceInteraction& p1);
 	void GenerateTiles();

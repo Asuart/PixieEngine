@@ -31,6 +31,7 @@ public:
 	Camera* GetMainCamera();
 	void SetMainCamera(uint32_t index);
 	void SetMainCamera(Camera* camera);
+	Bounds3f GetBounds();
 
 	// Ray tracing finctionality
 	void MakeGeometrySnapshot();
