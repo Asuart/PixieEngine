@@ -33,7 +33,7 @@ public:
 	Scene* m_scene = nullptr;
 	bool m_resizeRendererToVieport = false;
 
-	RayTracingRenderer(PixieEngineApp* parent, glm::ivec2 resolution, Scene* scene, RayTracingMode mode = RayTracingMode::RandomWalk);
+	RayTracingRenderer(PixieEngineApp* parent, glm::ivec2 resolution, Scene* scene, RayTracingMode mode = RayTracingMode::PathTracing);
 	~RayTracingRenderer();
 
 	void DrawFrame();

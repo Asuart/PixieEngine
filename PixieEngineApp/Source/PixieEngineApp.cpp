@@ -55,6 +55,9 @@ void PixieEngineApp::Start() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glViewport(0, 0, m_viewportFrameBuffer->m_resolution.x, m_viewportFrameBuffer->m_resolution.y);
 		if (m_rayTracingViewport) {
+			if (m_rayTracingRenderer->m_rayTracer->GetSamplesCount() == 0) {
+				m_sceneRenderer->DrawFrame();
+			}
 			m_rayTracingRenderer->DrawFrame();
 		}
 		else {

@@ -1,6 +1,6 @@
 #pragma once
 #include "pch.h"
-#include "RTMath.h"
+#include "RTTools.h"
 #include "BSDFSample.h"
 #include "Spectrum.h"
 
