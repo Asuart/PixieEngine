@@ -227,3 +227,11 @@ inline Float FrComplex(Float cosTheta_i, Complex<Float> eta) {
 	Complex<Float> r_perp = (cosTheta_i - eta * cosTheta_t) / (cosTheta_i + eta * cosTheta_t);
 	return (norm(r_parl) + norm(r_perp)) / 2;
 }
+
+inline Spectrum FrComplex(Float cosTheta_i, Spectrum eta, Spectrum k) {
+	return Spectrum(
+		FrComplex(cosTheta_i, Complex<Float>(eta.GetRGB().x, k.GetRGB().x)),
+		FrComplex(cosTheta_i, Complex<Float>(eta.GetRGB().y, k.GetRGB().y)),
+		FrComplex(cosTheta_i, Complex<Float>(eta.GetRGB().z, k.GetRGB().z))
+	);
+}
