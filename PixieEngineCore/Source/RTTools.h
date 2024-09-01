@@ -1,6 +1,7 @@
 #pragma once
 #include "RTMath.h"
 #include "ComplexNumber.h"
+#include "Spectrum.h"
 
 inline Vec3 FaceForward(Vec3  n, Vec3  v) {
 	return (glm::dot(n, v) < 0.) ? -n : n;

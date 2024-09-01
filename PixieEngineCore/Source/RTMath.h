@@ -1,6 +1,6 @@
 #pragma once
 #include "pch.h"
-#include "Complex.h"
+#include "ComplexNumber.h"
 
 static constexpr Float Pi = 3.14159265358979323846f;
 static constexpr Float TwoPi = Pi * 2.0f;
