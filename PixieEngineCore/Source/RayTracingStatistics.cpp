@@ -5,10 +5,10 @@ thread_local uint32_t g_threadPixelCoordX = 0;
 thread_local uint32_t g_threadPixelCoordY = 0;
 
 glm::ivec2 RayTracingStatistics::m_resolution = glm::ivec2(0);
-Buffer2D<uint64_t> RayTracingStatistics::m_rayCountBuffer = Buffer2D<uint64_t>(glm::ivec2(0));
-Buffer2D<uint64_t> RayTracingStatistics::m_sampleCountBuffer = Buffer2D<uint64_t>(glm::ivec2(0));
-Buffer2D<uint64_t> RayTracingStatistics::m_boxChecksBuffer = Buffer2D<uint64_t>(glm::ivec2(0));
-Buffer2D<uint64_t> RayTracingStatistics::m_triangleChecksBuffer = Buffer2D<uint64_t>(glm::ivec2(0));
+CountersBuffer2D RayTracingStatistics::m_rayCountBuffer = CountersBuffer2D(glm::ivec2(0));
+CountersBuffer2D RayTracingStatistics::m_sampleCountBuffer = CountersBuffer2D(glm::ivec2(0));
+CountersBuffer2D RayTracingStatistics::m_boxChecksBuffer = CountersBuffer2D(glm::ivec2(0));
+CountersBuffer2D RayTracingStatistics::m_triangleChecksBuffer = CountersBuffer2D(glm::ivec2(0));
 Texture<glm::fvec3> RayTracingStatistics::m_boxChecksTexture = Texture<glm::fvec3>(glm::ivec2(0));
 Texture<glm::fvec3> RayTracingStatistics::m_triangleChecksTexture = Texture<glm::fvec3>(glm::ivec2(0));
 

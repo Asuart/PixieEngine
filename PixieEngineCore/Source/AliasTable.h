@@ -13,7 +13,7 @@ public:
 
 protected:
     struct Bin {
-        double q, p;
+        Float q, p;
         int32_t alias;
     };
     std::vector<Bin> m_bins;

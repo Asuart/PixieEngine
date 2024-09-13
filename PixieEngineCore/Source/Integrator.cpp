@@ -65,7 +65,7 @@ void Integrator::StartRender() {
 
 	m_threadsCount = std::min(m_maxThreads, (int32_t)m_tiles.size());
 
-	m_spp = 8192, m_waveStart = 0, m_waveEnd = 1, m_nextWaveSize = 1;
+	m_spp = 32768, m_waveStart = 0, m_waveEnd = 1, m_nextWaveSize = 1;
 	for (int32_t i = 0; i < m_threadsCount; i++) {
 		m_renderThreads.push_back(new std::thread([&]() {
 			Sampler* sampler = new IndependentSampler(m_spp);
@@ -90,8 +90,8 @@ void Integrator::StartRender() {
 
 				m_tileQueueMutex.unlock();
 				Bounds2i quad = m_tiles[index];
-				for (int32_t y = quad.pMin.y; y < quad.pMax.y; y++) {
-					for (int32_t x = quad.pMin.x; x < quad.pMax.x; x++) {
+				for (int32_t y = quad.min.y; y < quad.max.y; y++) {
+					for (int32_t x = quad.min.x; x < quad.max.x; x++) {
 						for (int32_t sampleIndex = m_waveStart; sampleIndex < m_waveEnd; sampleIndex++) {
 							sampler->StartPixelSample(glm::ivec2(x, y), sampleIndex);
 							PerPixel(x, y, sampler);
@@ -120,10 +120,13 @@ void Integrator::PerPixel(uint32_t x, uint32_t y, Sampler* sampler) {
 	g_threadPixelCoordX = x;
 	g_threadPixelCoordY = y;
 	RayTracingStatistics::IncrementPixelSamples();
-	Vec2 uv = m_film.GetUV(x, y, sampler->Get2D());
+
+	SampleFilter* filter = m_film.GetFilter();
+	CameraSample cameraSample = GetCameraSample(x, y, filter, sampler);
+	Vec2 uv = m_film.GetUV(cameraSample.pFilm);
 	Ray ray = m_scene->GetMainCamera()->GetRay(uv);
-	Spectrum color = Integrate(ray, sampler);
-	m_film.AddPixel(x, y, glm::vec4(color.GetRGBValue(), 1.0));
+	Spectrum L = Integrate(ray, sampler);
+	m_film.AddSample(x, y, L, cameraSample.filterWeight);
 }
 
 bool Integrator::Unoccluded(const SurfaceInteraction& p0, const SurfaceInteraction& p1) {
@@ -162,4 +165,9 @@ float Integrator::GetRenderTime() {
 
 float Integrator::GetLastSampleTime() {
 	return m_lastSampleTime.count() / 1000.0f;
+}
+
+CameraSample Integrator::GetCameraSample(uint32_t x, uint32_t y, const SampleFilter* filter, Sampler* sampler) {
+	FilterSample fs = filter->Sample(sampler->GetPixel2D());
+	return CameraSample(Vec2(x, y) + fs.p + Vec2(0.5f, 0.5f), fs.weight);
 }

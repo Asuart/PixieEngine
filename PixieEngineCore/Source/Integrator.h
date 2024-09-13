@@ -25,6 +25,7 @@ public:
 	uint32_t GetSamplesCount();
 	float GetRenderTime();
 	float GetLastSampleTime();
+	CameraSample GetCameraSample(uint32_t x, uint32_t y, const SampleFilter* filter, Sampler* sampler);
 
 protected:
 	Integrator(const glm::ivec2& resolution);
@@ -38,9 +39,9 @@ protected:
 	std::vector<Bounds2i> m_tiles;
 	std::queue<int32_t> m_tileQueue;
 	std::mutex m_tileQueueMutex;
-	std::chrono::microseconds m_renderStartTime;
-	std::chrono::microseconds m_sampleStartTime;
-	std::chrono::microseconds m_lastSampleTime;
+	std::chrono::microseconds m_renderStartTime = std::chrono::microseconds(0);
+	std::chrono::microseconds m_sampleStartTime = std::chrono::microseconds(0);
+	std::chrono::microseconds m_lastSampleTime = std::chrono::microseconds(0);
 	int32_t m_spp = 0;
 	int32_t m_waveStart = 0;
 	int32_t m_waveEnd = 0;

@@ -28,10 +28,10 @@ struct RayTracingStatistics {
 
 protected:
 	static glm::ivec2 m_resolution;
-	static Buffer2D<uint64_t> m_rayCountBuffer;
-	static Buffer2D<uint64_t> m_sampleCountBuffer;
-	static Buffer2D<uint64_t> m_boxChecksBuffer;
-	static Buffer2D<uint64_t> m_triangleChecksBuffer;
+	static CountersBuffer2D m_rayCountBuffer;
+	static CountersBuffer2D m_sampleCountBuffer;
+	static CountersBuffer2D m_boxChecksBuffer;
+	static CountersBuffer2D m_triangleChecksBuffer;
 	static Texture<glm::fvec3> m_boxChecksTexture;
 	static Texture<glm::fvec3> m_triangleChecksTexture;
 };

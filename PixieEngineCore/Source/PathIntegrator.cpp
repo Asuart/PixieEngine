@@ -76,17 +76,17 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 		}
 
 		Vec3 wo = -ray.direction;
-		BSDFSample bs = bsdf.SampleDirectionAndDistribution(wo, sampler->Get1D(), sampler->Get2D());
+		std::optional<BSDFSample> bs = bsdf.SampleDirectionAndDistribution(wo, sampler->Get1D(), sampler->Get2D());
 		if (!bs) {
 			break;
 		}
 
-		beta *= bs.f * AbsDot(bs.wi, intr.normal) / bs.pdf;
-		p_b = bs.pdfIsProportional ? bsdf.PDF(wo, bs.wi) : bs.pdf;
-		specularBounce = bs.IsSpecular();
-		anyNonSpecularBounces |= !bs.IsSpecular();
-		if (bs.IsTransmission()) {
-			etaScale *= Sqr(bs.eta);
+		beta *= bs->f * AbsDot(bs->wi, intr.normal) / bs->pdf;
+		p_b = bs->pdfIsProportional ? bsdf.PDF(wo, bs->wi) : bs->pdf;
+		specularBounce = bs->IsSpecular();
+		anyNonSpecularBounces |= !bs->IsSpecular();
+		if (bs->IsTransmission()) {
+			etaScale *= Sqr(bs->eta);
 		}
 
 		Float rrBeta = MaxComponent(beta.GetRGBValue() * etaScale);
@@ -100,7 +100,7 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 
 		prevIntrCtx = intr;
 
-		ray = intr.SpawnRay(ray, bsdf, bs.wi, bs.flags, bs.eta);
+		ray = intr.SpawnRay(ray, bsdf, bs->wi, bs->flags, bs->eta);
 	}
 
 	return L;

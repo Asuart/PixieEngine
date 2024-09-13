@@ -285,7 +285,7 @@ SurfaceInteraction Transform::ApplyInverseInteraction(const SurfaceInteraction& 
 void Transform::Decompose() {
 	glm::vec3 skew;
 	glm::vec4 perspective;
-	glm::quat qRotation;
+	Quaternion qRotation;
 	glm::decompose(m_transform, m_scale, qRotation, m_position, skew, perspective);
 	m_rotation = glm::degrees(glm::eulerAngles(qRotation));
 }

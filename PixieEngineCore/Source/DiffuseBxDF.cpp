@@ -11,7 +11,7 @@ Spectrum DiffuseBxDF::SampleDistribution(Vec3 wo, Vec3 wi, TransportMode mode) c
 	return m_spectrum * InvPi;
 }
 
-BSDFSample DiffuseBxDF::SampleDirectionAndDistribution(Vec3 wo, Float uc, Vec2 u, TransportMode mode, BxDFReflTransFlags sampleFlags) const {
+std::optional<BSDFSample> DiffuseBxDF::SampleDirectionAndDistribution(Vec3 wo, Float uc, Vec2 u, TransportMode mode, BxDFReflTransFlags sampleFlags) const {
 	if (!((uint32_t)sampleFlags & (uint32_t)BxDFReflTransFlags::Reflection)) {
 		return {};
 	}

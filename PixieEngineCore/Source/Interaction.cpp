@@ -4,8 +4,8 @@
 #include "Material.h"
 #include "Camera.h"
 
-Interaction::Interaction(Vec3 position, Vec3 normal, Vec2 uv)
-	: position(position), normal(normal), uv(uv) {}
+Interaction::Interaction(Vec3 position, Vec3 normal, Vec2 uv, Vec3 wo)
+	: position(position), normal(normal), uv(uv), wo(wo) {}
 
 Interaction::Interaction(Vec3 position, const MediumInterface* mediumInterface)
 	: position(position), mediumInterface(mediumInterface) {}
@@ -29,6 +29,9 @@ bool Interaction::IsMediumInteraction() const {
 
 SurfaceInteraction::SurfaceInteraction(Vec3 position, const MediumInterface* mediumInterface)
 	: Interaction(position, mediumInterface) {}
+
+SurfaceInteraction::SurfaceInteraction(Vec3 position, Vec2 uv, Vec3 wo, Vec3 dpdu, Vec3 dpdv, Vec3 dndu, Vec3 dndv)
+	: Interaction(position, glm::normalize(glm::cross(dpdu, dpdv)), uv, wo), dpdu(dpdu), dpdv(dpdv), dndu(dndu), dndv(dndv) {}
 
 SurfaceInteraction::SurfaceInteraction(Vec3 position, Vec3 normal, Vec2 uv)
 	: Interaction(position, normal, uv) {}

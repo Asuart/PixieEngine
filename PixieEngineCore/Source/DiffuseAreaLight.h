@@ -19,5 +19,5 @@ public:
 
 protected:
 	const Shape* m_shape;
-	const Material* m_material = nullptr;
+	const Material* m_material;
 };

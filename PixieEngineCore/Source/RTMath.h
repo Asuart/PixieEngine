@@ -19,6 +19,8 @@ static constexpr Float MinSphericalSampleArea = 3e-4f;
 static constexpr Float MaxSphericalSampleArea = 6.22f;
 static constexpr Float UniformSpherePDF = Inv4Pi;
 static constexpr Float UniformHemispherePDF = Inv2Pi;
+static constexpr Float minFloat = std::numeric_limits<Float>::lowest();
+static constexpr Float maxFloat = std::numeric_limits<Float>::max();
 
 inline bool isnan(const Vec2& v) {
     return std::isnan(v.x) || std::isnan(v.y);
@@ -30,7 +32,7 @@ inline bool isnan(const Vec3& v) {
 
 template<typename T>
 constexpr T Lerp(Float t, T from, T to) {
-    return from + (to - from) * t;
+    return T(from + (to - from) * t);
 }
 
 template<typename T>
@@ -156,6 +158,10 @@ inline Float AngleBetween(Vec3 v1, Vec3 v2) {
     }
 }
 
+inline Vec3 SphericalDirection(Float sinTheta, Float cosTheta, Float phi) {
+    return Vec3(Clamp(sinTheta, -1, 1) * std::cos(phi), Clamp(sinTheta, -1, 1) * std::sin(phi), Clamp(cosTheta, -1, 1));
+}
+
 inline void CoordinateSystem(Vec3 v1, Vec3* v2, Vec3* v3) {
     Float sign = std::copysign(Float(1), v1.z);
     Float a = -1 / (sign + v1.z);
@@ -191,4 +197,67 @@ inline Float BilinearPDF(Vec2 p, const std::array<Float, 4>& w) {
 
 inline Vec3 GramSchmidt(Vec3 v, Vec3 w) {
     return v - glm::dot(v, w) * w;
+}
+
+template <typename Float, typename C>
+inline constexpr Float EvaluatePolynomial(Float t, C c) {
+    return c;
+}
+
+template <typename Float, typename C, typename... Args>
+inline constexpr Float EvaluatePolynomial(Float t, C c, Args... cRemaining) {
+    return std::fma(t, EvaluatePolynomial(t, cRemaining...), c);
+}
+
+inline uint32_t FloatToBits(float f) {
+    return std::bit_cast<uint32_t>(f);
+}
+
+inline float BitsToFloat(uint32_t ui) {
+    return std::bit_cast<float>(ui);
+}
+
+inline int32_t Exponent(float v) {
+    return (FloatToBits(v) >> 23) - 127;
+}
+
+inline float FastExp(float x) {
+    float xp = x * 1.442695041f;
+    float fxp = std::floor(xp), f = xp - fxp;
+    int32_t i = (int32_t)fxp;
+    float twoToF = EvaluatePolynomial(f, 1.f, 0.695556856f, 0.226173572f, 0.0781455737f);
+    int32_t exponent = Exponent(twoToF) + i;
+    if (exponent < -126) {
+        return 0;
+    }
+    if (exponent > 127) {
+        return Infinity;
+    }
+    uint32_t bits = FloatToBits(twoToF);
+    bits &= 0b10000000011111111111111111111111u;
+    bits |= (exponent + 127) << 23;
+    return BitsToFloat(bits);
+}
+
+inline Float Gaussian(Float x, Float mu = 0, Float sigma = 1) {
+    return 1 / std::sqrt(2 * Pi * sigma * sigma) * FastExp(-Sqr(x - mu) / (2 * sigma * sigma));
+}
+
+inline Float GaussianIntegral(Float x0, Float x1, Float mu = 0,
+    Float sigma = 1) {
+    Float sigmaRoot2 = sigma * Float(1.414213562373095);
+    return 0.5f * (std::erf((mu - x0) / sigmaRoot2) - std::erf((mu - x1) / sigmaRoot2));
+}
+
+template <typename Predicate>
+inline size_t FindInterval(size_t sz, const Predicate& pred) {
+    using ssize_t = std::make_signed_t<size_t>;
+    ssize_t size = (ssize_t)sz - 2, first = 1;
+    while (size > 0) {
+        size_t half = (size_t)size >> 1, middle = first + half;
+        bool predResult = pred(middle);
+        first = predResult ? middle + 1 : first;
+        size = predResult ? size - (half + 1) : half;
+    }
+    return (size_t)Clamp((size_t)first - 1, 0, sz - 2);
 }

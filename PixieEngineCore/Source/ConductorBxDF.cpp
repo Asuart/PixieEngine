@@ -27,7 +27,7 @@ Spectrum ConductorBxDF::SampleDistribution(Vec3 wo, Vec3 wi, TransportMode mode)
 	return m_mfDistrib.D(wm) * F * m_mfDistrib.G(wo, wi) / (4 * cosTheta_i * cosTheta_o);
 }
 
-BSDFSample ConductorBxDF::SampleDirectionAndDistribution(Vec3 wo, Float uc, Vec2 u, TransportMode mode, BxDFReflTransFlags sampleFlags) const {
+std::optional<BSDFSample> ConductorBxDF::SampleDirectionAndDistribution(Vec3 wo, Float uc, Vec2 u, TransportMode mode, BxDFReflTransFlags sampleFlags) const {
 	if (!((uint32_t)sampleFlags & (uint32_t)BxDFReflTransFlags::Reflection)) {
 		return {};
 	}

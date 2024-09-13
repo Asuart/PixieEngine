@@ -9,7 +9,7 @@ struct KeyPosition {
 };
 
 struct KeyRotation {
-    glm::quat orientation;
+    Quaternion orientation;
     Float timeStamp;
 };
 

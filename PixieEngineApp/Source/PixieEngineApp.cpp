@@ -55,7 +55,7 @@ void PixieEngineApp::Start() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glViewport(0, 0, m_viewportFrameBuffer->m_resolution.x, m_viewportFrameBuffer->m_resolution.y);
 		if (m_rayTracingViewport) {
-			if (m_rayTracingRenderer->m_rayTracer->GetSamplesCount() == 0) {
+			if (m_rayTracingRenderer->m_rayTracer->GetSamplesCount() <= 1) {
 				m_sceneRenderer->DrawFrame();
 			}
 			m_rayTracingRenderer->DrawFrame();
@@ -116,7 +116,7 @@ void PixieEngineApp::HandleUserInput() {
 		if (m_scene) {
 			Camera* camera = m_scene->GetMainCamera();
 			if (camera) {
-				camera->m_transform.MoveForward(speed * Timer::deltaTime);
+				camera->GetTransform().MoveForward(speed * Timer::deltaTime);
 			}
 		}
 		if (m_rayTracingViewport) m_rayTracingRenderer->Reset();
@@ -125,7 +125,7 @@ void PixieEngineApp::HandleUserInput() {
 		if (m_scene) {
 			Camera* camera = m_scene->GetMainCamera();
 			if (camera) {
-				camera->m_transform.MoveForward(-speed * Timer::deltaTime);
+				camera->GetTransform().MoveForward(-speed * Timer::deltaTime);
 			}
 		}
 		if (m_rayTracingViewport)m_rayTracingRenderer->Reset();
@@ -134,7 +134,7 @@ void PixieEngineApp::HandleUserInput() {
 		if (m_scene) {
 			Camera* camera = m_scene->GetMainCamera();
 			if (camera) {
-				camera->m_transform.MoveRight(speed * Timer::deltaTime);
+				camera->GetTransform().MoveRight(speed * Timer::deltaTime);
 			}
 		}
 		if (m_rayTracingViewport)m_rayTracingRenderer->Reset();
@@ -143,7 +143,7 @@ void PixieEngineApp::HandleUserInput() {
 		if (m_scene) {
 			Camera* camera = m_scene->GetMainCamera();
 			if (camera) {
-				camera->m_transform.MoveRight(-speed * Timer::deltaTime);
+				camera->GetTransform().MoveRight(-speed * Timer::deltaTime);
 			}
 		}
 		if (m_rayTracingViewport)m_rayTracingRenderer->Reset();
@@ -152,7 +152,7 @@ void PixieEngineApp::HandleUserInput() {
 		if (m_scene) {
 			Camera* camera = m_scene->GetMainCamera();
 			if (camera) {
-				camera->m_transform.MoveUp(speed * Timer::deltaTime);
+				camera->GetTransform().MoveUp(speed * Timer::deltaTime);
 			}
 		}
 		if (m_rayTracingViewport)m_rayTracingRenderer->Reset();
@@ -161,7 +161,7 @@ void PixieEngineApp::HandleUserInput() {
 		if (m_scene) {
 			Camera* camera = m_scene->GetMainCamera();
 			if (camera) {
-				camera->m_transform.MoveUp(-speed * Timer::deltaTime);
+				camera->GetTransform().MoveUp(-speed * Timer::deltaTime);
 			}
 		}
 		if (m_rayTracingViewport)m_rayTracingRenderer->Reset();
@@ -172,7 +172,7 @@ void PixieEngineApp::HandleUserInput() {
 				if (m_scene) {
 					Camera* camera = m_scene->GetMainCamera();
 					if (camera) {
-						camera->m_transform.AddRotationY(-rotationSpeed * (Float)UserInput::mouseDeltaX * Timer::deltaTime);
+						camera->GetTransform().AddRotationY(-rotationSpeed * (Float)UserInput::mouseDeltaX * Timer::deltaTime);
 					}
 				}
 			}

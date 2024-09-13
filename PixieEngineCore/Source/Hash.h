@@ -23,10 +23,8 @@ inline uint64_t MurmurHash64A(const unsigned char* key, size_t len, uint64_t see
     }
 
     switch (len & 7) {
-    case 7:
-        h ^= uint64_t(key[6]) << 48;
-    case 6:
-        h ^= uint64_t(key[5]) << 40;
+    case 7: h ^= uint64_t(key[6]) << 48;
+    case 6: h ^= uint64_t(key[5]) << 40;
     case 5:
         h ^= uint64_t(key[4]) << 32;
     case 4:

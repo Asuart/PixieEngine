@@ -12,10 +12,10 @@ public:
 
 	Component() = delete;
 
-protected:
-	Component(const std::string& name, SceneObject* parent);
-
 	virtual void OnStart();
 	virtual void OnUpdate();
 	virtual void OnFixedUpdate();
+
+protected:
+	Component(const std::string& name, SceneObject* parent);
 };

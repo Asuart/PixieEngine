@@ -58,7 +58,7 @@ void SceneRenderer::SetupCamera(const Camera* camera) {
 	GLuint mViewLoc = glGetUniformLocation(m_defaultShader, "mView");
 	GLuint mProjectioLoc = glGetUniformLocation(m_defaultShader, "mProjection");
 
-	const glm::fvec3& cameraPos = camera->m_transform.GetPositionValue();
+	const glm::fvec3& cameraPos = camera->GetTransform().GetPositionValue();
 	glUniform3f(cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
 	glUniformMatrix4fv(mViewLoc, 1, GL_FALSE, &camera->GetInverseViewMatrix()[0][0]);
 	glUniformMatrix4fv(mProjectioLoc, 1, GL_FALSE, &camera->GetProjectionMatrix()[0][0]);

@@ -25,6 +25,9 @@ struct ShapeIntersection {
 
 class Shape {
 public:
+	Shape() = default;
+	Shape(const Transform& transform) : m_transform(transform) {}
+
 	const Transform& GetTransform() const;
 	virtual Float Area() const = 0;
 	virtual std::optional<ShapeIntersection> Intersect(const Ray& ray, Float tMax = Infinity) const = 0;

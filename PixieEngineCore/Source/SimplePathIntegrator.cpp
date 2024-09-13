@@ -65,13 +65,13 @@ Spectrum SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 		}
 
 		if (m_sampleBSDF) {
-			BSDFSample bs = bsdf.SampleDirectionAndDistribution(wo, sampler->Get1D(), sampler->Get2D());
+			std::optional<BSDFSample> bs = bsdf.SampleDirectionAndDistribution(wo, sampler->Get1D(), sampler->Get2D());
 			if (!bs) {
 				break;
 			}
-			beta *= bs.f * AbsDot(bs.wi, intr.normal) / bs.pdf;
-			specularBounce = bs.IsSpecular();
-			ray = Ray(intr.position, bs.wi);
+			beta *= bs->f * AbsDot(bs->wi, intr.normal) / bs->pdf;
+			specularBounce = bs->IsSpecular();
+			ray = Ray(intr.position, bs->wi);
 		}
 		else {
 			Float pdf;

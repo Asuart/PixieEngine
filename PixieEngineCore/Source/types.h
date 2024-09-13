@@ -9,6 +9,7 @@ typedef glm::dvec3 Vec3;
 typedef glm::dvec4 Vec4;
 typedef glm::dmat3 Mat3;
 typedef glm::dmat4 Mat4;
+typedef glm::dquat Quaternion;
 #else
 typedef float Float;
 typedef glm::fvec2 Vec2;
@@ -16,4 +17,5 @@ typedef glm::fvec3 Vec3;
 typedef glm::fvec4 Vec4;
 typedef glm::fmat3 Mat3;
 typedef glm::fmat4 Mat4;
+typedef glm::fquat Quaternion;
 #endif

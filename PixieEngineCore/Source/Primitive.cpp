@@ -58,7 +58,7 @@ BVHPrimitive::BVHPrimitive(size_t primitiveIndex, const Bounds3f& bounds)
 	: primitiveIndex(primitiveIndex), bounds(bounds) {}
 
 Vec3 BVHPrimitive::Centroid() const {
-	return (Float)0.5f * (bounds.pMin + bounds.pMax);
+	return (Float)0.5f * (bounds.min + bounds.max);
 }
 
 void BVHBuildNode::InitLeaf(int32_t first, int32_t n, const Bounds3f& b) {
@@ -190,7 +190,7 @@ BVHBuildNode* BVHAggregate::buildRecursive(std::span<BVHPrimitive> bvhPrimitives
 		bounds = Union(bounds, prim.bounds);
 	}
 
-	if (bounds.SurfaceArea() == 0 || bvhPrimitives.size() == 1) {
+	if (bounds.Area() == 0 || bvhPrimitives.size() == 1) {
 		size_t firstPrimOffset = orderedPrimsOffset->fetch_add((int32_t)bvhPrimitives.size());
 		for (size_t i = 0; i < bvhPrimitives.size(); ++i) {
 			size_t index = bvhPrimitives[i].primitiveIndex;
@@ -206,7 +206,7 @@ BVHBuildNode* BVHAggregate::buildRecursive(std::span<BVHPrimitive> bvhPrimitives
 		}
 		int32_t dim = centroidBounds.MaxDimension();
 
-		if (centroidBounds.pMax[dim] == centroidBounds.pMin[dim]) {
+		if (centroidBounds.max[dim] == centroidBounds.min[dim]) {
 			size_t firstPrimOffset = orderedPrimsOffset->fetch_add((int32_t)bvhPrimitives.size());
 			for (size_t i = 0; i < bvhPrimitives.size(); ++i) {
 				size_t index = bvhPrimitives[i].primitiveIndex;
@@ -246,7 +246,7 @@ BVHBuildNode* BVHAggregate::buildRecursive(std::span<BVHPrimitive> bvhPrimitives
 				for (int32_t i = 0; i < nSplits; ++i) {
 					boundBelow = Union(boundBelow, buckets[i].bounds);
 					countBelow += buckets[i].count;
-					costs[i] += countBelow * boundBelow.SurfaceArea();
+					costs[i] += countBelow * boundBelow.Area();
 				}
 
 				int32_t countAbove = 0;
@@ -254,7 +254,7 @@ BVHBuildNode* BVHAggregate::buildRecursive(std::span<BVHPrimitive> bvhPrimitives
 				for (int32_t i = nSplits; i >= 1; --i) {
 					boundAbove = Union(boundAbove, buckets[i].bounds);
 					countAbove += buckets[i].count;
-					costs[i - 1] += countAbove * boundAbove.SurfaceArea();
+					costs[i - 1] += countAbove * boundAbove.Area();
 				}
 
 				int32_t minCostSplitBucket = -1;
@@ -267,7 +267,7 @@ BVHBuildNode* BVHAggregate::buildRecursive(std::span<BVHPrimitive> bvhPrimitives
 				}
 
 				Float leafCost = (Float)bvhPrimitives.size();
-				minCost = 1.f / 2.f + minCost / bounds.SurfaceArea();
+				minCost = 1.f / 2.f + minCost / bounds.Area();
 
 				if (bvhPrimitives.size() > maxPrimsInNode || minCost < leafCost) {
 					auto midIter = std::partition(

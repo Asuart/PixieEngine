@@ -18,7 +18,7 @@ struct Interaction {
 	const MediumInterface* mediumInterface = nullptr;
 
 	Interaction() = default;
-	Interaction(Vec3 position, Vec3 normal, Vec2 uv);
+	Interaction(Vec3 position, Vec3 normal, Vec2 uv, Vec3 wo = Vec3(0));
 	Interaction(Vec3 position, const MediumInterface* mediumInterface);
 
 	const Medium* GetMedium(Vec3 direction) const;
@@ -37,6 +37,7 @@ struct SurfaceInteraction : public Interaction {
 
 	SurfaceInteraction() = default;
 	SurfaceInteraction(Vec3 position, Vec3 normal, Vec2 uv);
+	SurfaceInteraction(Vec3 position, Vec2 uv, Vec3 wo, Vec3 dpdu, Vec3 dpdv, Vec3 dndu, Vec3 dndv);
 	SurfaceInteraction(Vec3 position, const MediumInterface* mediumInterface);
 
 	Spectrum Le(const glm::vec3& wo) const;

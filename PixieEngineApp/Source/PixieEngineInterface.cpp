@@ -130,7 +130,7 @@ void PixieEngineInterface::DrawMaterialsWindow() {
 			if (ImGui::ColorEdit3("Emission Color", (float*)&material->m_emissionColor.GetRGB())) {
 				m_app.m_rayTracingRenderer->Reset();
 			}
-			if (ImGui::DragFloat("Emission Strength", (float*)&material->m_emissionStrength)) {
+			if (ImGui::DragFloat("Emission Strength", &material->m_emissionStrength)) {
 				m_app.m_rayTracingRenderer->Reset();
 			}
 			if (ImGui::DragFloat("Roughness", &material->m_roughness, 0.01f, 0.0f, 1.0f)) {
@@ -165,7 +165,7 @@ void PixieEngineInterface::DrawInspectorWindow() {
 	if (Camera* mainCamera = m_app.m_scene->GetMainCamera()) {
 		ImGui::Text("Main Camera");
 		ImGui::Spacing();
-		DrawTransform(mainCamera->m_transform);
+		DrawTransform(mainCamera->GetTransform());
 		ImGui::Spacing();
 	}
 

@@ -28,6 +28,14 @@ Ray Camera::GetRay(const Vec2& coord) const {
 	return Ray(m_transform.GetPositionValue(), dir);
 }
 
+Transform& Camera::GetTransform() {
+	return m_transform;
+}
+
+const Transform& Camera::GetTransform() const {
+	return m_transform;
+}
+
 const Mat4& Camera::GetViewMatrix() const {
 	return m_transform.GetMatrix();
 }

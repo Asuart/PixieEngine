@@ -3,18 +3,18 @@
 
 AliasTable::AliasTable(const std::vector<Float> weights)
     : m_bins(weights.size()) {
-    double sum = std::accumulate(weights.begin(), weights.end(), 0.0);
+    Float sum = (Float)std::accumulate(weights.begin(), weights.end(), 0.0);
     for (size_t i = 0; i < weights.size(); i++) {
         m_bins[i].p = weights[i] / sum;
     }
 
     struct Outcome {
-        double pHat;
+        Float pHat;
         size_t index;
     };
     std::vector<Outcome> under, over;
     for (size_t i = 0; i < m_bins.size(); i++) {
-        double pHat = m_bins[i].p * m_bins.size();
+        Float pHat = m_bins[i].p * m_bins.size();
         if (pHat < 1) {
             under.push_back(Outcome{ pHat, i });
         }
@@ -29,9 +29,9 @@ AliasTable::AliasTable(const std::vector<Float> weights)
         over.pop_back();
 
         m_bins[un.index].q = un.pHat;
-        m_bins[un.index].alias = ov.index;
+        m_bins[un.index].alias = (int32_t)ov.index;
 
-        double pExcess = un.pHat + ov.pHat - 1;
+        Float pExcess = un.pHat + ov.pHat - 1;
         if (pExcess < 1) {
             under.push_back(Outcome{ pExcess, ov.index });
         }
@@ -55,15 +55,15 @@ AliasTable::AliasTable(const std::vector<Float> weights)
 }
 
 int32_t AliasTable::Sample(Float u, Float* pmf, Float* uRemapped) const {
-    int32_t offset = std::min<int32_t>((int32_t)(u * m_bins.size()), m_bins.size() - 1);
-    double up = std::min<double>(u * m_bins.size() - offset, OneMinusEpsilon);
+    int32_t offset = std::min<int32_t>((int32_t)(u * m_bins.size()), (int32_t)m_bins.size() - 1);
+    Float up = std::min<Float>(u * m_bins.size() - offset, OneMinusEpsilon);
 
     if (up < m_bins[offset].q) {
         if (pmf) {
             *pmf = m_bins[offset].p;
         }
         if (uRemapped) {
-            *uRemapped = std::min<Float>(up / m_bins[offset].q, OneMinusEpsilon);
+            *uRemapped = std::min<Float>((up / m_bins[offset].q), OneMinusEpsilon);
         }
         return offset;
     }
@@ -84,5 +84,5 @@ size_t AliasTable::size() const {
 }
 
 Float AliasTable::PMF(int32_t index) const {
-	return (Float)m_bins[index].p; 
+	return m_bins[index].p; 
 }

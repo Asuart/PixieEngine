@@ -14,6 +14,6 @@ Vec3 AssimpGLMHelpers::GetGLMVec(const aiVector3D& vec) {
 	return Vec3(vec.x, vec.y, vec.z);
 }
 
-glm::quat AssimpGLMHelpers::GetGLMQuat(const aiQuaternion& pOrientation) {
-	return glm::quat(pOrientation.w, pOrientation.x, pOrientation.y, pOrientation.z);
+Quaternion AssimpGLMHelpers::GetGLMQuat(const aiQuaternion& pOrientation) {
+	return Quaternion(pOrientation.w, pOrientation.x, pOrientation.y, pOrientation.z);
 }
