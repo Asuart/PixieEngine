@@ -13,7 +13,7 @@ void Texture<glm::fvec4>::TexImage2D() {
 
 template <>
 void Texture<Spectrum>::TexImage2D() {
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, resolution.x, resolution.y, 0, GL_RGB, GL_FLOAT, &pixels[0]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, resolution.x, resolution.y, 0, GL_RGB, GL_FLOAT_TYPE, &pixels[0]);
 }
 
 template <>

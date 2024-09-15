@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "UniformInfiniteLight.h"
 
-UniformInfiniteLight::UniformInfiniteLight(Spectrum spectrum, float scale, const Transform& transform)
+UniformInfiniteLight::UniformInfiniteLight(Spectrum spectrum, Float scale, const Transform& transform)
 	: Light(LightType::Infinite, transform, nullptr), m_spectrum(spectrum), m_scale(scale) {}
 
 Spectrum UniformInfiniteLight::Phi() const {
@@ -14,7 +14,7 @@ std::optional<LightLiSample> UniformInfiniteLight::SampleLi(LightSampleContext c
     }
     Vec3 wi = SampleUniformSphere(u);
     Float pdf = UniformSpherePDF;
-    return LightLiSample(m_scale * m_spectrum, wi, pdf, SurfaceInteraction(context.position + wi * 2.0f * m_sceneRadius, m_mediumInterface));
+    return LightLiSample(m_scale * m_spectrum, wi, pdf, SurfaceInteraction(context.position + wi * (Float)2 * m_sceneRadius, m_mediumInterface));
 }
 
 Float UniformInfiniteLight::SampleLiPDF(LightSampleContext context, Vec3 w, bool allowIncompletePDF) const {

@@ -40,7 +40,7 @@ void SceneRenderer::DrawFrame() {
 void SceneRenderer::DrawObject(SceneObject* object, GLuint mModelLoc) {
 	if (!object) return;
 	if (MeshComponent* mesh = object->GetComponent<MeshComponent>()) {
-		glUniformMatrix4fv(mModelLoc, 1, GL_FALSE, &object->transform.GetMatrix()[0][0]);
+		glUniformMatrix4(mModelLoc, 1, GL_FALSE, &object->transform.GetMatrix()[0][0]);
 		const Material* material = m_scene->GetMaterialsList()[0];
 		if (MaterialComponent* materialComponent = object->GetComponent<MaterialComponent>()) {
 			material = materialComponent->GetMaterial();
@@ -58,10 +58,10 @@ void SceneRenderer::SetupCamera(const Camera* camera) {
 	GLuint mViewLoc = glGetUniformLocation(m_defaultShader, "mView");
 	GLuint mProjectioLoc = glGetUniformLocation(m_defaultShader, "mProjection");
 
-	const glm::fvec3& cameraPos = camera->GetTransform().GetPositionValue();
+	glm::fvec3 cameraPos = camera->GetTransform().GetPositionValue();
 	glUniform3f(cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
-	glUniformMatrix4fv(mViewLoc, 1, GL_FALSE, &camera->GetInverseViewMatrix()[0][0]);
-	glUniformMatrix4fv(mProjectioLoc, 1, GL_FALSE, &camera->GetProjectionMatrix()[0][0]);
+	glUniformMatrix4(mViewLoc, 1, GL_FALSE, &camera->GetInverseViewMatrix()[0][0]);
+	glUniformMatrix4(mProjectioLoc, 1, GL_FALSE, &camera->GetProjectionMatrix()[0][0]);
 }
 
 void SceneRenderer::SetupLights() {
@@ -76,11 +76,11 @@ void SceneRenderer::SetupLights() {
 	std::vector<MaterialComponent*>& areaLights = m_scene->GetAreaLights();
 	for (size_t i = 0; i < areaLights.size() && i < MaxLights; i++) {
 		const Mesh* mesh = areaLights[i]->parent->GetComponent<MeshComponent>()->GetMesh();
-		const glm::fvec3& center = mesh->GetCenter() + areaLights[i]->parent->transform.GetPositionValue();
+		glm::fvec3 center = mesh->GetCenter() + areaLights[i]->parent->transform.GetPositionValue();
 		positions[i * 3 + 0] = center.x;
 		positions[i * 3 + 1] = center.y;
 		positions[i * 3 + 2] = center.z;
-		const glm::fvec3 emission = areaLights[i]->GetMaterial()->GetEmission().GetRGBValue();
+		glm::fvec3 emission = areaLights[i]->GetMaterial()->GetEmission().GetRGBValue();
 		colors[i * 3 + 0] = emission.x;
 		colors[i * 3 + 1] = emission.y;
 		colors[i * 3 + 2] = emission.z;
@@ -96,9 +96,8 @@ void SceneRenderer::SetupMaterial(const Material* material) {
 	GLuint roghnessLoc = glGetUniformLocation(m_defaultShader, "roughness");
 	GLuint ambientOcclusionLoc = glGetUniformLocation(m_defaultShader, "ambientOcclusion");
 
-	glm::fvec3 albedo = material->m_albedo.GetRGBValue();
-	glUniform3f(albedoLoc, albedo.x, albedo.y, albedo.z);
-	glUniform1f(metallicLoc, material->m_metallic);
-	glUniform1f(roghnessLoc, material->m_roughness);
-	glUniform1f(ambientOcclusionLoc, material->m_ambiendOcclusion);
+	glUniform3(albedoLoc, material->m_albedo.GetRGBValue());
+	glUniform1(metallicLoc, material->m_metallic);
+	glUniform1(roghnessLoc, material->m_roughness);
+	glUniform1(ambientOcclusionLoc, material->m_ambiendOcclusion);
 }

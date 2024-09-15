@@ -101,8 +101,8 @@ Material* SceneLoader::ProcessMaterial(Scene* loadedScene, uint32_t materialInde
 	aiGetMaterialFloat(scene->mMaterials[materialIndex], AI_MATKEY_REFRACTI, &eta);	
 
 
-	glm::fvec3 glmEmissionColor = glm::fvec3(colorEmissive.r, colorEmissive.g, colorEmissive.b);
-	float emissionNormaizer = MaxComponent(glmEmissionColor);
+	Vec3 glmEmissionColor = Vec3(colorEmissive.r, colorEmissive.g, colorEmissive.b);
+	float emissionNormaizer = (float)MaxComponent(glmEmissionColor);
 	glmEmissionColor /= emissionNormaizer;
 	emissionInt = emissionNormaizer * (emissionInt ? emissionInt : 1.0f);
 

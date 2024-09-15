@@ -1,22 +1,26 @@
 #include "pch.h"
 #include "Spectrum.h"
 
-Spectrum::Spectrum(float r, float g, float b) 
+Spectrum::Spectrum(Float r, Float g, Float b) 
 	: m_rgb(r, g, b) {}
 
-Spectrum::Spectrum(const glm::fvec3& rgb)
+Spectrum::Spectrum(const Vec3& rgb)
 	: m_rgb(rgb) {}
 
-glm::fvec3& Spectrum::GetRGB() {
+void Spectrum::SetRGB(Vec3 rgb) {
+	m_rgb = rgb;
+}
+
+Vec3& Spectrum::GetRGB() {
 	return m_rgb;
 }
 
-const glm::fvec3& Spectrum::GetRGBValue() const {
+const Vec3& Spectrum::GetRGBValue() const {
 	return m_rgb;
 }
 
 Float Spectrum::Average() const {
-	return (m_rgb.x + m_rgb.y + m_rgb.z) / 3.0;
+	return (m_rgb.x + m_rgb.y + m_rgb.z) / 3.0f;
 }
 
 Spectrum& Spectrum::operator=(const Spectrum& other) {
@@ -60,7 +64,7 @@ bool Spectrum::operator==(const Spectrum& other) {
 	return m_rgb == other.m_rgb;
 }
 
-bool Spectrum::operator==(const glm::fvec3& value) {
+bool Spectrum::operator==(const Vec3& value) {
 	return m_rgb == value;
 }
 
@@ -68,7 +72,7 @@ bool Spectrum::operator!=(const Spectrum& other) {
 	return m_rgb != other.m_rgb;
 }
 
-bool Spectrum::operator!=(const glm::fvec3& value) {
+bool Spectrum::operator!=(const Vec3& value) {
 	return m_rgb != value;
 }
 
@@ -77,7 +81,7 @@ Spectrum Spectrum::operator/(const Float& value) {
 }
 
 Spectrum::operator bool() const {
-	return m_rgb != glm::fvec3(0.0f, 0.0f, 0.0f);
+	return m_rgb != Vec3(0.0f);
 }
 
 Spectrum operator*(const Float& left, const Spectrum& right) {

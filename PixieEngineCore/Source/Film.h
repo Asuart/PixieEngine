@@ -7,7 +7,7 @@
 class Film {
 public:
 	OGLMesh* mesh;
-	Texture<glm::vec4>* texture;
+	Texture<glm::fvec4>* texture;
 	glm::ivec2 m_resolution;
 	Vec2 m_pixelSize;
 	SampleFilter* m_sampleFilter;

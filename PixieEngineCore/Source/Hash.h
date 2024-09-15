@@ -3,7 +3,7 @@
 
 inline uint64_t MurmurHash64A(const unsigned char* key, size_t len, uint64_t seed) {
     const uint64_t m = 0xc6a4a7935bd1e995ull;
-    const int r = 47;
+    const int32_t r = 47;
 
     uint64_t h = seed ^ (len * m);
 

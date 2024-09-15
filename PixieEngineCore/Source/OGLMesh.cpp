@@ -13,13 +13,13 @@ OGLMesh::OGLMesh(const Mesh& mesh) {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int32_t) * mesh.indices.size(), &mesh.indices[0], GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT_TYPE, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
 	glEnableVertexAttribArray(0);
 
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)12);
+	glVertexAttribPointer(1, 3, GL_FLOAT_TYPE, GL_FALSE, sizeof(Vertex), (GLvoid*)12);
 	glEnableVertexAttribArray(1);
 
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)24);
+	glVertexAttribPointer(2, 3, GL_FLOAT_TYPE, GL_FALSE, sizeof(Vertex), (GLvoid*)24);
 	glEnableVertexAttribArray(2);
 
 	glBindVertexArray(0);

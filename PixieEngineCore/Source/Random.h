@@ -82,10 +82,10 @@ inline int64_t RNG::Uniform<int64_t>() {
 
 template <>
 inline float RNG::Uniform<float>() {
-	return std::min<float>(OneMinusEpsilon, Uniform<uint32_t>() * 0x1p-32f);
+	return std::min<float>(FloatOneMinusEpsilon, Uniform<uint32_t>() * 0x1p-32f);
 }
 
 template <>
 inline double RNG::Uniform<double>() {
-	return std::min<double>(OneMinusEpsilon, Uniform<uint64_t>() * 0x1p-64);
+	return std::min<double>(DoubleOneMinusEpsilon, Uniform<uint64_t>() * 0x1p-64);
 }

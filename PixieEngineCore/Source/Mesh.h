@@ -18,5 +18,5 @@ struct Mesh {
 
 	Mesh(const std::vector<Vertex>& vertices, const std::vector<int32_t>& indices);
 
-	glm::fvec3 GetCenter() const;
+	Vec3 GetCenter() const;
 };

@@ -35,7 +35,7 @@ glm::ivec2 Bounds2i::Lerp(Vec2 p) const {
 
 void Bounds2i::BoundingCircle(Vec2* center, Float* radius) const {
 	*center = Center();
-	*radius = glm::length(Vec2(Diagonal()) / 2.0f);
+	*radius = glm::length(Vec2(Diagonal()) / (Float)2);
 }
 
 bool Bounds2i::IsEmpty() const {
@@ -73,7 +73,7 @@ Vec2 Bounds2f::Diagonal() const {
 }
 
 Vec2 Bounds2f::Center() const {
-	return min + Diagonal() / 2.0f;
+	return min + Diagonal() / (Float)2;
 }
 
 Float Bounds2f::Area() const {
@@ -107,7 +107,7 @@ Vec2 Bounds2f::Offset(Vec2 p) const {
 
 void Bounds2f::BoundingCircle(Vec2* center, Float* radius) const {
 	*center = Center();
-	*radius = glm::length(Vec2(Diagonal()) / 2.0f);
+	*radius = glm::length(Diagonal() / (Float)2);
 }
 
 bool Bounds2f::IsEmpty() const {
@@ -190,8 +190,8 @@ glm::ivec3 Bounds3i::Offset(glm::ivec3 p) const {
 }
 
 void Bounds3i::BoundingSphere(Vec3* center, Float* radius) const {
-	*center = (Vec3)(min + max) / (Float)2.0f;
-	*radius = glm::length(((Vec3)min + (Vec3)max) / 2.0f);
+	*center = (Vec3)(min + max) / (Float)2;
+	*radius = glm::length(((Vec3)min + (Vec3)max) / (Float)2);
 }
 
 bool Bounds3i::IsEmpty() const {
@@ -233,7 +233,7 @@ Vec3 Bounds3f::Diagonal() const {
 }
 
 Vec3 Bounds3f::Center() const {
-	return min + Diagonal() * 0.5f;
+	return min + Diagonal() * (Float)0.5;
 }
 
 Float Bounds3f::Area() const {

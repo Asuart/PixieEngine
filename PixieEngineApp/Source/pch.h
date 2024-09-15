@@ -7,3 +7,9 @@
 #include <backends/imgui_impl_opengl3.h>
 
 #include <GLFW/glfw3.h>
+
+#ifdef PIXIE_ENGINE_DOUBLE_PRECISION
+static constexpr ImGuiDataType_ ImGuiFloat = ImGuiDataType_::ImGuiDataType_Double;
+#else
+static constexpr ImGuiDataType_ ImGuiFloat = ImGuiDataType_::ImGuiDataType_Float;
+#endif;

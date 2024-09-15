@@ -4,7 +4,7 @@
 
 class PointLight : public Light {
 public:
-	PointLight(Spectrum spectrum, float scale, const Transform& transform, MediumInterface* mediumInterface);
+	PointLight(Spectrum spectrum, Float scale, const Transform& transform, MediumInterface* mediumInterface);
 
 	Spectrum Phi() const;
     std::optional<LightLiSample> SampleLi(LightSampleContext context, Vec2 u, bool allowIncompletePDF = false) const override;
@@ -12,5 +12,5 @@ public:
 
 protected:
 	Spectrum m_spectrum;
-	float m_scale;
+	Float m_scale;
 };

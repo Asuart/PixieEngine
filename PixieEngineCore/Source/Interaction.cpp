@@ -36,7 +36,7 @@ SurfaceInteraction::SurfaceInteraction(Vec3 position, Vec2 uv, Vec3 wo, Vec3 dpd
 SurfaceInteraction::SurfaceInteraction(Vec3 position, Vec3 normal, Vec2 uv)
 	: Interaction(position, normal, uv) {}
 
-Spectrum SurfaceInteraction::Le(const glm::vec3& wo) const {
+Spectrum SurfaceInteraction::Le(const Vec3& wo) const {
 	return areaLight ? areaLight->L(position, normal, uv, wo) : Spectrum();
 }
 

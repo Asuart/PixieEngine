@@ -33,3 +33,10 @@
 #include <glm/gtx/matrix_decompose.hpp>
 
 #include "types.h"
+#include "OpenGLInterface.h"
+
+#ifdef PIXIE_ENGINE_DOUBLE_PRECISION
+typedef GLdouble GLFloatType;
+#else
+typedef GLfloat GLFloatType;
+#endif

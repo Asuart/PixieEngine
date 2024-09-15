@@ -11,11 +11,11 @@ MeshComponent::MeshComponent(Mesh* mesh, SceneObject* parent)
 	glGenBuffers(1, &indexBufferObject);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferObject);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int32_t) * mesh->indices.size(), mesh->indices.data(), GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT_TYPE, GL_FALSE, sizeof(Vertex), (void*)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(3 * sizeof(GLfloat)));
+	glVertexAttribPointer(1, 3, GL_FLOAT_TYPE, GL_FALSE, sizeof(Vertex), (void*)(3 * sizeof(GLFloatType)));
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(6 * sizeof(GLfloat)));
+	glVertexAttribPointer(2, 2, GL_FLOAT_TYPE, GL_FALSE, sizeof(Vertex), (void*)(6 * sizeof(GLFloatType)));
 	glEnableVertexAttribArray(2);
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);               

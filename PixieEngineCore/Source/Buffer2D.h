@@ -14,7 +14,7 @@ public:
 	}
 
 	virtual void Clear() {
-		std::fill(m_data.data(), m_data.data() + m_data.size(), 0);
+		std::fill(m_data.data(), m_data.data() + m_data.size(), (T)0);
 	}
 
 	T GetValue(uint32_t index) const {

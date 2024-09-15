@@ -124,25 +124,33 @@ void PixieEngineInterface::DrawMaterialsWindow() {
 	std::vector<Material*> materials = m_app.m_scene->GetMaterialsList();
 	for (Material* material : materials) {
 		if (ImGui::CollapsingHeader(material->m_name.c_str())) {
-			if (ImGui::ColorEdit3("Albedo", (float*)&material->m_albedo.GetRGB())) {
+			const Float minZero = (Float)0;
+			const Float maxOne = (Float)1;
+			const Float maxTen = (Float)10;
+
+			glm::fvec3 albedoEditBuffer = material->m_albedo.GetRGB();
+			if (ImGui::ColorEdit3("Albedo", &albedoEditBuffer[0])) {
+				material->m_albedo.SetRGB((Vec3)albedoEditBuffer);
 				m_app.m_rayTracingRenderer->Reset();
 			}
-			if (ImGui::ColorEdit3("Emission Color", (float*)&material->m_emissionColor.GetRGB())) {
+			glm::fvec3 emissionColorEditBuffer = material->m_emissionColor.GetRGB();
+			if (ImGui::ColorEdit3("Emission Color", &emissionColorEditBuffer[0])) {
+				material->m_emissionColor.SetRGB((Vec3)emissionColorEditBuffer);
 				m_app.m_rayTracingRenderer->Reset();
 			}
-			if (ImGui::DragFloat("Emission Strength", &material->m_emissionStrength)) {
+			if (ImGui::DragScalar("Emission Strength", ImGuiFloat, &material->m_emissionStrength)) {
 				m_app.m_rayTracingRenderer->Reset();
 			}
-			if (ImGui::DragFloat("Roughness", &material->m_roughness, 0.01f, 0.0f, 1.0f)) {
+			if (ImGui::DragScalar("Roughness", ImGuiFloat, &material->m_roughness, 0.01f, &minZero, &maxOne)) {
 				m_app.m_rayTracingRenderer->Reset();
 			}
-			if (ImGui::DragFloat("Metallic", &material->m_metallic, 0.01f, 0.0f, 1.0f)) {
+			if (ImGui::DragScalar("Metallic", ImGuiFloat, &material->m_metallic, 0.01f, &minZero, &maxOne)) {
 				m_app.m_rayTracingRenderer->Reset();
 			}
-			if (ImGui::DragFloat("Transparency", &material->m_transparency, 0.01f, 0.0f, 1.0f)) {
+			if (ImGui::DragScalar("Transparency", ImGuiFloat, &material->m_transparency, 0.01f, &minZero, &maxOne)) {
 				m_app.m_rayTracingRenderer->Reset();
 			}
-			if (ImGui::DragFloat("Refraction", &material->m_refraction, 0.01f, 0.0f, 10.0f)) {
+			if (ImGui::DragScalar("Refraction", ImGuiFloat, &material->m_refraction, 0.01f, &minZero, &maxTen)) {
 				m_app.m_rayTracingRenderer->Reset();
 			}
 		}
@@ -206,13 +214,16 @@ void PixieEngineInterface::DrawSceneTree(SceneObject* object) {
 
 void PixieEngineInterface::DrawTransform(Transform& transform) {
 	ImGui::Text("Transform");
-	if (ImGui::DragFloat3(("Position##" + transform.id.ToString()).c_str(), (float*)&transform.GetPosition(), 0.01f, -10000.0f, 10000.0f)) {
+	const Float minPosition = (Float)-10000, maxPosition = (Float)10000;
+	const Float minRotation = (Float)-720, maxRotation = (Float)720;
+	const Float minScale = (Float)-10000, maxScale = (Float)10000;
+	if (ImGui::DragScalarN(("Position##" + transform.id.ToString()).c_str(), ImGuiFloat, &transform.GetPosition(), 3, 0.01f, &minPosition, &maxPosition)) {
 		transform.UpdateMatrices();
 	}
-	if (ImGui::DragFloat3(("Rotation##" + transform.id.ToString()).c_str(), (float*)&transform.GetRotation(), 0.1f, -720.0f, 720.0f)) {
+	if (ImGui::DragScalarN(("Rotation##" + transform.id.ToString()).c_str(), ImGuiFloat, &transform.GetRotation(), 3, 0.1f, &minRotation, &maxRotation)) {
 		transform.UpdateMatrices();
 	}
-	if (ImGui::DragFloat3(("Scale##" + transform.id.ToString()).c_str(), (float*)&transform.GetScale(), 0.01f, -10000.0f, 10000.0f)) {
+	if (ImGui::DragScalarN(("Scale##" + transform.id.ToString()).c_str(), ImGuiFloat, &transform.GetScale(), 3, 0.01f, &minScale, &maxScale)) {
 		transform.UpdateMatrices();
 	}
 }

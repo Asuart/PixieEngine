@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "PointLight.h"
 
-PointLight::PointLight(Spectrum spectrum, float scale, const Transform& transform, MediumInterface* mediumInterface)
+PointLight::PointLight(Spectrum spectrum, Float scale, const Transform& transform, MediumInterface* mediumInterface)
 	: Light(LightType::DeltaPosition, transform, mediumInterface), m_spectrum(spectrum), m_scale(scale) {}
 
 Spectrum PointLight::Phi() const {

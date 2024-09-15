@@ -13,7 +13,6 @@ static constexpr Float Sqrt2 = 1.41421356237309504880f;
 static constexpr Float MachineEpsilon = std::numeric_limits<Float>::epsilon() * 0.5f;
 static constexpr Float Infinity = std::numeric_limits<Float>::infinity();
 static constexpr Float ShadowEpsilon = 0.0001f;
-static constexpr Float OneMinusEpsilon = 1 - MachineEpsilon;
 static constexpr Float MaxDegrees = 360.0f;
 static constexpr Float MinSphericalSampleArea = 3e-4f;
 static constexpr Float MaxSphericalSampleArea = 6.22f;
@@ -21,6 +20,13 @@ static constexpr Float UniformSpherePDF = Inv4Pi;
 static constexpr Float UniformHemispherePDF = Inv2Pi;
 static constexpr Float minFloat = std::numeric_limits<Float>::lowest();
 static constexpr Float maxFloat = std::numeric_limits<Float>::max();
+static constexpr Float FloatOneMinusEpsilon = float(0x1.fffffep-1);
+static constexpr Float DoubleOneMinusEpsilon = 0x1.fffffffffffffp-1f;
+#ifdef PIXIE_ENGINE_DOUBLE_PRECISION
+static constexpr Float OneMinusEpsilon = DoubleOneMinusEpsilon;
+#else 
+static constexpr Float OneMinusEpsilon = FloatOneMinusEpsilon;
+#endif
 
 inline bool isnan(const Vec2& v) {
     return std::isnan(v.x) || std::isnan(v.y);
@@ -30,9 +36,32 @@ inline bool isnan(const Vec3& v) {
     return std::isnan(v.x) || std::isnan(v.y) || std::isnan(v.z);
 }
 
-template<typename T>
-constexpr T Lerp(Float t, T from, T to) {
-    return T(from + (to - from) * t);
+constexpr int32_t Lerp(Float t, int32_t from, int32_t to) {
+    return int32_t(from + (to - from) * t);
+}
+
+constexpr uint32_t Lerp(Float t, uint32_t from, uint32_t to) {
+    return uint32_t(from + (to - from) * t);
+}
+
+constexpr Float Lerp(Float t, Float from, Float to) {
+    return Float(from + (to - from) * t);
+}
+
+constexpr Vec2 Lerp(Float t, Vec2 from, Vec2 to) {
+    return from + (to - from) * t;
+}
+
+constexpr Vec3 Lerp(Float t, Vec3 from, Vec3 to) {
+    return from + (to - from) * t;
+}
+
+constexpr glm::ivec2 Lerp(Float t, glm::ivec2 from, glm::ivec2 to) {
+    return glm::ivec2(Vec2(from) + Vec2(to - from) * t);
+}
+
+constexpr glm::ivec3 Lerp(Float t, glm::ivec3 from, glm::ivec3 to) {
+    return glm::ivec3(Vec3(from) + Vec3(to - from) * t);
 }
 
 template<typename T>
@@ -240,12 +269,11 @@ inline float FastExp(float x) {
 }
 
 inline Float Gaussian(Float x, Float mu = 0, Float sigma = 1) {
-    return 1 / std::sqrt(2 * Pi * sigma * sigma) * FastExp(-Sqr(x - mu) / (2 * sigma * sigma));
+    return (Float)1 / std::sqrt((Float)2 * Pi * sigma * sigma) * (Float)FastExp((float)(-Sqr(x - mu) / ((Float)2 * sigma * sigma)));
 }
 
-inline Float GaussianIntegral(Float x0, Float x1, Float mu = 0,
-    Float sigma = 1) {
-    Float sigmaRoot2 = sigma * Float(1.414213562373095);
+inline Float GaussianIntegral(Float x0, Float x1, Float mu = 0, Float sigma = 1) {
+    Float sigmaRoot2 = sigma * Float(1.414213562373095f);
     return 0.5f * (std::erf((mu - x0) / sigmaRoot2) - std::erf((mu - x1) / sigmaRoot2));
 }
 
@@ -255,7 +283,7 @@ inline size_t FindInterval(size_t sz, const Predicate& pred) {
     ssize_t size = (ssize_t)sz - 2, first = 1;
     while (size > 0) {
         size_t half = (size_t)size >> 1, middle = first + half;
-        bool predResult = pred(middle);
+        bool predResult = pred((int32_t)middle);
         first = predResult ? middle + 1 : first;
         size = predResult ? size - (half + 1) : half;
     }

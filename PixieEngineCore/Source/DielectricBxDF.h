@@ -14,5 +14,5 @@ public:
 
 protected:
 	TrowbridgeReitzDistribution m_mfDistrib;
-	float m_refraction;
+	Float m_refraction;
 };

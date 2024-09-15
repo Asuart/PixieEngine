@@ -136,7 +136,7 @@ std::optional<Vec2> PiecewiseConstant2D::Invert(Vec2 p) const {
 	if (p1o < 0 || p1o > 1) {
 		return {};
 	}
-	int32_t offset = Clamp(p1o * m_pConditionalV.size(), 0, m_pConditionalV.size() - 1);
+	int32_t offset = (int32_t)Clamp(p1o * m_pConditionalV.size(), 0, m_pConditionalV.size() - 1);
 	std::optional<Float> cInv = m_pConditionalV[offset].Invert(p[0]);
 	if (!cInv) {
 		return {};

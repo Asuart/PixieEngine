@@ -10,7 +10,7 @@ BxDFFlags DielectricBxDF::Flags() const {
 }
 
 std::optional<BSDFSample> DielectricBxDF::SampleDirectionAndDistribution(Vec3 wo, Float uc, Vec2 u, TransportMode mode, BxDFReflTransFlags sampleFlags) const {
-	if (m_refraction == 1.0f || m_mfDistrib.EffectivelySmooth()) {
+	if (m_refraction == (Float)1.0f || m_mfDistrib.EffectivelySmooth()) {
 		Float R = FrDielectric(CosTheta(wo), m_refraction), T = 1 - R;
 		Float pr = R, pt = T;
 		if (!((int32_t)sampleFlags & (int32_t)BxDFReflTransFlags::Reflection)) {

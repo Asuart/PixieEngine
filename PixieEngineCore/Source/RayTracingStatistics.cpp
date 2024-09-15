@@ -89,7 +89,7 @@ void RayTracingStatistics::UploadBoxTestsTextureLinear() {
 	}
 	if (max == 0) max = 1;
 	for (size_t i = 0; i < pixels.size(); i++) {
-		pixels[i] = Lerp((values[i] / (float)max), glm::fvec3(0.0f), glm::fvec3(1.0f));
+		pixels[i] = (glm::fvec3)Lerp((values[i] / (Float)max), Vec3(0.0f), Vec3(1.0f));
 	}
 	m_boxChecksTexture.Upload();
 }
@@ -104,7 +104,7 @@ void RayTracingStatistics::UploadTriangleTestsTextureLinear() {
 	}
 	if (max == 0) max = 1;
 	for (size_t i = 0; i < pixels.size(); i++) {
-		pixels[i] = Lerp((Float)(values[i] / (double)max), glm::fvec3(0.0f), glm::fvec3(1.0f));
+		pixels[i] = (glm::fvec3)Lerp((values[i] / (Float)max), Vec3(0.0f), Vec3(1.0f));
 	}
 	m_triangleChecksTexture.Upload();
 }

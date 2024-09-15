@@ -8,7 +8,7 @@ Vec3 Refract(const Vec3& uv, const Vec3& n, Float etai_over_etat) {
 	return r_out_perp + r_out_parallel;
 }
 
-float Reflectance(Float cosine, Float ref_idx) {
+Float Reflectance(Float cosine, Float ref_idx) {
 	Float r0 = (1.0f - ref_idx) / (1.0f + ref_idx);
 	r0 = r0 * r0;
 	return r0 + (1.0f - r0) * pow((1.0f - cosine), 5.0f);
@@ -30,14 +30,14 @@ Spectrum Material::GetEmission() const {
 }
 
 Spectrum Material::Evaluate(const SurfaceInteraction& intr) const {
-	glm::fvec3 color = m_albedo.GetRGBValue();
+	Vec3 color = m_albedo.GetRGBValue();
 	if (m_albedoTexture) {
 		color *= m_albedoTexture->Sample(intr);
 	}
 	return color / Pi;
 }
 
-float Material::Pdf() const {
+Float Material::Pdf() const {
 	return Inv2Pi;
 }
 

@@ -5,7 +5,7 @@ LightBounds::LightBounds(const Bounds3f& b, Vec3 w, Float phi, Float cosTheta_o,
 	: bounds(b), w(w), phi(phi), cosTheta_o(cosTheta_o), cosTheta_e(cosTheta_e) {}
 
 Vec3 LightBounds::Centroid() const { 
-	return (bounds.min + bounds.max) / 2.0f;
+	return (bounds.min + bounds.max) / (Float)2;
 }
 
 Float LightBounds::Importance(Vec3 p, Vec3 n) const {

@@ -5,7 +5,7 @@
 BSDF::BSDF(const Material& material, const SurfaceInteraction& intr)
 	: m_frame(Frame::FromZ(intr.normal)) {
 	if (material.m_transparency) {
-		glm::fvec2 anisotropicRoughness = glm::fvec2(1.0f, 1.0f);
+		Vec2 anisotropicRoughness = Vec2(1.0f, 1.0f);
 		bool normalizeAnisotropicRoughness = false;
 		Float urough = material.m_roughness * anisotropicRoughness.x;
 		Float vrough = material.m_roughness * anisotropicRoughness.y;

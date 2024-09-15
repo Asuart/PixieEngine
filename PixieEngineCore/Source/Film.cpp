@@ -16,7 +16,7 @@ Film::Film(glm::ivec2 resolution)
 	};
 	mesh = new OGLMesh(Mesh(vertices, indices));
 	mesh->shader = CompileShader(QUAD_VERTEX_SHADER_SOURCE, QUAD_FRAGMENT_SHADER_SOURCE);
-	texture = new Texture<glm::vec4>(resolution);
+	texture = new Texture<glm::fvec4>(resolution);
 	texture->Upload();
 	m_sampleFilter = new GaussianFilter(Vec2(4.0), 0.85f);
 }

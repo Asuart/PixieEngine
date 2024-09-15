@@ -174,9 +174,9 @@ void Transform::AddScale(const Vec3& change) {
 }
 
 void Transform::UpdateMatrices() {
-	Mat4 rotateX = glm::rotate(Mat4(1.0f), glm::radians(m_rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-	Mat4 rotateY = glm::rotate(Mat4(1.0f), glm::radians(m_rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-	Mat4 rotateZ = glm::rotate(Mat4(1.0f), glm::radians(m_rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+	Mat4 rotateX = glm::rotate(Mat4(1.0f), glm::radians(m_rotation.x), Vec3(1.0f, 0.0f, 0.0f));
+	Mat4 rotateY = glm::rotate(Mat4(1.0f), glm::radians(m_rotation.y), Vec3(0.0f, 1.0f, 0.0f));
+	Mat4 rotateZ = glm::rotate(Mat4(1.0f), glm::radians(m_rotation.z), Vec3(0.0f, 0.0f, 1.0f));
 	Mat4 mRotate = rotateY * rotateX * rotateZ;
 	Mat4 mTranslate = glm::translate(Mat4(1.0f), m_position);
 	Mat4 mScale = glm::scale(Mat4(1.0f), m_scale);
@@ -283,21 +283,21 @@ SurfaceInteraction Transform::ApplyInverseInteraction(const SurfaceInteraction& 
 }
 
 void Transform::Decompose() {
-	glm::vec3 skew;
-	glm::vec4 perspective;
+	Vec3 skew;
+	Vec4 perspective;
 	Quaternion qRotation;
 	glm::decompose(m_transform, m_scale, qRotation, m_position, skew, perspective);
 	m_rotation = glm::degrees(glm::eulerAngles(qRotation));
 }
 
 void Transform::UpdateDirections() {
-	Mat4 rotateX = glm::rotate(Mat4(1.0f), glm::radians(m_rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-	Mat4 rotateY = glm::rotate(Mat4(1.0f), glm::radians(m_rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-	Mat4 rotateZ = glm::rotate(Mat4(1.0f), glm::radians(m_rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+	Mat4 rotateX = glm::rotate(Mat4(1.0f), glm::radians(m_rotation.x), Vec3(1.0f, 0.0f, 0.0f));
+	Mat4 rotateY = glm::rotate(Mat4(1.0f), glm::radians(m_rotation.y), Vec3(0.0f, 1.0f, 0.0f));
+	Mat4 rotateZ = glm::rotate(Mat4(1.0f), glm::radians(m_rotation.z), Vec3(0.0f, 0.0f, 1.0f));
 	Mat4 mRotate = rotateY * rotateX * rotateZ;
-	m_forward = glm::normalize(mRotate * glm::vec4(0.0, 0.0, -1.0, 0.0));
-	m_up = glm::normalize(mRotate * glm::vec4(0.0, 1.0, 0.0, 0.0));
-	m_right = glm::normalize(mRotate * glm::vec4(1.0, 0.0, 0.0, 0.0));
+	m_forward = glm::normalize(mRotate * Vec4(0.0f, 0.0f, -1.0f, 0.0f));
+	m_up = glm::normalize(mRotate * Vec4(0.0f, 1.0f, 0.0f, 0.0f));
+	m_right = glm::normalize(mRotate * Vec4(1.0f, 0.0f, 0.0f, 0.0f));
 }
 
 bool Transform::IsIdentity() const {
@@ -362,20 +362,20 @@ Transform RotateFromTo(Vec3 from, Vec3 to) {
 
 Transform Rotate(Float sinTheta, Float cosTheta, Vec3 axis) {
 	Vec3 a = glm::normalize(axis);
-	glm::mat4 m;
-	m[0][0] = a.x * a.x + (1 - a.x * a.x) * cosTheta;
-	m[0][1] = a.x * a.y * (1 - cosTheta) - a.z * sinTheta;
-	m[0][2] = a.x * a.z * (1 - cosTheta) + a.y * sinTheta;
+	Mat4 m;
+	m[0][0] = a.x * a.x + ((Float)1 - a.x * a.x) * cosTheta;
+	m[0][1] = a.x * a.y * ((Float)1 - cosTheta) - a.z * sinTheta;
+	m[0][2] = a.x * a.z * ((Float)1 - cosTheta) + a.y * sinTheta;
 	m[0][3] = 0;
 
-	m[1][0] = a.x * a.y * (1 - cosTheta) + a.z * sinTheta;
-	m[1][1] = a.y * a.y + (1 - a.y * a.y) * cosTheta;
-	m[1][2] = a.y * a.z * (1 - cosTheta) - a.x * sinTheta;
+	m[1][0] = a.x * a.y * ((Float)1 - cosTheta) + a.z * sinTheta;
+	m[1][1] = a.y * a.y + ((Float)1 - a.y * a.y) * cosTheta;
+	m[1][2] = a.y * a.z * ((Float)1 - cosTheta) - a.x * sinTheta;
 	m[1][3] = 0;
 
-	m[2][0] = a.x * a.z * (1 - cosTheta) - a.y * sinTheta;
-	m[2][1] = a.y * a.z * (1 - cosTheta) + a.x * sinTheta;
-	m[2][2] = a.z * a.z + (1 - a.z * a.z) * cosTheta;
+	m[2][0] = a.x * a.z * ((Float)1 - cosTheta) - a.y * sinTheta;
+	m[2][1] = a.y * a.z * ((Float)1 - cosTheta) + a.x * sinTheta;
+	m[2][2] = a.z * a.z + ((Float)1 - a.z * a.z) * cosTheta;
 	m[2][3] = 0;
 
 	return Transform(m);

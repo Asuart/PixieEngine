@@ -4,7 +4,7 @@
 
 class DirectionalLight : public Light {
 public:
-	DirectionalLight(Spectrum spectrum, float scale, const Transform& transform);
+	DirectionalLight(Spectrum spectrum, Float scale, const Transform& transform);
 	
 	Spectrum Phi() const override;
 	std::optional<LightLiSample> SampleLi(LightSampleContext context, Vec2 u, bool allowIncompletePDF = false) const override;
@@ -12,7 +12,7 @@ public:
 
 protected:
 	Spectrum m_spectrum;
-	float m_scale;
+	Float m_scale;
 	Vec3 m_sceneCenter = Vec3(0);
 	Float m_sceneRadius = 0.0f;
 };

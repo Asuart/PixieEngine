@@ -22,7 +22,7 @@ void StratifiedSampler::StartPixelSample(glm::ivec2 p, int32_t index, int32_t di
 
 Float StratifiedSampler::Get1D() {
     uint64_t hash = Hash(m_pixel, m_dimension, m_seed);
-    int32_t stratum = PermutationElement(m_sampleIndex, SamplesPerPixel(), hash);
+    int32_t stratum = PermutationElement(m_sampleIndex, SamplesPerPixel(), (uint32_t)hash);
     m_dimension++;
     Float delta = m_jitter ? m_rng.Uniform<Float>() : 0.5f;
     return (stratum + delta) / SamplesPerPixel();
@@ -30,7 +30,7 @@ Float StratifiedSampler::Get1D() {
 
 Vec2 StratifiedSampler::Get2D() {
     uint64_t hash = Hash(m_pixel, m_dimension, m_seed);
-    int32_t stratum = PermutationElement(m_sampleIndex, SamplesPerPixel(), hash);
+    int32_t stratum = PermutationElement(m_sampleIndex, SamplesPerPixel(), (uint32_t)hash);
     m_dimension += 2;
     int32_t x = stratum % m_xPixelSamples, y = stratum / m_xPixelSamples;
     Float dx = m_jitter ? m_rng.Uniform<Float>() : 0.5f;
