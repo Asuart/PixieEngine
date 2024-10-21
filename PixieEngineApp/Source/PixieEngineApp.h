@@ -17,7 +17,7 @@ public:
 
 protected:
 	static const uint32_t m_maxScenePathLength = 1024;
-	char m_scenePath[m_maxScenePathLength] = "../Scenes/default.obj";
+	char m_scenePath[m_maxScenePathLength] = "../Scenes/untitled.glb";
 	PixieEngineWindow m_window;
 	PixieEngineInterface m_interface;
 	Scene* m_scene;
@@ -26,7 +26,7 @@ protected:
 	glm::ivec2 m_viewportResolution;
 	FrameBuffer* m_viewportFrameBuffer;
 	SceneObject* m_selectedObject = nullptr;
-	bool m_rayTracingViewport = true;
+	bool m_rayTracingViewport = false;
 
 	void UpdateViewportResolution(glm::ivec2 resolution);
 	void ReloadScene();

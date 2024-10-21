@@ -4,8 +4,10 @@
 #include "Camera.h"
 #include "MeshComponent.h"
 #include "MaterialComponent.h"
+#include "MeshAnimatorComponent.h"
 #include "ShaderLibrary.h"
 #include "Light.h"
+#include "Timer.h"
 
 class SceneRenderer : public Renderer {
 public:
@@ -20,7 +22,7 @@ protected:
 	Scene* m_scene = nullptr;
 	GLuint m_defaultShader = 0;
 
-	void DrawObject(SceneObject* object, GLuint mModelLoc);
+	void DrawObject(SceneObject* object, GLuint mModelLoc, Mat4 parentTransform = Mat4(1.0f));
 	void SetupCamera(const Camera* camera);
 	void SetupLights();
 	void SetupMaterial(const Material* material);

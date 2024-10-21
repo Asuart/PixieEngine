@@ -4,6 +4,7 @@
 #include "MeshComponent.h"
 #include "MaterialComponent.h"
 #include "MeshAnimator.h"
+#include "MeshAnimatorComponent.h"
 
 class SceneLoader {
 public:
@@ -15,5 +16,5 @@ protected:
 	Material* ProcessMaterial(Scene* loadedScene, uint32_t materialIndex, const aiScene* scene);
 	void SetVertexBoneData(Vertex& vertex, int32_t boneID, Float weight);
 	void ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, std::map<std::string, BoneInfo>& boneInfoMap, aiMesh* mesh, const aiScene* scene);
-	void LoadBones(const aiAnimation* animation, std::map<std::string, BoneInfo>& boneInfoMap, std::vector<Bone>& bones);
+	std::vector<Bone> LoadBones(const aiAnimation* animation, std::map<std::string, BoneInfo>& boneInfoMap);
 };

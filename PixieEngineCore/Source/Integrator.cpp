@@ -13,25 +13,35 @@ Integrator::Integrator(const glm::ivec2& resolution)
 
 void Integrator::SetScene(Scene* scene) {
 	bool wasRendering = m_isRendering;
-	StopRender();
+	if (m_isRendering) {
+		StopRender();
+	}
 	m_scene = scene;
 	Reset();
-	if (wasRendering) StartRender();
+	if (wasRendering) {
+		StartRender();
+	}
 }
 
 void Integrator::SetResolution(const glm::ivec2& resolution) {
 	bool wasRendering = m_isRendering;
-	StopRender();
+	if (m_isRendering) {
+		StopRender();
+	}
 	m_resolution = resolution;
 	m_film.Resize(resolution);
 	RayTracingStatistics::Resize(resolution);
 	Reset();
-	if (wasRendering) StartRender();
+	if (wasRendering) {
+		StartRender();
+	}
 }
 
 void Integrator::Reset() {
 	bool wasRendering = m_isRendering;
-	StopRender();
+	if (m_isRendering) {
+		StopRender();
+	}
 
 	m_film.Reset();
 	RayTracingStatistics::Reset();
@@ -48,7 +58,9 @@ void Integrator::Reset() {
 		lights[i]->Preprocess(sceneBounds);
 	}
 
-	if (wasRendering) StartRender();
+	if (wasRendering) {
+		StartRender();
+	}
 }
 
 void Integrator::StartRender() {
@@ -106,7 +118,6 @@ void Integrator::StartRender() {
 
 void Integrator::StopRender() {
 	if (!m_isRendering) return;
-	m_isRendering = false;
 	for (int32_t i = 0; i < m_renderThreads.size(); i++) {
 		m_renderThreads[i]->join();
 	}
@@ -114,6 +125,7 @@ void Integrator::StopRender() {
 		delete m_renderThreads[i];
 	}
 	m_renderThreads.clear();
+	m_isRendering = false;
 }
 
 void Integrator::PerPixel(uint32_t x, uint32_t y, Sampler* sampler) {

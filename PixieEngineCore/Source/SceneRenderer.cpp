@@ -37,10 +37,17 @@ void SceneRenderer::DrawFrame() {
 	DrawObject(rootObject, mModelLoc);
 }
 
-void SceneRenderer::DrawObject(SceneObject* object, GLuint mModelLoc) {
+void SceneRenderer::DrawObject(SceneObject* object, GLuint mModelLoc, Mat4 parentTransform) {
 	if (!object) return;
+	Mat4 objectTransform = parentTransform * object->transform.GetMatrix();
+	if (MeshAnimatorComponent* animatorComponent = object->GetComponent<MeshAnimatorComponent>()) {
+		animatorComponent->UpdateAnimation(Timer::deltaTime);
+		std::vector<Mat4> transforms = animatorComponent->GetBoneMatrices();
+		GLuint mat4Loc = glGetUniformLocation(m_defaultShader, "finalBonesMatrices");
+		glUniformMatrix4(mat4Loc, transforms.size(), GL_FALSE, &transforms[0][0][0]);
+	}
 	if (MeshComponent* mesh = object->GetComponent<MeshComponent>()) {
-		glUniformMatrix4(mModelLoc, 1, GL_FALSE, &object->transform.GetMatrix()[0][0]);
+		glUniformMatrix4(mModelLoc, 1, GL_FALSE, &objectTransform[0][0]);
 		const Material* material = m_scene->GetMaterialsList()[0];
 		if (MaterialComponent* materialComponent = object->GetComponent<MaterialComponent>()) {
 			material = materialComponent->GetMaterial();
@@ -49,7 +56,7 @@ void SceneRenderer::DrawObject(SceneObject* object, GLuint mModelLoc) {
 		mesh->Draw();
 	}
 	for (size_t i = 0; i < object->children.size(); i++) {
-		DrawObject(object->children[i], mModelLoc);
+		DrawObject(object->children[i], mModelLoc, objectTransform);
 	}
 }
 

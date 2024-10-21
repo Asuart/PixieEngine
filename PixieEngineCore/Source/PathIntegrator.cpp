@@ -9,12 +9,17 @@ PathIntegrator::~PathIntegrator() {
 }
 
 void PathIntegrator::SetScene(Scene* scene) {
-	StopRender();
+	bool wasRendering = m_isRendering;
+	if (m_isRendering) {
+		StopRender();
+	}
 	m_scene = scene;
 	if (m_lightSampler) delete m_lightSampler;
 	m_lightSampler = new UniformLightSampler((const std::vector<Light*>&)m_scene->GetGeometrySnapshot()->GetAreaLights());
 	Reset();
-	StartRender();
+	if (wasRendering) {
+		StartRender();
+	}
 }
 
 Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {

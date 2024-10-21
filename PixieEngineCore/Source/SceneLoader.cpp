@@ -19,9 +19,17 @@ Scene* SceneLoader::LoadScene(const std::string& filePath) {
 
 	std::vector<Animation*> animations;
 	for (uint32_t i = 0; i < scene->mNumAnimations; i++) {
-		std::vector<Bone> bones;
-		LoadBones(scene->mAnimations[i], boneInfoMap, bones);
-		animations.push_back(new Animation((float)scene->mAnimations[i]->mDuration, (int32_t)scene->mAnimations[i]->mTicksPerSecond, bones, boneInfoMap,  rootObject));
+		std::vector<Bone> bones = LoadBones(scene->mAnimations[i], boneInfoMap);
+		animations.push_back(new Animation(
+			(float)scene->mAnimations[i]->mDuration,
+			(int32_t)scene->mAnimations[i]->mTicksPerSecond,
+			bones, boneInfoMap, rootObject)
+		);
+	}
+	if (animations.size() > 0) {
+		Mat4 globalInverseTransform = glm::inverse(AssimpGLMHelpers::ConvertMatrixToGLMFormat(scene->mRootNode->mTransformation));
+		MeshAnimatorComponent* animator = new MeshAnimatorComponent(animations, rootObject, globalInverseTransform);
+		rootObject->AddComponent(animator);
 	}
 
 	return loadedScene;
@@ -39,8 +47,9 @@ SceneObject* SceneLoader::ProcessNode(Scene* loadedScene, SceneObject* parentObj
 
 	for (uint32_t i = 0; i < node->mNumChildren; i++) {
 		SceneObject* child = ProcessNode(loadedScene, nodeObject, boneInfoMap, node->mChildren[i], scene);
-		loadedScene->AddObject(child, parentObject);
+		loadedScene->AddObject(child, nodeObject);
 	}
+
 	return nodeObject;
 }
 
@@ -71,8 +80,8 @@ Mesh* SceneLoader::ProcessMesh(Scene* loadedScene, SceneObject* object, std::map
 	std::vector<Vertex> vertices;
 	for (uint32_t i = 0; i < mesh->mNumVertices; i++) {
 		vertices.push_back(Vertex(
-			{ mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z },
-			mesh->HasNormals() ? Vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z) : Vec3(0.0f),
+			AssimpGLMHelpers::GetGLMVec(mesh->mVertices[i]),
+			mesh->HasNormals() ? AssimpGLMHelpers::GetGLMVec(mesh->mNormals[i]) : Vec3(0.0f),
 			mesh->HasTextureCoords(0) ? Vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y) : Vec2(0.0f)
 		));
 	}
@@ -100,7 +109,6 @@ Material* SceneLoader::ProcessMaterial(Scene* loadedScene, uint32_t materialInde
 	aiGetMaterialFloat(scene->mMaterials[materialIndex], AI_MATKEY_OPACITY, &opacity);
 	aiGetMaterialFloat(scene->mMaterials[materialIndex], AI_MATKEY_REFRACTI, &eta);	
 
-
 	Vec3 glmEmissionColor = Vec3(colorEmissive.r, colorEmissive.g, colorEmissive.b);
 	float emissionNormaizer = (float)MaxComponent(glmEmissionColor);
 	glmEmissionColor /= emissionNormaizer;
@@ -119,13 +127,15 @@ Material* SceneLoader::ProcessMaterial(Scene* loadedScene, uint32_t materialInde
 	return material;
 }
 
-void SceneLoader::LoadBones(const aiAnimation* animation, std::map<std::string, BoneInfo>& boneInfoMap, std::vector<Bone>& bones) {
+std::vector<Bone> SceneLoader::LoadBones(const aiAnimation* animation, std::map<std::string, BoneInfo>& boneInfoMap) {
+	std::vector<Bone> bones;
 	for (uint32_t i = 0; i < animation->mNumChannels; i++) {
 		aiNodeAnim* channel = animation->mChannels[i];
 		std::string boneName = channel->mNodeName.data;
 
 		if (boneInfoMap.find(boneName) == boneInfoMap.end()) {
-			boneInfoMap[boneName].id = (int32_t)boneInfoMap.size();
+			int32_t boneID = boneInfoMap.size();
+			boneInfoMap[boneName] = { boneID, Mat4(1.0f) };
 		}
 
 		Bone bone = Bone(boneName, boneInfoMap[boneName].id);
@@ -144,39 +154,52 @@ void SceneLoader::LoadBones(const aiAnimation* animation, std::map<std::string, 
 			bone.rotations.push_back(data);
 		}
 
-		for (uint32_t keyIndex = 0; keyIndex < channel->mNumScalingKeys; keyIndex++) {
+		for (uint32_t scaleIndex = 0; scaleIndex < channel->mNumScalingKeys; scaleIndex++) {
 			KeyScale data;
-			data.scale = AssimpGLMHelpers::GetGLMVec(channel->mScalingKeys[keyIndex].mValue);
-			data.timeStamp = (Float)channel->mScalingKeys[keyIndex].mTime;
+			data.scale = AssimpGLMHelpers::GetGLMVec(channel->mScalingKeys[scaleIndex].mValue);
+			data.timeStamp = (Float)channel->mScalingKeys[scaleIndex].mTime;
 			bone.scales.push_back(data);
 		}
 
 		bones.push_back(bone);
 	}
+	return bones;
 }
 
 void SceneLoader::SetVertexBoneData(Vertex& vertex, int32_t boneID, Float weight) {
+	if (weight == 0) return;
+
 	for (uint32_t i = 0; i < MaxBonesPerVertex; i++) {
-		if (vertex.boneIDs[i] < 0) {
-			vertex.boneWeights[i] = weight;
+		if (vertex.boneIDs[i] == -1) {
 			vertex.boneIDs[i] = boneID;
-			break;
+			vertex.boneWeights[i] = weight;
+			return;
 		}
+	}
+
+	int32_t minIndex = 0;
+	Float min = 0.0f;
+	for (int32_t i = 0; i < MaxBonesPerVertex; i++) {
+		if (vertex.boneWeights[i] < min) {
+			min = vertex.boneWeights[i];
+			minIndex = i;
+		}
+	}
+	if (weight > min) {
+		vertex.boneIDs[minIndex] = boneID;
+		vertex.boneWeights[minIndex] = weight;
 	}
 }
 
 void SceneLoader::ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, std::map<std::string, BoneInfo>& boneInfoMap, aiMesh* mesh, const aiScene* scene) {
-	if (!mesh->HasBones()) return;
+	static std::map<int, int> influencesCounts;
 
 	for (uint32_t boneIndex = 0; boneIndex < mesh->mNumBones; boneIndex++) {
 		int32_t boneID = -1;
 		std::string boneName = mesh->mBones[boneIndex]->mName.C_Str();
 		if (boneInfoMap.find(boneName) == boneInfoMap.end()) {
-			BoneInfo newBoneInfo;
-			newBoneInfo.id = (int32_t)boneInfoMap.size();
-			newBoneInfo.offset = AssimpGLMHelpers::ConvertMatrixToGLMFormat(mesh->mBones[boneIndex]->mOffsetMatrix);
-			boneInfoMap[boneName] = newBoneInfo;
-			boneID = newBoneInfo.id;
+			boneID = boneInfoMap.size();
+			boneInfoMap[boneName] = { boneID, AssimpGLMHelpers::ConvertMatrixToGLMFormat(mesh->mBones[boneIndex]->mOffsetMatrix) };
 		}
 		else {
 			boneID = boneInfoMap[boneName].id;
@@ -184,12 +207,16 @@ void SceneLoader::ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, st
 		assert(boneID != -1);
 
 		aiVertexWeight* weights = mesh->mBones[boneIndex]->mWeights;
-		int32_t numWeights = mesh->mBones[boneIndex]->mNumWeights;
-		for (int32_t weightIndex = 0; weightIndex < numWeights; weightIndex++) {
-			int32_t vertexId = weights[weightIndex].mVertexId;
-			Float weight = weights[weightIndex].mWeight;
-			assert(vertexId <= vertices.size());
-			SetVertexBoneData(vertices[vertexId], boneID, weight);
+		for (int32_t weightIndex = 0; weightIndex < mesh->mBones[boneIndex]->mNumWeights; weightIndex++) {
+			assert(weights[weightIndex].mVertexId <= vertices.size());
+			influencesCounts[weights[weightIndex].mVertexId]++;
+			SetVertexBoneData(vertices[weights[weightIndex].mVertexId], boneID, weights[weightIndex].mWeight);
 		}
 	}
+
+	int32_t maxInfluences = 0;
+	for (auto el : influencesCounts) {
+		if (el.second > maxInfluences) maxInfluences = el.second;
+	}
+	std::cout << "  Max vertex influences: " << maxInfluences << "\n";
 }

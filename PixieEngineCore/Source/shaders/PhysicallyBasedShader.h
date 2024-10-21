@@ -22,15 +22,7 @@ const char* const PBR_VERTEX_SHADER_SOURCE =
 ""
 "void main()\n"
 "{\n"
-"    mat4 BoneTransform = finalBonesMatrices[boneIDs[0]] * weights[0];\n"
-"    BoneTransform += finalBonesMatrices[boneIDs[1]] * weights[1];\n"
-"    BoneTransform += finalBonesMatrices[boneIDs[2]] * weights[2];\n"
-"    BoneTransform += finalBonesMatrices[boneIDs[3]] * weights[3];\n"
-""
-"    vec4 PosL = BoneTransform * vec4(pos, 1.0);\n"
-"    gl_Position = mProjection * mView * PosL;\n"
 "    vec4 totalPosition = vec4(0.0f);\n"
-""
 "    for (int i = 0; i < MAX_BONE_INFLUENCE; i++) {\n"
 "        if (boneIDs[i] == -1)\n"
 "            continue;\n"
@@ -43,10 +35,10 @@ const char* const PBR_VERTEX_SHADER_SOURCE =
 "        vec3 localNormal = mat3(finalBonesMatrices[boneIDs[i]]) * norm;\n"
 "    }\n"
 ""
-"    gl_Position = mProjection * mView * mModel * vec4(pos, 1.0);\n"
 "	 fTexCoords = uv;\n"
-"	 fWorldPos = (mModel * vec4(pos, 1.0)).xyz;\n"
+"	 fWorldPos = (mModel * totalPosition).xyz;\n"
 "    fNormal = mat3(transpose(inverse(mModel))) * norm;\n"
+"    gl_Position = mProjection * mView * mModel * totalPosition;\n"
 "}\n";
 
 const char* const PBR_FRAGMENT_SHADER_SOURCE =

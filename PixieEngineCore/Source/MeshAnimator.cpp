@@ -111,7 +111,8 @@ const std::map<std::string, BoneInfo>& Animation::GetBoneIDMap() const {
     return boneInfoMap;
 }
 
-Animator::Animator(Animation* Animation) {
+Animator::Animator(Animation* Animation, Mat4 globalInverseTransform)
+    : m_globalInverseTransform(globalInverseTransform) {
     currentTime = 0.0;
     currentAnimation = Animation;
 
@@ -141,7 +142,6 @@ void Animator::CalculateBoneTransform(const SceneObject* node, Mat4 parentTransf
     Mat4 nodeTransform = node->transform.GetMatrix();
 
     Bone* Bone = currentAnimation->FindBone(nodeName);
-
     if (Bone) {
         Bone->Update(currentTime);
         nodeTransform = Bone->localTransform;
@@ -153,7 +153,7 @@ void Animator::CalculateBoneTransform(const SceneObject* node, Mat4 parentTransf
     if (boneInfoMap.find(nodeName) != boneInfoMap.end()) {
         int32_t index = boneInfoMap[nodeName].id;
         Mat4 offset = boneInfoMap[nodeName].offset;
-        finalBoneMatrices[index] = globalTransformation * offset;
+        finalBoneMatrices[index] = m_globalInverseTransform * globalTransformation * offset;
     }
 
     for (size_t i = 0; i < node->children.size(); i++) {

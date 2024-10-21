@@ -4,29 +4,29 @@
 #include "SceneObject.h"
 
 struct KeyPosition {
-    Vec3 position;
-    Float timeStamp;
+    Vec3 position = Vec3(0.0f);
+    Float timeStamp = 0.0f;
 };
 
 struct KeyRotation {
-    Quaternion orientation;
-    Float timeStamp;
+    Quaternion orientation = Quaternion();
+    Float timeStamp = 0.0f;
 };
 
 struct KeyScale {
-    Vec3 scale;
-    Float timeStamp;
+    Vec3 scale = Vec3(1.0f);
+    Float timeStamp = 0.0f;
 };
 
 struct BoneInfo {
-    int32_t id;
-    Mat4 offset;
+    int32_t id = -1;
+    Mat4 offset = Mat4(1.0f);
 };
 
 struct Bone {
     std::string name;
-    int32_t id;
-    Mat4 localTransform;
+    int32_t id = -1;
+    Mat4 localTransform = Mat4(1.0f);
     std::vector<KeyPosition> positions;
     std::vector<KeyRotation> rotations;
     std::vector<KeyScale> scales;
@@ -70,16 +70,18 @@ private:
 
 class Animator {
 public:
-    Animator(Animation* Animation);
+    Animator(Animation* Animation, Mat4 globalInverseTransform);
 
     void UpdateAnimation(Float dt);
     void PlayAnimation(Animation* pAnimation);
-    void CalculateBoneTransform(const SceneObject* node, Mat4 parentTransform);
     std::vector<Mat4> GetFinalBoneMatrices();
 
 private:
+    Mat4 m_globalInverseTransform;
     std::vector<Mat4> finalBoneMatrices;
-    Animation* currentAnimation;
-    Float currentTime;
-    Float deltaTime;
+    Animation* currentAnimation = nullptr;
+    Float currentTime = 0.0f;
+    Float deltaTime = 0.0f;
+
+    void CalculateBoneTransform(const SceneObject* node, Mat4 parentTransform);
 };

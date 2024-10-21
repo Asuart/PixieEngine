@@ -1,12 +1,64 @@
 #include "pch.h"
 #include "PixieEngineApp.h"
 
+void APIENTRY openglCallbackFunction(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+{
+	// filter some warnings
+	if (id == 131185) return;
+
+	std::cout << "---------------------opengl-callback-start------------\n";
+	std::cout << "message: " << message << "\n";
+	std::cout << "type: ";
+	switch (type) {
+	case GL_DEBUG_TYPE_ERROR:
+		std::cout << "ERROR";
+		break;
+	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+		std::cout << "DEPRECATED_BEHAVIOR";
+		break;
+	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+		std::cout << "UNDEFINED_BEHAVIOR";
+		break;
+	case GL_DEBUG_TYPE_PORTABILITY:
+		std::cout << "PORTABILITY";
+		break;
+	case GL_DEBUG_TYPE_PERFORMANCE:
+		std::cout << "PERFORMANCE";
+		break;
+	case GL_DEBUG_TYPE_OTHER:
+		std::cout << "OTHER";
+		break;
+	default:
+		std::cout << "UNDEFINED";
+	}
+	std::cout << "\n";
+
+	std::cout << "id: " << id << "\n";
+	std::cout << "severity: ";
+	switch (severity) {
+	case GL_DEBUG_SEVERITY_LOW:
+		std::cout << "LOW";
+		break;
+	case GL_DEBUG_SEVERITY_MEDIUM:
+		std::cout << "MEDIUM";
+		break;
+	case GL_DEBUG_SEVERITY_HIGH:
+		std::cout << "HIGH";
+		break;
+	default:
+		std::cout << "UNDEFINED";
+	}
+	std::cout << "\n---------------------opengl-callback-end--------------\n";
+}
+
 PixieEngineApp::PixieEngineApp()
 	: m_interface(*this) {
 	if (!gladLoadGL()) {
 		std::cout << "GLEW initialization failed.\n";
 		exit(1);
 	}
+	glEnable(GL_DEBUG_OUTPUT);
+	glDebugMessageCallback(openglCallbackFunction, 0);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -49,8 +101,6 @@ void PixieEngineApp::Start() {
 		HandleUserInput();
 		UserInput::Reset();
 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		m_viewportFrameBuffer->Bind();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glViewport(0, 0, m_viewportFrameBuffer->m_resolution.x, m_viewportFrameBuffer->m_resolution.y);
@@ -64,7 +114,9 @@ void PixieEngineApp::Start() {
 			m_sceneRenderer->DrawFrame();
 		}
 		m_viewportFrameBuffer->Unbind();
+
 		glViewport(0, 0, m_window.GetWindowSize().x, m_window.GetWindowSize().y);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		m_interface.Draw();
 
@@ -105,7 +157,9 @@ void PixieEngineApp::ReloadScene() {
 	m_sceneRenderer->SetScene(m_scene);
 
 	m_rayTracingRenderer->SetScene(m_scene);
-	m_rayTracingRenderer->StartRender();
+	if (m_rayTracingViewport) {
+		m_rayTracingRenderer->StartRender();
+	}
 }
 
 void PixieEngineApp::HandleUserInput() {

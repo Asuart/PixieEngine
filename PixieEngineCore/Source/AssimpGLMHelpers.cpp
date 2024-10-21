@@ -10,6 +10,10 @@ Mat4 AssimpGLMHelpers::ConvertMatrixToGLMFormat(const aiMatrix4x4& from) {
 	return to;
 }
 
+Vec2 AssimpGLMHelpers::GetGLMVec(const aiVector2D& vec) {
+	return Vec2(vec.x, vec.y);
+}
+
 Vec3 AssimpGLMHelpers::GetGLMVec(const aiVector3D& vec) {
 	return Vec3(vec.x, vec.y, vec.z);
 }
