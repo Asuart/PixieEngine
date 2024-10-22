@@ -9,6 +9,8 @@ struct Texture {
 	glm::ivec2 resolution;
 	std::vector<T> pixels;
 
+	Texture(int32_t width, int32_t height, uint8_t* data, int32_t numChannels = 3);
+
 	Texture(glm::ivec2 _resolution)
 		: resolution(_resolution), pixels(_resolution.x * _resolution.y) {}
 

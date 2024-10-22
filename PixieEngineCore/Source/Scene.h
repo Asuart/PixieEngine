@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "MaterialComponent.h"
 #include "GeometrySnapshot.h"
+#include "PointLight.h"
 
 class Scene {
 public:
@@ -15,7 +16,6 @@ public:
 
 	void AddObject(SceneObject* object, SceneObject* parent = nullptr);
 	void AddObject(SceneObject* object, const std::string& parentName);
-	void RemoveObject(SceneObject* object);
 	void RemoveObject(const std::string& objectName);
 	void RemoveObjects(const std::string& objectName);
 	SceneObject* FindObject(const std::string& objectName);
@@ -27,6 +27,7 @@ public:
 	std::vector<Mesh*>& GetMeshesList();
 	std::vector<MaterialComponent*>& GetAreaLights();
 	std::vector<Light*>& GetInfiniteLights();
+	std::vector<PointLight*>& GetPointLights();
 	std::vector<Camera>& GetCameras();
 	Camera* GetMainCamera();
 	void SetMainCamera(uint32_t index);
@@ -42,12 +43,12 @@ public:
 
 protected:
 	SceneObject* rootObject = nullptr;
-	std::vector<SceneObject*> flatObjects;
 	std::vector<Material*> materials;
 	std::vector<Mesh*> meshes;
-	std::vector<MaterialComponent*> areaLights;
 	std::vector<Camera> cameras;
 	std::vector<Light*> infiniteLights;
+	std::vector<PointLight*> pointLights;
+	std::vector<MaterialComponent*> areaLights;
 	Camera* mainCamera = nullptr;
 	GeometrySnapshot* geometrySnapshot = nullptr;
 

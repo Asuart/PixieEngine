@@ -11,10 +11,10 @@ struct SurfaceInteraction;
 struct Material {
 	const std::string m_name;
 	Spectrum m_albedo = Spectrum(0.8f, 0.8f, 0.8f);
-	Texture<Spectrum>* m_albedoTexture = nullptr;
+	Texture<Vec3>* m_albedoTexture = nullptr;
 	Spectrum m_emissionColor = Spectrum(1.0f, 1.0f, 1.0f);
 	Float m_emissionStrength = 0.0f;
-	Texture<Spectrum>* m_emissionTexture = nullptr;
+	Texture<Vec3>* m_emissionTexture = nullptr;
 	Float m_metallic = 1.0f;
 	Texture<float>* m_metallicTexture = nullptr;
 	Float m_roughness = 1.0f;
@@ -23,7 +23,7 @@ struct Material {
 	Texture<float>* m_ambientOcclusionTexture = nullptr;
 	Float m_refraction = 1.0f;
 	Float m_transparency = 0.0f;
-	Texture<glm::fvec3>* m_normalTexture = nullptr;
+	Texture<Vec3>* m_normalTexture = nullptr;
 
 	Material(const std::string& name, Spectrum albedo = Spectrum(0.8f), Spectrum emissionColor = Spectrum(0.0f), float emissionStrength = 0.0f, float roughness = 1.0f, float metallic = 0.0f, float transparency = 0.0f, float refraction = 1.0f);
 

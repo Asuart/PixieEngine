@@ -2,7 +2,7 @@
 #include "Scene.h"
 
 Scene::Scene(const std::string& name)
-	: name(name), rootObject(new SceneObject("root object")) {
+	: name(name), rootObject(new SceneObject("Scene")) {
 	Vec3 lookfrom1(0.0f, 0.0f, 10.0f);
 	Vec3 lookat1(0.0f, 0.0f, 0.0f);
 	Vec3 vup1(0.0f, 1.0f, 0.0f);
@@ -34,18 +34,17 @@ Scene::Scene(const std::string& name)
 	cameras.push_back(cam3);
 
 	mainCamera = &cameras.back();
+
+	pointLights.push_back(new PointLight(Spectrum(1.0f, 1.0f, 1.0f), 2.0f, glm::translate(Vec3(0, 0, 0)), nullptr));
 }
 
 void Scene::AddObject(SceneObject* object, SceneObject* parent) {
 	if (parent) {
-		object->parent = parent;
-		parent->children.push_back(object);
+		parent->AddChild(object);
 	}
 	else {
-		object->parent = rootObject;
-		rootObject->children.push_back(object);
+		rootObject->AddChild(object);
 	}
-	flatObjects.push_back(object);
 }
 
 void Scene::AddObject(SceneObject* object, const std::string& parentName) {
@@ -54,98 +53,34 @@ void Scene::AddObject(SceneObject* object, const std::string& parentName) {
 	AddObject(object, parent);
 }
 
-void Scene::RemoveObject(SceneObject* object) {
-	for (size_t i = 0; i < flatObjects.size(); i++) {
-		if (flatObjects[i] == object) {
-			SceneObject* obj = flatObjects[i];
-			flatObjects.erase(flatObjects.begin() + i);
-			if (!obj->parent) break;
-			for (size_t j = 0; j < obj->parent->children.size(); j++) {
-				if (obj->parent->children[j] == obj) {
-					obj->parent->children.erase(obj->parent->children.begin() + j);
-					break;
-				}
-			}
-			break;
-		}
-	}
-}
-
 void Scene::RemoveObject(const std::string& objectName) {
-	for (size_t i = 0; i < flatObjects.size(); i++) {
-		if (flatObjects[i]->name == objectName) {
-			SceneObject* obj = flatObjects[i];
-			flatObjects.erase(flatObjects.begin() + i);
-			if (!obj->parent) break;
-			for (size_t j = 0; j < obj->parent->children.size(); j++) {
-				if (obj->parent->children[j] == obj) {
-					obj->parent->children.erase(obj->parent->children.begin() + j);
-					break;
-				}
-			}
-			break;
-		}
+	SceneObject* object = FindObject(objectName);
+	if (object) {
+		object->Remove();
 	}
 }
 
 void Scene::RemoveObjects(const std::string& objectName) {
-	bool objectFound = false;
-	while (!objectFound) {
-		objectFound = false;
-		for (size_t i = 0; i < flatObjects.size(); i++) {
-			if (flatObjects[i]->name == objectName) {
-				SceneObject* obj = flatObjects[i];
-				flatObjects.erase(flatObjects.begin() + i);
-				objectFound = true;
-				if (!obj->parent) break;
-				for (size_t j = 0; j < obj->parent->children.size(); j++) {
-					if (obj->parent->children[j] == obj) {
-						obj->parent->children.erase(obj->parent->children.begin() + j);
-						break;
-					}
-				}
-				break;
-			}
-		}
+	std::vector<SceneObject*> objects = FindObjects(objectName);
+	for (int32_t i = 0; i < objects.size(); i++) {
+		objects[i]->Remove();
 	}
 }
 
 SceneObject* Scene::FindObject(const std::string& objectName) {
-	for (size_t i = 0; i < flatObjects.size(); i++) {
-		if (flatObjects[i]->name == objectName) {
-			return flatObjects[i];
-		}
-	}
-	return nullptr;
+	return rootObject->FindObject(objectName);
 }
 
 std::vector<SceneObject*> Scene::FindObjects(const std::string& objectName) {
-	std::vector<SceneObject*> objects;
-	for (size_t i = 0; i < flatObjects.size(); i++) {
-		if (flatObjects[i]->name == objectName) {
-			objects.push_back(flatObjects[i]);
-		}
-	}
-	return objects;
+	return rootObject->FindObjects(objectName);
 }
 
 SceneObject* Scene::FindObjectWithComponent(const std::string& componentName) {
-	for (size_t i = 0; i < flatObjects.size(); i++) {
-		if (flatObjects[i]->GetComponent(componentName)) {
-			return flatObjects[i];
-		}
-	}
-	return nullptr;
+	return rootObject->FindObjectWithComponent(componentName);
 }
 
 std::vector<SceneObject*> Scene::FindObjectsWithComponent(const std::string& componentName) {
-	std::vector<SceneObject*> objects;
-	for (size_t i = 0; i < flatObjects.size(); i++) {
-		if (flatObjects[i]->GetComponent(componentName)) {
-			objects.push_back(flatObjects[i]);
-		}
-	}
-	return objects;
+	return rootObject->FindObjectsWithComponent(componentName);
 }
 
 SceneObject* Scene::GetRootObject() {
@@ -166,6 +101,10 @@ std::vector<MaterialComponent*>& Scene::GetAreaLights() {
 
 std::vector<Light*>& Scene::GetInfiniteLights() {
 	return infiniteLights;
+}
+
+std::vector<PointLight*>& Scene::GetPointLights() {
+	return pointLights;
 }
 
 std::vector<Camera>& Scene::GetCameras() {
@@ -196,7 +135,7 @@ void Scene::FixedUpdate() {}
 
 void Scene::MakeGeometrySnapshot() {
 	if (geometrySnapshot) delete geometrySnapshot;
-	geometrySnapshot = new GeometrySnapshot(flatObjects);
+	geometrySnapshot = new GeometrySnapshot(rootObject);
 }
 
 GeometrySnapshot* Scene::GetGeometrySnapshot() {

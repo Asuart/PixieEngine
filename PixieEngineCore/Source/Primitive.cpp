@@ -184,6 +184,7 @@ bool BVHAggregate::IntersectP(const Ray& ray, Float tMax) const {
 
 BVHBuildNode* BVHAggregate::buildRecursive(std::span<BVHPrimitive> bvhPrimitives, std::atomic<int32_t>* totalNodes, std::atomic<int32_t>* orderedPrimsOffset, std::vector<Primitive*>& orderedPrims) {
 	BVHBuildNode* node = new BVHBuildNode();
+	if (bvhPrimitives.size() == 0) return node;
 	++*totalNodes;
 	Bounds3f bounds;
 	for (const auto& prim : bvhPrimitives) {

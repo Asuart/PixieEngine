@@ -12,7 +12,8 @@ project "PixieEngineCore"
       "Source/**.h",
       "Source/**.cpp",
       "Source/shaders/**.h",
-      "../Dependencies/glad/src/**.c"
+      "../Dependencies/glad/src/**.c",
+      "../Dependencies/stb/**.h",
     }
 
    includedirs
@@ -21,6 +22,7 @@ project "PixieEngineCore"
       "Source/shaders",
       "../Dependencies/glm",
       "../Dependencies/glad/include",
+      "../Dependencies/stb",
    }
 
    links

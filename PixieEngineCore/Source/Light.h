@@ -68,6 +68,8 @@ public:
 	virtual LightType Type() const;
 	virtual void Preprocess(const Bounds3f& sceneBounds);
 
+	const Transform& GetTransform();
+
 protected:
 	LightType m_type;
 	Transform m_transform;

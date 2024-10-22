@@ -8,10 +8,11 @@
 #include "ShaderLibrary.h"
 #include "Light.h"
 #include "Timer.h"
+#include "ResourceManager.h"
 
-class SceneRenderer : public Renderer {
+class DefaultRenderer : public Renderer {
 public:
-	SceneRenderer(const glm::ivec2& resolution, Scene* scene = nullptr);
+	DefaultRenderer(const glm::ivec2& resolution, Scene* scene = nullptr);
 
 	void SetScene(Scene* scene);
 	void SetResolution(const glm::ivec2& resolution) override;

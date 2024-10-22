@@ -21,7 +21,7 @@
 #include "AssimpGLMHelper.h"
 #include "Material.h"
 #include "ShaderLibrary.h"
-#include "SceneLoader.h"
+#include "ResourceManager.h"
 #include "FrameBuffer.h"
 
 class PixieEngine {

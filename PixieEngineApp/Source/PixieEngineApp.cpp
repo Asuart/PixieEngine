@@ -62,6 +62,8 @@ PixieEngineApp::PixieEngineApp()
 
 	glEnable(GL_DEPTH_TEST);
 
+	ResourceManager::Initialize();
+
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
@@ -75,11 +77,11 @@ PixieEngineApp::PixieEngineApp()
 	ImGui_ImplGlfw_InitForOpenGL(m_window.GetGLFWWindow(), true);
 	ImGui_ImplOpenGL3_Init();
 
-	SceneLoader sceneLoader;
-	m_scene = sceneLoader.LoadScene(m_scenePath);
+	m_scene = new Scene("Initial Scene");
+	m_scene->AddObject(ResourceManager::LoadModel(m_scenePath));
 	m_scene->MakeGeometrySnapshot();
 
-	m_sceneRenderer = new SceneRenderer(glm::ivec2(640, 640), m_scene);
+	m_sceneRenderer = new DefaultRenderer(glm::ivec2(640, 640), m_scene);
 
 	m_rayTracingRenderer = new RayTracingRenderer(this, glm::ivec2(640, 640), m_scene);
 	if (m_rayTracingViewport) {
@@ -150,8 +152,8 @@ void PixieEngineApp::ReloadScene() {
 		m_scene = nullptr;
 	}
 
-	SceneLoader sceneLoader;
-	m_scene = sceneLoader.LoadScene(m_scenePath);
+	m_scene = new Scene("Initial Scene");
+	m_scene->AddObject(ResourceManager::LoadModel(m_scenePath));
 	m_scene->MakeGeometrySnapshot();
 
 	m_sceneRenderer->SetScene(m_scene);

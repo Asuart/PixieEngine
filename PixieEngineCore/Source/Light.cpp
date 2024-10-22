@@ -36,3 +36,7 @@ LightType Light::Type() const {
 }
 
 void Light::Preprocess(const Bounds3f& sceneBounds) {}
+
+const Transform& Light::GetTransform() {
+	return m_transform;
+}

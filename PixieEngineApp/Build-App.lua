@@ -31,6 +31,7 @@ project "PixieEngineApp"
       "../Dependencies/imgui",
       "../Dependencies/imgui/backends",
       "../Dependencies/GLFW/include",
+      "../Dependencies/stb",
    }
 
    links

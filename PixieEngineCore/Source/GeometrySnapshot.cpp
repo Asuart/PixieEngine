@@ -1,8 +1,9 @@
 #include "pch.h"
 #include "GeometrySnapshot.h"
 
-GeometrySnapshot::GeometrySnapshot(const std::vector<SceneObject*>& flatObjects, uint32_t maxPrimitivesPerLeaf) {
+GeometrySnapshot::GeometrySnapshot(SceneObject* rootObject, uint32_t maxPrimitivesPerLeaf) {
 	uint64_t trianglesCount = 0, invalidTrianglesCount = 0;
+	std::vector<SceneObject*> flatObjects = rootObject->FindObjectsWithComponent("Mesh Component");
 
 	std::vector<Primitive*> agregatePrimitives;
 	for (size_t sceneObjectIndex = 0; sceneObjectIndex < flatObjects.size(); sceneObjectIndex++) {

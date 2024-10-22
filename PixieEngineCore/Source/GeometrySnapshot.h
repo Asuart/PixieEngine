@@ -10,7 +10,7 @@
 
 class GeometrySnapshot {
 public:
-	GeometrySnapshot(const std::vector<SceneObject*>& flatObjects, uint32_t maxPrimitivesPerLeaf = 6);
+	GeometrySnapshot(SceneObject* rootObject, uint32_t maxPrimitivesPerLeaf = 6);
 	~GeometrySnapshot();
 
 	std::optional<ShapeIntersection> Intersect(const Ray& ray, Float tMax = Infinity) const;

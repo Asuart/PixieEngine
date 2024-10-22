@@ -9,7 +9,10 @@ struct Vertex {
 	Vec2 uv;
 	int32_t boneIDs[MaxBonesPerVertex];
 	Float boneWeights[MaxBonesPerVertex];
+
 	Vertex(const Vec3& p = Vec3(0), const Vec3& n = Vec3(0), const Vec2& uv = Vec2(0));
+
+	bool AddWeight(int32_t boneID, float weigt, bool overrideSmallest = true);
 };
 
 struct Mesh {
