@@ -3,6 +3,8 @@
 #include "AssimpGLMHelper.h"
 #include "SceneObject.h"
 
+const int32_t MaxBonesPerModel = 100;
+
 struct KeyPosition {
     Vec3 position = Vec3(0.0f);
     Float timeStamp = 0.0f;
@@ -57,8 +59,8 @@ public:
 
     int32_t GetTicksPerSecond() const;
     float GetDuration() const;
-    const SceneObject* GetRootNode() const;
-    const std::map<std::string, BoneInfo>& GetBoneIDMap() const;
+    SceneObject* GetRootNode();
+    std::map<std::string, BoneInfo>& GetBoneIDMap();
 
 private:
     float duration;
@@ -72,9 +74,10 @@ class Animator {
 public:
     Animator(Animation* Animation, Mat4 globalInverseTransform);
 
-    void UpdateAnimation(Float dt);
     void PlayAnimation(Animation* pAnimation);
-    std::vector<Mat4> GetFinalBoneMatrices();
+    void UpdateAnimation(Float dt);
+    std::vector<Mat4>& GetFinalBoneMatrices();
+    void GetBoneMatrices(Float time, std::array<Mat4, MaxBonesPerModel>& transforms);
 
 private:
     Mat4 m_globalInverseTransform;
@@ -83,5 +86,6 @@ private:
     Float currentTime = 0.0f;
     Float deltaTime = 0.0f;
 
-    void CalculateBoneTransform(const SceneObject* node, Mat4 parentTransform);
+    void CalculateBoneTransform(SceneObject* node, Mat4 parentTransform);
+    void CalculateBoneTransform(SceneObject* node, Mat4 parentTransform, std::array<Mat4, MaxBonesPerModel>& transforms);
 };

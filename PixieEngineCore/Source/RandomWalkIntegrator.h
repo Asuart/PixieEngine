@@ -1,13 +1,11 @@
 #pragma once
-#include "Integrator.h"
+#include "RayTracing.h"
 #include "RTMath.h"
 
-class RandomWalkIntegrator : public Integrator {
+class RandomWalkIntegrator : public RayTracer {
 public:
-	RandomWalkIntegrator(const glm::ivec2& resolution);
-
-	virtual Spectrum Integrate(Ray ray, Sampler* sampler) override;
+	virtual Spectrum SampleLightRay(SceneSnapshot* sceneSnapshot, Ray ray, Sampler* sampler) override;
 
 protected:
-	virtual Spectrum IntegrateRandomWalk(Ray ray, Sampler* sampler, uint32_t depth = 0);
+	virtual Spectrum IntegrateRandomWalk(SceneSnapshot* sceneSnapshot, Ray ray, Sampler* sampler, uint32_t depth = 0);
 };

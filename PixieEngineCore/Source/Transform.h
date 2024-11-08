@@ -1,5 +1,4 @@
 #pragma once
-#include "UID.h"
 #include "RTMath.h"
 #include "Ray.h"
 #include "Interaction.h"
@@ -7,45 +6,38 @@
 
 class Transform {
 public:
-	UID id;
-
-	Transform(const Vec3& position = Vec3(0.0f), const Vec3& rotation = Vec3(0.0f), const Vec3& scale = Vec3(1.0f));
+	Transform() = default;
+	Transform(const Vec3& position, const Quaternion& rotation = Quaternion(), const Vec3& scale = Vec3(1.0f));
 	Transform(const Mat4& m);
 	Transform(const Mat4& m, const Mat4& mInv);
 
 	const Mat4& GetMatrix() const;
 	const Mat4& GetInverseMatrix() const;
-	Vec3& GetPosition();
-	Vec3& GetRotation();
-	Vec3& GetScale();
-	const Vec3& GetPositionValue() const;
-	const Vec3& GetRotationValue() const;
-	const Vec3& GetScaleValue() const;
+	Vec3 GetPosition() const;
+	Quaternion GetRotation() const;
+	Vec3 GetEulerRotation() const;
+	Vec3 GetScale() const;
+	Vec3 GetRight() const;
+	Vec3 GetUp() const;
+	Vec3 GetForward() const;
 
-
+	void Set(const Transform& transform);
+	void Set(Mat4 transform);
+	void Set(const Vec3& position, const Quaternion& rotation = Quaternion(), const Vec3& scale = Vec3(1.0f));
 	void LookAt(Vec3 pos, Vec3 look, Vec3 up);
-	void SetPosition(Float x, Float y, Float z);
 	void SetPosition(const Vec3& pos);
-	void Move(Float x, Float y, Float z);
-	void Move(const Vec3& offset);
-	void MoveForward(Float value);
-	void MoveRight(Float value);
-	void MoveUp(Float value);
-	void SetRotation(Float x, Float y, Float z);
-	void SetRotation(const Vec3& rotation);
-	void SetRotationX(Float rotation);
-	void SetRotationY(Float rotation);
-	void SetRotationZ(Float rotation);
-	void AddRotation(Float x, Float y, Float z);
-	void AddRotationX(Float rotation);
-	void AddRotationY(Float rotation);
-	void AddRotationZ(Float rotation);
-	void SetScale(Float x, Float y, Float z);
+	void Translate(const Vec3& offset);
+	void SetRotation(const Quaternion& rotation);
+	void SetEulerRotation(Vec3 degrees);
+	void Rotate(const Quaternion& rotation);
+	void Rotate(Float x, Float y, Float z);
+	void RotateX(Float radians);
+	void RotateY(Float radians);
+	void RotateZ(Float radians);
+	void RotateAroundAxis(Vec3 axis, Float radians);
 	void SetScale(const Vec3& scale);
-	void AddScale(Float x, Float y, Float z);
-	void AddScale(const Vec3& change);
-
-	void UpdateMatrices();
+	void Scale(const Vec3& change);
+	void Invert();
 
 	Vec3 ApplyPoint(Vec3 p) const;
 	Vec3 ApplyVector(Vec3 v) const;
@@ -69,21 +61,12 @@ public:
 	Transform operator*(const Transform& t2) const;
 
 protected:
-	Mat4 m_transform;
-	Mat4 m_inverseTransform;
-	Vec3 m_position;
-	Vec3 m_rotation;
-	Vec3 m_scale;
-	Vec3 m_forward;
-	Vec3 m_right;
-	Vec3 m_up;
-
-	void Decompose();
-	void UpdateDirections();
+	Mat4 m_transform = Mat4(1.0f);
+	Mat4 m_inverseTransform = Mat4(1.0f);
 };
 
 Transform Inverse(const Transform& t);
 Transform Transpose(const Transform& t);
 Transform RotateFromTo(Vec3 from, Vec3 to);
-Transform Rotate(Float sinTheta, Float cosTheta, Vec3 axis);
-Transform Rotate(Float theta, Vec3 axis);
+Transform RotateAroundAxis(Float sinTheta, Float cosTheta, Vec3 axis);
+Transform RotateAroundAxis(Float theta, Vec3 axis);

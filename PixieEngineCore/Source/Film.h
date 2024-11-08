@@ -1,12 +1,10 @@
 #pragma once
 #include "ShaderLibrary.h"
-#include "OGLMesh.h"
 #include "Texture.h"
 #include "SampleFilter.h"
 
 class Film {
 public:
-	OGLMesh* mesh;
 	Texture<glm::fvec4>* texture;
 	glm::ivec2 m_resolution;
 	Vec2 m_pixelSize;

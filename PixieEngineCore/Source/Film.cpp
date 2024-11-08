@@ -3,19 +3,6 @@
 
 Film::Film(glm::ivec2 resolution)
 	: m_resolution(resolution), m_pixelSize(Vec2(1.0f) / (Vec2)resolution) {
-	Vec2 min(0.0), max(1.0);
-	std::vector<Vertex> vertices = {
-		{Vertex(Vec3(min.x, min.y, 0))},
-		{Vertex(Vec3(min.x, max.y, 0))},
-		{Vertex(Vec3(max.x, max.y, 0))},
-		{Vertex(Vec3(max.x, min.y, 0))},
-	};
-	std::vector<int32_t> indices = {
-		0, 1, 2,
-		0, 2, 3
-	};
-	mesh = new OGLMesh(Mesh(vertices, indices));
-	mesh->shader = CompileShader(QUAD_VERTEX_SHADER_SOURCE, QUAD_FRAGMENT_SHADER_SOURCE);
 	texture = new Texture<glm::fvec4>(resolution);
 	texture->Upload();
 	m_sampleFilter = new GaussianFilter(Vec2(4.0), 0.85f);

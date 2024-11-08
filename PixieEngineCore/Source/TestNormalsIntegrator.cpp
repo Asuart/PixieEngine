@@ -1,12 +1,9 @@
 #include "pch.h"
 #include "TestNormalsIntegrator.h"
 
-TestNormalsIntegrator::TestNormalsIntegrator(const glm::ivec2& resolution)
-	: Integrator(resolution) {}
-
-Spectrum TestNormalsIntegrator::Integrate(Ray ray, Sampler* sampler) {
+Spectrum TestNormalsIntegrator::SampleLightRay(SceneSnapshot* sceneSnapshot, Ray ray, Sampler* sampler) {
 	RayTracingStatistics::IncrementRays();
-	std::optional<ShapeIntersection> si = m_scene->Intersect(ray);
+	std::optional<ShapeIntersection> si = RayTracing::Intersect(ray, sceneSnapshot);
 	if (!si) {
 		return Spectrum();
 	}

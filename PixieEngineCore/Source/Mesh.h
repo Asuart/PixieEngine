@@ -16,10 +16,21 @@ struct Vertex {
 };
 
 struct Mesh {
-	const std::vector<Vertex> vertices;
-	const std::vector<int32_t> indices;
+	std::vector<Vertex> m_vertices;
+	std::vector<int32_t> m_indices;
 
 	Mesh(const std::vector<Vertex>& vertices, const std::vector<int32_t>& indices);
 
 	Vec3 GetCenter() const;
+	void Draw() const;
+	void Upload();
+	void Bind() const;
+	void FreeCPUData();
+	void FreeGPUData();
+
+protected:
+	GLuint m_vao = 0;
+	GLuint m_vbo = 0;
+	GLuint m_ibo = 0;
+	int32_t m_indicesCount = 0;
 };

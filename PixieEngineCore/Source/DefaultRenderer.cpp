@@ -1,77 +1,57 @@
 #include "pch.h"
 #include "DefaultRenderer.h"
 
-DefaultRenderer::DefaultRenderer(const glm::ivec2& resolution, Scene* scene)
-	: Renderer(resolution), m_scene(scene) {
+DefaultRenderer::DefaultRenderer() {
 	m_defaultShader = CompileShader(PBR_VERTEX_SHADER_SOURCE, PBR_FRAGMENT_SHADER_SOURCE);
 }
 
-void DefaultRenderer::SetScene(Scene* scene) {
-	m_scene = scene;
-}
-
-void DefaultRenderer::SetResolution(const glm::ivec2& resolution) {
-	m_resolution = resolution;
-	std::vector<Camera>& cameras = m_scene->GetCameras();
-	for (size_t i = 0; i < cameras.size(); i++) {
-		cameras[i].SetAspect((float)resolution.x / resolution.y);
-	}
-}
-
-void DefaultRenderer::Reset() {
-
-}
-
-void DefaultRenderer::DrawFrame() {
-	if (!m_scene) return;
-	Camera* camera = m_scene->GetMainCamera();
-	if (!camera) return;
-
+void DefaultRenderer::DrawFrame(Scene* scene, Camera* camera) {
 	glUseProgram(m_defaultShader);
 
 	SetupCamera(camera);
-	SetupLights();
+	SetupLights(scene);
 
 	GLuint mModelLoc = glGetUniformLocation(m_defaultShader, "mModel");
-	SceneObject* rootObject = m_scene->GetRootObject();
+	SceneObject* rootObject = scene->GetRootObject();
 	DrawObject(rootObject, mModelLoc);
 }
 
 void DefaultRenderer::DrawObject(SceneObject* object, GLuint mModelLoc, Mat4 parentTransform) {
 	if (!object) return;
-	Mat4 objectTransform = parentTransform * object->transform.GetMatrix();
-	if (MeshAnimatorComponent* animatorComponent = object->GetComponent<MeshAnimatorComponent>()) {
-		animatorComponent->UpdateAnimation(Timer::deltaTime * 0.25f);
-		std::vector<Mat4> transforms = animatorComponent->GetBoneMatrices();
+
+	Mat4 objectTransform = parentTransform * object->GetTransform().GetMatrix();
+	if (const MeshAnimatorComponent* animatorComponent = object->GetComponent<MeshAnimatorComponent>()) {
+		std::array<Mat4, MaxBonesPerModel> boneMatricesBuffer;
+		animatorComponent->GetBoneMatrices(0.0f, boneMatricesBuffer);
 		GLuint mat4Loc = glGetUniformLocation(m_defaultShader, "finalBonesMatrices");
-		glUniformMatrix4(mat4Loc, transforms.size(), GL_FALSE, &transforms[0][0][0]);
+		glUniformMatrix4(mat4Loc, (GLsizei)boneMatricesBuffer.size(), GL_FALSE, &boneMatricesBuffer[0][0][0]);
 	}
-	if (MeshComponent* mesh = object->GetComponent<MeshComponent>()) {
+	if (const MeshComponent* mesh = object->GetComponent<MeshComponent>()) {
 		glUniformMatrix4(mModelLoc, 1, GL_FALSE, &objectTransform[0][0]);
-		const Material* material = ResourceManager::GetDefaultMaterial();
+		Material* material = ResourceManager::GetDefaultMaterial();
 		if (MaterialComponent* materialComponent = object->GetComponent<MaterialComponent>()) {
 			material = materialComponent->GetMaterial();
 		}
 		SetupMaterial(material);
 		mesh->Draw();
 	}
-	for (size_t i = 0; i < object->children.size(); i++) {
-		DrawObject(object->children[i], mModelLoc, objectTransform);
+	for (size_t i = 0; i < object->GetChildren().size(); i++) {
+		DrawObject(object->GetChild(i), mModelLoc, objectTransform);
 	}
 }
 
-void DefaultRenderer::SetupCamera(const Camera* camera) {
+void DefaultRenderer::SetupCamera(Camera* camera) {
 	GLuint cameraPosLoc = glGetUniformLocation(m_defaultShader, "cameraPos");
 	GLuint mViewLoc = glGetUniformLocation(m_defaultShader, "mView");
 	GLuint mProjectioLoc = glGetUniformLocation(m_defaultShader, "mProjection");
 
-	glm::fvec3 cameraPos = camera->GetTransform().GetPositionValue();
+	glm::fvec3 cameraPos = camera->GetTransform().GetPosition();
 	glUniform3f(cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
-	glUniformMatrix4(mViewLoc, 1, GL_FALSE, &camera->GetInverseViewMatrix()[0][0]);
+	glUniformMatrix4(mViewLoc, 1, GL_FALSE, &camera->GetViewMatrix()[0][0]);
 	glUniformMatrix4(mProjectioLoc, 1, GL_FALSE, &camera->GetProjectionMatrix()[0][0]);
 }
 
-void DefaultRenderer::SetupLights() {
+void DefaultRenderer::SetupLights(Scene* scene) {
 	const size_t MaxLights = 4;
 
 	GLuint positionsLoc = glGetUniformLocation(m_defaultShader, "lightPositions");
@@ -80,13 +60,13 @@ void DefaultRenderer::SetupLights() {
 	GLfloat positions[MaxLights * 3] = { 0 };
 	GLfloat colors[MaxLights * 3] = { 0 };
 
-	std::vector<PointLight*>& pointLights = m_scene->GetPointLights();
+	const std::vector<PointLightComponent*>& pointLights = scene->GetPointLights();
 	for (size_t i = 0; i < pointLights.size() && i < MaxLights; i++) {
-		glm::fvec3 center = pointLights[i]->GetTransform().GetPositionValue();
+		glm::fvec3 center = pointLights[i]->GetParent()->GetTransform().GetPosition();
 		positions[i * 3 + 0] = center.x;
 		positions[i * 3 + 1] = center.y;
 		positions[i * 3 + 2] = center.z;
-		glm::fvec3 emission = pointLights[i]->Phi().GetRGBValue();
+		glm::fvec3 emission = pointLights[i]->GetEmission();
 		colors[i * 3 + 0] = emission.x;
 		colors[i * 3 + 1] = emission.y;
 		colors[i * 3 + 2] = emission.z;
@@ -96,7 +76,7 @@ void DefaultRenderer::SetupLights() {
 	glUniform3fv(colorsLoc, MaxLights, colors);
 }
 
-void DefaultRenderer::SetupMaterial(const Material* material) {
+void DefaultRenderer::SetupMaterial(Material* material) {
 	GLuint albedoLoc = glGetUniformLocation(m_defaultShader, "albedo");
 	GLuint metallicLoc = glGetUniformLocation(m_defaultShader, "metallic");
 	GLuint roghnessLoc = glGetUniformLocation(m_defaultShader, "roughness");

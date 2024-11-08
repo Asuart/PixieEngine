@@ -100,6 +100,16 @@ struct Texture {
 		return pixels[pixelIndex];
 	}
 
+	void FreeCPUData() {
+		resolution = glm::ivec2(0, 0);
+		pixels.resize(0);
+	}
+
+	void FreeGPUData() {
+		glDeleteTextures(1, &id);
+		id = 0;
+	}
+
 private:
 	void TexImage2D();
 };

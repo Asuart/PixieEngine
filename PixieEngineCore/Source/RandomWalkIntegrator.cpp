@@ -1,19 +1,17 @@
 #include "pch.h"
 #include "RandomWalkIntegrator.h"
+#include "SceneSnapshot.h"
 
-RandomWalkIntegrator::RandomWalkIntegrator(const glm::ivec2& resolution)
-	: Integrator(resolution) {}
-
-Spectrum RandomWalkIntegrator::Integrate(Ray ray, Sampler* sampler) {
-	return IntegrateRandomWalk(ray, sampler);
+Spectrum RandomWalkIntegrator::SampleLightRay(SceneSnapshot* sceneSnapshot, Ray ray, Sampler* sampler) {
+	return IntegrateRandomWalk(sceneSnapshot, ray, sampler);
 }
 
-Spectrum RandomWalkIntegrator::IntegrateRandomWalk(Ray ray, Sampler* sampler, uint32_t depth) {
+Spectrum RandomWalkIntegrator::IntegrateRandomWalk(SceneSnapshot* sceneSnapshot, Ray ray, Sampler* sampler, uint32_t depth) {
 	RayTracingStatistics::IncrementRays();
-	std::optional<ShapeIntersection> si = m_scene->Intersect(ray);
+	std::optional<ShapeIntersection> si = RayTracing::Intersect(ray, sceneSnapshot);
 	if (!si) {
 		Spectrum Le;
-		for (Light* light : m_scene->GetInfiniteLights()) {
+		for (Light* light : sceneSnapshot->GetInfiniteLights()) {
 			Le += light->Le(ray);
 		}
 		return Le;
@@ -23,11 +21,11 @@ Spectrum RandomWalkIntegrator::IntegrateRandomWalk(Ray ray, Sampler* sampler, ui
 	SurfaceInteraction intr = si->intr;
 	Spectrum Le = intr.Le(wo);
 
-	if (depth == m_maxDepth) {
+	if (depth == RayTracing::c_maxRayBounces) {
 		return Le;
 	}
 
-	BSDF bsdf = intr.GetBSDF(ray, m_scene->GetMainCamera(), sampler);
+	BSDF bsdf = intr.GetBSDF(ray, sampler);
 
 	Vec3 wp = SampleUniformSphere(sampler->Get2D());
 
@@ -36,6 +34,5 @@ Spectrum RandomWalkIntegrator::IntegrateRandomWalk(Ray ray, Sampler* sampler, ui
 		return Le;
 	}
 
-	ray = Ray(intr.position, wp);
-	return Le + fcos * IntegrateRandomWalk(ray, sampler, depth + 1) / (1 / (4 * Pi));
+	return Le + fcos * IntegrateRandomWalk(sceneSnapshot, Ray(intr.position, wp), sampler, depth + 1) / (1 / (4 * Pi));
 }

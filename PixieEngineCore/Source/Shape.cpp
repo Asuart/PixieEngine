@@ -9,7 +9,3 @@ ShapeSampleContext::ShapeSampleContext(const SurfaceInteraction& intr)
 
 ShapeSample::ShapeSample(SurfaceInteraction intr, Float p)
 	: intr(intr), pdf(p) {}
-
-const Transform& Shape::GetTransform() const {
-	return m_transform;
-}

@@ -2,8 +2,12 @@
 #include "MaterialComponent.h"
 
 MaterialComponent::MaterialComponent(Material* material, SceneObject* parent)
-	: Component("Material Component", parent), material(material) {}
+	: Component(ComponentType::Material, parent), m_material(material) {}
 
-const Material* MaterialComponent::GetMaterial() const {
-	return material;
+Material* MaterialComponent::GetMaterial() {
+	return m_material;
+}
+
+void MaterialComponent::SetMaterial(Material* _material) {
+	m_material = _material;
 }

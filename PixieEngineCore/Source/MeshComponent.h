@@ -6,14 +6,12 @@
 class MeshComponent : public Component {
 public:
 	MeshComponent(Mesh* mesh, SceneObject* parent);
-	~MeshComponent();
 
 	const Mesh* GetMesh() const;
-	void Draw();
+	Mesh* GetMesh();
+	void Draw() const;
+	void UploadMesh();
 
 protected:
-	Mesh* mesh;
-	GLuint vao;
-	GLuint vertexBufferObject;
-	GLuint indexBufferObject;
+	Mesh* m_mesh;
 };

@@ -7,6 +7,7 @@ struct Medium;
 struct Ray {
 	Vec3 origin;
 	Vec3 direction;
+	Vec3 inverseDirection;
 	Medium* medium;
 
 	Ray(const Vec3& origin, const Vec3& direction, Medium* medium = nullptr);

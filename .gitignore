@@ -3,6 +3,7 @@
 Binaries/
 build/
 scenes/*
+assets/*
 x64/
 
 # Files

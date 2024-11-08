@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "DiffuseAreaLight.h"
 
-DiffuseAreaLight::DiffuseAreaLight(const Shape* shape, const Material* material, const MediumInterface* mediumInterface)
-	: Light(LightType::Area, shape->GetTransform(), mediumInterface), m_shape(shape), m_material(material) {}
+DiffuseAreaLight::DiffuseAreaLight(const Shape* shape, Transform transform, const Material* material, const MediumInterface* mediumInterface)
+	: Light(LightType::Area, transform, mediumInterface), m_shape(shape), m_material(material) {}
 
 Spectrum DiffuseAreaLight::Phi() const {
 	return Pi * 2.0f * m_shape->Area() * m_material->GetEmission();

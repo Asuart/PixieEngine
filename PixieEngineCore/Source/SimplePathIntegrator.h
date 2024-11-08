@@ -1,20 +1,20 @@
 #pragma once
 #include "pch.h"
-#include "Integrator.h"
+#include "RayTracing.h"
 #include "Random.h"
 #include "UniformLightSampler.h"
 
-class SimplePathIntegrator : public Integrator {
+class SimplePathIntegrator : public RayTracer {
 public:
 	bool m_sampleLights = true;
 	bool m_sampleBSDF = true;
 
-	SimplePathIntegrator(const glm::ivec2& resolution);
+	SimplePathIntegrator();
 	~SimplePathIntegrator();
 
-	virtual void SetScene(Scene* scene) override;
-	virtual Spectrum Integrate(Ray ray, Sampler* sampler) override;
+	void PreprocessSceneSnapshot(SceneSnapshot* sceneSnapshot) override;
+	Spectrum SampleLightRay(SceneSnapshot* sceneSnapshot, Ray ray, Sampler* sampler) override;
 
 protected:
-	LightSampler* m_lightSampler;
+	UniformLightSampler* m_lightSampler;
 };

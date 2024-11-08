@@ -4,58 +4,52 @@
 #include "SceneObject.h"
 #include "Camera.h"
 #include "MaterialComponent.h"
-#include "GeometrySnapshot.h"
 #include "PointLight.h"
+#include "Shape.h"
+#include "RayTracing.h"
+#include "CameraComponent.h"
+#include "PointLightComponent.h"
+#include "DiffuseAreaLightComponent.h"
+#include "DirectionalLightComponent.h"
 
 class Scene {
 public:
 	const UID id;
-	const std::string name;
 
 	Scene(const std::string& name);
 
+	void Start();
+	void Update();
+	void FixedUpdate();
+
+	const std::string& GetName();
+	void SetName(const std::string& name);
 	void AddObject(SceneObject* object, SceneObject* parent = nullptr);
 	void AddObject(SceneObject* object, const std::string& parentName);
 	void RemoveObject(const std::string& objectName);
 	void RemoveObjects(const std::string& objectName);
 	SceneObject* FindObject(const std::string& objectName);
 	std::vector<SceneObject*> FindObjects(const std::string& objectName);
-	SceneObject* FindObjectWithComponent(const std::string& componentName);
-	std::vector<SceneObject*> FindObjectsWithComponent(const std::string& componentName);
+	SceneObject* FindObjectWithComponent(ComponentType type);
+	std::vector<SceneObject*> FindObjectsWithComponent(ComponentType type);
+	const SceneObject* GetRootObject() const;
 	SceneObject* GetRootObject();
-	std::vector<Material*>& GetMaterialsList();
-	std::vector<Mesh*>& GetMeshesList();
-	std::vector<MaterialComponent*>& GetAreaLights();
-	std::vector<Light*>& GetInfiniteLights();
-	std::vector<PointLight*>& GetPointLights();
-	std::vector<Camera>& GetCameras();
-	Camera* GetMainCamera();
-	void SetMainCamera(uint32_t index);
-	void SetMainCamera(Camera* camera);
+	std::vector<DiffuseAreaLightComponent*>& GetDiffuseAreaLights();
+	std::vector<DirectionalLightComponent*>& GetDirectionalLights();
+	std::vector<PointLightComponent*>& GetPointLights();
+	std::vector<CameraComponent*>& GetCameras();
 	Bounds3f GetBounds();
 
 	// Ray tracing finctionality
-	void MakeGeometrySnapshot();
-	GeometrySnapshot* GetGeometrySnapshot();
 	std::optional<ShapeIntersection> Intersect(const Ray& ray, Float tMax = Infinity) const;
-	bool IntersectP(const Ray& ray, Float tMax = Infinity) const;
+	bool IsIntersected(const Ray& ray, Float tMax = Infinity) const;
 	Vec3 GetSkyColor(const Ray& ray);
 
 protected:
-	SceneObject* rootObject = nullptr;
-	std::vector<Material*> materials;
-	std::vector<Mesh*> meshes;
-	std::vector<Camera> cameras;
-	std::vector<Light*> infiniteLights;
-	std::vector<PointLight*> pointLights;
-	std::vector<MaterialComponent*> areaLights;
-	Camera* mainCamera = nullptr;
-	GeometrySnapshot* geometrySnapshot = nullptr;
-
-	virtual void Start();
-	virtual void Update();
-	virtual void FixedUpdate();
-
-	friend class RTScene;
-	friend class SceneLoader;
+	std::string m_name;
+	SceneObject* m_rootObject = nullptr;
+	std::vector<CameraComponent*> m_cameras;
+	std::vector<DirectionalLightComponent*> m_directionalLights;
+	std::vector<PointLightComponent*> m_pointLights;
+	std::vector<DiffuseAreaLightComponent*> m_diffuseAreaLights;
 };

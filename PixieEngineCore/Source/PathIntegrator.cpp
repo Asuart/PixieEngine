@@ -1,28 +1,25 @@
 #include "pch.h"
 #include "PathIntegrator.h"
+#include "SceneSnapshot.h"
 
-PathIntegrator::PathIntegrator(const glm::ivec2& resolution)
-	: Integrator(resolution), m_lightSampler(new UniformLightSampler()){}
+PathIntegrator::PathIntegrator()
+	: m_lightSampler(new UniformLightSampler()) {}
 
 PathIntegrator::~PathIntegrator() {
 	delete m_lightSampler;
 }
 
-void PathIntegrator::SetScene(Scene* scene) {
-	bool wasRendering = m_isRendering;
-	if (m_isRendering) {
-		StopRender();
-	}
-	m_scene = scene;
+void PathIntegrator::PreprocessSceneSnapshot(SceneSnapshot* sceneSnapshot) {
 	if (m_lightSampler) delete m_lightSampler;
-	m_lightSampler = new UniformLightSampler((const std::vector<Light*>&)m_scene->GetGeometrySnapshot()->GetAreaLights());
-	Reset();
-	if (wasRendering) {
-		StartRender();
+	if (sceneSnapshot) {
+		m_lightSampler = new UniformLightSampler((std::vector<Light*>*) &sceneSnapshot->GetAreaLights());
+	}
+	else {
+		m_lightSampler = new UniformLightSampler({});
 	}
 }
 
-Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
+Spectrum PathIntegrator::SampleLightRay(SceneSnapshot* sceneSnapshot, Ray ray, Sampler* sampler) {
 	Spectrum L(0.0f, 0.0f, 0.0f), beta(1.0f, 1.0f, 1.0f);
 	int32_t depth = 0;
 	Float p_b = 0.0f, etaScale = 1.0f;
@@ -31,9 +28,9 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 
 	while (true) {
 		RayTracingStatistics::IncrementRays();
-		std::optional<ShapeIntersection> si = m_scene->Intersect(ray);
+		std::optional<ShapeIntersection> si = RayTracing::Intersect(ray, sceneSnapshot);
 		if (!si) {
-			for (Light* light : m_scene->GetInfiniteLights()) {
+			for (Light* light : sceneSnapshot->GetInfiniteLights()) {
 				Spectrum Le = light->Le(ray);
 				if (depth == 0 || specularBounce) {
 					L += beta * Le;
@@ -60,11 +57,11 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 			}
 		}
 
-		if (depth++ == m_maxDepth) {
+		if (depth++ == RayTracing::c_maxRayBounces) {
 			break;
 		}
 
-		BSDF bsdf = intr.GetBSDF(ray, m_scene->GetMainCamera(), sampler);
+		BSDF bsdf = intr.GetBSDF(ray, sampler);
 		if (!bsdf) {
 			specularBounce = true;
 			intr.SkipIntersection(ray);
@@ -76,7 +73,7 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 		}
 
 		if (IsNonSpecular(bsdf.Flags())) {
-			Spectrum Ld = SampleLd(intr, bsdf, sampler);
+			Spectrum Ld = SampleLd(sceneSnapshot, intr, bsdf, sampler);
 			L += beta * Ld;
 		}
 
@@ -111,7 +108,7 @@ Spectrum PathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 	return L;
 }
 
-Spectrum PathIntegrator::SampleLd(const SurfaceInteraction& intr, const BSDF& bsdf, Sampler* sampler) {
+Spectrum PathIntegrator::SampleLd(SceneSnapshot* sceneSnapshot, const SurfaceInteraction& intr, const BSDF& bsdf, Sampler* sampler) {
 	std::optional<SampledLight> sampledLight = m_lightSampler->Sample(sampler->Get1D());
 	if (!sampledLight) {
 		return Spectrum();
@@ -124,7 +121,7 @@ Spectrum PathIntegrator::SampleLd(const SurfaceInteraction& intr, const BSDF& bs
 
 	Vec3 wo = intr.wo, wi = ls->wi;
 	Spectrum f = bsdf.SampleDistribution(wo, wi) * AbsDot(wi, intr.normal);
-	if (!f || !Unoccluded(intr, ls->pLight)) {
+	if (!f || !RayTracing::Unoccluded(sceneSnapshot, intr, ls->pLight)) {
 		return Spectrum();
 	}
 

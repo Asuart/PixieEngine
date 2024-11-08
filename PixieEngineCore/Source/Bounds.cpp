@@ -286,52 +286,6 @@ bool Bounds3f::IsDegenerate() const {
 	return min.x > max.x || min.y > max.y || min.z > max.z;
 }
 
-bool Bounds3f::IntersectP(const Ray& ray, Float tMax, Float* hitt0, Float* hitt1) const {
-	RayTracingStatistics::IncrementBoxTests();
-	Float t0 = 0, t1 = tMax;
-	for (int32_t i = 0; i < 3; ++i) {
-		Float invRayDir = 1 / ray.direction[i];
-		Float tNear = (min[i] - ray.origin[i]) * invRayDir;
-		Float tFar = (max[i] - ray.origin[i]) * invRayDir;
-		if (tNear > tFar)
-			std::swap(tNear, tFar);
-		tFar *= 1 + 2 * gamma(3);
-
-		t0 = tNear > t0 ? tNear : t0;
-		t1 = tFar < t1 ? tFar : t1;
-		if (t0 > t1) return false;
-	}
-	if (hitt0) *hitt0 = t0;
-	if (hitt1) *hitt1 = t1;
-	return true;
-}
-
-bool Bounds3f::IntersectP(const Ray& ray, Float raytMax, Vec3 invDir, const int32_t dirIsNeg[3]) const {
-	RayTracingStatistics::IncrementBoxTests();
-	const Bounds3f& bounds = *this;
-	Float tMin = (bounds[dirIsNeg[0]].x - ray.origin.x) * invDir.x;
-	Float tMax = (bounds[1 - dirIsNeg[0]].x - ray.origin.x) * invDir.x;
-	Float tyMin = (bounds[dirIsNeg[1]].y - ray.origin.y) * invDir.y;
-	Float tyMax = (bounds[1 - dirIsNeg[1]].y - ray.origin.y) * invDir.y;
-
-	tMax *= 1 + 2 * gamma(3);
-	tyMax *= 1 + 2 * gamma(3);
-
-	if (tMin > tyMax || tyMin > tMax) return false;
-	if (tyMin > tMin) tMin = tyMin;
-	if (tyMax < tMax) tMax = tyMax;
-
-	Float tzMin = (bounds[dirIsNeg[2]].z - ray.origin.z) * invDir.z;
-	Float tzMax = (bounds[1 - dirIsNeg[2]].z - ray.origin.z) * invDir.z;
-	tzMax *= 1 + 2 * gamma(3);
-
-	if (tMin > tzMax || tzMin > tMax) return false;
-	if (tzMin > tMin) tMin = tzMin;
-	if (tzMax < tMax) tMax = tzMax;
-
-	return (tMin < raytMax) && (tMax > 0);
-}
-
 bool Bounds3f::operator==(const Bounds3f& b) const {
 	return b.min == min && b.max == max;
 }
@@ -366,6 +320,13 @@ Bounds3f Union(const Bounds3f& b1, const Bounds3f& b2) {
 	Bounds3f ret;
 	ret.min = glm::min(b1.min, b2.min);
 	ret.max = glm::max(b1.max, b2.max);
+	return ret;
+}
+
+Bounds3f Union(const Bounds3f& b, Vec3 p) {
+	Bounds3f ret;
+	ret.min = glm::min(b.min, p);
+	ret.max = glm::max(b.max, p);
 	return ret;
 }
 

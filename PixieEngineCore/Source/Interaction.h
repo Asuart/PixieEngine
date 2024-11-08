@@ -41,7 +41,7 @@ struct SurfaceInteraction : public Interaction {
 	SurfaceInteraction(Vec3 position, const MediumInterface* mediumInterface);
 
 	Spectrum Le(const Vec3& wo) const;
-	BSDF GetBSDF(const Ray& ray, const Camera* camera, Sampler* sampler);
+	BSDF GetBSDF(const Ray& ray, Sampler* sampler);
 	Ray SpawnRay(const Ray& rayi, const BSDF& bsdf, Vec3 wi, BxDFFlags flags, Float eta) const;
 	void SkipIntersection(Ray& ray) const;
 };

@@ -12,19 +12,15 @@
 
 class DefaultRenderer : public Renderer {
 public:
-	DefaultRenderer(const glm::ivec2& resolution, Scene* scene = nullptr);
+	DefaultRenderer();
 
-	void SetScene(Scene* scene);
-	void SetResolution(const glm::ivec2& resolution) override;
-	void DrawFrame();
-	void Reset() override;
+	void DrawFrame(Scene* scene, Camera* camera) override;
 
 protected:
-	Scene* m_scene = nullptr;
 	GLuint m_defaultShader = 0;
 
 	void DrawObject(SceneObject* object, GLuint mModelLoc, Mat4 parentTransform = Mat4(1.0f));
-	void SetupCamera(const Camera* camera);
-	void SetupLights();
-	void SetupMaterial(const Material* material);
+	void SetupCamera(Camera* camera);
+	void SetupLights(Scene* scene);
+	void SetupMaterial(Material* material);
 };

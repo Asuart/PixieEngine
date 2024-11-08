@@ -1,38 +1,30 @@
 #include "pch.h"
 #include "SimplePathIntegrator.h"
+#include "SceneSnapshot.h"
 
-SimplePathIntegrator::SimplePathIntegrator(const glm::ivec2& resolution)
-	: Integrator(resolution), m_lightSampler(new UniformLightSampler()) {}
+SimplePathIntegrator::SimplePathIntegrator()
+	: m_lightSampler(new UniformLightSampler({})) {}
 
 SimplePathIntegrator::~SimplePathIntegrator() {
-	delete m_lightSampler;
-}
-
-void SimplePathIntegrator::SetScene(Scene* scene) {
-	bool wasRendering = m_isRendering;
-	if (m_isRendering) {
-		StopRender();
-	}
-	m_scene = scene;
 	if (m_lightSampler) delete m_lightSampler;
-	m_lightSampler = new UniformLightSampler((const std::vector<Light*>&)m_scene->GetGeometrySnapshot()->GetAreaLights());
-	Reset();
-	if (wasRendering) {
-		StartRender();
-	}
 }
 
-Spectrum SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
+void SimplePathIntegrator::PreprocessSceneSnapshot(SceneSnapshot* sceneSnapshot) {
+	if (m_lightSampler) delete m_lightSampler;
+	m_lightSampler = new UniformLightSampler((std::vector<Light*>*)&sceneSnapshot->GetAreaLights());
+}
+
+Spectrum SimplePathIntegrator::SampleLightRay(SceneSnapshot* sceneSnapshot, Ray ray, Sampler* sampler) {
 	Spectrum L(0.0f, 0.0f, 0.0f), beta(1.0f, 1.0f, 1.0f);
 	bool specularBounce = true;
 	int32_t depth = 0;
 
 	while (beta) {
 		RayTracingStatistics::IncrementRays();
-		std::optional<ShapeIntersection> si = m_scene->Intersect(ray);
+		std::optional<ShapeIntersection> si = RayTracing::Intersect(ray, sceneSnapshot);
 		if (!si) {
 			if (!m_sampleLights || specularBounce) {
-				for (Light* light : m_scene->GetInfiniteLights()) {
+				for (Light* light : sceneSnapshot->GetInfiniteLights()) {
 					L += beta * light->Le(ray);
 				}
 			}
@@ -44,11 +36,11 @@ Spectrum SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 			L += beta * intr.Le(-ray.direction);
 		}
 
-		if (depth++ == m_maxDepth) {
+		if (depth++ == RayTracing::c_maxRayBounces) {
 			break;
 		}
 
-		BSDF bsdf = intr.GetBSDF(ray, m_scene->GetMainCamera(), sampler);
+		BSDF bsdf = intr.GetBSDF(ray, sampler);
 		if (!bsdf) {
 			specularBounce = true;
 			intr.SkipIntersection(ray);
@@ -62,7 +54,7 @@ Spectrum SimplePathIntegrator::Integrate(Ray ray, Sampler* sampler) {
 				std::optional<LightLiSample> ls = sampledLight->light->SampleLi(intr, sampler->Get2D());
 				if (ls && ls->L && ls->pdf > 0) {
 					Spectrum f = bsdf.SampleDistribution(wo, ls->wi) * AbsDot(ls->wi, intr.normal);
-					if (f && Unoccluded(intr, ls->pLight)) {
+					if (f && RayTracing::Unoccluded(sceneSnapshot, intr, ls->pLight)) {
 						L += beta * f * ls->L / (sampledLight->p * ls->pdf);
 					}
 				}

@@ -1,6 +1,4 @@
-#ifndef PIXIE_ENGINE
-#define PIXIE_ENGINE
-
+#pragma once
 #include "UID.h"
 #include "Math.h"
 #include "Ray.h"
@@ -9,11 +7,10 @@
 #include "Texture.h"
 #include "Material.h"
 #include "Mesh.h"
-#include "OGLMesh.h"
 #include "Scene.h"
 #include "BSDF.h"
 #include "Camera.h"
-#include "TriangleCache.h"
+#include "Triangle.h"
 #include "PerlinNoise.h"
 #include "Primitive.h"
 #include "Light.h"
@@ -37,5 +34,3 @@ private:
 	void Update();
 	void FixedUpdate();
 };
-
-#endif // PIXIE_ENGINE

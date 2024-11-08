@@ -14,12 +14,14 @@
 #include <queue>
 #include <unordered_map>
 #include <map>
+#include <set>
 #include <span>
 #include <atomic>
 #include <thread>
 #include <optional>
 #include <mutex>
 #include <numeric>
+#include <memory_resource>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>

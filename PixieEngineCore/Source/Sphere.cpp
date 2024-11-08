@@ -2,7 +2,7 @@
 #include "Sphere.h"
 
 Sphere::Sphere(const Transform& transform, Float r)
-	: Shape(transform), m_radius(r) {}
+	: m_transform(transform), m_radius(r) {}
 
 Float Sphere::Area() const {
 	return 4 * Pi * m_radius;
@@ -90,7 +90,7 @@ std::optional<ShapeIntersection> Sphere::Intersect(const Ray& ray, Float tMax) c
 	return ShapeIntersection{ m_transform.ApplyInteraction(SurfaceInteraction(pHit, uv, woObject, dpdu, dpdv, dndu, dndv)), tShapeHit };
 }
 
-bool Sphere::IntersectP(const Ray& ray, Float tMax) const {
+bool Sphere::IsIntersected(const Ray& ray, Float tMax) const {
 	Vec3 oi = m_transform.ApplyInversePoint(ray.origin);
 	Vec3 di = m_transform.ApplyInverseVector(ray.direction);
 

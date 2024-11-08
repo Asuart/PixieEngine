@@ -1,8 +1,12 @@
 #include "pch.h"
 #include "Component.h"
 
-Component::Component(const std::string& name, SceneObject* parent)
-	: name(name), parent(parent) {}
+Component::Component(ComponentType type, SceneObject* parent)
+	: type(type), m_parent(parent) {}
+
+SceneObject* Component::GetParent() {
+	return m_parent;
+}
 
 void Component::OnStart() {}
 

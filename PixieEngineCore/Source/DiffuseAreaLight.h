@@ -6,7 +6,7 @@
 
 class DiffuseAreaLight : public Light {
 public:
-	DiffuseAreaLight(const Shape* shape, const Material* material, const MediumInterface* mediumInterface = nullptr);
+	DiffuseAreaLight(const Shape* shape, Transform transform, const Material* material, const MediumInterface* mediumInterface = nullptr);
 
 	Spectrum Phi() const override;
 	Spectrum L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const override;

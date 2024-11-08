@@ -1,9 +1,10 @@
 #include "pch.h"
-#include "GeometrySnapshot.h"
+#include "SceneSnapshot.h"
+#include "Scene.h"
 
-GeometrySnapshot::GeometrySnapshot(SceneObject* rootObject, uint32_t maxPrimitivesPerLeaf) {
+SceneSnapshot::SceneSnapshot(Scene* scene, uint32_t maxPrimitivesPerLeaf) {
 	uint64_t trianglesCount = 0, invalidTrianglesCount = 0;
-	std::vector<SceneObject*> flatObjects = rootObject->FindObjectsWithComponent("Mesh Component");
+	std::vector<SceneObject*> flatObjects = scene->FindObjectsWithComponent(ComponentType::Mesh);
 
 	std::vector<Primitive*> agregatePrimitives;
 	for (size_t sceneObjectIndex = 0; sceneObjectIndex < flatObjects.size(); sceneObjectIndex++) {
@@ -18,11 +19,11 @@ GeometrySnapshot::GeometrySnapshot(SceneObject* rootObject, uint32_t maxPrimitiv
 		if (!mesh || !material) continue;
 
 		std::vector<Primitive*> shapePrimitives;
-		for (size_t i = 0; i < mesh->indices.size(); i += 3) {
-			TriangleCache* triangle = new TriangleCache(
-				mesh->vertices[mesh->indices[i + 0]],
-				mesh->vertices[mesh->indices[i + 1]],
-				mesh->vertices[mesh->indices[i + 2]]
+		for (size_t i = 0; i < mesh->m_indices.size() / 3; i++) {
+			Triangle* triangle = new Triangle(
+				mesh->m_vertices[mesh->m_indices[i * 3 + 0]],
+				mesh->m_vertices[mesh->m_indices[i * 3 + 1]],
+				mesh->m_vertices[mesh->m_indices[i * 3 + 2]]
 			);
 
 			trianglesCount++;
@@ -33,7 +34,7 @@ GeometrySnapshot::GeometrySnapshot(SceneObject* rootObject, uint32_t maxPrimitiv
 
 			DiffuseAreaLight* areaLight = nullptr;
 			if (material->m_emissionStrength) {
-				areaLight = new DiffuseAreaLight(triangle, material);
+				areaLight = new DiffuseAreaLight(triangle, Transform(), material);
 				m_areaLights.push_back(areaLight);
 			}
 			shapePrimitives.push_back(new ShapePrimitive(triangle, material, areaLight));
@@ -46,25 +47,30 @@ GeometrySnapshot::GeometrySnapshot(SceneObject* rootObject, uint32_t maxPrimitiv
 	std::cout << "Scene triangles count: " << trianglesCount << ", invalid triangles count: " << invalidTrianglesCount << "\n";
 }
 
-GeometrySnapshot::~GeometrySnapshot() {
+SceneSnapshot::~SceneSnapshot() {
 	if (m_rootPrimitive) delete m_rootPrimitive;
 	for (size_t i = 0; i < m_areaLights.size(); i++) {
 		delete m_areaLights[i];
 	}
 }
 
-std::optional<ShapeIntersection> GeometrySnapshot::Intersect(const Ray& ray, Float tMax) const {
-	return m_rootPrimitive->Intersect(ray, tMax);
+const Primitive* SceneSnapshot::GetRootPrimitive() const {
+	return m_rootPrimitive;
 }
 
-bool GeometrySnapshot::IntersectP(const Ray& ray, Float tMax) const {
-	return m_rootPrimitive->IntersectP(ray, tMax);
-}
-
-std::vector<DiffuseAreaLight*>& GeometrySnapshot::GetAreaLights() {
+std::vector<DiffuseAreaLight*>& SceneSnapshot::GetAreaLights() {
 	return m_areaLights;
 }
 
-Bounds3f GeometrySnapshot::GetBounds() {
-	return m_rootPrimitive->GetBounds();
+std::vector<Light*>& SceneSnapshot::GetInfiniteLights() {
+	return m_infiniteLights;
+}
+
+Bounds3f SceneSnapshot::GetBounds() const {
+	if (m_rootPrimitive) {
+		return m_rootPrimitive->GetBounds();
+	}
+	else {
+		return Bounds3f();
+	}
 }

@@ -5,20 +5,21 @@
 #include "Light.h"
 #include "MeshComponent.h"
 #include "MaterialComponent.h"
-#include "TriangleCache.h"
+#include "Triangle.h"
 #include "DiffuseAreaLight.h"
 
-class GeometrySnapshot {
+class SceneSnapshot {
 public:
-	GeometrySnapshot(SceneObject* rootObject, uint32_t maxPrimitivesPerLeaf = 6);
-	~GeometrySnapshot();
+	SceneSnapshot(Scene* scene, uint32_t maxPrimitivesPerLeaf = 6);
+	~SceneSnapshot();
 
-	std::optional<ShapeIntersection> Intersect(const Ray& ray, Float tMax = Infinity) const;
-	bool IntersectP(const Ray& ray, Float tMax = Infinity) const;
+	const Primitive* GetRootPrimitive() const;
+	Bounds3f GetBounds() const;
 	std::vector<DiffuseAreaLight*>& GetAreaLights();
-	Bounds3f GetBounds();
+	std::vector<Light*>& GetInfiniteLights();
 
 private:
 	std::vector<DiffuseAreaLight*> m_areaLights;
+	std::vector<Light*> m_infiniteLights;
 	Primitive* m_rootPrimitive;
 };

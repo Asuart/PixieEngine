@@ -40,7 +40,7 @@ Spectrum SurfaceInteraction::Le(const Vec3& wo) const {
 	return areaLight ? areaLight->L(position, normal, uv, wo) : Spectrum();
 }
 
-BSDF SurfaceInteraction::GetBSDF(const Ray& ray, const Camera* camera, Sampler* sampler) {
+BSDF SurfaceInteraction::GetBSDF(const Ray& ray, Sampler* sampler) {
 	return material->GetBSDF(*this);
 }
 

@@ -1,55 +1,6 @@
 #include "pch.h"
 #include "PixieEngineApp.h"
-
-void APIENTRY openglCallbackFunction(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
-{
-	// filter some warnings
-	if (id == 131185) return;
-
-	std::cout << "---------------------opengl-callback-start------------\n";
-	std::cout << "message: " << message << "\n";
-	std::cout << "type: ";
-	switch (type) {
-	case GL_DEBUG_TYPE_ERROR:
-		std::cout << "ERROR";
-		break;
-	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-		std::cout << "DEPRECATED_BEHAVIOR";
-		break;
-	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-		std::cout << "UNDEFINED_BEHAVIOR";
-		break;
-	case GL_DEBUG_TYPE_PORTABILITY:
-		std::cout << "PORTABILITY";
-		break;
-	case GL_DEBUG_TYPE_PERFORMANCE:
-		std::cout << "PERFORMANCE";
-		break;
-	case GL_DEBUG_TYPE_OTHER:
-		std::cout << "OTHER";
-		break;
-	default:
-		std::cout << "UNDEFINED";
-	}
-	std::cout << "\n";
-
-	std::cout << "id: " << id << "\n";
-	std::cout << "severity: ";
-	switch (severity) {
-	case GL_DEBUG_SEVERITY_LOW:
-		std::cout << "LOW";
-		break;
-	case GL_DEBUG_SEVERITY_MEDIUM:
-		std::cout << "MEDIUM";
-		break;
-	case GL_DEBUG_SEVERITY_HIGH:
-		std::cout << "HIGH";
-		break;
-	default:
-		std::cout << "UNDEFINED";
-	}
-	std::cout << "\n---------------------opengl-callback-end--------------\n";
-}
+#include "OpenGLInterface.h"
 
 PixieEngineApp::PixieEngineApp()
 	: m_interface(*this) {
@@ -77,55 +28,43 @@ PixieEngineApp::PixieEngineApp()
 	ImGui_ImplGlfw_InitForOpenGL(m_window.GetGLFWWindow(), true);
 	ImGui_ImplOpenGL3_Init();
 
-	m_scene = new Scene("Initial Scene");
-	m_scene->AddObject(ResourceManager::LoadModel(m_scenePath));
-	m_scene->MakeGeometrySnapshot();
-
-	m_sceneRenderer = new DefaultRenderer(glm::ivec2(640, 640), m_scene);
-
-	m_rayTracingRenderer = new RayTracingRenderer(this, glm::ivec2(640, 640), m_scene);
-	if (m_rayTracingViewport) {
-		m_rayTracingRenderer->StartRender();
+	m_scene = ResourceManager::LoadScene(m_currentScenePath);
+	if (!m_scene) {
+		m_scene = new Scene("Scene");
 	}
+	m_scene->Start();
+	m_sceneSnapsot = new SceneSnapshot(m_scene);
 
-	m_viewportFrameBuffer = new FrameBuffer(640, 640);
+	m_defaultRenderer = new DefaultRenderer();
+
+	m_interface.Initialize();
 }
 
 PixieEngineApp::~PixieEngineApp() {
-	delete m_rayTracingRenderer;
-	delete m_viewportFrameBuffer;
+	delete m_defaultRenderer;
+	if (m_sceneSnapsot) {
+		delete m_sceneSnapsot;
+	}
+	if (m_scene) {
+		delete m_scene;
+	}
 }
 
 void PixieEngineApp::Start() {
 	while (!m_window.IsShouldClose()) {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		Timer::Update();
+		UserInput::Reset();
 		glfwPollEvents();
 		HandleUserInput();
-		UserInput::Reset();
-
-		m_viewportFrameBuffer->Bind();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glViewport(0, 0, m_viewportFrameBuffer->m_resolution.x, m_viewportFrameBuffer->m_resolution.y);
-		if (m_rayTracingViewport) {
-			if (m_rayTracingRenderer->m_rayTracer->GetSamplesCount() <= 1) {
-				m_sceneRenderer->DrawFrame();
-			}
-			m_rayTracingRenderer->DrawFrame();
-		}
-		else {
-			m_sceneRenderer->DrawFrame();
-		}
-		m_viewportFrameBuffer->Unbind();
-
-		glViewport(0, 0, m_window.GetWindowSize().x, m_window.GetWindowSize().y);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+		m_scene->Update();
 		m_interface.Draw();
-
 		glfwSwapBuffers(m_window.GetGLFWWindow());
 	}
-
-	m_rayTracingRenderer->StopRender();
+	std::vector<RayTracingViewportWindow*> rayTracingWindows = m_interface.GetWindowsOfType<RayTracingViewportWindow>();
+	for (size_t i = 0; i < rayTracingWindows.size(); i++) {
+		rayTracingWindows[i]->StopRender();
+	}
 }
 
 GLFWwindow* PixieEngineApp::GetGLFWWindow() {
@@ -136,103 +75,154 @@ void PixieEngineApp::HandleResize(uint32_t width, uint32_t height) {
 	glViewport(0, 0, width, height);
 }
 
-void PixieEngineApp::UpdateViewportResolution(glm::ivec2 resolution) {
-	m_viewportResolution = resolution;
-	m_rayTracingRenderer->SetViewportSize(resolution);
-	if (m_rayTracingRenderer->m_resizeRendererToVieport) {
-		m_sceneRenderer->SetResolution(resolution);
-		m_viewportFrameBuffer->Resize(resolution.x, resolution.y);
+void PixieEngineApp::ResetRayTracers() {
+	std::vector<RayTracingViewportWindow*> rayTracingWindows = m_interface.GetWindowsOfType<RayTracingViewportWindow>();
+	for (size_t i = 0; i < rayTracingWindows.size(); i++) {
+		rayTracingWindows[i]->Reset();
+	}
+}
+
+Scene* PixieEngineApp::GetScene() {
+	return m_scene;
+}
+
+SceneSnapshot* PixieEngineApp::GetSceneSnapshot() {
+	return m_sceneSnapsot;
+}
+
+const SceneObject* PixieEngineApp::GetSelectedObject() const {
+	return m_selectedObject;
+}
+
+SceneObject* PixieEngineApp::GetSelectedObject() {
+	return m_selectedObject;
+}
+
+void PixieEngineApp::SelectObject(SceneObject* object) {
+	m_selectedObject = object;
+}
+
+void PixieEngineApp::RemoveSelectedObject() {
+	if (!m_selectedObject || m_selectedObject == m_scene->GetRootObject()) {
+		return;
+	}
+	m_selectedObject->Detach();
+	delete m_selectedObject;
+	m_selectedObject = nullptr;
+	std::vector<RayTracingViewportWindow*> rayTracingWindows = m_interface.GetWindowsOfType<RayTracingViewportWindow>();
+	std::vector<bool> renderingStates;
+	renderingStates.resize(rayTracingWindows.size());
+	for (size_t i = 0; i < rayTracingWindows.size(); i++) {
+		renderingStates[i] = rayTracingWindows[i]->IsRendering();
+		rayTracingWindows[i]->StopRender();
+		rayTracingWindows[i]->Reset();
+	}
+	if (m_sceneSnapsot) {
+		delete m_sceneSnapsot;
+	}
+	m_sceneSnapsot = new SceneSnapshot(m_scene);
+	for (size_t i = 0; i < rayTracingWindows.size(); i++) {
+		if (renderingStates[i]) {
+			rayTracingWindows[i]->StartRender();
+		}
+	}
+}
+
+void PixieEngineApp::RestoreViewportSize() {
+	glViewport(0, 0, m_window.GetWindowSize().x, m_window.GetWindowSize().y);
+}
+
+DefaultRenderer* PixieEngineApp::GetDefaultRenderer() {
+	return m_defaultRenderer;
+}
+
+const std::filesystem::path& PixieEngineApp::GetAssetsPath() {
+	return m_assetsPath;
+}
+
+void PixieEngineApp::SetAssetsPath(const std::filesystem::path& path) {
+	m_assetsPath = path;
+}
+
+void PixieEngineApp::LoadScene(const std::filesystem::path& filePath) {
+	std::vector<RayTracingViewportWindow*> rayTracingWindows = m_interface.GetWindowsOfType<RayTracingViewportWindow>();
+	std::vector<bool> renderingStates;
+	renderingStates.resize(rayTracingWindows.size());
+	for (size_t i = 0; i < rayTracingWindows.size(); i++) {
+		renderingStates[i] = rayTracingWindows[i]->IsRendering();
+		rayTracingWindows[i]->StopRender();
+		rayTracingWindows[i]->Reset();
+	}
+	if (m_scene) {
+		delete m_scene;
+	}
+	m_scene = ResourceManager::LoadScene(filePath);
+	if (!m_scene) {
+		m_scene = new Scene("Scene");
+	}
+	else {
+		m_currentScenePath = filePath;
+	}
+	m_scene->Start();
+	if (m_sceneSnapsot) {
+		delete m_sceneSnapsot;
+	}
+	m_sceneSnapsot = new SceneSnapshot(m_scene);
+	for (size_t i = 0; i < rayTracingWindows.size(); i++) {
+		if (renderingStates[i]) {
+			rayTracingWindows[i]->StartRender();
+		}
+	}
+}
+
+void PixieEngineApp::LoadModel(const std::filesystem::path& filePath) {
+	SceneObject* object = ResourceManager::LoadModel(filePath);
+	if (object) {
+		std::vector<RayTracingViewportWindow*> rayTracingWindows = m_interface.GetWindowsOfType<RayTracingViewportWindow>();
+		std::vector<bool> renderingStates;
+		renderingStates.resize(rayTracingWindows.size());
+		for (size_t i = 0; i < rayTracingWindows.size(); i++) {
+			renderingStates[i] = rayTracingWindows[i]->IsRendering();
+			rayTracingWindows[i]->StopRender();
+			rayTracingWindows[i]->Reset();
+		}
+		m_scene->GetRootObject()->AddChild(object);
+		object->OnStart();
+		if (m_sceneSnapsot) {
+			delete m_sceneSnapsot;
+		}
+		m_sceneSnapsot = new SceneSnapshot(m_scene);
+		for (size_t i = 0; i < rayTracingWindows.size(); i++) {
+			if (renderingStates[i]) {
+				rayTracingWindows[i]->StartRender();
+			}
+		}
 	}
 }
 
 void PixieEngineApp::ReloadScene() {
-	m_rayTracingRenderer->StopRender();
+	std::vector<RayTracingViewportWindow*> rayTracingWindows = m_interface.GetWindowsOfType<RayTracingViewportWindow>();
+	std::vector<bool> renderingStates;
+	renderingStates.resize(rayTracingWindows.size());
+	for (size_t i = 0; i < rayTracingWindows.size(); i++) {
+		renderingStates[i] = rayTracingWindows[i]->IsRendering();
+		rayTracingWindows[i]->StopRender();
+		rayTracingWindows[i]->Reset();
+	}
 	if (m_scene) {
 		delete m_scene;
-		m_scene = nullptr;
 	}
-
-	m_scene = new Scene("Initial Scene");
-	m_scene->AddObject(ResourceManager::LoadModel(m_scenePath));
-	m_scene->MakeGeometrySnapshot();
-
-	m_sceneRenderer->SetScene(m_scene);
-
-	m_rayTracingRenderer->SetScene(m_scene);
-	if (m_rayTracingViewport) {
-		m_rayTracingRenderer->StartRender();
+	m_scene = ResourceManager::LoadScene(m_currentScenePath);
+	m_scene->Start();
+	if (m_sceneSnapsot) {
+		delete m_sceneSnapsot;
 	}
-}
-
-void PixieEngineApp::HandleUserInput() {
-	const Float speed = 10.0f;
-	const Float rotationSpeed = 50.0f;
-
-	if (UserInput::GetKey(GLFW_KEY_W)) {
-		if (m_scene) {
-			Camera* camera = m_scene->GetMainCamera();
-			if (camera) {
-				camera->GetTransform().MoveForward(speed * Timer::deltaTime);
-			}
-		}
-		if (m_rayTracingViewport) m_rayTracingRenderer->Reset();
-	}
-	if (UserInput::GetKey(GLFW_KEY_S)) {
-		if (m_scene) {
-			Camera* camera = m_scene->GetMainCamera();
-			if (camera) {
-				camera->GetTransform().MoveForward(-speed * Timer::deltaTime);
-			}
-		}
-		if (m_rayTracingViewport)m_rayTracingRenderer->Reset();
-	}
-	if (UserInput::GetKey(GLFW_KEY_D)) {
-		if (m_scene) {
-			Camera* camera = m_scene->GetMainCamera();
-			if (camera) {
-				camera->GetTransform().MoveRight(speed * Timer::deltaTime);
-			}
-		}
-		if (m_rayTracingViewport)m_rayTracingRenderer->Reset();
-	}
-	if (UserInput::GetKey(GLFW_KEY_A)) {
-		if (m_scene) {
-			Camera* camera = m_scene->GetMainCamera();
-			if (camera) {
-				camera->GetTransform().MoveRight(-speed * Timer::deltaTime);
-			}
-		}
-		if (m_rayTracingViewport)m_rayTracingRenderer->Reset();
-	}
-	if (UserInput::GetKey(GLFW_KEY_SPACE)) {
-		if (m_scene) {
-			Camera* camera = m_scene->GetMainCamera();
-			if (camera) {
-				camera->GetTransform().MoveUp(speed * Timer::deltaTime);
-			}
-		}
-		if (m_rayTracingViewport)m_rayTracingRenderer->Reset();
-	}
-	if (UserInput::GetKey(GLFW_KEY_LEFT_CONTROL)) {
-		if (m_scene) {
-			Camera* camera = m_scene->GetMainCamera();
-			if (camera) {
-				camera->GetTransform().MoveUp(-speed * Timer::deltaTime);
-			}
-		}
-		if (m_rayTracingViewport)m_rayTracingRenderer->Reset();
-	}
-	if (UserInput::GetMouseButton(GLFW_MOUSE_BUTTON_2)) {
-		if (UserInput::mouseDeltaX) {
-			if (UserInput::mouseDeltaX) {
-				if (m_scene) {
-					Camera* camera = m_scene->GetMainCamera();
-					if (camera) {
-						camera->GetTransform().AddRotationY(-rotationSpeed * (Float)UserInput::mouseDeltaX * Timer::deltaTime);
-					}
-				}
-			}
-			if (m_rayTracingViewport)m_rayTracingRenderer->Reset();
+	m_sceneSnapsot = new SceneSnapshot(m_scene);
+	for (size_t i = 0; i < rayTracingWindows.size(); i++) {
+		if (renderingStates[i]) {
+			rayTracingWindows[i]->StartRender();
 		}
 	}
 }
+
+void PixieEngineApp::HandleUserInput() {}

@@ -20,6 +20,7 @@ const char* const QUAD_FRAGMENT_SHADER_SOURCE =
 "uniform sampler2D ourTexture;\n"
 "void main() {\n"
 "	vec4 pixel = texture(ourTexture, fTexCoord);\n"
+"	color = vec4(0.f, 0.0f, 0.0f, 1.0f);"
 "	if(pixel.a < 0.1) discard;\n"
 "	else color = vec4(pixel.rgb / uSamples, 1.0);\n"
 "}\n";

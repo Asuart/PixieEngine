@@ -2,7 +2,7 @@
 #include "Ray.h"
 
 Ray::Ray(const Vec3& origin, const Vec3& direction, Medium* medium)
-	: origin(origin), direction(direction), medium(medium) {
+	: origin(origin), direction(direction), medium(medium), inverseDirection(1.0f / direction) {
 	assert(!isnan(origin) || !isnan(direction));
 }
 

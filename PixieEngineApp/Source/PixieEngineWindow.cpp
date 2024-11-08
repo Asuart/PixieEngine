@@ -7,7 +7,7 @@ PixieEngineWindow::PixieEngineWindow(uint32_t width, uint32_t height) {
 		exit(1);
 	}
 
-	m_window = glfwCreateWindow(width, height, "Computer Graphics Collection", NULL, NULL);
+	m_window = glfwCreateWindow(width, height, "Pixie Engine", NULL, NULL);
 	glfwMakeContextCurrent(m_window);
 	UserInput::SetInputWindow(m_window);
 }

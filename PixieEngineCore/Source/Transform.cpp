@@ -1,25 +1,33 @@
 #include "pch.h"
 #include "Transform.h"
 
-Transform::Transform(const Vec3& position, const Vec3& rotation, const Vec3& scale)
-	: m_position(position), m_rotation(rotation), m_scale(scale) {
-	UpdateMatrices();
-	UpdateDirections();
+struct Decomposition {
+	Vec3 scale;
+	Quaternion orientation;
+	Vec3 translation;
+	Vec3 skew;
+	Vec4 perspective;
+};
+
+inline Decomposition Decompose(const Mat4& m) {
+	Decomposition dec;
+	glm::decompose(m, dec.scale, dec.orientation, dec.translation, dec.skew, dec.perspective);
+	return dec;
+}
+
+inline Mat4 Recompose(const Decomposition& dec) {
+	return glm::recompose(dec.scale, dec.orientation, dec.translation, dec.skew, dec.perspective);
+}
+
+Transform::Transform(const Vec3& position, const Quaternion& rotation, const Vec3& scale) {
+	Set(position, rotation, scale);
 };
 
 Transform::Transform(const Mat4& m)
-	: m_transform(m), m_inverseTransform(glm::inverse(m)) {
-	Decompose();
-	UpdateMatrices();
-	UpdateDirections();
-}
+	: m_transform(m), m_inverseTransform(glm::inverse(m)) {}
 
 Transform::Transform(const Mat4& m, const Mat4& mInv)
-	: m_transform(m), m_inverseTransform(mInv) {
-	Decompose();
-	UpdateMatrices();
-	UpdateDirections();
-}
+	: m_transform(m), m_inverseTransform(mInv) {}
 
 const Mat4& Transform::GetMatrix() const {
 	return m_transform;
@@ -29,160 +37,140 @@ const Mat4& Transform::GetInverseMatrix() const {
 	return m_inverseTransform;
 }
 
-Vec3& Transform::GetPosition() {
-	return m_position;
+Vec3 Transform::GetPosition() const {
+	Decomposition dec = Decompose(m_transform);
+	return dec.translation;
 }
 
-Vec3& Transform::GetRotation() {
-	return m_rotation;
+Quaternion Transform::GetRotation() const {
+	Decomposition dec = Decompose(m_transform);
+	return dec.orientation;
 }
 
-Vec3& Transform::GetScale() {
-	return m_scale;
+Vec3 Transform::GetEulerRotation() const {
+	Decomposition dec = Decompose(m_transform);
+	return glm::degrees(glm::eulerAngles(dec.orientation));
 }
 
-const Vec3& Transform::GetPositionValue() const {
-	return m_position;
+Vec3 Transform::GetScale() const {
+	Decomposition dec = Decompose(m_transform);
+	return dec.scale;
 }
 
-const Vec3& Transform::GetRotationValue() const {
-	return m_rotation;
+Vec3 Transform::GetRight() const {
+	Decomposition dec = Decompose(m_transform);
+	return glm::rotate(dec.orientation, Vec3(1, 0, 0));
 }
 
-const Vec3& Transform::GetScaleValue() const {
-	return m_scale;
+Vec3 Transform::GetUp() const {
+	Decomposition dec = Decompose(m_transform);
+	return glm::rotate(dec.orientation, Vec3(0, 1, 0));
+}
+
+Vec3 Transform::GetForward() const {
+	Decomposition dec = Decompose(m_transform);
+	return glm::rotate(dec.orientation, Vec3(0, 0, -1));
+}
+
+void Transform::Set(Mat4 transform) {
+	m_transform = transform;
+	m_inverseTransform = glm::inverse(transform);
+}
+
+void Transform::Set(const Transform& transform) {
+	m_transform = transform.m_transform;
+	m_inverseTransform = transform.m_inverseTransform;
+}
+
+void Transform::Set(const Vec3& position, const Quaternion& rotation, const Vec3& scale) {
+	m_transform = Mat4(rotation);
+	m_transform = glm::scale(m_transform, scale);
+	m_transform = glm::translate(m_transform, position);
+	m_inverseTransform = glm::inverse(m_transform);
 }
 
 void Transform::LookAt(Vec3 pos, Vec3 look, Vec3 up) {
-	m_transform = glm::lookAt(pos, look, up);
-	m_inverseTransform = glm::inverse(m_transform);
-	Decompose();
-	SetPosition(pos);
-	AddRotationY(180.0f);
-	UpdateDirections();
-}
-
-void Transform::SetPosition(Float x, Float y, Float z) {
-	m_position = Vec3(x, y, z);
-	UpdateMatrices();
+	m_inverseTransform = glm::lookAt(pos, look, up) ;
+	m_transform = glm::inverse(m_inverseTransform);
 }
 
 void Transform::SetPosition(const Vec3& pos) {
-	m_position = pos;
-	UpdateMatrices();
+	Decomposition dec = Decompose(m_transform);
+	dec.translation = pos;
+	m_transform = Recompose(dec);
+	m_inverseTransform = glm::inverse(m_transform);
 }
 
-void Transform::Move(Float x, Float y, Float z) {
-	m_position += Vec3(x, y, z);
-	UpdateMatrices();
+void Transform::Translate(const Vec3& offset) {
+	Decomposition dec = Decompose(m_transform);
+	dec.translation += offset;
+	m_transform = Recompose(dec);
+	m_inverseTransform = glm::inverse(m_transform);
 }
 
-void Transform::Move(const Vec3& offset) {
-	m_position += offset;
-	UpdateMatrices();
+void Transform::SetRotation(const Quaternion& rotation) {
+	Decomposition dec = Decompose(m_transform);
+	dec.orientation = rotation;
+	m_transform = Recompose(dec);
+	m_inverseTransform = glm::inverse(m_transform);
 }
 
-void Transform::MoveForward(Float value) {
-	m_position += m_forward * value;
-	UpdateMatrices();
+void Transform::SetEulerRotation(Vec3 degrees) {
+	Decomposition dec = Decompose(m_transform);
+	dec.orientation = Quaternion(glm::radians(degrees));
+	m_transform = Recompose(dec);
+	m_inverseTransform = glm::inverse(m_transform);
 }
 
-void Transform::MoveRight(Float value) {
-	m_position += m_right * value;
-	UpdateMatrices();
+void Transform::Rotate(const Quaternion& rotation) {
+	Decomposition dec = Decompose(m_transform);
+	dec.orientation *= rotation;
+	m_transform = Recompose(dec);
+	m_inverseTransform = glm::inverse(m_transform);
 }
 
-void Transform::MoveUp(Float value) {
-	m_position += m_up * value;
-	UpdateMatrices();
+void Transform::Rotate(Float x, Float y, Float z) {
+	Decomposition dec = Decompose(m_transform);
+	dec.orientation *= Quaternion({ x, y ,z });
+	m_transform = Recompose(dec);
+	m_inverseTransform = glm::inverse(m_transform);
 }
 
-void Transform::SetRotation(Float x, Float y, Float z) {
-	SetRotation(m_rotation + Vec3(x, y, z));
+void Transform::RotateX(Float radians) {
+	Rotate(radians, 0, 0);
 }
 
-void Transform::SetRotation(const Vec3& rotation) {
-	m_rotation = rotation;
-	if (m_rotation.x >= MaxDegrees) m_rotation.x -= std::floor(m_rotation.x / MaxDegrees) * MaxDegrees;
-	if (m_rotation.x <= -MaxDegrees) m_rotation.x += std::floor(-m_rotation.x / MaxDegrees) * MaxDegrees;
-	if (m_rotation.y >= MaxDegrees) m_rotation.y -= std::floor(m_rotation.y / MaxDegrees) * MaxDegrees;
-	if (m_rotation.y <= -MaxDegrees) m_rotation.y += std::floor(-m_rotation.y / MaxDegrees) * MaxDegrees;
-	if (m_rotation.z >= MaxDegrees) m_rotation.z -= std::floor(m_rotation.z / MaxDegrees) * MaxDegrees;
-	if (m_rotation.z <= -MaxDegrees) m_rotation.z += std::floor(-m_rotation.z / MaxDegrees) * MaxDegrees;
-	UpdateMatrices();
-	UpdateDirections();
+void Transform::RotateY(Float radians) {
+	Rotate(0, radians, 0);
 }
 
-void Transform::SetRotationX(Float rotation) {
-	m_rotation.x = rotation;
-	if (m_rotation.x >= MaxDegrees) m_rotation.x -= std::floor(m_rotation.x / MaxDegrees) * MaxDegrees;
-	if (m_rotation.x <= -MaxDegrees) m_rotation.x += std::floor(-m_rotation.x / MaxDegrees) * MaxDegrees;
-	UpdateMatrices();
-	UpdateDirections();
+void Transform::RotateZ(Float radians) {
+	Rotate(0, 0, radians);
 }
 
-void Transform::SetRotationY(Float rotation) {
-	m_rotation.y = rotation;
-	if (m_rotation.y >= MaxDegrees) m_rotation.y -= std::floor(m_rotation.y / MaxDegrees) * MaxDegrees;
-	if (m_rotation.y <= -MaxDegrees) m_rotation.y += std::floor(-m_rotation.y / MaxDegrees) * MaxDegrees;
-	UpdateMatrices();
-	UpdateDirections();
-}
-
-void Transform::SetRotationZ(Float rotation) {
-	m_rotation.z = rotation;
-	if (m_rotation.z >= MaxDegrees) m_rotation.z -= std::floor(m_rotation.z / MaxDegrees) * MaxDegrees;
-	if (m_rotation.z <= -MaxDegrees) m_rotation.z += std::floor(-m_rotation.z / MaxDegrees) * MaxDegrees;
-	UpdateMatrices();
-	UpdateDirections();
-}
-
-void Transform::AddRotation(Float x, Float y, Float z) {
-	SetRotation(m_rotation + Vec3(x, y, z));
-}
-
-void Transform::AddRotationX(Float rotation) {
-	SetRotationX(m_rotation.x + rotation);
-}
-
-void Transform::AddRotationY(Float rotation) {
-	SetRotationY(m_rotation.y + rotation);
-}
-
-void Transform::AddRotationZ(Float rotation) {
-	SetRotationX(m_rotation.z + rotation);
-}
-
-void Transform::SetScale(Float x, Float y, Float z) {
-	m_scale = Vec3(x, y, z);
-	UpdateMatrices();
+void Transform::RotateAroundAxis(Vec3 axis, Float radians) {
+	Decomposition dec = Decompose(m_transform);
+	dec.orientation = glm::rotate(dec.orientation, radians, axis);
+	m_transform = Recompose(dec);
+	m_inverseTransform = glm::inverse(m_transform);
 }
 
 void Transform::SetScale(const Vec3& scale) {
-	m_scale = scale;
-	UpdateMatrices();
-}
-
-void Transform::AddScale(Float x, Float y, Float z) {
-	m_scale += Vec3(x, y, z);
-	UpdateMatrices();
-}
-
-void Transform::AddScale(const Vec3& change) {
-	m_scale += change;
-	UpdateMatrices();
-}
-
-void Transform::UpdateMatrices() {
-	Mat4 rotateX = glm::rotate(Mat4(1.0f), glm::radians(m_rotation.x), Vec3(1.0f, 0.0f, 0.0f));
-	Mat4 rotateY = glm::rotate(Mat4(1.0f), glm::radians(m_rotation.y), Vec3(0.0f, 1.0f, 0.0f));
-	Mat4 rotateZ = glm::rotate(Mat4(1.0f), glm::radians(m_rotation.z), Vec3(0.0f, 0.0f, 1.0f));
-	Mat4 mRotate = rotateY * rotateX * rotateZ;
-	Mat4 mTranslate = glm::translate(Mat4(1.0f), m_position);
-	Mat4 mScale = glm::scale(Mat4(1.0f), m_scale);
-	m_transform = mTranslate * mRotate * mScale;
+	Decomposition dec = Decompose(m_transform);
+	dec.scale = scale;
+	m_transform = Recompose(dec);
 	m_inverseTransform = glm::inverse(m_transform);
-	UpdateDirections();
+}
+
+void Transform::Scale(const Vec3& change) {
+	Decomposition dec = Decompose(m_transform);
+	dec.scale += change;
+	m_transform = Recompose(dec);
+	m_inverseTransform = glm::inverse(m_transform);
+}
+
+void Transform::Invert() {
+	std::swap(m_transform, m_inverseTransform);
 }
 
 Vec3 Transform::ApplyPoint(Vec3 p) const {
@@ -282,24 +270,6 @@ SurfaceInteraction Transform::ApplyInverseInteraction(const SurfaceInteraction& 
 	return ret;
 }
 
-void Transform::Decompose() {
-	Vec3 skew;
-	Vec4 perspective;
-	Quaternion qRotation;
-	glm::decompose(m_transform, m_scale, qRotation, m_position, skew, perspective);
-	m_rotation = glm::degrees(glm::eulerAngles(qRotation));
-}
-
-void Transform::UpdateDirections() {
-	Mat4 rotateX = glm::rotate(Mat4(1.0f), glm::radians(m_rotation.x), Vec3(1.0f, 0.0f, 0.0f));
-	Mat4 rotateY = glm::rotate(Mat4(1.0f), glm::radians(m_rotation.y), Vec3(0.0f, 1.0f, 0.0f));
-	Mat4 rotateZ = glm::rotate(Mat4(1.0f), glm::radians(m_rotation.z), Vec3(0.0f, 0.0f, 1.0f));
-	Mat4 mRotate = rotateY * rotateX * rotateZ;
-	m_forward = glm::normalize(mRotate * Vec4(0.0f, 0.0f, -1.0f, 0.0f));
-	m_up = glm::normalize(mRotate * Vec4(0.0f, 1.0f, 0.0f, 0.0f));
-	m_right = glm::normalize(mRotate * Vec4(1.0f, 0.0f, 0.0f, 0.0f));
-}
-
 bool Transform::IsIdentity() const {
 	return m_transform == Mat4(1.0f);
 }
@@ -360,29 +330,29 @@ Transform RotateFromTo(Vec3 from, Vec3 to) {
 	return Transform(r, glm::transpose(r));
 }
 
-Transform Rotate(Float sinTheta, Float cosTheta, Vec3 axis) {
+Transform RotateAroundAxis(Float sinTheta, Float cosTheta, Vec3 axis) {
 	Vec3 a = glm::normalize(axis);
-	Mat4 m;
+	Mat4 m = Mat4(1.0f);
 	m[0][0] = a.x * a.x + ((Float)1 - a.x * a.x) * cosTheta;
-	m[0][1] = a.x * a.y * ((Float)1 - cosTheta) - a.z * sinTheta;
-	m[0][2] = a.x * a.z * ((Float)1 - cosTheta) + a.y * sinTheta;
-	m[0][3] = 0;
+	m[1][0] = a.x * a.y * ((Float)1 - cosTheta) - a.z * sinTheta;
+	m[2][0] = a.x * a.z * ((Float)1 - cosTheta) + a.y * sinTheta;
+	m[3][0] = 0;
 
-	m[1][0] = a.x * a.y * ((Float)1 - cosTheta) + a.z * sinTheta;
+	m[0][1] = a.x * a.y * ((Float)1 - cosTheta) + a.z * sinTheta;
 	m[1][1] = a.y * a.y + ((Float)1 - a.y * a.y) * cosTheta;
-	m[1][2] = a.y * a.z * ((Float)1 - cosTheta) - a.x * sinTheta;
-	m[1][3] = 0;
+	m[2][1] = a.y * a.z * ((Float)1 - cosTheta) - a.x * sinTheta;
+	m[3][1] = 0;
 
-	m[2][0] = a.x * a.z * ((Float)1 - cosTheta) - a.y * sinTheta;
-	m[2][1] = a.y * a.z * ((Float)1 - cosTheta) + a.x * sinTheta;
+	m[0][2] = a.x * a.z * ((Float)1 - cosTheta) - a.y * sinTheta;
+	m[1][2] = a.y * a.z * ((Float)1 - cosTheta) + a.x * sinTheta;
 	m[2][2] = a.z * a.z + ((Float)1 - a.z * a.z) * cosTheta;
-	m[2][3] = 0;
+	m[3][2] = 0;
 
 	return Transform(m);
 }
 
-Transform Rotate(Float theta, Vec3 axis) {
+Transform RotateAroundAxis(Float theta, Vec3 axis) {
 	Float sinTheta = std::sin(glm::radians(theta));
 	Float cosTheta = std::cos(glm::radians(theta));
-	return Rotate(sinTheta, cosTheta, axis);
+	return RotateAroundAxis(sinTheta, cosTheta, axis);
 }

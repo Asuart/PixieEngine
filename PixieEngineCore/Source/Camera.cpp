@@ -25,7 +25,11 @@ Ray Camera::GetRay(const Vec2& coord) const {
 	Float theta = Lerp(coord.x, -(m_fovy * m_aspect) / 2, (m_fovy * m_aspect) / 2);
 	Float phi = Lerp(coord.y, -m_fovy / 2, m_fovy / 2);
 	Vec3 dir = glm::normalize(glm::mat3(m_transform.GetMatrix()) * Vec3(glm::tan(theta), glm::tan(phi), -1.0f));
-	return Ray(m_transform.GetPositionValue(), dir);
+	return Ray(m_transform.GetPosition(), dir);
+}
+
+Float Camera::GetFieldOfView() {
+	return m_fovy;
 }
 
 Transform& Camera::GetTransform() {
@@ -37,11 +41,11 @@ const Transform& Camera::GetTransform() const {
 }
 
 const Mat4& Camera::GetViewMatrix() const {
-	return m_transform.GetMatrix();
+	return m_transform.GetInverseMatrix();
 }
 
 const Mat4& Camera::GetInverseViewMatrix() const {
-	return m_transform.GetInverseMatrix();
+	return m_transform.GetMatrix();
 }
 
 const Mat4& Camera::GetProjectionMatrix() const {

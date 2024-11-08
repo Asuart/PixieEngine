@@ -27,3 +27,53 @@ inline void glUniform3(GLint location, GLdouble x, GLdouble y, GLdouble z) {
 inline void glUniform3(GLint location, Vec3 v) {
 	glUniform3(location, v.x, v.y, v.z);
 }
+
+inline void APIENTRY openglCallbackFunction(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+{
+	// filter some warnings
+	if (id == 131185) return;
+
+	std::cout << "---------------------opengl-callback-start------------\n";
+	std::cout << "message: " << message << "\n";
+	std::cout << "type: ";
+	switch (type) {
+	case GL_DEBUG_TYPE_ERROR:
+		std::cout << "ERROR";
+		break;
+	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+		std::cout << "DEPRECATED_BEHAVIOR";
+		break;
+	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+		std::cout << "UNDEFINED_BEHAVIOR";
+		break;
+	case GL_DEBUG_TYPE_PORTABILITY:
+		std::cout << "PORTABILITY";
+		break;
+	case GL_DEBUG_TYPE_PERFORMANCE:
+		std::cout << "PERFORMANCE";
+		break;
+	case GL_DEBUG_TYPE_OTHER:
+		std::cout << "OTHER";
+		break;
+	default:
+		std::cout << "UNDEFINED";
+	}
+	std::cout << "\n";
+
+	std::cout << "id: " << id << "\n";
+	std::cout << "severity: ";
+	switch (severity) {
+	case GL_DEBUG_SEVERITY_LOW:
+		std::cout << "LOW";
+		break;
+	case GL_DEBUG_SEVERITY_MEDIUM:
+		std::cout << "MEDIUM";
+		break;
+	case GL_DEBUG_SEVERITY_HIGH:
+		std::cout << "HIGH";
+		break;
+	default:
+		std::cout << "UNDEFINED";
+	}
+	std::cout << "\n---------------------opengl-callback-end--------------\n";
+}

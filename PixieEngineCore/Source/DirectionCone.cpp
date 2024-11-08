@@ -41,6 +41,6 @@ DirectionCone Union(const DirectionCone& a, const DirectionCone& b) {
         return DirectionCone::EntireSphere();
     }
 
-    Vec3 w = Rotate(glm::degrees(theta_r), wr).ApplyVector(a.w);
+    Vec3 w = RotateAroundAxis(glm::degrees(theta_r), wr).ApplyVector(a.w);
     return DirectionCone(w, std::cos(theta_o));
 }

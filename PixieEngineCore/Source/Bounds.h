@@ -102,8 +102,6 @@ public:
 	void BoundingSphere(Vec3* center, Float* radius) const;
 	bool IsEmpty() const;
 	bool IsDegenerate() const;
-	bool IntersectP(const Ray& ray, Float tMax = Infinity, Float* hitt0 = nullptr, Float* hitt1 = nullptr) const;
-	bool IntersectP(const Ray& ray, Float tMax, Vec3 invDir, const int32_t dirIsNeg[3]) const;
 
 	Vec3 operator[](int32_t i) const;
 	Vec3& operator[](int32_t i);
@@ -115,4 +113,5 @@ Bounds2i Union(const Bounds2i& b1, const Bounds2i& b2);
 Bounds2f Union(const Bounds2f& b1, const Bounds2f& b2);
 Bounds3i Union(const Bounds3i& b1, const Bounds3i& b2);
 Bounds3f Union(const Bounds3f& b1, const Bounds3f& b2);
+Bounds3f Union(const Bounds3f& b, Vec3 p);
 bool Inside(Vec3 p, const Bounds3f& b);

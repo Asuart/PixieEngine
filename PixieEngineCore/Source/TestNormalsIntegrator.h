@@ -1,9 +1,7 @@
 #pragma once
-#include "Integrator.h"
+#include "RayTracing.h"
 
-class TestNormalsIntegrator : public Integrator {
+class TestNormalsIntegrator : public RayTracer {
 public:
-	TestNormalsIntegrator(const glm::ivec2& resolution);
-
-	virtual Spectrum Integrate(Ray ray, Sampler* sampler) override;
+	virtual Spectrum SampleLightRay(SceneSnapshot* sceneSnapshot, Ray ray, Sampler* sampler) override;
 };

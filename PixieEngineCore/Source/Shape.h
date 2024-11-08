@@ -26,18 +26,13 @@ struct ShapeIntersection {
 class Shape {
 public:
 	Shape() = default;
-	Shape(const Transform& transform) : m_transform(transform) {}
 
-	const Transform& GetTransform() const;
 	virtual Float Area() const = 0;
 	virtual std::optional<ShapeIntersection> Intersect(const Ray& ray, Float tMax = Infinity) const = 0;
-	virtual bool IntersectP(const Ray& ray, Float tMax = Infinity) const = 0;
+	virtual bool IsIntersected(const Ray& ray, Float tMax = Infinity) const = 0;
 	virtual Bounds3f Bounds() const = 0;
 	virtual std::optional<ShapeSample> Sample(Vec2 u) const = 0;
 	virtual std::optional<ShapeSample> Sample(const ShapeSampleContext& ctx, Vec2 u) const = 0;
 	virtual Float SamplePDF(const SurfaceInteraction&) const = 0;
 	virtual Float SamplePDF(const ShapeSampleContext& ctx, Vec3 wi) const = 0;
-
-protected:
-	Transform m_transform;
 };

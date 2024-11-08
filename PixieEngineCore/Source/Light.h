@@ -3,7 +3,7 @@
 #include "Spectrum.h"
 #include "Ray.h"
 #include "Interaction.h"
-#include "TriangleCache.h"
+#include "Triangle.h"
 #include "Bounds.h"
 #include "Transform.h"
 

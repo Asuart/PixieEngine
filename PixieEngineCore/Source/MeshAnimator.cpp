@@ -103,11 +103,11 @@ float Animation::GetDuration() const {
     return duration;
 }
 
-const SceneObject* Animation::GetRootNode() const {
+SceneObject* Animation::GetRootNode() {
     return rootNode;
 }
 
-const std::map<std::string, BoneInfo>& Animation::GetBoneIDMap() const {
+std::map<std::string, BoneInfo>& Animation::GetBoneIDMap() {
     return boneInfoMap;
 }
 
@@ -116,9 +116,9 @@ Animator::Animator(Animation* Animation, Mat4 globalInverseTransform)
     currentTime = 0.0;
     currentAnimation = Animation;
 
-    finalBoneMatrices.reserve(100);
+    finalBoneMatrices.reserve(MaxBonesPerModel);
 
-    for (uint32_t i = 0; i < 100; i++) {
+    for (uint32_t i = 0; i < MaxBonesPerModel; i++) {
         finalBoneMatrices.push_back(Mat4(1.0f));
     }
 }
@@ -137,9 +137,9 @@ void Animator::PlayAnimation(Animation* pAnimation) {
     currentTime = 0.0f;
 }
 
-void Animator::CalculateBoneTransform(const SceneObject* node, Mat4 parentTransform) {
-    std::string nodeName = node->name;
-    Mat4 nodeTransform = node->transform.GetMatrix();
+void Animator::CalculateBoneTransform(SceneObject* node, Mat4 parentTransform) {
+    std::string nodeName = node->GetName();
+    Mat4 nodeTransform = node->GetTransform().GetMatrix();
 
     Bone* Bone = currentAnimation->FindBone(nodeName);
     if (Bone) {
@@ -152,15 +152,49 @@ void Animator::CalculateBoneTransform(const SceneObject* node, Mat4 parentTransf
     auto boneInfoMap = currentAnimation->GetBoneIDMap();
     if (boneInfoMap.find(nodeName) != boneInfoMap.end()) {
         int32_t index = boneInfoMap[nodeName].id;
-        Mat4 offset = boneInfoMap[nodeName].offset;
-        finalBoneMatrices[index] = m_globalInverseTransform * globalTransformation * offset;
+        if (index < MaxBonesPerModel) {
+            Mat4 offset = boneInfoMap[nodeName].offset;
+            finalBoneMatrices[index] = m_globalInverseTransform * globalTransformation * offset;
+        }
     }
 
-    for (size_t i = 0; i < node->children.size(); i++) {
-        CalculateBoneTransform(node->children[i], globalTransformation);
+    for (size_t i = 0; i < node->GetChildren().size(); i++) {
+        CalculateBoneTransform(node->GetChild(i), globalTransformation);
     }
 }
 
-std::vector<Mat4> Animator::GetFinalBoneMatrices() {
+void Animator::CalculateBoneTransform(SceneObject* node, Mat4 parentTransform, std::array<Mat4, MaxBonesPerModel>& transforms) {
+    std::string nodeName = node->GetName();
+    Mat4 nodeTransform = node->GetTransform().GetMatrix();
+
+    Bone* Bone = currentAnimation->FindBone(nodeName);
+    if (Bone) {
+        Bone->Update(currentTime);
+        nodeTransform = Bone->localTransform;
+    }
+
+    Mat4 globalTransformation = parentTransform * nodeTransform;
+
+    auto boneInfoMap = currentAnimation->GetBoneIDMap();
+    if (boneInfoMap.find(nodeName) != boneInfoMap.end()) {
+        int32_t index = boneInfoMap[nodeName].id;
+        if (index < MaxBonesPerModel) {
+            Mat4 offset = boneInfoMap[nodeName].offset;
+            transforms[index] = m_globalInverseTransform * globalTransformation * offset;
+        }
+    }
+
+    for (size_t i = 0; i < node->GetChildren().size(); i++) {
+        CalculateBoneTransform(node->GetChild(i), globalTransformation, transforms);
+    }
+}
+
+std::vector<Mat4>& Animator::GetFinalBoneMatrices() {
     return finalBoneMatrices;
+}
+
+void Animator::GetBoneMatrices(Float time, std::array<Mat4, MaxBonesPerModel>& transforms) {
+    if (currentAnimation) {
+        CalculateBoneTransform(currentAnimation->GetRootNode(), Mat4(1.0f), transforms);
+    }
 }
