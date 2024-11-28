@@ -3,7 +3,7 @@
 #include "Component.h"
 #include "MeshAnimator.h"
 #include "OpenGLInterface.h"
-#include "Timer.h"
+#include "EngineTime.h"
 
 class MeshAnimatorComponent : public Component {
 public:

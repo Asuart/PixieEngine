@@ -1,3 +1,4 @@
+#pragma once
 #include "ComponentTypes.h"
 #include "Component.h"
 #include "MaterialComponent.h"
@@ -8,3 +9,4 @@
 #include "PointLightComponent.h"
 #include "DirectionalLightComponent.h"
 #include "MeshAnimatorComponent.h"
+#include "SphereComponent.h"

@@ -14,8 +14,12 @@ Float Reflectance(Float cosine, Float ref_idx) {
 	return r0 + (1.0f - r0) * pow((1.0f - cosine), 5.0f);
 }
 
-Material::Material(const std::string& name, Spectrum albedo, Spectrum emissionColor, float emissionStrength, float roughness, float metallic, float transparency, float refraction)
-	: m_name(name),	m_emissionColor(emissionColor), m_emissionStrength(emissionStrength), m_albedo(albedo), m_roughness(roughness), m_metallic(metallic), m_transparency(transparency), m_refraction(refraction) {}
+Material::Material(const std::string& name, Spectrum albedo, Spectrum emissionColor, float emissionStrength, float roughness, float metallic, float transparency, float refraction) :
+	m_name(name), m_emissionColor(emissionColor), m_emissionStrength(emissionStrength), m_albedo(albedo), m_roughness(roughness), m_metallic(metallic), m_transparency(transparency), m_refraction(refraction) {
+	assert(!isnan(m_emissionColor.GetRGB().x) && !isnan(m_emissionColor.GetRGB().y) && !isnan(m_emissionColor.GetRGB().z));
+	assert(!isnan(m_emissionStrength) && !isnan(m_albedo.GetRGB().x) && !isnan(m_albedo.GetRGB().y) && !isnan(m_albedo.GetRGB().z));
+	assert(!isnan(m_roughness) && !isnan(m_metallic) && !isnan(m_transparency) && !isnan(m_refraction));
+}
 
 bool Material::IsEmissive() {
 	return m_emissionStrength > 0.0f;
@@ -25,22 +29,22 @@ bool Material::IsTranslucent() {
 	return m_transparency > 0.0f;
 }
 
-Spectrum Material::GetEmission() const {
+Spectrum Material::GetEmission() {
 	return m_emissionColor * m_emissionStrength;
 }
 
-Spectrum Material::Evaluate(const SurfaceInteraction& intr) const {
-	Vec3 color = m_albedo.GetRGBValue();
+Spectrum Material::Evaluate(const RayInteraction& intr) {
+	Vec3 color = m_albedo.GetRGB();
 	if (m_albedoTexture) {
-		color *= m_albedoTexture->Sample(intr);
+		color *= m_albedoTexture->GetPixel(intr.uv);
 	}
 	return color / Pi;
 }
 
-Float Material::Pdf() const {
+Float Material::Pdf() {
 	return Inv2Pi;
 }
 
-BSDF Material::GetBSDF(const SurfaceInteraction& intr) const {
+BSDF Material::GetBSDF(const RayInteraction& intr) {
 	return BSDF(*this, intr);
 }

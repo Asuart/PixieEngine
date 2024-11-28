@@ -5,8 +5,8 @@ template <typename T>
 class Buffer2D {
 public:
 
-	Buffer2D(const glm::ivec2& resolution)
-		: m_resolution(resolution), m_data(std::vector<T>(resolution.x* resolution.y)) {}
+	Buffer2D(const glm::ivec2& resolution) :
+		m_resolution(resolution), m_data(std::vector<T>(resolution.x* resolution.y)) {}
 
 	void Resize(const glm::ivec2& resolution) {
 		m_resolution = resolution;
@@ -73,8 +73,8 @@ protected:
 class CountersBuffer2D : public Buffer2D<uint64_t> {
 public:
 
-	CountersBuffer2D(glm::ivec2 resolution)
-		: Buffer2D(resolution) {}
+	CountersBuffer2D(glm::ivec2 resolution) :
+		Buffer2D(resolution) {}
 
 	void Clear() override {
 		std::fill(m_data.data(), m_data.data() + m_data.size(), 0);

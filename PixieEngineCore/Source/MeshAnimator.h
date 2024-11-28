@@ -1,6 +1,5 @@
 #pragma once
 #include "pch.h"
-#include "AssimpGLMHelper.h"
 #include "SceneObject.h"
 
 const int32_t MaxBonesPerModel = 100;

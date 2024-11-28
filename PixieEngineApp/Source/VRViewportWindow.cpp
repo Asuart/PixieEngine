@@ -5,14 +5,14 @@
 VRViewportWindow::VRViewportWindow(PixieEngineApp& app, PixieEngineInterface& inter)
 	: PixieEngineInterfaceWindow(app, inter),
 	m_viewportResolution(glm::ivec2(1280, 720)),
-	m_viewportCamera(Vec3(-10, 0, 0), Vec3(0, 0, 0), Vec3(0, 1, 0), glm::radians(39.6f), 8.0f / 9.0f, 0, 10),
+	m_viewportCamera(Vec3(-10, 0, 0), Vec3(0, 0, 0), Vec3(0, 1, 0), glm::radians(39.6f), { 640, 720 }, 0, 10),
 	m_cameraController(m_viewportCamera) {}
 
 void VRViewportWindow::Initialize() {
-	m_viewportFrameBuffer = new FrameBuffer(1280, 720);
-	m_viewportFrameBufferLeft = new FrameBuffer(640, 720);
-	m_viewportFrameBufferRight = new FrameBuffer(640, 720);
-	m_vrShader = CompileShader(VR_QUAD_VERTEX_SHADER_SOURCE, VR_QUAD_FRAGMENT_SHADER_SOURCE);
+	m_viewportFrameBuffer = new FrameBuffer({ 1280, 720 });
+	m_viewportFrameBufferLeft = new FrameBuffer({ 640, 720 });
+	m_viewportFrameBufferRight = new FrameBuffer({ 640, 720 });
+	m_vrShader = ResourceManager::CompileShader(VR_QUAD_VERTEX_SHADER_SOURCE, VR_QUAD_FRAGMENT_SHADER_SOURCE);
 }
 
 void VRViewportWindow::Draw() {
@@ -105,8 +105,7 @@ void VRViewportWindow::Draw() {
 void VRViewportWindow::UpdateViewportResolution(glm::ivec2 resolution) {
 	glm::ivec2 hwResolution = glm::ivec2(resolution.x / 2, resolution.y);
 	m_viewportResolution = resolution;
-	m_viewportFrameBuffer->Resize(resolution.x, resolution.y);
-	m_viewportFrameBufferLeft->Resize(hwResolution.x, hwResolution.y);
-	m_viewportFrameBufferRight->Resize(hwResolution.x, hwResolution.y);
-	m_viewportCamera.SetAspect((float)hwResolution.x / hwResolution.y);
+	m_viewportFrameBuffer->Resize(resolution);
+	m_viewportFrameBufferLeft->Resize(hwResolution);
+	m_viewportFrameBufferRight->Resize(hwResolution);
 }

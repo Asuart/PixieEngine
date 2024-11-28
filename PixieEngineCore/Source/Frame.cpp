@@ -1,11 +1,9 @@
 #include "pch.h"
 #include "Frame.h"
 
-Frame::Frame()
-	: x(1, 0, 0), y(0, 1, 0), z(0, 0, 1) {}
+Frame::Frame() : x(1, 0, 0), y(0, 1, 0), z(0, 0, 1) {}
 
-Frame::Frame(Vec3 x, Vec3 y, Vec3 z)
-	: x(x), y(y), z(z) {}
+Frame::Frame(Vec3 x, Vec3 y, Vec3 z) : x(x), y(y), z(z) {}
 
 Frame Frame::FromXZ(Vec3 x, Vec3 z) {
 	return Frame(x, glm::cross(z, x), z);

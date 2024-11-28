@@ -1,11 +1,11 @@
 #include "pch.h"
 #include "Bounds.h"
 
-Bounds2i::Bounds2i(glm::ivec2 p) 
-	: min(p), max(p) {}
+Bounds2i::Bounds2i(glm::ivec2 p) :
+	min(p), max(p) {}
 
-Bounds2i::Bounds2i(glm::ivec2 p1, glm::ivec2 p2) 
-	: min(glm::min(p1, p2)), max(glm::max(p1, p2)) {}
+Bounds2i::Bounds2i(glm::ivec2 p1, glm::ivec2 p2) :
+	min(glm::min(p1, p2)), max(glm::max(p1, p2)) {}
 
 glm::ivec2 Bounds2i::Diagonal() const {
 	return max - min;
@@ -62,11 +62,11 @@ bool Bounds2i::operator!=(const Bounds2i& b) const {
 	return min != b.min || max != b.max;
 }
 
-Bounds2f::Bounds2f(Vec2 p) 
-	: min(p), max(p) {}
+Bounds2f::Bounds2f(Vec2 p) :
+	min(p), max(p) {}
 
-Bounds2f::Bounds2f(Vec2 p1, Vec2 p2) 
-	: min(glm::min(p1, p2)), max(glm::max(p1, p2)) {}
+Bounds2f::Bounds2f(Vec2 p1, Vec2 p2) :
+	min(glm::min(p1, p2)), max(glm::max(p1, p2)) {}
 
 Vec2 Bounds2f::Diagonal() const {
 	return max - min;
@@ -134,11 +134,11 @@ bool Bounds2f::operator!=(const Bounds2f& b) const {
 	return min != b.min || max != b.max;
 }
 
-Bounds3i::Bounds3i(glm::ivec3 p) 
-	: min(p), max(p) {}
+Bounds3i::Bounds3i(glm::ivec3 p) :
+	min(p), max(p) {}
 
-Bounds3i::Bounds3i(glm::ivec3 p1, glm::ivec3 p2)
-	: min(glm::min(p1, p2)), max(glm::max(p1, p2)) {}
+Bounds3i::Bounds3i(glm::ivec3 p1, glm::ivec3 p2) :
+	min(glm::min(p1, p2)), max(glm::max(p1, p2)) {}
 
 glm::ivec3 Bounds3i::Corner(int32_t corner) const {
 	return glm::ivec3((*this)[(corner & 1)].x, (*this)[(corner & 2) ? 1 : 0].y, (*this)[(corner & 4) ? 1 : 0].z);
@@ -218,11 +218,11 @@ glm::ivec3& Bounds3i::operator[](int32_t i) {
 	return (i == 0) ? min : max;
 }
 
-Bounds3f::Bounds3f(Vec3 p)
-	: min(p), max(p) {}
+Bounds3f::Bounds3f(Vec3 p) :
+	min(p), max(p) {}
 
-Bounds3f::Bounds3f(Vec3 p1, Vec3 p2)
-	: min(glm::min(p1, p2)), max(glm::max(p1, p2)) {}
+Bounds3f::Bounds3f(Vec3 p1, Vec3 p2) :
+	min(glm::min(p1, p2)), max(glm::max(p1, p2)) {}
 
 Vec3 Bounds3f::Corner(int32_t corner) const {
 	return Vec3((*this)[(corner & 1)].x, (*this)[(corner & 2) ? 1 : 0].y, (*this)[(corner & 4) ? 1 : 0].z);

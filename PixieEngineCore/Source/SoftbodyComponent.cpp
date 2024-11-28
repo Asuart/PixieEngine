@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "SoftbodyComponent.h"
 
-SoftbodyComponent::SoftbodyComponent(SceneObject* parent)
-	: Component(ComponentType::Softbody, parent) {}
+SoftbodyComponent::SoftbodyComponent(SceneObject* parent) :
+	Component(ComponentType::Softbody, parent) {}
 
 void SoftbodyComponent::OnStart() {
 	m_mesh = m_parent->GetComponent<MeshComponent>()->GetMesh();
@@ -51,7 +51,7 @@ void SoftbodyComponent::OnStart() {
 	std::vector<int32_t> indices;
 	indices.resize(springColors.size());
 	for (size_t i = 0; i < indices.size(); i++) {
-		indices[i] = i;
+		indices[i] = (int32_t)i;
 	}
 	std::sort(indices.begin(), indices.end(), [&](int32_t first, int32_t second) {
 		return springColors[first] < springColors[second];
@@ -82,7 +82,7 @@ void SoftbodyComponent::OnStart() {
 
 void SoftbodyComponent::OnUpdate() {
 	return;
-	m_timeAligner += Timer::deltaTime;
+	m_timeAligner += Time::deltaTime;
 	while (m_timeAligner >= m_deltaTime) {
 		m_timeAligner -= m_deltaTime;
 		SetForcesToGravity();

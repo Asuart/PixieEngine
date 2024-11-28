@@ -2,8 +2,8 @@
 #include "AssetsBrowserWindow.h"
 #include "PixieEngineApp.h"
 
-AssetsBrowserWindow::AssetsBrowserWindow(PixieEngineApp& app, PixieEngineInterface& inter)
-	: PixieEngineInterfaceWindow(app, inter) {}
+AssetsBrowserWindow::AssetsBrowserWindow(PixieEngineApp& app, PixieEngineInterface& inter) :
+	PixieEngineInterfaceWindow(app, inter) {}
 
 void AssetsBrowserWindow::Initialize() {
 	m_folderIcon = ResourceManager::LoadRGBATexture("../Resources/folder-icon.png")->id;
@@ -23,7 +23,7 @@ void AssetsBrowserWindow::Draw() {
 		std::filesystem::path assetPath = m_app.GetAssetsPath();
 
 		if (assetPath.parent_path() != "") {
-			ImGui::ImageButton((ImTextureID)m_parentFolderIcon, { m_thumbnailSize, m_thumbnailSize }, { 0, 0 }, { 1, 1 });
+			ImGui::ImageButton((ImTextureID)(uint64_t)m_parentFolderIcon, { m_thumbnailSize, m_thumbnailSize }, { 0, 0 }, { 1, 1 });
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 				m_app.SetAssetsPath(assetPath.parent_path());
 			}
@@ -45,7 +45,7 @@ void AssetsBrowserWindow::Draw() {
 
 		for (const auto& path : directories) {
 			const std::string fileName = path.filename().string();
-			ImGui::ImageButton((ImTextureID)m_folderIcon, { m_thumbnailSize, m_thumbnailSize }, { 0, 0 }, { 1, 1 });
+			ImGui::ImageButton((ImTextureID)(uint64_t)m_folderIcon, { m_thumbnailSize, m_thumbnailSize }, { 0, 0 }, { 1, 1 });
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 				m_app.SetAssetsPath(assetPath.string() + "/" + fileName);
 			}
@@ -55,7 +55,7 @@ void AssetsBrowserWindow::Draw() {
 
 		for (const auto& path : files) {
 			const std::string fileName = path.filename().string();
-			ImGui::ImageButton((ImTextureID)m_fileIcon, { m_thumbnailSize, m_thumbnailSize }, { 0, 0 }, { 1, 1 });
+			ImGui::ImageButton((ImTextureID)(uint64_t)m_fileIcon, { m_thumbnailSize, m_thumbnailSize }, { 0, 0 }, { 1, 1 });
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 				if (ResourceManager::IsValidScenePath(path)) {
 					m_app.LoadScene(path);

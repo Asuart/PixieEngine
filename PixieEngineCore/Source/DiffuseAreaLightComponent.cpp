@@ -2,8 +2,8 @@
 #include "DiffuseAreaLightComponent.h"
 #include "MeshComponent.h"
 
-DiffuseAreaLightComponent::DiffuseAreaLightComponent(SceneObject* parent, Vec3 color, Float strength)
-	: Component(ComponentType::DiffuseAreaLight, parent), m_color(color), m_strength(strength) {}
+DiffuseAreaLightComponent::DiffuseAreaLightComponent(SceneObject* parent, Vec3 color, Float strength) :
+	Component(ComponentType::DiffuseAreaLight, parent), m_color(color), m_strength(strength) {}
 
 void DiffuseAreaLightComponent::OnStart() {
 	if (MeshComponent* meshComponent = m_parent->GetComponent<MeshComponent>()) {

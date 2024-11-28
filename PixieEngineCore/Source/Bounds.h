@@ -1,8 +1,7 @@
 #pragma once
 #include "pch.h"
 #include "Ray.h"
-#include "RTMath.h"
-#include "RayTracingStatistics.h"
+#include "MathAndPhysics.h"
 
 struct Bounds2i {
 	glm::ivec2 min = glm::ivec2(std::numeric_limits<int32_t>::max());

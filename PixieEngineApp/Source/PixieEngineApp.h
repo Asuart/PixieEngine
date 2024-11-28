@@ -24,12 +24,15 @@ public:
 	DefaultRenderer* GetDefaultRenderer();
 	const std::filesystem::path& GetAssetsPath();
 	void SetAssetsPath(const std::filesystem::path& path);
+	void UpdateSceneSnapshot();
 
+	void LoadDemoScene(GeneratedScene type);
+	void AddObject(GeneratedObject type);
 	void LoadScene(const std::filesystem::path& filePath);
 	void LoadModel(const std::filesystem::path& filePath);
 
 protected:
-	std::filesystem::path m_currentScenePath = "../Assets/Scenes/untitled.glb";
+	std::filesystem::path m_currentScenePath = "../Assets/Scenes/default-min.obj";
 	std::filesystem::path m_assetsPath = "../Assets/Scenes";
 	PixieEngineWindow m_window;
 	PixieEngineInterface m_interface;

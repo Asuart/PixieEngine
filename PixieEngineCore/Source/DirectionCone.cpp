@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "DirectionCone.h"
 
-DirectionCone::DirectionCone(Vec3 w, Float cosTheta)
-	: w(w), cosTheta(cosTheta) {}
+DirectionCone::DirectionCone(Vec3 w, Float cosTheta) :
+    w(w), cosTheta(cosTheta) {}
 
 DirectionCone DirectionCone::EntireSphere() {
 	return DirectionCone(Vec3(0, 0, 1), -1);

@@ -13,6 +13,7 @@
 #include "VRViewportSettingsWindow.h"
 #include "StatsWindow.h"
 #include "RendererViewportSettingsWindow.h"
+#include "GPURayTracingViewportWindow.h"
 
 class PixieEngineApp;
 

@@ -2,7 +2,8 @@
 #include "DefaultRenderer.h"
 
 DefaultRenderer::DefaultRenderer() {
-	m_defaultShader = CompileShader(PBR_VERTEX_SHADER_SOURCE, PBR_FRAGMENT_SHADER_SOURCE);
+	m_defaultShader = ResourceManager::CompileShader(PBR_VERTEX_SHADER_SOURCE, PBR_FRAGMENT_SHADER_SOURCE);
+	m_quadShader = ResourceManager::CompileShader(QUAD_VERTEX_SHADER_SOURCE, QUAD_FRAGMENT_SHADER_SOURCE);
 }
 
 void DefaultRenderer::DrawFrame(Scene* scene, Camera* camera) {
@@ -14,6 +15,37 @@ void DefaultRenderer::DrawFrame(Scene* scene, Camera* camera) {
 	GLuint mModelLoc = glGetUniformLocation(m_defaultShader, "mModel");
 	SceneObject* rootObject = scene->GetRootObject();
 	DrawObject(rootObject, mModelLoc);
+}
+
+void DefaultRenderer::DrawTexture(GLuint texture, glm::ivec2 textureResolution, glm::ivec2 viewportResolution, int32_t samples) {
+	glUseProgram(m_quadShader);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glUniform1i(glGetUniformLocation(m_quadShader, "ourTexture"), 0);
+	float textureAspect = Aspect(textureResolution);
+	float viewportAspect = Aspect(viewportResolution);
+	float posX, posY;
+	float sizeX, sizeY;
+	if (viewportAspect > textureAspect) {
+		sizeY = 1.0f;
+		sizeX = textureAspect / viewportAspect;
+		posX = (1.0f - sizeX) * 0.5f;
+		posY = 0.0f;
+	}
+	else {
+		sizeX = 1.0f;
+		sizeY = viewportAspect / textureAspect;
+		posX = 0.0f;
+		posY = (1.0f - sizeY) * 0.5f;
+	}
+	GLuint posLoc = glGetUniformLocation(m_quadShader, "uPos");
+	GLuint sizeLoc = glGetUniformLocation(m_quadShader, "uSize");
+	GLuint samplesLoc = glGetUniformLocation(m_quadShader, "uSamples");
+	glUniform2f(posLoc, posX, posY);
+	glUniform2f(sizeLoc, sizeX, sizeY);
+	glUniform1f(samplesLoc, (Float)samples);
+
+	ResourceManager::GetQuadMesh()->Draw();
 }
 
 void DefaultRenderer::DrawObject(SceneObject* object, GLuint mModelLoc, Mat4 parentTransform) {
@@ -36,7 +68,7 @@ void DefaultRenderer::DrawObject(SceneObject* object, GLuint mModelLoc, Mat4 par
 		mesh->Draw();
 	}
 	for (size_t i = 0; i < object->GetChildren().size(); i++) {
-		DrawObject(object->GetChild(i), mModelLoc, objectTransform);
+		DrawObject(object->GetChild((int32_t)i), mModelLoc, objectTransform);
 	}
 }
 
@@ -80,13 +112,11 @@ void DefaultRenderer::SetupMaterial(Material* material) {
 	GLuint albedoLoc = glGetUniformLocation(m_defaultShader, "albedo");
 	GLuint metallicLoc = glGetUniformLocation(m_defaultShader, "metallic");
 	GLuint roghnessLoc = glGetUniformLocation(m_defaultShader, "roughness");
-	GLuint ambientOcclusionLoc = glGetUniformLocation(m_defaultShader, "ambientOcclusion");
 	GLuint useDiffuseMapLoc = glGetUniformLocation(m_defaultShader, "useDiffuseMap");
 
-	glUniform3(albedoLoc, material->m_albedo.GetRGBValue());
+	glUniform3(albedoLoc, material->m_albedo.GetRGB());
 	glUniform1(metallicLoc, material->m_metallic);
 	glUniform1(roghnessLoc, material->m_roughness);
-	glUniform1(ambientOcclusionLoc, material->m_ambiendOcclusion);
 	glUniform1i(useDiffuseMapLoc, material->m_albedoTexture != nullptr);
 	if (material->m_albedoTexture) {
 		glActiveTexture(GL_TEXTURE0);

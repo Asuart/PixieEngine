@@ -2,8 +2,8 @@
 #include "SceneTreeWindow.h"
 #include "PixieEngineApp.h"
 
-SceneTreeWindow::SceneTreeWindow(PixieEngineApp& app, PixieEngineInterface& inter)
-	: PixieEngineInterfaceWindow(app, inter) {}
+SceneTreeWindow::SceneTreeWindow(PixieEngineApp& app, PixieEngineInterface& inter) :
+	PixieEngineInterfaceWindow(app, inter) {}
 
 void SceneTreeWindow::Draw() {
 	ImGui::SetNextWindowSize(ImVec2(400, 400));
@@ -30,7 +30,7 @@ void SceneTreeWindow::DrawSceneTree(SceneObject* object) {
 	}
 	if (openTreeNode) {
 		for (size_t i = 0; i < object->GetChildren().size(); i++) {
-			DrawSceneTree(object->GetChild(i));
+			DrawSceneTree(object->GetChild((int32_t)i));
 		}
 		ImGui::TreePop();
 	}

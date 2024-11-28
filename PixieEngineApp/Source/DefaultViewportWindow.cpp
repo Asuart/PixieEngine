@@ -2,14 +2,15 @@
 #include "DefaultViewportWindow.h"
 #include "PixieEngineApp.h"
 
-DefaultViewportWindow::DefaultViewportWindow(PixieEngineApp& app, PixieEngineInterface& inter)
-	: PixieEngineInterfaceWindow(app, inter),
-	m_viewportResolution(glm::ivec2(1280, 720)),
-	m_viewportCamera(Vec3(-10, 0, 0), Vec3(0, 0, 0), Vec3(0, 1, 0), glm::radians(39.6f), 16.0f / 9.0f, 0, 10),
+DefaultViewportWindow::DefaultViewportWindow(PixieEngineApp& app, PixieEngineInterface& inter) :
+	PixieEngineInterfaceWindow(app, inter),
+	m_viewportResolution({ 1280, 720 }),
+	m_viewportCamera(Vec3(-10, 0, 0), Vec3(0, 0, 0), Vec3(0, 1, 0), glm::radians(39.6f), { 1280, 720 }, 0, 10),
 	m_cameraController(m_viewportCamera) {}
 
 void DefaultViewportWindow::Initialize() {
-	m_viewportFrameBuffer = new FrameBuffer(1280, 720);
+	m_viewportFrameBuffer = new FrameBuffer(m_viewportResolution);
+	m_cameraFrameBuffer = new FrameBuffer(m_viewportCamera.GetResolution());
 }
 
 void DefaultViewportWindow::Draw() {
@@ -21,7 +22,6 @@ void DefaultViewportWindow::Draw() {
 
 		ImVec2 viewportResolution = ImGui::GetContentRegionAvail();
 		ImGui::SetNextWindowSize(viewportResolution);
-
 		glm::ivec2 glmViewportResolution = { viewportResolution.x, viewportResolution.y };
 		if (glmViewportResolution != m_viewportResolution) {
 			UpdateViewportResolution(glmViewportResolution);
@@ -29,17 +29,41 @@ void DefaultViewportWindow::Draw() {
 
 		Scene* scene = m_app.GetScene();
 		if (scene) {
-			m_viewportFrameBuffer->Bind();
-			glViewport(0, 0, m_viewportFrameBuffer->m_resolution.x, m_viewportFrameBuffer->m_resolution.y);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			if (m_useCameraResolution) {
+				m_cameraFrameBuffer->Resize(m_viewportCamera.GetResolution());
 
-			m_app.GetDefaultRenderer()->DrawFrame(scene, &m_viewportCamera);
+				m_cameraFrameBuffer->Bind();
+				glViewport(0, 0, m_cameraFrameBuffer->m_resolution.x, m_cameraFrameBuffer->m_resolution.y);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				m_app.GetDefaultRenderer()->DrawFrame(scene, &m_viewportCamera);
+				m_cameraFrameBuffer->Unbind();
 
-			m_viewportFrameBuffer->Unbind();
-			m_app.RestoreViewportSize();
+				m_viewportFrameBuffer->Bind();
+				glViewport(0, 0, m_viewportFrameBuffer->m_resolution.x, m_viewportFrameBuffer->m_resolution.y);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+				m_app.GetDefaultRenderer()->DrawTexture(m_cameraFrameBuffer->m_texture, m_cameraFrameBuffer->m_resolution, m_viewportResolution);
+
+				m_viewportFrameBuffer->Unbind();
+				m_app.RestoreViewportSize();
+
+				ImGui::Image((void*)(uint64_t)m_viewportFrameBuffer->m_texture, viewportResolution, { 0.0, 1.0 }, { 1.0, 0.0 });
+			}
+			else {
+				m_viewportFrameBuffer->Bind();
+				glViewport(0, 0, m_viewportFrameBuffer->m_resolution.x, m_viewportFrameBuffer->m_resolution.y);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+				Camera camera = m_viewportCamera;
+				camera.SetResolution(m_viewportResolution);
+				m_app.GetDefaultRenderer()->DrawFrame(scene, &camera);
+
+				m_viewportFrameBuffer->Unbind();
+				m_app.RestoreViewportSize();
+
+				ImGui::Image((void*)(uint64_t)m_viewportFrameBuffer->m_texture, viewportResolution, { 0.0, 1.0 }, { 1.0, 0.0 });
+			}
 		}
-
-		ImGui::Image((void*)(uint64_t)m_viewportFrameBuffer->m_texture, viewportResolution, { 0.0, 1.0 }, { 1.0, 0.0 });
 	}
 	ImGui::End();
 	ImGui::PopStyleVar();
@@ -47,6 +71,5 @@ void DefaultViewportWindow::Draw() {
 
 void DefaultViewportWindow::UpdateViewportResolution(glm::ivec2 resolution) {
 	m_viewportResolution = resolution;
-	m_viewportFrameBuffer->Resize(resolution.x, resolution.y);
-	m_viewportCamera.SetAspect((float)resolution.x / resolution.y);
+	m_viewportFrameBuffer->Resize(resolution);
 }

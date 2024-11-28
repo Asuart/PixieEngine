@@ -2,8 +2,8 @@
 #include "InspectorWindow.h"
 #include "PixieEngineApp.h"
 
-InspectorWindow::InspectorWindow(PixieEngineApp& app, PixieEngineInterface& inter)
-	: PixieEngineInterfaceWindow(app, inter) {}
+InspectorWindow::InspectorWindow(PixieEngineApp& app, PixieEngineInterface& inter) :
+	PixieEngineInterfaceWindow(app, inter) {}
 
 void InspectorWindow::Draw() {
 	ImGui::SetNextWindowSize(ImVec2(400, 400));

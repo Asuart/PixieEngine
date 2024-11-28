@@ -2,10 +2,10 @@
 #include "pch.h"
 
 struct FrameBuffer {
-	FrameBuffer(uint32_t width, uint32_t height);
+	FrameBuffer(glm::ivec2 resolution);
 	~FrameBuffer();
 
-	void Resize(uint32_t width, uint32_t height);
+	void Resize(glm::ivec2 resolution);
 	void Bind();
 	void Unbind();
 

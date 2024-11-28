@@ -1,5 +1,5 @@
 #pragma once
-#include "RTMath.h"
+#include "MathAndPhysics.h"
 #include "Ray.h"
 #include "Interaction.h"
 #include "Bounds.h"
@@ -43,14 +43,14 @@ public:
 	Vec3 ApplyVector(Vec3 v) const;
 	Vec3 ApplyNormal(Vec3 n) const;
 	Ray ApplyRay(const Ray& r, Float* tMax = nullptr) const;
-	SurfaceInteraction ApplyInteraction(const SurfaceInteraction& in) const;
+	RayInteraction ApplyInteraction(const RayInteraction& in) const;
 	Bounds3f ApplyBounds(const Bounds3f& b) const;
 
 	Vec3 ApplyInversePoint(Vec3 p) const;
 	Vec3 ApplyInverseVector(Vec3 v) const;
 	Vec3 ApplyInverseNormal(Vec3 n) const;
 	Ray ApplyInverseRay(const Ray& r, Float* tMax = nullptr) const;
-	SurfaceInteraction ApplyInverseInteraction(const SurfaceInteraction& in) const;
+	RayInteraction ApplyInverseInteraction(const RayInteraction& in) const;
 
 	bool IsIdentity() const;
 	bool HasScale(Float tolerance = 1e-3f) const;
@@ -70,3 +70,5 @@ Transform Transpose(const Transform& t);
 Transform RotateFromTo(Vec3 from, Vec3 to);
 Transform RotateAroundAxis(Float sinTheta, Float cosTheta, Vec3 axis);
 Transform RotateAroundAxis(Float theta, Vec3 axis);
+Transform LookAt(Vec3 from, Vec3 to, Vec3 up);
+

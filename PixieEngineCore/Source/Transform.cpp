@@ -23,11 +23,11 @@ Transform::Transform(const Vec3& position, const Quaternion& rotation, const Vec
 	Set(position, rotation, scale);
 };
 
-Transform::Transform(const Mat4& m)
-	: m_transform(m), m_inverseTransform(glm::inverse(m)) {}
+Transform::Transform(const Mat4& m) :
+	m_transform(m), m_inverseTransform(glm::inverse(m)) {}
 
-Transform::Transform(const Mat4& m, const Mat4& mInv)
-	: m_transform(m), m_inverseTransform(mInv) {}
+Transform::Transform(const Mat4& m, const Mat4& mInv) :
+	m_transform(m), m_inverseTransform(mInv) {}
 
 const Mat4& Transform::GetMatrix() const {
 	return m_transform;
@@ -203,8 +203,8 @@ Ray Transform::ApplyRay(const Ray& r, Float* tMax) const {
 	return Ray(o, d);
 }
 
-SurfaceInteraction Transform::ApplyInteraction(const SurfaceInteraction& in) const {
-	SurfaceInteraction ret(in);
+RayInteraction Transform::ApplyInteraction(const RayInteraction& in) const {
+	RayInteraction ret(in);
 	ret.position = ApplyPoint(in.position);
 	ret.normal = ApplyNormal(in.normal);
 	if (length2(ret.normal) > 0.0f) {
@@ -220,7 +220,7 @@ SurfaceInteraction Transform::ApplyInteraction(const SurfaceInteraction& in) con
 Bounds3f Transform::ApplyBounds(const Bounds3f& b) const {
 	Bounds3f bt;
 	for (int32_t i = 0; i < 8; ++i) {
-		bt = Union(bt, ApplyBounds(b));
+		bt = Union(bt, ApplyPoint(b.Corner(i)));
 	}
 	return bt;
 }
@@ -255,8 +255,8 @@ Ray Transform::ApplyInverseRay(const Ray& r, Float* tMax) const {
 	return Ray(o, d);
 }
 
-SurfaceInteraction Transform::ApplyInverseInteraction(const SurfaceInteraction& in) const {
-	SurfaceInteraction ret(in);
+RayInteraction Transform::ApplyInverseInteraction(const RayInteraction& in) const {
+	RayInteraction ret(in);
 	Transform t = Inverse(*this);
 	ret.position = t.ApplyPoint(in.position);
 	ret.normal = t.ApplyNormal(in.normal);
@@ -355,4 +355,10 @@ Transform RotateAroundAxis(Float theta, Vec3 axis) {
 	Float sinTheta = std::sin(glm::radians(theta));
 	Float cosTheta = std::cos(glm::radians(theta));
 	return RotateAroundAxis(sinTheta, cosTheta, axis);
+}
+
+Transform LookAt(Vec3 from, Vec3 to, Vec3 up) {
+	Transform t;
+	t.LookAt(from, to, up);
+	return t;
 }

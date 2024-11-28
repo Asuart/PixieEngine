@@ -1,9 +1,8 @@
 #include "pch.h"
 #include "Scene.h"
-#include "RayTracing.h"
 
-Scene::Scene(const std::string& name)
-	: m_name(name), m_rootObject(new SceneObject(name)) {}
+Scene::Scene(const std::string& name) :
+	m_name(name), m_rootObject(new SceneObject(name)) {}
 
 const std::string& Scene::GetName() {
 	return m_name;
@@ -14,6 +13,12 @@ void Scene::SetName(const std::string& name) {
 }
 
 void Scene::AddObject(SceneObject* object, SceneObject* parent) {
+	if (PointLightComponent* pointLight = object->GetComponent<PointLightComponent>()) {
+		m_pointLights.push_back(pointLight);
+	}
+	if (DirectionalLightComponent* pointLight = object->GetComponent<DirectionalLightComponent>()) {
+		m_directionalLights.push_back(pointLight);
+	}
 	if (parent) {
 		parent->AddChild(object);
 	}
@@ -24,7 +29,9 @@ void Scene::AddObject(SceneObject* object, SceneObject* parent) {
 
 void Scene::AddObject(SceneObject* object, const std::string& parentName) {
 	SceneObject* parent = FindObject(parentName);
-	if (parent == nullptr) return;
+	if (parent == nullptr) {
+		return;
+	}
 	AddObject(object, parent);
 }
 
@@ -86,6 +93,14 @@ Bounds3f Scene::GetBounds() {
 	return Bounds3f();
 }
 
+void Scene::SetSkybox(Skybox* skybox) {
+	m_skybox = skybox;
+}
+
+Skybox* Scene::GetSkybox() {
+	return m_skybox;
+}
+
 void Scene::Start() {
 	m_rootObject->OnStart();
 }
@@ -96,16 +111,4 @@ void Scene::Update() {
 
 void Scene::FixedUpdate() {
 	m_rootObject->OnFixedUpdate();
-}
-
-std::optional<ShapeIntersection> Scene::Intersect(const Ray& ray, Float tMax) const {
-	return RayTracing::Intersect(ray, this, tMax);
-}
-
-bool Scene::IsIntersected(const Ray& ray, Float tMax) const {
-	return RayTracing::IsIntersected(ray, this, tMax);
-}
-
-Vec3 Scene::GetSkyColor(const Ray& ray) {
-	return Vec3(0.0f, 0.0f, 0.0f);
 }

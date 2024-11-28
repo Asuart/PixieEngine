@@ -1,10 +1,9 @@
 #include "pch.h"
 #include "RayTracingSettingsWindow.h"
 #include "PixieEngineInterface.h"
-#include "RayTracingStatistics.h"
 
-RayTracingSettingsWindow::RayTracingSettingsWindow(PixieEngineApp& app, PixieEngineInterface& inter)
-	: PixieEngineInterfaceWindow(app, inter) {}
+RayTracingSettingsWindow::RayTracingSettingsWindow(PixieEngineApp& app, PixieEngineInterface& inter) :
+	PixieEngineInterfaceWindow(app, inter) {}
 
 void RayTracingSettingsWindow::Draw() {
 	ImGui::SetNextWindowSize(ImVec2(400, 400));
@@ -57,24 +56,6 @@ void RayTracingSettingsWindow::Draw() {
 			}
 			ImGui::Spacing();
 
-			if (viewport->m_rayTracingMode == RayTracingMode::SimplePathTracing) {
-				SimplePathIntegrator* integrator = dynamic_cast<SimplePathIntegrator*>(viewport->m_rayTracer);
-				if (ImGui::Checkbox("Sample Lights", &integrator->m_sampleLights)) {
-					viewport->Reset();
-				}
-				if (ImGui::Checkbox("Sample BSDF", &integrator->m_sampleBSDF)) {
-					viewport->Reset();
-				}
-				ImGui::Spacing();
-			}
-			else if (viewport->m_rayTracingMode == RayTracingMode::PathTracing) {
-				PathIntegrator* integrator = dynamic_cast<PathIntegrator*>(viewport->m_rayTracer);
-				if (ImGui::Checkbox("Regularize BSDF", &integrator->m_regularize)) {
-					viewport->Reset();
-				}
-				ImGui::Spacing();
-			}
-
 			std::string samplesText = std::string("Samples: ") + std::to_string(viewport->GetSamplesCount());
 			ImGui::Text(samplesText.c_str());
 
@@ -83,18 +64,6 @@ void RayTracingSettingsWindow::Draw() {
 
 			std::string lastSampleTimeText = std::string("Last Sample Time: ") + std::to_string(viewport->GetLastSampleTime());
 			ImGui::Text(lastSampleTimeText.c_str());
-
-			uint64_t totalRays = RayTracingStatistics::GetTotalRays();
-			std::string totalRaysText = std::string("Rays: ") + std::to_string(totalRays);
-			ImGui::Text(totalRaysText.c_str());
-
-			uint64_t totalBoxes = RayTracingStatistics::GetTotalBoxTests();
-			std::string totalBoxesText = std::string("Box checks: ") + std::to_string(totalBoxes);
-			ImGui::Text(totalBoxesText.c_str());
-
-			uint64_t totalTriangles = RayTracingStatistics::GetTotalTriangleTests();
-			std::string totalTrianglesText = std::string("Triangle checks: ") + std::to_string(totalTriangles);
-			ImGui::Text(totalTrianglesText.c_str());
 
 			ImGui::PopItemWidth();
 		}

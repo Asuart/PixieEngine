@@ -12,13 +12,15 @@ struct CameraSample {
 class Camera {
 public:
 
-	Camera(Vec3 lookFrom, Vec3 lookAt, Vec3 up, Float fovy, Float aspect, Float aperture = 0, Float focusDistance = 0, Float _near = 0.01f, Float _far = 1000.0);
+	Camera(Vec3 lookFrom, Vec3 lookAt, Vec3 up, Float fovy, glm::ivec2 resolution, Float aperture = 0, Float focusDistance = 0, Float _near = 0.01f, Float _far = 1000.0);
+	Camera(Transform transform, Float fovy, glm::ivec2 resolution, Float aperture = 0, Float focusDistance = 0, Float _near = 0.01f, Float _far = 1000.0);
 
 	void LookAt(const Vec3& lookFrom, const Vec3& lookAt, const Vec3& up);
-	void SetAspect(float aspect);
-	void SetFieldOfViewY(float fovy);
 	Ray GetRay(const Vec2& uv) const;
-	Float GetFieldOfView();
+	Float GetFieldOfViewY() const;
+	void SetFieldOfViewY(Float fovy);
+	glm::ivec2 GetResolution() const;
+	void SetResolution(glm::ivec2 resolution);
 
 	Transform& GetTransform();
 	const Transform& GetTransform() const;
@@ -28,6 +30,7 @@ public:
 
 protected:
 	Transform m_transform;
+	glm::ivec2 m_resolution = { 1280, 720 };
 	Float m_fovy = Pi / 2.0f;
 	Float m_aspect = 1.0f;
 	Float m_near = 0.01f;

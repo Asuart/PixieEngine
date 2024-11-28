@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "MeshComponent.h"
 
-MeshComponent::MeshComponent(Mesh* mesh, SceneObject* parent)
-	: Component(ComponentType::Mesh, parent), m_mesh(mesh) {
+MeshComponent::MeshComponent(Mesh* mesh, SceneObject* parent) :
+	Component(ComponentType::Mesh, parent), m_mesh(mesh) {
 	UploadMesh();
 }
 

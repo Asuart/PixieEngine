@@ -1,6 +1,6 @@
 #pragma once
 #include "pch.h"
-#include "RTMath.h"
+#include "MathAndPhysics.h"
 #include "Transform.h"
 
 struct DirectionCone {

@@ -3,8 +3,8 @@
 #include "RayTracingViewportWindow.h"
 #include "PixieEngineInterface.h"
 
-StatsWindow::StatsWindow(PixieEngineApp& app, PixieEngineInterface& inter)
-	: PixieEngineInterfaceWindow(app, inter) {}
+StatsWindow::StatsWindow(PixieEngineApp& app, PixieEngineInterface& inter) :
+	PixieEngineInterfaceWindow(app, inter) {}
 
 void StatsWindow::Draw() {
 	ImGui::SetNextWindowSize(ImVec2(400, 400));

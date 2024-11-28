@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "SceneObject.h"
 
-SceneObject::SceneObject(const std::string& name, Transform transform)
-	: m_name(name), m_localTransform(transform), m_parent(nullptr) {}
+SceneObject::SceneObject(const std::string& name, Transform transform) :
+	m_name(name), m_localTransform(transform), m_parent(nullptr) {}
 
 void SceneObject::AddChild(SceneObject* object) {
 	object->Detach();

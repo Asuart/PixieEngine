@@ -8,10 +8,12 @@ std::filesystem::path ResourceManager::m_currentFilePath = "";
 std::map<std::filesystem::path, SceneObject*> ResourceManager::m_Models = {};
 std::map<std::filesystem::path, Texture<Vec3>*> ResourceManager::m_RGBTextures = {};
 std::map<std::filesystem::path, Texture<Vec4>*> ResourceManager::m_RGBATextures = {};
-std::map<std::string, Material*> ResourceManager::m_materials = {};
+std::vector<Material> ResourceManager::m_materials = {};
 std::vector<Mesh*> ResourceManager::m_meshes = {};
 
 static const std::string c_deafultMaterial = "Default Material";
+static const int32_t c_maxMaterials = 512;
+
 
 inline void ltrim(std::string& s) {
 	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
@@ -30,6 +32,27 @@ inline void trim(std::string& s) {
 	ltrim(s);
 }
 
+Mat4 AssimpGLMHelpers::ConvertMatrixToGLMFormat(const aiMatrix4x4& from) {
+	Mat4 to;
+	to[0][0] = from.a1; to[1][0] = from.a2; to[2][0] = from.a3; to[3][0] = from.a4;
+	to[0][1] = from.b1; to[1][1] = from.b2; to[2][1] = from.b3; to[3][1] = from.b4;
+	to[0][2] = from.c1; to[1][2] = from.c2; to[2][2] = from.c3; to[3][2] = from.c4;
+	to[0][3] = from.d1; to[1][3] = from.d2; to[2][3] = from.d3; to[3][3] = from.d4;
+	return to;
+}
+
+Vec2 AssimpGLMHelpers::GetGLMVec(const aiVector2D& vec) {
+	return Vec2(vec.x, vec.y);
+}
+
+Vec3 AssimpGLMHelpers::GetGLMVec(const aiVector3D& vec) {
+	return Vec3(vec.x, vec.y, vec.z);
+}
+
+Quaternion AssimpGLMHelpers::GetGLMQuat(const aiQuaternion& pOrientation) {
+	return Quaternion(pOrientation.w, pOrientation.x, pOrientation.y, pOrientation.z);
+}
+
 void ResourceManager::Initialize() {
 	Vec2 min(0.0), max(1.0);
 	std::vector<Vertex> vertices = {
@@ -45,7 +68,8 @@ void ResourceManager::Initialize() {
 	Mesh* quadMesh = new Mesh(vertices, indices);
 	quadMesh->Upload();
 	m_meshes.push_back(quadMesh);
-	m_materials.insert({ c_deafultMaterial, new Material(c_deafultMaterial) });
+	m_materials.reserve(c_maxMaterials);
+	AddMaterial(Material(c_deafultMaterial));
 }
 
 Scene* ResourceManager::LoadScene(std::filesystem::path filePath) {
@@ -147,10 +171,32 @@ Texture<Vec4>* ResourceManager::LoadRGBATexture(std::filesystem::path filePath) 
 }
 
 Material* ResourceManager::GetDefaultMaterial() {
-	return m_materials[c_deafultMaterial];
+	return &m_materials[0];
 }
 
-std::map<std::string, Material*>& ResourceManager::GetMaterials() {
+Material* ResourceManager::GetMaterial(uint32_t index) {
+	return &m_materials[index];
+}
+
+int32_t ResourceManager::GetMaterialIndex(const Material* material) {
+	for (int32_t i = 0; i < m_materials.size(); i++) {
+		if (m_materials[i].m_name == material->m_name) {
+			return i;
+		}
+	}
+	return 0;
+}
+
+int32_t ResourceManager::GetMaterialIndex(const std::string& name) {
+	for (int32_t i = 0; i < m_materials.size(); i++) {
+		if (m_materials[i].m_name == name) {
+			return i;
+		}
+	}
+	return 0;
+}
+
+std::vector<Material>& ResourceManager::GetMaterials() {
 	return m_materials;
 }
 
@@ -294,13 +340,9 @@ Scene* ResourceManager::LoadPBRTScene(std::filesystem::path filePath) {
 				std::cout << "Unexpected tokens amount parsing NamedMaterial: " << tokens.size() << "\n";
 				break;
 			}
-			Material* material = GetDefaultMaterial();
-			if (m_materials.find(tokens[1]) == m_materials.end()) {
-				material = new Material(tokens[1]);
-				m_materials[tokens[1]] = material;
-			}
-			else {
-				material = m_materials[tokens[1]];
+			Material* material = FindMaterial(tokens[1]);
+			if (material == nullptr) {
+				material = AddMaterial(Material(tokens[1]));
 			}
 			if (MaterialComponent* materialComponent = objects[depth]->GetComponent<MaterialComponent>()) {
 				materialComponent->SetMaterial(material);
@@ -631,8 +673,8 @@ Material* ResourceManager::ProcessAssimpMaterial(const aiMaterial* aiMaterial) {
 	std::string materialName = aiMaterial->GetName().C_Str();
 	std::cout << "  Material: " << materialName << "\n";
 
-	if (auto it = m_materials.find(materialName); it != m_materials.end()) {
-		return it->second;
+	if (Material* mat = FindMaterial(materialName); mat != nullptr) {
+		return mat;
 	}
 
 	aiColor4D color, colorEmissive;
@@ -652,23 +694,29 @@ Material* ResourceManager::ProcessAssimpMaterial(const aiMaterial* aiMaterial) {
 	std::vector<Texture<Vec3>*> diffuseMaps = ProcessAssimpMaterialTextures(aiMaterial, aiTextureType_DIFFUSE, "texture_diffuse");
 	std::vector<Texture<Vec3>*> specularMaps = ProcessAssimpMaterialTextures(aiMaterial, aiTextureType_SPECULAR, "texture_specular");
 
-	Material* material = new Material(materialName);
-	material->m_albedo = Vec3(color.r, color.g, color.b);
+	Material material = Material(materialName);
+	material.m_albedo = Vec3(color.r, color.g, color.b);
 	if (diffuseMaps.size() > 0) {
-		material->m_albedoTexture = diffuseMaps[0];
+		material.m_albedoTexture = diffuseMaps[0];
 	}
-	material->m_roughness = roughness;
+	material.m_roughness = roughness;
 	if (specularMaps.size() > 0) {
 
 	}
-	material->m_emissionColor = glmEmissionColor;
-	material->m_emissionStrength = emissionInt;
-	material->m_transparency = 1.0f - opacity;
-	material->m_refraction = eta;
+	if (!isnan(glmEmissionColor.r) && !isnan(glmEmissionColor.y) && !isnan(glmEmissionColor.z)) {
+		material.m_emissionColor = glmEmissionColor;
+	}
+	if (!isnan(emissionInt)) {
+		material.m_emissionStrength = emissionInt;
+	}
+	if (!isnan(opacity)) {
+		material.m_transparency = 1.0f - opacity;
+	}
+	if (!isnan(eta)) {
+		material.m_refraction = eta;
+	}
 
-	m_materials[materialName] = material;
-
-	return material;
+	return AddMaterial(material);
 }
 
 std::vector<Texture<Vec3>*> ResourceManager::ProcessAssimpMaterialTextures(const aiMaterial* material, aiTextureType type, const std::string& name) {
@@ -716,4 +764,115 @@ Float ResourceManager::StringToFloat(const std::string& str) {
 	catch (std::exception e) {
 		return 0.0f;
 	}
+}
+
+Material* ResourceManager::FindMaterial(const std::string& name) {
+	auto it = std::find_if(m_materials.begin(), m_materials.end(), [&](const Material& mat) {
+		return mat.m_name == name;
+		});
+	if (it == m_materials.end()) {
+		return nullptr;
+	}
+	return &(*it);
+}
+
+Material* ResourceManager::AddMaterial(const Material& material) {
+	if (m_materials.size() == c_maxMaterials) {
+		throw new std::exception("Materials limit exceeded.");
+	}
+	m_materials.push_back(material);
+	return &m_materials.back();
+}
+
+std::string ResourceManager::ReadFile(const char* filePath) {
+	std::ifstream t(filePath);
+	std::string file((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
+	return file;
+}
+
+GLuint ResourceManager::LoadShader(const char* vertex_path, const char* fragment_path) {
+	std::string vertShaderStr = ReadFile(vertex_path);
+	std::string fragShaderStr = ReadFile(fragment_path);
+	const char* vertShaderSrc = vertShaderStr.c_str();
+	const char* fragShaderSrc = fragShaderStr.c_str();
+	return CompileShader(vertShaderSrc, fragShaderSrc);
+}
+
+GLuint ResourceManager::CompileShader(const char* vertShaderSrc, const char* fragShaderSrc) {
+	GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
+	GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
+
+	GLint result = GL_FALSE;
+	int32_t logLength;
+
+	glShaderSource(vertShader, 1, &vertShaderSrc, NULL);
+	glCompileShader(vertShader);
+
+	glGetShaderiv(vertShader, GL_COMPILE_STATUS, &result);
+	glGetShaderiv(vertShader, GL_INFO_LOG_LENGTH, &logLength);
+	std::vector<char> vertShaderError((logLength > 1) ? logLength : 1);
+	glGetShaderInfoLog(vertShader, logLength, NULL, &vertShaderError[0]);
+	if (logLength) {
+		std::cout << &vertShaderError[0] << std::endl;
+	}
+
+	glShaderSource(fragShader, 1, &fragShaderSrc, NULL);
+	glCompileShader(fragShader);
+
+	glGetShaderiv(fragShader, GL_COMPILE_STATUS, &result);
+	glGetShaderiv(fragShader, GL_INFO_LOG_LENGTH, &logLength);
+	std::vector<char> fragShaderError((logLength > 1) ? logLength : 1);
+	glGetShaderInfoLog(fragShader, logLength, NULL, &fragShaderError[0]);
+	if (logLength) {
+		std::cout << &fragShaderError[0] << std::endl;
+	}
+
+	GLuint program = glCreateProgram();
+	glAttachShader(program, vertShader);
+	glAttachShader(program, fragShader);
+	glLinkProgram(program);
+
+	glGetProgramiv(program, GL_LINK_STATUS, &result);
+	glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
+	std::vector<char> programError((logLength > 1) ? logLength : 1);
+	glGetProgramInfoLog(program, logLength, NULL, &programError[0]);
+	if (logLength) {
+		std::cout << &programError[0] << std::endl;
+	}
+
+	glDeleteShader(vertShader);
+	glDeleteShader(fragShader);
+
+	return program;
+}
+
+GLuint ResourceManager::LoadComputeShader(const char* compute_path) {
+	std::string computeShaderStr = ReadFile(compute_path);
+	return CompileComputeShader(computeShaderStr.c_str());
+}
+
+GLuint ResourceManager::CompileComputeShader(const char* computeShaderSrc) {
+	GLint result = GL_FALSE;
+	int32_t logLength;
+	GLuint ray_shader = glCreateShader(GL_COMPUTE_SHADER);
+	glShaderSource(ray_shader, 1, &computeShaderSrc, NULL);
+	glCompileShader(ray_shader);
+
+	glGetShaderiv(ray_shader, GL_COMPILE_STATUS, &result);
+	glGetShaderiv(ray_shader, GL_INFO_LOG_LENGTH, &logLength);
+	std::vector<char> fragShaderError((logLength > 1) ? logLength : 1);
+	glGetShaderInfoLog(ray_shader, logLength, NULL, &fragShaderError[0]);
+	std::cout << &fragShaderError[0] << std::endl;
+
+	GLuint rayProgram = glCreateProgram();
+	glAttachShader(rayProgram, ray_shader);
+	glLinkProgram(rayProgram);
+
+	glGetProgramiv(rayProgram, GL_LINK_STATUS, &result);
+	glGetProgramiv(rayProgram, GL_INFO_LOG_LENGTH, &logLength);
+	std::vector<char> programError((logLength > 1) ? logLength : 1);
+	glGetProgramInfoLog(rayProgram, logLength, NULL, &programError[0]);
+	std::cout << &programError[0] << std::endl;
+
+	return rayProgram;
 }

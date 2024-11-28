@@ -1,11 +1,11 @@
 #include "pch.h"
 #include "PiecewiseConstant.h"
 
-PiecewiseConstant1D::PiecewiseConstant1D(std::vector<Float> f)
-	: PiecewiseConstant1D(f, 0.0f, 1.0f) {}
+PiecewiseConstant1D::PiecewiseConstant1D(std::vector<Float> f) :
+	PiecewiseConstant1D(f, 0.0f, 1.0f) {}
 
-PiecewiseConstant1D::PiecewiseConstant1D(std::vector<Float> f, Float min, Float max)
-	: m_func(f.begin(), f.end()), m_cdf(f.size() + 1), m_min(min), m_max(max) {
+PiecewiseConstant1D::PiecewiseConstant1D(std::vector<Float> f, Float min, Float max) :
+	m_func(f.begin(), f.end()), m_cdf(f.size() + 1), m_min(min), m_max(max) {
 	for (Float& f : m_func) {
 		f = std::abs(f);
 	}
@@ -70,11 +70,11 @@ std::optional<Float> PiecewiseConstant1D::Invert(Float x) const {
 	return Lerp(delta, m_cdf[offset], m_cdf[offset + 1]);
 }
 
-PiecewiseConstant2D::PiecewiseConstant2D(const Buffer2D<Float>& data)
-	: PiecewiseConstant2D(data, Bounds2f(Vec2(0, 0), Vec2(1, 1))) {}
+PiecewiseConstant2D::PiecewiseConstant2D(const Buffer2D<Float>& data) :
+	PiecewiseConstant2D(data, Bounds2f(Vec2(0, 0), Vec2(1, 1))) {}
 
-PiecewiseConstant2D::PiecewiseConstant2D(const Buffer2D<Float>& data, Bounds2f domain)
-	: m_domain(domain) {
+PiecewiseConstant2D::PiecewiseConstant2D(const Buffer2D<Float>& data, Bounds2f domain) :
+	m_domain(domain) {
 	int32_t nu = data.GetWidth();
 	int32_t nv = data.GetHeight();
 	m_pConditionalV.reserve(nv);

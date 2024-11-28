@@ -159,7 +159,7 @@ void Animator::CalculateBoneTransform(SceneObject* node, Mat4 parentTransform) {
     }
 
     for (size_t i = 0; i < node->GetChildren().size(); i++) {
-        CalculateBoneTransform(node->GetChild(i), globalTransformation);
+        CalculateBoneTransform(node->GetChild((int32_t)i), globalTransformation);
     }
 }
 
@@ -185,7 +185,7 @@ void Animator::CalculateBoneTransform(SceneObject* node, Mat4 parentTransform, s
     }
 
     for (size_t i = 0; i < node->GetChildren().size(); i++) {
-        CalculateBoneTransform(node->GetChild(i), globalTransformation, transforms);
+        CalculateBoneTransform(node->GetChild((int32_t)i), globalTransformation, transforms);
     }
 }
 

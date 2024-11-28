@@ -5,23 +5,23 @@ std::random_device rd;
 std::mt19937 gen(rd());
 std::uniform_real_distribution<> dist(0, 1);
 
-inline Float RandomFloat() {
+Float RandomFloat() {
 	return (Float)dist(gen);
 }
 
-inline Float RandomFloat(Float min, Float max) {
+Float RandomFloat(Float min, Float max) {
 	return min + (max - min) * RandomFloat();
 }
 
-inline Vec3 RandomVector() {
+Vec3 RandomVector() {
 	return Vec3(RandomFloat(), RandomFloat(), RandomFloat());
 }
 
-inline Vec3 RandomVector(Float min, Float max) {
+Vec3 RandomVector(Float min, Float max) {
 	return Vec3(RandomFloat(min, max), RandomFloat(min, max), RandomFloat(min, max));
 }
 
-inline Vec3 RandomUnitVector() {
+Vec3 RandomUnitVector() {
 	return glm::normalize(RandomVector(-1.0, 1.0));
 }
 
@@ -36,7 +36,7 @@ Vec3 RandomInHemisphere(const Vec3& normal) {
 	return -uSphere;
 }
 
-inline Vec3 RandomInUnitDisk() {
+Vec3 RandomInUnitDisk() {
 	RandomInUnitSphere();
 	return glm::normalize(Vec3(RandomFloat(-1, 1), RandomFloat(-1, 1), 0));
 }
@@ -92,8 +92,7 @@ int32_t PermutationElement(uint32_t i, uint32_t l, uint32_t p) {
 	return (i + p) % l;
 }
 
-RNG::RNG() 
-	: m_state(PCG32_DEFAULT_STATE), m_inc(PCG32_DEFAULT_STREAM) {}
+RNG::RNG() : m_state(PCG32_DEFAULT_STATE), m_inc(PCG32_DEFAULT_STREAM) {}
 
 RNG::RNG(uint64_t seqIndex, uint64_t seed) { 
 	SetSequence(seqIndex, seed); 

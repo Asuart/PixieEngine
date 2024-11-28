@@ -10,7 +10,8 @@ enum class ComponentType {
 	PointLight,
 	DirectionalLight,
 	DiffuseAreaLight,
-	MeshAnimator
+	MeshAnimator,
+	Sphere,
 };
 
 constexpr inline std::string to_string(ComponentType type) {
@@ -24,6 +25,7 @@ constexpr inline std::string to_string(ComponentType type) {
 	case ComponentType::DirectionalLight: return "Directional Light Component";
 	case ComponentType::DiffuseAreaLight: return "Diffuse Area Light Component";
 	case ComponentType::MeshAnimator: return "Mesh Animator Component";
+	case ComponentType::Sphere: return "Sphere Component";
 	default: return "Undefined Component";
 	}
 };

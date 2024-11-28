@@ -1,12 +1,12 @@
 #include "pch.h"
 #include "ViewportCameraController.h"
 
-ViewportCameraController::ViewportCameraController(Camera& camera)
-	: m_camera(camera) {}
+ViewportCameraController::ViewportCameraController(Camera& camera) :
+	m_camera(camera) {}
 
 bool ViewportCameraController::Update() {
-	const Float scale = 10.0f * (UserInput::GetKey(GLFW_KEY_LEFT_SHIFT) ? 0.1f : 1.0f) * Timer::deltaTime;
-	const Float rotationScale = (UserInput::GetKey(GLFW_KEY_LEFT_SHIFT) ? 0.1f : 1.0f) * Timer::deltaTime;
+	const Float scale = 10.0f * (UserInput::GetKey(GLFW_KEY_LEFT_SHIFT) ? 0.1f : 1.0f) * Time::deltaTime;
+	const Float rotationScale = (UserInput::GetKey(GLFW_KEY_LEFT_SHIFT) ? 0.1f : 1.0f) * Time::deltaTime;
 	bool moved = false;
 	Transform& transform = m_camera.GetTransform();
 	if (UserInput::GetKey(GLFW_KEY_W)) {

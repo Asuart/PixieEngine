@@ -4,8 +4,8 @@
 #include "PixieEngineApp.h"
 #include "PixieEngineInterface.h"
 
-StereoscopicViewportSettingsWindow::StereoscopicViewportSettingsWindow(PixieEngineApp& app, PixieEngineInterface& inter)
-	: PixieEngineInterfaceWindow(app, inter) {}
+StereoscopicViewportSettingsWindow::StereoscopicViewportSettingsWindow(PixieEngineApp& app, PixieEngineInterface& inter) :
+	PixieEngineInterfaceWindow(app, inter) {}
 
 void StereoscopicViewportSettingsWindow::Draw() {
 	ImGui::SetNextWindowSize(ImVec2(400, 400));
@@ -15,7 +15,7 @@ void StereoscopicViewportSettingsWindow::Draw() {
 			StereoscopicViewportWindow* viewport = viewports[0];
 			ComponentRenderer::DrawTransform(viewport->m_viewportCamera.GetTransform());
 			ImGui::Spacing();
-			float fovy = viewport->m_viewportCamera.GetFieldOfView();
+			float fovy = viewport->m_viewportCamera.GetFieldOfViewY();
 			if (ImGui::DragFloat("FoV y", &fovy, 0.01f, 0.0f, 720.0f)) {
 				viewport->m_viewportCamera.SetFieldOfViewY(fovy);
 			}

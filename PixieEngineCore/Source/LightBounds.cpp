@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "LightBounds.h"
 
-LightBounds::LightBounds(const Bounds3f& b, Vec3 w, Float phi, Float cosTheta_o, Float cosTheta_e)
-	: bounds(b), w(w), phi(phi), cosTheta_o(cosTheta_o), cosTheta_e(cosTheta_e) {}
+LightBounds::LightBounds(const Bounds3f& b, Vec3 w, Float phi, Float cosTheta_o, Float cosTheta_e) :
+    bounds(b), w(w), phi(phi), cosTheta_o(cosTheta_o), cosTheta_e(cosTheta_e) {}
 
 Vec3 LightBounds::Centroid() const { 
 	return (bounds.min + bounds.max) / (Float)2;

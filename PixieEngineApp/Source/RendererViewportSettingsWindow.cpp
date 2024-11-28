@@ -4,8 +4,8 @@
 #include "PixieEngineApp.h"
 #include "PixieEngineInterface.h"
 
-RendererViewportSettingsWindow::RendererViewportSettingsWindow(PixieEngineApp& app, PixieEngineInterface& inter)
-	: PixieEngineInterfaceWindow(app, inter) {}
+RendererViewportSettingsWindow::RendererViewportSettingsWindow(PixieEngineApp& app, PixieEngineInterface& inter) :
+	PixieEngineInterfaceWindow(app, inter) {}
 
 void RendererViewportSettingsWindow::Draw() {
 	ImGui::SetNextWindowSize(ImVec2(400, 400));
@@ -15,9 +15,19 @@ void RendererViewportSettingsWindow::Draw() {
 			DefaultViewportWindow* viewport = viewports[0];
 			ComponentRenderer::DrawTransform(viewport->m_viewportCamera.GetTransform());
 			ImGui::Spacing();
-			float fovy = viewport->m_viewportCamera.GetFieldOfView();
-			if (ImGui::DragFloat("FoV y", &fovy, 0.01f, 0.0f, 720.0f)) {
+			float fovy = viewport->m_viewportCamera.GetFieldOfViewY();
+			if (ImGui::DragFloat("Field of View y", &fovy, 0.01f, 0.0f, 720.0f)) {
 				viewport->m_viewportCamera.SetFieldOfViewY(fovy);
+			}
+			ImGui::Spacing();
+			if (ImGui::Checkbox("Use Camera Resolution", &viewport->m_useCameraResolution)) {}
+			if (viewport->m_useCameraResolution) {
+				glm::ivec2 resolution = viewport->m_viewportCamera.GetResolution();
+				if (ImGui::InputInt2("Camera Resolution", &resolution[0])) {
+					resolution = glm::clamp(resolution, 1, 4096);
+					viewport->m_viewportCamera.SetResolution(resolution);
+				}
+				ImGui::Text((std::string("Aspect: ") + std::to_string(Aspect(resolution))).c_str());
 			}
 		}
 	}

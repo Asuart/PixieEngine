@@ -2,8 +2,8 @@
 #include "PixieEngineInterface.h"
 #include "PixieEngineApp.h"
 
-PixieEngineInterface::PixieEngineInterface(PixieEngineApp& app)
-	: m_app(app) {
+PixieEngineInterface::PixieEngineInterface(PixieEngineApp& app) :
+	m_app(app) {
 	m_openWindows.push_back(new SceneTreeWindow(m_app, *this));
 	m_openWindows.push_back(new AssetsBrowserWindow(m_app, *this));
 	m_openWindows.push_back(new InspectorWindow(m_app, *this));
@@ -17,6 +17,7 @@ PixieEngineInterface::PixieEngineInterface(PixieEngineApp& app)
 	m_openWindows.push_back(new VRViewportSettingsWindow(m_app, *this));
 	m_openWindows.push_back(new StatsWindow(m_app, *this));
 	m_openWindows.push_back(new RendererViewportSettingsWindow(m_app, *this));
+	m_openWindows.push_back(new GPURayTracingViewportWindow(m_app, *this));
 }
 
 PixieEngineInterface::~PixieEngineInterface() {
@@ -67,6 +68,36 @@ void PixieEngineInterface::Draw() {
 		if (ImGui::BeginMenu("File")) {
 			if (ImGui::MenuItem("Close")) {
 				glfwSetWindowShouldClose(m_app.m_window.GetGLFWWindow(), true);
+			}
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("Test Scenes")) {
+			if (ImGui::MenuItem("Empty Scene")) {
+				m_app.LoadDemoScene(GeneratedScene::Empty);
+			}
+			if (ImGui::MenuItem("Demo Sphere")) {
+				m_app.LoadDemoScene(GeneratedScene::DemoSphere);
+			}
+			if (ImGui::MenuItem("Small And Big Spheres")) {
+				m_app.LoadDemoScene(GeneratedScene::SmallAndBigSpheres);
+			}
+			if (ImGui::MenuItem("Test Materials")) {
+				m_app.LoadDemoScene(GeneratedScene::TestMaterials);
+			}
+			if (ImGui::MenuItem("Randomized Spheres")) {
+				m_app.LoadDemoScene(GeneratedScene::RandomizedSpheres);
+			}
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("Add Object")) {
+			if (ImGui::MenuItem("Sphere")) {
+				m_app.AddObject(GeneratedObject::Sphere);
+			}
+			if (ImGui::MenuItem("Point Light")) {
+				m_app.AddObject(GeneratedObject::PointLight);
+			}
+			if (ImGui::MenuItem("Directional Light")) {
+				m_app.AddObject(GeneratedObject::DirectionalLight);
 			}
 			ImGui::EndMenu();
 		}

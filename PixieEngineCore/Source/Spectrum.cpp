@@ -1,11 +1,14 @@
 #include "pch.h"
 #include "Spectrum.h"
 
-Spectrum::Spectrum(Float r, Float g, Float b) 
-	: m_rgb(r, g, b) {}
+Spectrum::Spectrum(Float rgb) :
+	m_rgb(rgb, rgb, rgb) {}
 
-Spectrum::Spectrum(const Vec3& rgb)
-	: m_rgb(rgb) {}
+Spectrum::Spectrum(Float r, Float g, Float b) :
+	m_rgb(r, g, b) {}
+
+Spectrum::Spectrum(const Vec3& rgb) :
+	m_rgb(rgb) {}
 
 void Spectrum::SetRGB(Vec3 rgb) {
 	m_rgb = rgb;
@@ -15,13 +18,14 @@ Vec3& Spectrum::GetRGB() {
 	return m_rgb;
 }
 
-const Vec3& Spectrum::GetRGBValue() const {
-	return m_rgb;
-}
-
 Float Spectrum::Average() const {
 	return (m_rgb.x + m_rgb.y + m_rgb.z) / 3.0f;
 }
+
+Float Spectrum::MaxComponent() const {
+	return glm::max(m_rgb.x, m_rgb.y, m_rgb.z);
+}
+
 
 Spectrum& Spectrum::operator=(const Spectrum& other) {
 	m_rgb = other.m_rgb;

@@ -7,18 +7,20 @@ void clear(std::queue<int32_t>& q) {
 	std::swap(q, empty);
 }
 
-RayTracingViewportWindow::RayTracingViewportWindow(PixieEngineApp& app, PixieEngineInterface& inter)
-	: PixieEngineInterfaceWindow(app, inter),
-	m_viewportCamera(Vec3(-10, 0,0), Vec3(0,0,0), Vec3(0, 1, 0), glm::radians(39.6f), 16.0f / 9.0f, 0, 10),
-	m_viewportResolution(glm::ivec2(1280, 720)), m_cameraController(m_viewportCamera) {
-	RayTracingStatistics::Resize(glm::ivec2(1280, 720));
+RayTracingViewportWindow::RayTracingViewportWindow(PixieEngineApp& app, PixieEngineInterface& inter) :
+	PixieEngineInterfaceWindow(app, inter),
+	m_viewportCamera(Vec3(-10, 0, 0), Vec3(0, 0, 0), Vec3(0, 1, 0), glm::radians(39.6f), { 1280, 720 }, 0, 1000),
+	m_viewportResolution(glm::ivec2(1280, 720)), m_cameraController(m_viewportCamera),
+	m_boxTestsTexture({ 1280, 720 }), m_shapeTestsTexture({ 1280, 720 }),
+	m_depthTexture({ 1280, 720 }), m_normalTexture({ 1280, 720 }) {
 	m_rayTracer = CreateRayTracer(m_rayTracingMode);
 }
 
 void RayTracingViewportWindow::Initialize() {
 	m_film = new Film({ 1280, 720 });
-	m_viewportFrameBuffer = new FrameBuffer(1280, 720);
-	m_quadShader = CompileShader(QUAD_VERTEX_SHADER_SOURCE, QUAD_FRAGMENT_SHADER_SOURCE);
+	m_viewportFrameBuffer = new FrameBuffer({ 1280, 720 });
+	m_cameraFrameBuffer = new FrameBuffer({ 1280, 720 });
+	ResetCamera();
 }
 
 void RayTracingViewportWindow::Draw() {
@@ -45,57 +47,41 @@ void RayTracingViewportWindow::Draw() {
 		if (GetSamplesCount() <= 1) {
 			Scene* scene = m_app.GetScene();
 			if (scene) {
+				m_cameraFrameBuffer->Resize(m_viewportCamera.GetResolution());
+				m_cameraFrameBuffer->Bind();
+				glViewport(0, 0, m_cameraFrameBuffer->m_resolution.x, m_cameraFrameBuffer->m_resolution.y);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 				m_app.GetDefaultRenderer()->DrawFrame(scene, &m_viewportCamera);
+				m_viewportFrameBuffer->Bind();
+				glViewport(0, 0, m_viewportFrameBuffer->m_resolution.x, m_viewportFrameBuffer->m_resolution.y);
+				m_app.GetDefaultRenderer()->DrawTexture(m_cameraFrameBuffer->m_texture, m_cameraFrameBuffer->m_resolution, m_viewportResolution);
 				glClear(GL_DEPTH_BUFFER_BIT);
 			}
 		}
 		
-		glUseProgram(m_quadShader);
-		GLuint posLoc = glGetUniformLocation(m_quadShader, "uPos");
-		GLuint sizeLoc = glGetUniformLocation(m_quadShader, "uSize");
-		GLuint samplesLoc = glGetUniformLocation(m_quadShader, "uSamples");
-		
-		float textureAspect = (float)m_film->m_resolution.x / m_film->m_resolution.y;
-		float viewportAspect = (float)m_viewportResolution.x / m_viewportResolution.y;
-		float posX, posY;
-		float sizeX, sizeY;
-		if (viewportAspect > textureAspect) {
-			sizeY = 1.0f;
-			sizeX = textureAspect / viewportAspect;
-			posX = (1.0f - sizeX) * 0.5f;
-			posY = 0.0f;
-		}
-		else {
-			sizeX = 1.0f;
-			sizeY = viewportAspect / textureAspect;
-			posX = 0.0f;
-			posY = (1.0f - sizeY) * 0.5f;
-		}
-		
-		glUniform2f(posLoc, posX, posY);
-		glUniform2f(sizeLoc, sizeX, sizeY);
-		
-		glActiveTexture(GL_TEXTURE0);
 		switch (m_visualizationMode) {
-		case RayTracingVisualization::Integration:
+		case RayTracingVisualization::LightAccumulation:
 			m_film->texture->Upload();
-			glUniform1f(samplesLoc, (float)GetSamplesCount());
-			m_film->texture->Bind(GL_TEXTURE0);
+			m_app.GetDefaultRenderer()->DrawTexture(m_film->texture->id, m_film->texture->resolution, m_viewportResolution, m_samples);
 			break;
-		case RayTracingVisualization::BoxChecksStatistics:
-			RayTracingStatistics::UploadBoxTestsTextureLinear();
-			glUniform1f(samplesLoc, 1.0f);
-			RayTracingStatistics::BindBoxTestsTexture();
+		case RayTracingVisualization::BoxTest:
+			m_boxTestsTexture.Upload();
+			m_app.GetDefaultRenderer()->DrawTexture(m_boxTestsTexture.id, m_boxTestsTexture.resolution, m_viewportResolution, 50);
 			break;
-		case RayTracingVisualization::TriangleChecksStatistics:
-			RayTracingStatistics::UploadTriangleTestsTextureLinear();
-			glUniform1f(samplesLoc, 1.0f);
-			RayTracingStatistics::BindTriangleTestsTexture();
+		case RayTracingVisualization::ShapeTest:
+			m_shapeTestsTexture.Upload();
+			m_app.GetDefaultRenderer()->DrawTexture(m_shapeTestsTexture.id, m_shapeTestsTexture.resolution, m_viewportResolution, 50);
+			break;
+		case RayTracingVisualization::Depth:
+			m_depthTexture.Upload();
+			m_app.GetDefaultRenderer()->DrawTexture(m_depthTexture.id, m_depthTexture.resolution, m_viewportResolution, 20);
+			break;
+		case RayTracingVisualization::Normals:
+			m_normalTexture.Upload();
+			m_app.GetDefaultRenderer()->DrawTexture(m_normalTexture.id, m_normalTexture.resolution, m_viewportResolution, 1);
 			break;
 		}
-		
-		ResourceManager::GetQuadMesh()->Draw();
-
+	
 		m_viewportFrameBuffer->Unbind();
 		m_app.RestoreViewportSize();
 
@@ -117,9 +103,7 @@ void RayTracingViewportWindow::SetResolution(const glm::ivec2& resolution) {
 	if (m_isRendering) {
 		StopRender();
 	}
-	m_viewportCamera.SetAspect((float)resolution.x / resolution.y);
 	m_film->Resize(resolution);
-	RayTracingStatistics::Resize(resolution);
 	Reset();
 	if (wasRendering) {
 		StartRender();
@@ -150,24 +134,7 @@ void RayTracingViewportWindow::Reset() {
 	}
 
 	m_film->Reset();
-	RayTracingStatistics::Reset();
-	GenerateTiles();
 	m_samples = 1;
-
-	SceneSnapshot* sceneSnapshot = m_app.GetSceneSnapshot();
-	if (!sceneSnapshot) {
-		return;
-	}
-
-	Bounds3f sceneBounds = sceneSnapshot->GetBounds();
-	const std::vector<DiffuseAreaLight*>& areaLights = sceneSnapshot->GetAreaLights();
-	for (size_t i = 0; i < areaLights.size(); i++) {
-		areaLights[i]->Preprocess(sceneBounds);
-	}
-	const std::vector<Light*>& lights = sceneSnapshot->GetInfiniteLights();
-	for (size_t i = 0; i < lights.size(); i++) {
-		lights[i]->Preprocess(sceneBounds);
-	}
 
 	if (wasRendering) {
 		StartRender();
@@ -175,7 +142,8 @@ void RayTracingViewportWindow::Reset() {
 }
 
 void RayTracingViewportWindow::StartRender() {
-	if (!m_app.GetSceneSnapshot() || m_isRendering) {
+	SceneSnapshot* sceneSnapshot = m_app.GetSceneSnapshot();
+	if (!sceneSnapshot || m_isRendering) {
 		return;
 	}
 	m_isRendering = true;
@@ -183,6 +151,15 @@ void RayTracingViewportWindow::StartRender() {
 	m_renderStartTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
 	m_sampleStartTime = m_renderStartTime;
 
+	m_rayTracer->SetSceneSnapshot(sceneSnapshot);
+
+	Bounds3f sceneBounds = sceneSnapshot->GetBounds();
+	const std::vector<Light*>& lights = sceneSnapshot->GetInfiniteLights();
+	for (size_t i = 0; i < lights.size(); i++) {
+		lights[i]->Preprocess(sceneBounds);
+	}
+
+	GenerateTiles();
 	clear(m_tileQueue);
 	for (size_t i = 0; i < m_tiles.size(); i++) {
 		m_tileQueue.push((int32_t)i);
@@ -256,8 +233,8 @@ float RayTracingViewportWindow::GetLastSampleTime() {
 	return m_lastSampleTime.count() / 1000.0f;
 }
 
-CameraSample RayTracingViewportWindow::GetCameraSample(uint32_t x, uint32_t y, const SampleFilter* filter, Sampler* sampler) {
-	FilterSample fs = filter->Sample(sampler->GetPixel2D());
+CameraSample RayTracingViewportWindow::GetCameraSample(uint32_t x, uint32_t y, const FilmFilter* filter, Sampler* sampler) {
+	FilmFilterSample fs = filter->Sample(sampler->GetPixel2D());
 	return CameraSample(Vec2(x, y) + fs.p + Vec2(0.5f, 0.5f), fs.weight);
 }
 
@@ -299,29 +276,39 @@ void RayTracingViewportWindow::GenerateTiles() {
 }
 
 void RayTracingViewportWindow::PerPixel(uint32_t x, uint32_t y, Sampler* sampler) {
-	g_threadPixelCoordX = x;
-	g_threadPixelCoordY = y;
-	RayTracingStatistics::IncrementPixelSamples();
-
-	SampleFilter* filter = m_film->GetFilter();
+	FilmFilter* filter = m_film->GetFilter();
 	CameraSample cameraSample = GetCameraSample(x, y, filter, sampler);
 	Vec2 uv = m_film->GetUV(cameraSample.pFilm);
 	Ray ray = m_viewportCamera.GetRay(uv);
-	Spectrum L = m_rayTracer->SampleLightRay(m_app.GetSceneSnapshot(), ray, sampler);
-	m_film->AddSample(x, y, L, cameraSample.filterWeight);
+	GBufferPixel pixel = m_rayTracer->SampleLightRay(ray, sampler);
+	m_boxTestsTexture.SetPixel(x, y, (Float)pixel.boxChecks);
+	m_shapeTestsTexture.SetPixel(x, y, (Float)pixel.shapeChecks);
+	m_normalTexture.SetPixel(x, y, glm::abs(pixel.normal));
+	m_depthTexture.SetPixel(x, y, pixel.depth);
+	m_film->AddSample(x, y, pixel.light, cameraSample.filterWeight);
 }
 
 void RayTracingViewportWindow::UpdateViewportResolution(glm::ivec2 resolution) {
-	bool wasRendering = m_isRendering;
-	StopRender();
 	m_viewportResolution = resolution;
-	m_viewportFrameBuffer->Resize(resolution.x, resolution.y);
-	m_film->Resize(resolution);
-	m_viewportCamera.SetAspect((float)resolution.x / resolution.y);
-	RayTracingStatistics::Resize(resolution);
-	GenerateTiles();
-	Reset();
-	if (wasRendering) {
+	m_viewportFrameBuffer->Resize(resolution);
+	if (m_resizeToViewport) {
+		bool wasRendering = m_isRendering;
+		StopRender();
+		m_film->Resize(resolution);
+		m_boxTestsTexture = Texture<Float>({ 1280, 720 });
+		m_shapeTestsTexture = Texture<Float>({ 1280, 720 });
+		m_normalTexture = Texture<Vec3>({ 1280, 720 });
+		m_depthTexture = Texture<Float>({ 1280, 720 });
+		GenerateTiles();
+		Reset();
 		StartRender();
+	}
+}
+
+void RayTracingViewportWindow::ResetCamera() {
+	if (SceneSnapshot* snapshot = m_app.GetSceneSnapshot()) {
+		if (snapshot->GetCameras().size() > 0) {
+			m_viewportCamera = snapshot->GetCameras()[0];
+		}
 	}
 }

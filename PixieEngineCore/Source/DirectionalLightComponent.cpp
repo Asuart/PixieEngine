@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "DirectionalLightComponent.h"
 
-DirectionalLightComponent::DirectionalLightComponent(SceneObject* parent,Vec3 direction, Vec3 color, Float strength)
-	: Component(ComponentType::DirectionalLight, parent), m_direction(glm::normalize(direction)), m_color(color), m_strength(strength) {}
+DirectionalLightComponent::DirectionalLightComponent(SceneObject* parent,Vec3 direction, Vec3 color, Float strength) :
+	Component(ComponentType::DirectionalLight, parent), m_direction(glm::normalize(direction)), m_color(color), m_strength(strength) {}
 
 Vec3 DirectionalLightComponent::GetDirection() {
 	return m_direction;

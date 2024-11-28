@@ -2,13 +2,14 @@
 #include "pch.h"
 
 struct Spectrum {
-	Spectrum(Float r = 0.0f, Float g = 0.0f, Float b = 0.0f);
+	Spectrum(Float rgb = 0.0f);
+	Spectrum(Float r, Float g, Float b);
 	Spectrum(const Vec3& rgb);
 
 	void SetRGB(Vec3 rgb);
 	Vec3& GetRGB();
-	const Vec3& GetRGBValue() const;
 	Float Average() const;
+	Float MaxComponent() const;
 
 	Spectrum& operator=(const Spectrum& other);
 	Spectrum operator+(const Spectrum& other);

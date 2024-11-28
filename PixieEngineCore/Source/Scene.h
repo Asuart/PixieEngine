@@ -4,13 +4,11 @@
 #include "SceneObject.h"
 #include "Camera.h"
 #include "MaterialComponent.h"
-#include "PointLight.h"
-#include "Shape.h"
-#include "RayTracing.h"
 #include "CameraComponent.h"
 #include "PointLightComponent.h"
 #include "DiffuseAreaLightComponent.h"
 #include "DirectionalLightComponent.h"
+#include "Skyboxes.h"
 
 class Scene {
 public:
@@ -39,11 +37,8 @@ public:
 	std::vector<PointLightComponent*>& GetPointLights();
 	std::vector<CameraComponent*>& GetCameras();
 	Bounds3f GetBounds();
-
-	// Ray tracing finctionality
-	std::optional<ShapeIntersection> Intersect(const Ray& ray, Float tMax = Infinity) const;
-	bool IsIntersected(const Ray& ray, Float tMax = Infinity) const;
-	Vec3 GetSkyColor(const Ray& ray);
+	void SetSkybox(Skybox* skybox);
+	Skybox* GetSkybox();
 
 protected:
 	std::string m_name;
@@ -52,4 +47,5 @@ protected:
 	std::vector<DirectionalLightComponent*> m_directionalLights;
 	std::vector<PointLightComponent*> m_pointLights;
 	std::vector<DiffuseAreaLightComponent*> m_diffuseAreaLights;
+	Skybox* m_skybox = nullptr;
 };

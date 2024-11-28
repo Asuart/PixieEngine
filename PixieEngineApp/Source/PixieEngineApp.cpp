@@ -2,8 +2,8 @@
 #include "PixieEngineApp.h"
 #include "OpenGLInterface.h"
 
-PixieEngineApp::PixieEngineApp()
-	: m_interface(*this) {
+PixieEngineApp::PixieEngineApp() :
+	m_interface(*this) {
 	if (!gladLoadGL()) {
 		std::cout << "GLEW initialization failed.\n";
 		exit(1);
@@ -31,6 +31,10 @@ PixieEngineApp::PixieEngineApp()
 	m_scene = ResourceManager::LoadScene(m_currentScenePath);
 	if (!m_scene) {
 		m_scene = new Scene("Scene");
+		SceneObject* object = ResourceManager::LoadModel(m_currentScenePath);
+		if (object) {
+			m_scene->AddObject(object);
+		}
 	}
 	m_scene->Start();
 	m_sceneSnapsot = new SceneSnapshot(m_scene);
@@ -53,7 +57,7 @@ PixieEngineApp::~PixieEngineApp() {
 void PixieEngineApp::Start() {
 	while (!m_window.IsShouldClose()) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		Timer::Update();
+		Time::Update();
 		UserInput::Reset();
 		glfwPollEvents();
 		HandleUserInput();
@@ -117,10 +121,7 @@ void PixieEngineApp::RemoveSelectedObject() {
 		rayTracingWindows[i]->StopRender();
 		rayTracingWindows[i]->Reset();
 	}
-	if (m_sceneSnapsot) {
-		delete m_sceneSnapsot;
-	}
-	m_sceneSnapsot = new SceneSnapshot(m_scene);
+	UpdateSceneSnapshot();
 	for (size_t i = 0; i < rayTracingWindows.size(); i++) {
 		if (renderingStates[i]) {
 			rayTracingWindows[i]->StartRender();
@@ -144,6 +145,70 @@ void PixieEngineApp::SetAssetsPath(const std::filesystem::path& path) {
 	m_assetsPath = path;
 }
 
+void PixieEngineApp::UpdateSceneSnapshot() {
+	std::vector<RayTracingViewportWindow*> rayTracingWindows = m_interface.GetWindowsOfType<RayTracingViewportWindow>();
+	std::vector<bool> renderingStates;
+	renderingStates.resize(rayTracingWindows.size());
+	for (size_t i = 0; i < rayTracingWindows.size(); i++) {
+		renderingStates[i] = rayTracingWindows[i]->IsRendering();
+		rayTracingWindows[i]->StopRender();
+		rayTracingWindows[i]->Reset();
+	}
+	if (m_sceneSnapsot) {
+		delete m_sceneSnapsot;
+	}
+	m_sceneSnapsot = new SceneSnapshot(m_scene);
+	for (size_t i = 0; i < rayTracingWindows.size(); i++) {
+		if (renderingStates[i]) {
+			rayTracingWindows[i]->StartRender();
+		}
+	}
+}
+
+void PixieEngineApp::LoadDemoScene(GeneratedScene type) {
+	std::vector<RayTracingViewportWindow*> rayTracingWindows = m_interface.GetWindowsOfType<RayTracingViewportWindow>();
+	std::vector<bool> renderingStates;
+	renderingStates.resize(rayTracingWindows.size());
+	for (size_t i = 0; i < rayTracingWindows.size(); i++) {
+		renderingStates[i] = rayTracingWindows[i]->IsRendering();
+		rayTracingWindows[i]->StopRender();
+		rayTracingWindows[i]->Reset();
+	}
+	if (m_scene) {
+		delete m_scene;
+	}
+	m_scene = SceneGenerator::CreateScene(type);
+	m_scene->Start();
+	UpdateSceneSnapshot();
+	for (size_t i = 0; i < rayTracingWindows.size(); i++) {
+		if (renderingStates[i]) {
+			rayTracingWindows[i]->StartRender();
+		}
+	}
+}
+
+void PixieEngineApp::AddObject(GeneratedObject type) {
+	std::vector<RayTracingViewportWindow*> rayTracingWindows = m_interface.GetWindowsOfType<RayTracingViewportWindow>();
+	std::vector<bool> renderingStates;
+	renderingStates.resize(rayTracingWindows.size());
+	for (size_t i = 0; i < rayTracingWindows.size(); i++) {
+		renderingStates[i] = rayTracingWindows[i]->IsRendering();
+		rayTracingWindows[i]->StopRender();
+		rayTracingWindows[i]->Reset();
+	}
+	SceneObject* object = SceneGenerator::CreateObject(type);
+	if (object) {
+		m_scene->AddObject(object);
+		object->OnStart();
+		UpdateSceneSnapshot();
+	}
+	for (size_t i = 0; i < rayTracingWindows.size(); i++) {
+		if (renderingStates[i]) {
+			rayTracingWindows[i]->StartRender();
+		}
+	}
+}
+
 void PixieEngineApp::LoadScene(const std::filesystem::path& filePath) {
 	std::vector<RayTracingViewportWindow*> rayTracingWindows = m_interface.GetWindowsOfType<RayTracingViewportWindow>();
 	std::vector<bool> renderingStates;
@@ -164,10 +229,7 @@ void PixieEngineApp::LoadScene(const std::filesystem::path& filePath) {
 		m_currentScenePath = filePath;
 	}
 	m_scene->Start();
-	if (m_sceneSnapsot) {
-		delete m_sceneSnapsot;
-	}
-	m_sceneSnapsot = new SceneSnapshot(m_scene);
+	UpdateSceneSnapshot();
 	for (size_t i = 0; i < rayTracingWindows.size(); i++) {
 		if (renderingStates[i]) {
 			rayTracingWindows[i]->StartRender();

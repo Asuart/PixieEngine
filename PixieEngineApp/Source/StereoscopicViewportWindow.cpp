@@ -2,17 +2,17 @@
 #include "StereoscopicViewportWindow.h"
 #include "PixieEngineApp.h"
 
-StereoscopicViewportWindow::StereoscopicViewportWindow(PixieEngineApp& app, PixieEngineInterface& inter)
-	: PixieEngineInterfaceWindow(app, inter),
+StereoscopicViewportWindow::StereoscopicViewportWindow(PixieEngineApp& app, PixieEngineInterface& inter) :
+	PixieEngineInterfaceWindow(app, inter),
 	m_viewportResolution(glm::ivec2(1280, 720)),
-	m_viewportCamera(Vec3(-10, 0, 0), Vec3(0, 0, 0), Vec3(0, 1, 0), glm::radians(39.6f), 16.0f / 9.0f, 0, 10),
+	m_viewportCamera(Vec3(-10, 0, 0), Vec3(0, 0, 0), Vec3(0, 1, 0), glm::radians(39.6f), { 1280, 720 }, 0, 10),
 	m_cameraController(m_viewportCamera) {}
 
 void StereoscopicViewportWindow::Initialize() {
-	m_viewportFrameBuffer = new FrameBuffer(1280, 720);
-	m_viewportFrameBufferLeft = new FrameBuffer(1280, 720);
-	m_viewportFrameBufferRight = new FrameBuffer(1280, 720);
-	m_stereoscopicShader = CompileShader(STEREOSCOPIC_QUAD_VERTEX_SHADER_SOURCE, STEREOSCOPIC_QUAD_FRAGMENT_SHADER_SOURCE);
+	m_viewportFrameBuffer = new FrameBuffer({ 1280, 720 });
+	m_viewportFrameBufferLeft = new FrameBuffer({ 1280, 720 });
+	m_viewportFrameBufferRight = new FrameBuffer({ 1280, 720 });
+	m_stereoscopicShader = ResourceManager::CompileShader(STEREOSCOPIC_QUAD_VERTEX_SHADER_SOURCE, STEREOSCOPIC_QUAD_FRAGMENT_SHADER_SOURCE);
 }
 
 void StereoscopicViewportWindow::Draw() {
@@ -104,8 +104,7 @@ void StereoscopicViewportWindow::Draw() {
 
 void StereoscopicViewportWindow::UpdateViewportResolution(glm::ivec2 resolution) {
 	m_viewportResolution = resolution;
-	m_viewportFrameBuffer->Resize(resolution.x, resolution.y);
-	m_viewportFrameBufferLeft->Resize(resolution.x, resolution.y);
-	m_viewportFrameBufferRight->Resize(resolution.x, resolution.y);
-	m_viewportCamera.SetAspect((float)resolution.x / resolution.y);
+	m_viewportFrameBuffer->Resize(resolution);
+	m_viewportFrameBufferLeft->Resize(resolution);
+	m_viewportFrameBufferRight->Resize(resolution);
 }

@@ -14,7 +14,7 @@ protected:
 	Camera m_viewportCamera;
 	ViewportCameraController m_cameraController;
 	glm::ivec2 m_viewportResolution;
-	GLuint m_vrShader;
+	GLuint m_vrShader = 0;
 	FrameBuffer* m_viewportFrameBuffer = nullptr;
 	FrameBuffer* m_viewportFrameBufferLeft = nullptr;
 	FrameBuffer* m_viewportFrameBufferRight = nullptr;
