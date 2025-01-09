@@ -22,7 +22,7 @@ public:
 	void SelectObject(SceneObject* object);
 	void RemoveSelectedObject();
 	void RestoreViewportSize();
-	DefaultRenderer* GetDefaultRenderer();
+	ForwardRenderer* GetDefaultRenderer();
 	DefferedRenderer* GetDefferedRenderer();
 	const std::filesystem::path& GetAssetsPath();
 	void SetAssetsPath(const std::filesystem::path& path);
@@ -40,7 +40,7 @@ protected:
 	PixieEngineInterface m_interface;
 	Scene* m_scene;
 	SceneSnapshot* m_sceneSnapsot;
-	DefaultRenderer* m_defaultRenderer;
+	ForwardRenderer* m_defaultRenderer;
 	DefferedRenderer* m_defferedRenderer;
 	SceneObject* m_selectedObject = nullptr;
 

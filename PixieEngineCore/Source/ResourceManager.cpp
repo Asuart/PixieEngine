@@ -867,7 +867,8 @@ Shader ResourceManager::CompileShader(const char* vertShaderSrc, const char* fra
 }
 
 ComputeShader ResourceManager::LoadComputeShader(const std::string& computePath) {
-	std::string computeShaderStr = ReadFile(computePath);
+	const std::string shadersPath = GetApplicationDirectory().string() + std::string("/Resources/Shaders/");
+	std::string computeShaderStr = ReadFile(shadersPath + computePath);
 	return CompileComputeShader(computeShaderStr.c_str());
 }
 

@@ -1,7 +1,5 @@
 #version 460 core
 
-layout(local_size_x = 4, local_size_y = 4, local_size_z = 1​) in;  
-
 struct Ray {
 	vec3 origin;
 	vec3 direction;

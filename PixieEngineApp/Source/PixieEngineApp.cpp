@@ -39,7 +39,7 @@ PixieEngineApp::PixieEngineApp() :
 	m_scene->Start();
 	m_sceneSnapsot = new SceneSnapshot(m_scene);
 
-	m_defaultRenderer = new DefaultRenderer();
+	m_defaultRenderer = new ForwardRenderer();
 	m_defferedRenderer = new DefferedRenderer();
 
 	m_interface.Initialize();
@@ -134,7 +134,7 @@ void PixieEngineApp::RestoreViewportSize() {
 	glViewport(0, 0, m_window.GetWindowSize().x, m_window.GetWindowSize().y);
 }
 
-DefaultRenderer* PixieEngineApp::GetDefaultRenderer() {
+ForwardRenderer* PixieEngineApp::GetDefaultRenderer() {
 	return m_defaultRenderer;
 }
 

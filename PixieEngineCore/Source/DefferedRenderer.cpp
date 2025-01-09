@@ -10,6 +10,9 @@ DefferedRenderer::DefferedRenderer() :
 }
 
 void DefferedRenderer::DrawFrame(Scene* scene, Camera* camera) {
+	GLint originalViewport[4];
+	glGetIntegerv(GL_VIEWPORT, originalViewport);
+
 	m_gBuffer.Resize(camera->GetResolution());
 	m_viewportFrameBuffer.Resize(camera->GetResolution());
 	glViewport(0, 0, camera->GetResolution().x, camera->GetResolution().y);

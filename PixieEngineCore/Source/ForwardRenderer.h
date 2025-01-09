@@ -6,9 +6,9 @@
 #include "EngineTime.h"
 #include "ResourceManager.h"
 
-class DefaultRenderer {
+class ForwardRenderer {
 public:
-	DefaultRenderer();
+	ForwardRenderer();
 
 	void DrawFrame(Scene* scene, Camera* camera);
 	void DrawTexture(GLuint texture, glm::ivec2 textureResolution, glm::ivec2 viewportResolution, int32_t samples = 1);

@@ -5,7 +5,7 @@
 #include "FrameBuffer.h"
 #include "ResourceManager.h"
 #include "RayTracers.h"
-#include "DefaultRenderer.h"
+#include "ForwardRenderer.h"
 #include "Film.h"
 #include "SceneSnapshot.h"
 #include "CameraComponent.h"

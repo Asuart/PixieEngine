@@ -1,22 +1,22 @@
 #include "pch.h"
-#include "DefaultRenderer.h"
+#include "ForwardRenderer.h"
 #include "LTC_Matrix.h"
 
-DefaultRenderer::DefaultRenderer() {
+ForwardRenderer::ForwardRenderer() {
 	m_defaultShader = ResourceManager::LoadShader("PhysicallyBasedVertexShader.glsl", "PhysicallyBasedFragmentShader.glsl");
 	m_quadShader = ResourceManager::LoadShader("TextureViewerQuadVertexShader.glsl", "TextureViewerQuadFragmentShader.glsl");
 	m_LTC1Texture = LoadLTCTexture(LTC1);
 	m_LTC2Texture = LoadLTCTexture(LTC2);
 }
 
-void DefaultRenderer::DrawFrame(Scene* scene, Camera* camera) {
+void ForwardRenderer::DrawFrame(Scene* scene, Camera* camera) {
 	m_defaultShader.Bind();
 	SetupCamera(camera);
 	SetupLights(scene);
 	DrawObject(scene->GetRootObject());
 }
 
-void DefaultRenderer::DrawTexture(GLuint texture, glm::ivec2 textureResolution, glm::ivec2 viewportResolution, int32_t samples) {
+void ForwardRenderer::DrawTexture(GLuint texture, glm::ivec2 textureResolution, glm::ivec2 viewportResolution, int32_t samples) {
 	m_quadShader.Bind();
 
 	Vec2 pos(0.0f, 0.0f), size(1.0f, 1.0f);
@@ -42,7 +42,7 @@ void DefaultRenderer::DrawTexture(GLuint texture, glm::ivec2 textureResolution, 
 	ResourceManager::GetQuadMesh()->Draw();
 }
 
-void DefaultRenderer::DrawObject(SceneObject* object, Mat4 parentTransform) {
+void ForwardRenderer::DrawObject(SceneObject* object, Mat4 parentTransform) {
 	if (!object) return;
 
 	Mat4 objectTransform = parentTransform * object->GetTransform().GetMatrix();
@@ -65,13 +65,13 @@ void DefaultRenderer::DrawObject(SceneObject* object, Mat4 parentTransform) {
 	}
 }
 
-void DefaultRenderer::SetupCamera(Camera* camera) {
+void ForwardRenderer::SetupCamera(Camera* camera) {
 	m_defaultShader.SetUniform3f("cameraPos", camera->GetTransform().GetPosition());
 	m_defaultShader.SetUniformMat4f("mView", camera->GetViewMatrix());
 	m_defaultShader.SetUniformMat4f("mProjection", camera->GetProjectionMatrix());
 }
 
-void DefaultRenderer::SetupLights(Scene* scene) {
+void ForwardRenderer::SetupLights(Scene* scene) {
 	// Point lights
 	const size_t MaxPointLights = 32;
 	int32_t nPointLights = 0;
@@ -110,7 +110,7 @@ void DefaultRenderer::SetupLights(Scene* scene) {
 	m_defaultShader.SetTexture("LTC2", m_LTC2Texture, 2);
 }
 
-void DefaultRenderer::SetupMaterial(Material* material) {
+void ForwardRenderer::SetupMaterial(Material* material) {
 	m_defaultShader.SetUniform3f("albedo", material->m_albedo.GetRGB());
 	m_defaultShader.SetUniform1f("metallic", material->m_metallic);
 	m_defaultShader.SetUniform1f("roughness", material->m_roughness);
@@ -120,7 +120,7 @@ void DefaultRenderer::SetupMaterial(Material* material) {
 	}
 }
 
-GLuint DefaultRenderer::LoadLTCTexture(const float* matrixTable) {
+GLuint ForwardRenderer::LoadLTCTexture(const float* matrixTable) {
 	GLuint texture = 0;
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
