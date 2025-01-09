@@ -4,7 +4,7 @@
 #include "MeshComponent.h"
 #include "MeshAnimator.h"
 #include "MeshAnimatorComponent.h"
-#include "Shaders.h"
+#include "Shader.h"
 
 enum class ResourceType : int32_t {
 	Scene,
@@ -22,6 +22,9 @@ public:
 
 class ResourceManager {
 public:
+	static void SetApplicationPath(const std::string& path);
+	static std::filesystem::path GetApplicationPath();
+	static std::filesystem::path GetApplicationDirectory();
 	static void Initialize();
 	static Scene* LoadScene(std::filesystem::path filePath);
 	static bool SaveScene(std::filesystem::path filePath, Scene* scene);
@@ -38,13 +41,14 @@ public:
 	static bool IsValidModelPath(const std::filesystem::path& filePath);
 	static bool IsValidTexturePath(const std::filesystem::path& filePath);
 	static Mesh* GetQuadMesh();
-	static std::string ReadFile(const char* filePath);
-	static GLuint LoadShader(const char* vertex_path, const char* fragment_path);
-	static GLuint CompileShader(const char* vertex_source, const char* fragment_source);
-	static GLuint LoadComputeShader(const char* compute_path);
-	static GLuint CompileComputeShader(const char* compute_path);
+	static std::string ReadFile(const std::string& filePath);
+	static Shader LoadShader(const std::string& vertexName, const std::string& fragmentName);
+	static Shader CompileShader(const char* vertexSource, const char* fragmentSource);
+	static ComputeShader LoadComputeShader(const std::string& computePath);
+	static ComputeShader CompileComputeShader(const char* computeSource);
 
 protected:
+	static std::filesystem::path m_applicationPath;
 	static std::filesystem::path m_currentFilePath;
 	static std::map<std::filesystem::path, SceneObject*> m_Models;
 	static std::map<std::filesystem::path, Texture<Vec3>*> m_RGBTextures;

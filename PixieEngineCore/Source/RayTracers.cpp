@@ -265,11 +265,11 @@ struct RayMajorantSegment {
 Spectrum ClampZero(Spectrum s) {
     return Spectrum(glm::max(s.GetRGB(), Vec3(0.0f)));
 }
-
+      
 //template <typename F>
-//Spectrum SampleT_maj(Ray ray, Float tMax, Float u, RNG& rng, F callback) {
+//Spectrum SampleT_maj(Ray ray, Float tMax, Float u, RNG& rng, F callback`) {
 //    auto sample = [&](auto medium) {
-//        using M = typename std::remove_reference_t<decltype(*medium)>;
+//        using M = typename std::remove_reference_t<decltype(*medium)>; 
 //        return SampleT_maj<M>(ray, tMax, u, rng, callback);
 //        };
 //    //return ray.medium.Dispatch(sample);
@@ -488,7 +488,7 @@ GBufferPixel VolumetricRayTracer::SampleLightRay(Ray ray, Sampler* sampler) {
         }
     
         if (m_regularize && anyNonSpecularBounces) {
-            //bsdf.Regularize();
+            bsdf.Regularize();
         }
     
         if (IsNonSpecular(bsdf.Flags())) {

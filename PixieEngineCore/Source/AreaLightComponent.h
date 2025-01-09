@@ -1,11 +1,11 @@
 #pragma once
-#include "pch.h"
 #include "Component.h"
-#include "Mesh.h"
+#include "MeshComponent.h"
 
-class DiffuseAreaLightComponent : public Component {
+class AreaLightComponent : public Component {
 public:
-	DiffuseAreaLightComponent(SceneObject* parent, Vec3 color, Float strength);
+public:
+	AreaLightComponent(SceneObject* parent, Vec3 color, Float strength);
 
 	void OnStart() override;
 	Vec3 GetEmission();

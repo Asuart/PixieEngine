@@ -43,7 +43,7 @@ protected:
 	int32_t m_threadsCount = 0;
 	int32_t m_maxThreads = 1;
 	std::vector<std::thread*> m_renderThreads;
-	const glm::ivec2 m_tileSize = glm::ivec2(128, 128);
+	const glm::ivec2 m_tileSize = glm::ivec2(32, 32);
 	std::vector<Bounds2i> m_tiles;
 	std::queue<int32_t> m_tileQueue;
 	std::mutex m_tileQueueMutex;

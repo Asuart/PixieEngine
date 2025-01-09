@@ -1,65 +1,58 @@
 #include "pch.h"
 #include "DefaultRenderer.h"
+#include "LTC_Matrix.h"
 
 DefaultRenderer::DefaultRenderer() {
-	m_defaultShader = ResourceManager::CompileShader(PBR_VERTEX_SHADER_SOURCE, PBR_FRAGMENT_SHADER_SOURCE);
-	m_quadShader = ResourceManager::CompileShader(QUAD_VERTEX_SHADER_SOURCE, QUAD_FRAGMENT_SHADER_SOURCE);
+	m_defaultShader = ResourceManager::LoadShader("PhysicallyBasedVertexShader.glsl", "PhysicallyBasedFragmentShader.glsl");
+	m_quadShader = ResourceManager::LoadShader("TextureViewerQuadVertexShader.glsl", "TextureViewerQuadFragmentShader.glsl");
+	m_LTC1Texture = LoadLTCTexture(LTC1);
+	m_LTC2Texture = LoadLTCTexture(LTC2);
 }
 
 void DefaultRenderer::DrawFrame(Scene* scene, Camera* camera) {
-	glUseProgram(m_defaultShader);
-
+	m_defaultShader.Bind();
 	SetupCamera(camera);
 	SetupLights(scene);
-
-	GLuint mModelLoc = glGetUniformLocation(m_defaultShader, "mModel");
-	SceneObject* rootObject = scene->GetRootObject();
-	DrawObject(rootObject, mModelLoc);
+	DrawObject(scene->GetRootObject());
 }
 
 void DefaultRenderer::DrawTexture(GLuint texture, glm::ivec2 textureResolution, glm::ivec2 viewportResolution, int32_t samples) {
-	glUseProgram(m_quadShader);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glUniform1i(glGetUniformLocation(m_quadShader, "ourTexture"), 0);
-	float textureAspect = Aspect(textureResolution);
-	float viewportAspect = Aspect(viewportResolution);
-	float posX, posY;
-	float sizeX, sizeY;
+	m_quadShader.Bind();
+
+	Vec2 pos(0.0f, 0.0f), size(1.0f, 1.0f);
+	Float textureAspect = Aspect(textureResolution);
+	Float viewportAspect = Aspect(viewportResolution);
 	if (viewportAspect > textureAspect) {
-		sizeY = 1.0f;
-		sizeX = textureAspect / viewportAspect;
-		posX = (1.0f - sizeX) * 0.5f;
-		posY = 0.0f;
+		size.x = textureAspect / viewportAspect;
+		pos.x = (1.0f - size.x) * 0.5f;
 	}
 	else {
-		sizeX = 1.0f;
-		sizeY = viewportAspect / textureAspect;
-		posX = 0.0f;
-		posY = (1.0f - sizeY) * 0.5f;
+		size.y = viewportAspect / textureAspect;
+		pos.y = (1.0f - size.y) * 0.5f;
 	}
-	GLuint posLoc = glGetUniformLocation(m_quadShader, "uPos");
-	GLuint sizeLoc = glGetUniformLocation(m_quadShader, "uSize");
-	GLuint samplesLoc = glGetUniformLocation(m_quadShader, "uSamples");
-	glUniform2f(posLoc, posX, posY);
-	glUniform2f(sizeLoc, sizeX, sizeY);
-	glUniform1f(samplesLoc, (Float)samples);
+
+	m_quadShader.SetUniform2f("uPos", pos);
+	m_quadShader.SetUniform2f("uSize", size);
+	m_quadShader.SetUniform1f("uSamples", samples);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	m_quadShader.SetUniform1i("ourTexture", 0);
 
 	ResourceManager::GetQuadMesh()->Draw();
 }
 
-void DefaultRenderer::DrawObject(SceneObject* object, GLuint mModelLoc, Mat4 parentTransform) {
+void DefaultRenderer::DrawObject(SceneObject* object, Mat4 parentTransform) {
 	if (!object) return;
 
 	Mat4 objectTransform = parentTransform * object->GetTransform().GetMatrix();
 	if (const MeshAnimatorComponent* animatorComponent = object->GetComponent<MeshAnimatorComponent>()) {
 		std::array<Mat4, MaxBonesPerModel> boneMatricesBuffer;
 		animatorComponent->GetBoneMatrices(0.0f, boneMatricesBuffer);
-		GLuint mat4Loc = glGetUniformLocation(m_defaultShader, "finalBonesMatrices");
-		glUniformMatrix4(mat4Loc, (GLsizei)boneMatricesBuffer.size(), GL_FALSE, &boneMatricesBuffer[0][0][0]);
+		m_defaultShader.SetUniformMat4fv("finalBonesMatrices", &boneMatricesBuffer[0][0][0], boneMatricesBuffer.size());
 	}
 	if (const MeshComponent* mesh = object->GetComponent<MeshComponent>()) {
-		glUniformMatrix4(mModelLoc, 1, GL_FALSE, &objectTransform[0][0]);
+		m_defaultShader.SetUniformMat4f("mModel", objectTransform);
 		Material* material = ResourceManager::GetDefaultMaterial();
 		if (MaterialComponent* materialComponent = object->GetComponent<MaterialComponent>()) {
 			material = materialComponent->GetMaterial();
@@ -68,58 +61,74 @@ void DefaultRenderer::DrawObject(SceneObject* object, GLuint mModelLoc, Mat4 par
 		mesh->Draw();
 	}
 	for (size_t i = 0; i < object->GetChildren().size(); i++) {
-		DrawObject(object->GetChild((int32_t)i), mModelLoc, objectTransform);
+		DrawObject(object->GetChild((int32_t)i), objectTransform);
 	}
 }
 
 void DefaultRenderer::SetupCamera(Camera* camera) {
-	GLuint cameraPosLoc = glGetUniformLocation(m_defaultShader, "cameraPos");
-	GLuint mViewLoc = glGetUniformLocation(m_defaultShader, "mView");
-	GLuint mProjectioLoc = glGetUniformLocation(m_defaultShader, "mProjection");
-
-	glm::fvec3 cameraPos = camera->GetTransform().GetPosition();
-	glUniform3f(cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
-	glUniformMatrix4(mViewLoc, 1, GL_FALSE, &camera->GetViewMatrix()[0][0]);
-	glUniformMatrix4(mProjectioLoc, 1, GL_FALSE, &camera->GetProjectionMatrix()[0][0]);
+	m_defaultShader.SetUniform3f("cameraPos", camera->GetTransform().GetPosition());
+	m_defaultShader.SetUniformMat4f("mView", camera->GetViewMatrix());
+	m_defaultShader.SetUniformMat4f("mProjection", camera->GetProjectionMatrix());
 }
 
 void DefaultRenderer::SetupLights(Scene* scene) {
-	const size_t MaxLights = 4;
-
-	GLuint positionsLoc = glGetUniformLocation(m_defaultShader, "lightPositions");
-	GLuint colorsLoc = glGetUniformLocation(m_defaultShader, "lightColors");
-
-	GLfloat positions[MaxLights * 3] = { 0 };
-	GLfloat colors[MaxLights * 3] = { 0 };
-
+	// Point lights
+	const size_t MaxPointLights = 32;
+	int32_t nPointLights = 0;
 	const std::vector<PointLightComponent*>& pointLights = scene->GetPointLights();
-	for (size_t i = 0; i < pointLights.size() && i < MaxLights; i++) {
-		glm::fvec3 center = pointLights[i]->GetParent()->GetTransform().GetPosition();
-		positions[i * 3 + 0] = center.x;
-		positions[i * 3 + 1] = center.y;
-		positions[i * 3 + 2] = center.z;
-		glm::fvec3 emission = pointLights[i]->GetEmission();
-		colors[i * 3 + 0] = emission.x;
-		colors[i * 3 + 1] = emission.y;
-		colors[i * 3 + 2] = emission.z;
+	for (size_t i = 0; i < pointLights.size() && i < MaxPointLights; i++) {
+		const std::string base = std::string("pointLights[") + std::to_string(nPointLights) + std::string("].");
+		m_defaultShader.SetUniform3f(base + std::string("position"), pointLights[i]->GetParent()->GetTransform().GetPosition());
+		m_defaultShader.SetUniform3f(base + std::string("emission"), pointLights[i]->GetEmission());
+		nPointLights++;
 	}
+	m_defaultShader.SetUniform1i("nPointLights", nPointLights);
 
-	glUniform3fv(positionsLoc, MaxLights, positions);
-	glUniform3fv(colorsLoc, MaxLights, colors);
+	// Area lights
+	const size_t MaxAreaLights = 32;
+	int32_t nAreaLights = 0;
+	const std::vector<AreaLightComponent*>& areaLights = scene->GetAreaLights();
+	for (size_t i = 0; i < areaLights.size(); i++) {
+		MeshComponent* meshComponent = areaLights[i]->GetParent()->GetComponent<MeshComponent>();
+		if (!meshComponent) continue;
+		Mesh* mesh = meshComponent->GetMesh();
+		if (!mesh) continue;
+		for (int32_t firstIndex = 0; firstIndex < mesh->m_indices.size() && nAreaLights < MaxAreaLights; firstIndex += 3) {
+			const std::string base = std::string("areaLights[") + std::to_string(nAreaLights) + std::string("].");
+			m_defaultShader.SetUniform3f(base + std::string("emission"), areaLights[i]->GetEmission());
+			m_defaultShader.SetUniform1i(base + std::string("twoSided"), 1);
+			m_defaultShader.SetUniform3f(base + std::string("points[0]"), mesh->m_vertices[mesh->m_indices[firstIndex + 0]].position);
+			m_defaultShader.SetUniform3f(base + std::string("points[1]"), mesh->m_vertices[mesh->m_indices[firstIndex + 1]].position);
+			m_defaultShader.SetUniform3f(base + std::string("points[2]"), mesh->m_vertices[mesh->m_indices[firstIndex + 2]].position);
+			nAreaLights++;
+		}
+		if (nAreaLights >= MaxAreaLights) break;
+	}
+	m_defaultShader.SetUniform1i("nAreaLights", nAreaLights);
+
+	m_defaultShader.SetTexture("LTC1", m_LTC1Texture, 1);
+	m_defaultShader.SetTexture("LTC2", m_LTC2Texture, 2);
 }
 
 void DefaultRenderer::SetupMaterial(Material* material) {
-	GLuint albedoLoc = glGetUniformLocation(m_defaultShader, "albedo");
-	GLuint metallicLoc = glGetUniformLocation(m_defaultShader, "metallic");
-	GLuint roghnessLoc = glGetUniformLocation(m_defaultShader, "roughness");
-	GLuint useDiffuseMapLoc = glGetUniformLocation(m_defaultShader, "useDiffuseMap");
-
-	glUniform3(albedoLoc, material->m_albedo.GetRGB());
-	glUniform1(metallicLoc, material->m_metallic);
-	glUniform1(roghnessLoc, material->m_roughness);
-	glUniform1i(useDiffuseMapLoc, material->m_albedoTexture != nullptr);
+	m_defaultShader.SetUniform3f("albedo", material->m_albedo.GetRGB());
+	m_defaultShader.SetUniform1f("metallic", material->m_metallic);
+	m_defaultShader.SetUniform1f("roughness", material->m_roughness);
+	m_defaultShader.SetUniform1i("useDiffuseMap", material->m_albedoTexture != nullptr);
 	if (material->m_albedoTexture) {
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, material->m_albedoTexture->id);
+		m_defaultShader.SetTexture("albedoTexture", material->m_albedoTexture->id, 0);
 	}
+}
+
+GLuint DefaultRenderer::LoadLTCTexture(const float* matrixTable) {
+	GLuint texture = 0;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 64, 64, 0, GL_RGBA, GL_FLOAT, matrixTable);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	return texture;
 }

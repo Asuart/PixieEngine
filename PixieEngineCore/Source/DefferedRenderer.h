@@ -5,23 +5,27 @@
 #include "Components.h"
 #include "EngineTime.h"
 #include "ResourceManager.h"
+#include "FrameBuffer.h"
+#include "LTC_Matrix.h"
 
-class DefaultRenderer {
+class DefferedRenderer {
 public:
-	DefaultRenderer();
+	GBuffer m_gBuffer;
+	FrameBuffer m_viewportFrameBuffer;
+
+	DefferedRenderer();
 
 	void DrawFrame(Scene* scene, Camera* camera);
-	void DrawTexture(GLuint texture, glm::ivec2 textureResolution, glm::ivec2 viewportResolution, int32_t samples = 1);
 
 protected:
-	Shader m_defaultShader;
-	Shader m_quadShader;
+	Shader m_shader;
+	Shader m_lightingShader;
 	GLuint m_LTC1Texture = 0;
 	GLuint m_LTC2Texture = 0;
 
 	void DrawObject(SceneObject* object, Mat4 parentTransform = Mat4(1.0f));
 	void SetupCamera(Camera* camera);
-	void SetupLights(Scene* scene);
 	void SetupMaterial(Material* material);
+	void SetupLights(Scene* scene);
 	GLuint LoadLTCTexture(const float* matrixTable);
 };

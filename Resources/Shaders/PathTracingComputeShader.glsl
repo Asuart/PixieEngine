@@ -1,7 +1,6 @@
-#pragma once
-
-static const char* GPU_RAY_TRACING_COMPUTE_SHADER = R"(
 #version 460 core
+
+layout(local_size_x = 4, local_size_y = 4, local_size_z = 1​) in;  
 
 struct Ray {
 	vec3 origin;
@@ -267,4 +266,3 @@ void main() {
 	}
 	imageStore(screen, pixel_coords, sumPixel);
 }
-)";

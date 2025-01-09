@@ -197,10 +197,14 @@ void RayTracingViewportWindow::StartRender() {
 						for (int32_t sampleIndex = m_waveStart; sampleIndex < m_waveEnd; sampleIndex++) {
 							sampler->StartPixelSample(glm::ivec2(x, y), sampleIndex);
 							PerPixel(x, y, sampler);
+							if (!m_isRendering) {
+								goto thread_termination;
+							}
 						}
 					}
 				}
 			}
+			thread_termination:
 			delete sampler;
 			}));
 	}

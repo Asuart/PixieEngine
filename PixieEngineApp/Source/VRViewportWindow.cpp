@@ -12,7 +12,7 @@ void VRViewportWindow::Initialize() {
 	m_viewportFrameBuffer = new FrameBuffer({ 1280, 720 });
 	m_viewportFrameBufferLeft = new FrameBuffer({ 640, 720 });
 	m_viewportFrameBufferRight = new FrameBuffer({ 640, 720 });
-	m_vrShader = ResourceManager::CompileShader(VR_QUAD_VERTEX_SHADER_SOURCE, VR_QUAD_FRAGMENT_SHADER_SOURCE);
+	m_vrShader = ResourceManager::LoadShader("VRQuadVertexShader.glsl", "VRQuadFragmentShader.glsl");
 }
 
 void VRViewportWindow::Draw() {
@@ -51,44 +51,27 @@ void VRViewportWindow::Draw() {
 			m_viewportFrameBuffer->Bind();
 			glViewport(0, 0, m_viewportFrameBuffer->m_resolution.x, m_viewportFrameBuffer->m_resolution.y);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			glUseProgram(m_vrShader);
+			m_vrShader.Bind();
 
-			GLuint posLoc = glGetUniformLocation(m_vrShader, "uPos");
-			GLuint sizeLoc = glGetUniformLocation(m_vrShader, "uSize");
-			float textureAspect = (float)m_viewportResolution.x / m_viewportResolution.y;
-			float viewportAspect = (float)m_viewportResolution.x / m_viewportResolution.y;
-			float posX, posY;
-			float sizeX, sizeY;
+			Vec2 pos(0.0f, 0.0f), size(1.0f, 1.0f);
+			Float textureAspect = Aspect(m_viewportResolution);
+			Float viewportAspect = Aspect(m_viewportResolution);
 			if (viewportAspect > textureAspect) {
-				sizeY = 1.0f;
-				sizeX = textureAspect / viewportAspect;
-				posX = (1.0f - sizeX) * 0.5f;
-				posY = 0.0f;
+				size.x = textureAspect / viewportAspect;
+				pos.x = (1.0f - size.x) * 0.5f;
 			}
 			else {
-				sizeX = 1.0f;
-				sizeY = viewportAspect / textureAspect;
-				posX = 0.0f;
-				posY = (1.0f - sizeY) * 0.5f;
+				size.y = viewportAspect / textureAspect;
+				pos.y = (1.0f - size.y) * 0.5f;
 			}
 
-			glUniform2f(posLoc, posX, posY);
-			glUniform2f(sizeLoc, sizeX, sizeY);
+			m_vrShader.SetUniform2f("uPos", pos);
+			m_vrShader.SetUniform2f("uSize", size);
+			m_vrShader.SetUniform1f("uDistance", m_distance);
+			m_vrShader.SetUniform1f("uK", m_k);
 
-			GLuint textureLeftLoc = glGetUniformLocation(m_vrShader, "textureLeft");
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, m_viewportFrameBufferLeft->m_texture);
-			glUniform1i(textureLeftLoc, 0);
-
-			GLuint textureRightLoc = glGetUniformLocation(m_vrShader, "textureRight");
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, m_viewportFrameBufferRight->m_texture);
-			glUniform1i(textureRightLoc, 1);
-
-			GLuint balanceLoc = glGetUniformLocation(m_vrShader, "uDistance");
-			glUniform1f(balanceLoc, m_distance);
-			GLuint scaleLoc = glGetUniformLocation(m_vrShader, "uK");
-			glUniform1f(scaleLoc, m_k);
+			m_vrShader.SetTexture("textureLeft", m_viewportFrameBufferLeft->m_texture, 0);
+			m_vrShader.SetTexture("textureLeft", m_viewportFrameBufferRight->m_texture, 1);
 
 			ResourceManager::GetQuadMesh()->Draw();
 

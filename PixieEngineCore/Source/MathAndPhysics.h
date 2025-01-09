@@ -583,3 +583,13 @@ inline int32_t SampleDiscrete(std::vector<Float>& weights, Float u, Float* pmf =
 inline float Aspect(glm::ivec2 resolution) {
 	return (float)resolution.x / resolution.y;
 }
+
+inline Float IntegrateEdge(Vec3 v1, Vec3 v2, Vec3 N) {
+	Float x = dot(v1, v2);
+	Float y = abs(x);
+	Float a = 0.8543985f + (0.4965155f + 0.0145206f * y) * y;
+	Float b = 3.4175940f + (4.1616724f + y) * y;
+	Float v = a / b;
+	Float theta_sintheta = (x > 0.0f) ? v : 0.5f * (1.0f / sqrt(glm::max(1.0f - x * x, 1e-7f))) - v;
+	return glm::dot(glm::cross(v1, v2) * theta_sintheta, N);
+}

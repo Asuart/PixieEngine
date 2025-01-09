@@ -6,9 +6,9 @@ AssetsBrowserWindow::AssetsBrowserWindow(PixieEngineApp& app, PixieEngineInterfa
 	PixieEngineInterfaceWindow(app, inter) {}
 
 void AssetsBrowserWindow::Initialize() {
-	m_folderIcon = ResourceManager::LoadRGBATexture("../Resources/folder-icon.png")->id;
-	m_parentFolderIcon = ResourceManager::LoadRGBATexture("../Resources/folder-up-icon.png")->id;
-	m_fileIcon = ResourceManager::LoadRGBATexture("../Resources/file-icon.png")->id;
+	m_folderIcon = ResourceManager::LoadRGBATexture("folder-icon.png")->id;
+	m_parentFolderIcon = ResourceManager::LoadRGBATexture("folder-up-icon.png")->id;
+	m_fileIcon = ResourceManager::LoadRGBATexture("file-icon.png")->id;
 }
 
 void AssetsBrowserWindow::Draw() {

@@ -10,6 +10,6 @@
 #include "SceneSnapshot.h"
 #include "CameraComponent.h"
 #include "PointLightComponent.h"
-#include "DiffuseAreaLightComponent.h"
+#include "AreaLightComponent.h"
 #include "Shapes.h"
 #include "SceneGenerator.h"

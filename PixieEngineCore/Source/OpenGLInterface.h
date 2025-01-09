@@ -1,5 +1,13 @@
 #pragma once
 
+inline void glUniformMatrix3(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value) {
+	glUniformMatrix3fv(location, count, transpose, value);
+}
+
+inline void glUniformMatrix3(GLint location, GLsizei count, GLboolean transpose, const GLdouble* value) {
+	glUniformMatrix3dv(location, count, transpose, value);
+}
+
 inline void glUniformMatrix4(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value) {
 	glUniformMatrix4fv(location, count, transpose, value);
 }
@@ -28,10 +36,9 @@ inline void glUniform3(GLint location, Vec3 v) {
 	glUniform3(location, v.x, v.y, v.z);
 }
 
-inline void APIENTRY openglCallbackFunction(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
-{
+inline void APIENTRY openglCallbackFunction(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
 	// filter some warnings
-	if (id == 131185) return;
+	if (id == 131185 || id == 131218) return;
 
 	std::cout << "---------------------opengl-callback-start------------\n";
 	std::cout << "message: " << message << "\n";

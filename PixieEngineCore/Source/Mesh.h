@@ -27,6 +27,9 @@ struct Mesh {
 	void Bind() const;
 	void FreeCPUData();
 	void FreeGPUData();
+	
+	inline const std::vector<Vertex>& GetVertices() const { return m_vertices; }
+	inline const std::vector<int32_t>& GetIndices() const { return m_indices; }
 
 protected:
 	GLuint m_vao = 0;

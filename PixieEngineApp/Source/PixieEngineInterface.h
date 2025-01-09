@@ -14,6 +14,7 @@
 #include "StatsWindow.h"
 #include "RendererViewportSettingsWindow.h"
 #include "GPURayTracingViewportWindow.h"
+#include "DefferedViewportWindow.h"
 
 class PixieEngineApp;
 

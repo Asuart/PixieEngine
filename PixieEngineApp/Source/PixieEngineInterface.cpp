@@ -18,6 +18,7 @@ PixieEngineInterface::PixieEngineInterface(PixieEngineApp& app) :
 	m_openWindows.push_back(new StatsWindow(m_app, *this));
 	m_openWindows.push_back(new RendererViewportSettingsWindow(m_app, *this));
 	m_openWindows.push_back(new GPURayTracingViewportWindow(m_app, *this));
+	m_openWindows.push_back(new DefferedViewportWindow(m_app, *this));
 }
 
 PixieEngineInterface::~PixieEngineInterface() {

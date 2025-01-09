@@ -50,7 +50,7 @@ protected:
 	ViewportCameraController m_cameraController;
 	FrameBuffer* m_viewportFrameBuffer = nullptr;
 	SceneSnapshot* m_sceneSnapshot = nullptr;
-	GLuint m_shader = 0;
+	ComputeShader m_shader;
 	GLuint m_resultTexture = 0;
 	glm::ivec2 m_resultTextureResolution = { 1280, 720 };
 	glm::ivec2 m_viewportResolution = { 1280, 720 };

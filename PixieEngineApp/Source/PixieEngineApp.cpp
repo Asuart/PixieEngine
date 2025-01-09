@@ -40,6 +40,7 @@ PixieEngineApp::PixieEngineApp() :
 	m_sceneSnapsot = new SceneSnapshot(m_scene);
 
 	m_defaultRenderer = new DefaultRenderer();
+	m_defferedRenderer = new DefferedRenderer();
 
 	m_interface.Initialize();
 }
@@ -137,6 +138,10 @@ DefaultRenderer* PixieEngineApp::GetDefaultRenderer() {
 	return m_defaultRenderer;
 }
 
+DefferedRenderer* PixieEngineApp::GetDefferedRenderer() {
+	return m_defferedRenderer;
+}
+
 const std::filesystem::path& PixieEngineApp::GetAssetsPath() {
 	return m_assetsPath;
 }
@@ -181,6 +186,7 @@ void PixieEngineApp::LoadDemoScene(GeneratedScene type) {
 	m_scene->Start();
 	UpdateSceneSnapshot();
 	for (size_t i = 0; i < rayTracingWindows.size(); i++) {
+		rayTracingWindows[i]->ResetCamera();
 		if (renderingStates[i]) {
 			rayTracingWindows[i]->StartRender();
 		}
@@ -231,6 +237,7 @@ void PixieEngineApp::LoadScene(const std::filesystem::path& filePath) {
 	m_scene->Start();
 	UpdateSceneSnapshot();
 	for (size_t i = 0; i < rayTracingWindows.size(); i++) {
+		rayTracingWindows[i]->ResetCamera();
 		if (renderingStates[i]) {
 			rayTracingWindows[i]->StartRender();
 		}

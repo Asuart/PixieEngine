@@ -20,7 +20,7 @@ GPURayTracingViewportWindow::GPURayTracingViewportWindow(PixieEngineApp& app, Pi
 void GPURayTracingViewportWindow::Initialize() {
 	m_viewportFrameBuffer = new FrameBuffer({ 1280, 720 });
 
-	m_shader = ResourceManager::CompileComputeShader(GPU_RAY_TRACING_COMPUTE_SHADER);
+	m_shader = ResourceManager::LoadComputeShader("PathTracingComputeShader.glsl");
 
 	glGenTextures(1, &m_resultTexture);
 	glBindTexture(GL_TEXTURE_2D, m_resultTexture);
@@ -53,16 +53,11 @@ void GPURayTracingViewportWindow::Draw() {
 		}
 
 		if (m_numTriangles > 0) {
-			HightPrecisionTimer timer("Compute Shader");
-			glUseProgram(m_shader);
-			int32_t numTrianglesLoc = glGetUniformLocation(m_shader, "uNumTriangles");
-			glUniform1i(numTrianglesLoc, m_numTriangles);
-			int32_t viewMatrixLoc = glGetUniformLocation(m_shader, "uViewMatrix");
-			glUniformMatrix4(viewMatrixLoc, 1, GL_FALSE, &m_viewportCamera.GetInverseViewMatrix()[0][0]);
-			GLuint timeLoc = glGetUniformLocation(m_shader, "uTime");
-			glUniform1ui(timeLoc, (GLuint)Time::lastTime.count());
-			GLuint resetLoc = glGetUniformLocation(m_shader, "uReset");
-			glUniform1i(resetLoc, m_samples == 0);
+			m_shader.Bind();
+			m_shader.SetUniform1i("uNumTriangles", m_numTriangles);
+			m_shader.SetUniform1i("uTime", (GLuint)Time::lastTime.count());
+			m_shader.SetUniform1i("uReset", m_samples == 0);
+			m_shader.SetUniformMat4f("uViewMatrix", m_viewportCamera.GetInverseViewMatrix());
 			glDispatchCompute((GLuint)m_resultTextureResolution.x / 8, (GLuint)m_resultTextureResolution.y / 4, 1);
 			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 			m_samples++;

@@ -6,9 +6,9 @@
 #include "MaterialComponent.h"
 #include "CameraComponent.h"
 #include "PointLightComponent.h"
-#include "DiffuseAreaLightComponent.h"
 #include "DirectionalLightComponent.h"
 #include "Skyboxes.h"
+#include "AreaLightComponent.h"
 
 class Scene {
 public:
@@ -32,7 +32,7 @@ public:
 	std::vector<SceneObject*> FindObjectsWithComponent(ComponentType type);
 	const SceneObject* GetRootObject() const;
 	SceneObject* GetRootObject();
-	std::vector<DiffuseAreaLightComponent*>& GetDiffuseAreaLights();
+	std::vector<AreaLightComponent*>& GetAreaLights();
 	std::vector<DirectionalLightComponent*>& GetDirectionalLights();
 	std::vector<PointLightComponent*>& GetPointLights();
 	std::vector<CameraComponent*>& GetCameras();
@@ -46,6 +46,6 @@ protected:
 	std::vector<CameraComponent*> m_cameras;
 	std::vector<DirectionalLightComponent*> m_directionalLights;
 	std::vector<PointLightComponent*> m_pointLights;
-	std::vector<DiffuseAreaLightComponent*> m_diffuseAreaLights;
+	std::vector<AreaLightComponent*> m_areaLights;
 	Skybox* m_skybox = nullptr;
 };

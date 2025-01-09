@@ -1,6 +1,7 @@
 #pragma once
 #include "pch.h"
 #include "Scene.h"
+#include "SceneSnapshot.h"
 
 //class SceneManager {
 //public:
@@ -14,6 +15,10 @@
 //	void AttachObjectToRoot(SceneObject* object);
 //
 //protected:
+//	Scene m_currentScene;
+//	Scene m_virtualScene;
+//	Scene* m_activeScene = &m_currentScene;
+//
 //	Scene m_scene;
 //	Scene m_activeScene;
 //	SceneSnapshot* m_sceneSnapshot;

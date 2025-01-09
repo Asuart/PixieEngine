@@ -4,6 +4,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+std::filesystem::path ResourceManager::m_applicationPath = "";
 std::filesystem::path ResourceManager::m_currentFilePath = "";
 std::map<std::filesystem::path, SceneObject*> ResourceManager::m_Models = {};
 std::map<std::filesystem::path, Texture<Vec3>*> ResourceManager::m_RGBTextures = {};
@@ -51,6 +52,18 @@ Vec3 AssimpGLMHelpers::GetGLMVec(const aiVector3D& vec) {
 
 Quaternion AssimpGLMHelpers::GetGLMQuat(const aiQuaternion& pOrientation) {
 	return Quaternion(pOrientation.w, pOrientation.x, pOrientation.y, pOrientation.z);
+}
+
+void ResourceManager::SetApplicationPath(const std::string& path) {
+	m_applicationPath = path;
+}
+
+std::filesystem::path ResourceManager::GetApplicationPath() {
+	return m_applicationPath;
+}
+
+std::filesystem::path ResourceManager::GetApplicationDirectory() {
+	return m_applicationPath.parent_path();
 }
 
 void ResourceManager::Initialize() {
@@ -160,7 +173,8 @@ Texture<Vec4>* ResourceManager::LoadRGBATexture(std::filesystem::path filePath) 
 		return m_RGBATextures[filePath];
 	}
 	int32_t width, height, nrChannels;
-	uint8_t* data = stbi_load(filePath.string().c_str(), &width, &height, &nrChannels, 0);
+	std::string fullPath = GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
+	uint8_t* data = stbi_load(fullPath.c_str(), &width, &height, &nrChannels, 0);
 	if (!data) {
 		std::cout << "  Error: Failed to load texture.\n";
 		return nullptr;
@@ -220,7 +234,7 @@ bool ResourceManager::IsValidModelPath(const std::filesystem::path& filePath) {
 		return false;
 	}
 	std::string extension = filePath.extension().string();
-	const std::set<std::string> modelExtensions = { ".dae", ".obj", ".fbx", ".glb", ".gltf", ".ply"};
+	const std::set<std::string> modelExtensions = { ".dae", ".obj", ".fbx", ".glb", ".gltf", ".ply", ".3ds"};
 	if (std::find(modelExtensions.begin(), modelExtensions.end(), extension) == modelExtensions.end()) {
 		std::cout << "Unsupported model format: " << filePath << "\n";
 		return false;
@@ -554,6 +568,10 @@ SceneObject* ResourceManager::ProcessAssimpNode(const aiScene* scene, const aiNo
 		}
 		MaterialComponent* materialComponent = new MaterialComponent(material, nodeObject);
 		nodeObject->AddComponent(materialComponent);
+		if (material->GetEmission()) {
+			AreaLightComponent* areaLightComponent = new AreaLightComponent(nodeObject, material->GetEmission().GetRGB(), 1.0f);
+			nodeObject->AddComponent(areaLightComponent);
+		}
 	}
 	else {
 		for (uint32_t meshIndex = 0; meshIndex < node->mNumMeshes; meshIndex++) {
@@ -784,21 +802,23 @@ Material* ResourceManager::AddMaterial(const Material& material) {
 	return &m_materials.back();
 }
 
-std::string ResourceManager::ReadFile(const char* filePath) {
+std::string ResourceManager::ReadFile(const std::string& filePath) {
 	std::ifstream t(filePath);
 	std::string file((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
 	return file;
 }
 
-GLuint ResourceManager::LoadShader(const char* vertex_path, const char* fragment_path) {
-	std::string vertShaderStr = ReadFile(vertex_path);
-	std::string fragShaderStr = ReadFile(fragment_path);
+Shader ResourceManager::LoadShader(const std::string& vertexName, const std::string& fragmentName) {
+	const std::string shadersPath = GetApplicationDirectory().string() + std::string("/Resources/Shaders/");
+	std::string vertShaderStr = ReadFile(shadersPath + vertexName);
+	std::string fragShaderStr = ReadFile(shadersPath + fragmentName);
 	const char* vertShaderSrc = vertShaderStr.c_str();
 	const char* fragShaderSrc = fragShaderStr.c_str();
+	std::cout << "  Compiling shaders: " << vertexName << " and " << fragmentName << "\n";
 	return CompileShader(vertShaderSrc, fragShaderSrc);
 }
 
-GLuint ResourceManager::CompileShader(const char* vertShaderSrc, const char* fragShaderSrc) {
+Shader ResourceManager::CompileShader(const char* vertShaderSrc, const char* fragShaderSrc) {
 	GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
 	GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
 
@@ -843,15 +863,15 @@ GLuint ResourceManager::CompileShader(const char* vertShaderSrc, const char* fra
 	glDeleteShader(vertShader);
 	glDeleteShader(fragShader);
 
-	return program;
+	return Shader(program);
 }
 
-GLuint ResourceManager::LoadComputeShader(const char* compute_path) {
-	std::string computeShaderStr = ReadFile(compute_path);
+ComputeShader ResourceManager::LoadComputeShader(const std::string& computePath) {
+	std::string computeShaderStr = ReadFile(computePath);
 	return CompileComputeShader(computeShaderStr.c_str());
 }
 
-GLuint ResourceManager::CompileComputeShader(const char* computeShaderSrc) {
+ComputeShader ResourceManager::CompileComputeShader(const char* computeShaderSrc) {
 	GLint result = GL_FALSE;
 	int32_t logLength;
 	GLuint ray_shader = glCreateShader(GL_COMPUTE_SHADER);
@@ -874,5 +894,5 @@ GLuint ResourceManager::CompileComputeShader(const char* computeShaderSrc) {
 	glGetProgramInfoLog(rayProgram, logLength, NULL, &programError[0]);
 	std::cout << &programError[0] << std::endl;
 
-	return rayProgram;
+	return ComputeShader(rayProgram);
 }

@@ -12,7 +12,7 @@ void StereoscopicViewportWindow::Initialize() {
 	m_viewportFrameBuffer = new FrameBuffer({ 1280, 720 });
 	m_viewportFrameBufferLeft = new FrameBuffer({ 1280, 720 });
 	m_viewportFrameBufferRight = new FrameBuffer({ 1280, 720 });
-	m_stereoscopicShader = ResourceManager::CompileShader(STEREOSCOPIC_QUAD_VERTEX_SHADER_SOURCE, STEREOSCOPIC_QUAD_FRAGMENT_SHADER_SOURCE);
+	m_stereoscopicShader = ResourceManager::LoadShader("StereoscopicQuadVertexShader.glsl", "StereoscopicQuadFragmentShader.glsl");
 }
 
 void StereoscopicViewportWindow::Draw() {
@@ -51,44 +51,28 @@ void StereoscopicViewportWindow::Draw() {
 			m_viewportFrameBuffer->Bind();
 			glViewport(0, 0, m_viewportFrameBuffer->m_resolution.x, m_viewportFrameBuffer->m_resolution.y);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			glUseProgram(m_stereoscopicShader);
+			m_stereoscopicShader.Bind();
 
-			GLuint posLoc = glGetUniformLocation(m_stereoscopicShader, "uPos");
-			GLuint sizeLoc = glGetUniformLocation(m_stereoscopicShader, "uSize");
-			float textureAspect = (float)m_viewportResolution.x / m_viewportResolution.y;
-			float viewportAspect = (float)m_viewportResolution.x / m_viewportResolution.y;
-			float posX, posY;
-			float sizeX, sizeY;
+			Vec2 pos(0.0f, 0.0f), size(1.0f, 1.0f);
+			Float textureAspect = Aspect(m_viewportResolution);
+			Float viewportAspect = Aspect(m_viewportResolution);
 			if (viewportAspect > textureAspect) {
-				sizeY = 1.0f;
-				sizeX = textureAspect / viewportAspect;
-				posX = (1.0f - sizeX) * 0.5f;
-				posY = 0.0f;
+				size.x = textureAspect / viewportAspect;
+				pos.x = (1.0f - size.x) * 0.5f;
 			}
 			else {
-				sizeX = 1.0f;
-				sizeY = viewportAspect / textureAspect;
-				posX = 0.0f;
-				posY = (1.0f - sizeY) * 0.5f;
+				size.y = viewportAspect / textureAspect;
+				pos.y = (1.0f - size.y) * 0.5f;
 			}
 
-			glUniform2f(posLoc, posX, posY);
-			glUniform2f(sizeLoc, sizeX, sizeY);
+			m_stereoscopicShader.SetUniform2f("uPos", pos);
+			m_stereoscopicShader.SetUniform2f("uSize", size);
 
-			GLuint textureLeftLoc = glGetUniformLocation(m_stereoscopicShader, "textureLeft");
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, m_viewportFrameBufferLeft->m_texture);
-			glUniform1i(textureLeftLoc, 0);
+			m_stereoscopicShader.SetTexture("textureLeft", m_viewportFrameBufferLeft->m_texture, 0);
+			m_stereoscopicShader.SetTexture("textureRight", m_viewportFrameBufferRight->m_texture, 1);
 
-			GLuint textureRightLoc = glGetUniformLocation(m_stereoscopicShader, "textureRight");
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, m_viewportFrameBufferRight->m_texture);
-			glUniform1i(textureRightLoc, 1);
-
-			GLuint balanceLoc = glGetUniformLocation(m_stereoscopicShader, "uBalance");
-			glUniform3f(balanceLoc, m_redBalance, m_greenBalance, m_blueBalance);
-			GLuint scaleLoc = glGetUniformLocation(m_stereoscopicShader, "uScale");
-			glUniform3f(scaleLoc, m_redScale, m_greenScale, m_blueScale);
+			m_stereoscopicShader.SetUniform3f("uBalance", { m_redBalance, m_greenBalance, m_blueBalance });
+			m_stereoscopicShader.SetUniform3f("uScale", { m_redScale, m_greenScale, m_blueScale });
 
 			ResourceManager::GetQuadMesh()->Draw();
 

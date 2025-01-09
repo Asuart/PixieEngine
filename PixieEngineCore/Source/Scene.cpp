@@ -19,6 +19,9 @@ void Scene::AddObject(SceneObject* object, SceneObject* parent) {
 	if (DirectionalLightComponent* pointLight = object->GetComponent<DirectionalLightComponent>()) {
 		m_directionalLights.push_back(pointLight);
 	}
+	if (AreaLightComponent* areaLight = object->GetComponent<AreaLightComponent>()) {
+		m_areaLights.push_back(areaLight);
+	}
 	if (parent) {
 		parent->AddChild(object);
 	}
@@ -73,8 +76,15 @@ SceneObject* Scene::GetRootObject() {
 	return m_rootObject;
 }
 
-std::vector<DiffuseAreaLightComponent*>& Scene::GetDiffuseAreaLights() {
-	return m_diffuseAreaLights;
+std::vector<AreaLightComponent*>& Scene::GetAreaLights() {
+	m_areaLights.clear();
+	std::vector<SceneObject*> objects = m_rootObject->FindObjectsWithComponent(ComponentType::DiffuseAreaLight);
+	for (size_t i = 0; i < objects.size(); i++) {
+		if (AreaLightComponent* areaLight = objects[i]->GetComponent<AreaLightComponent>()) {
+			m_areaLights.push_back(areaLight);
+		}
+	}
+	return m_areaLights;
 }
 
 std::vector<DirectionalLightComponent*>& Scene::GetDirectionalLights() {

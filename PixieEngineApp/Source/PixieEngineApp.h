@@ -2,6 +2,7 @@
 #include "PixieEngineWindow.h"
 #include "PixieEngineInterface.h"
 #include "ResourceManager.h"
+#include "DefferedRenderer.h"
 
 class PixieEngineInterface;
 
@@ -22,6 +23,7 @@ public:
 	void RemoveSelectedObject();
 	void RestoreViewportSize();
 	DefaultRenderer* GetDefaultRenderer();
+	DefferedRenderer* GetDefferedRenderer();
 	const std::filesystem::path& GetAssetsPath();
 	void SetAssetsPath(const std::filesystem::path& path);
 	void UpdateSceneSnapshot();
@@ -39,6 +41,7 @@ protected:
 	Scene* m_scene;
 	SceneSnapshot* m_sceneSnapsot;
 	DefaultRenderer* m_defaultRenderer;
+	DefferedRenderer* m_defferedRenderer;
 	SceneObject* m_selectedObject = nullptr;
 
 	void ReloadScene();
