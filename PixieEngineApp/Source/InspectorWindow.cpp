@@ -2,13 +2,13 @@
 #include "InspectorWindow.h"
 #include "PixieEngineApp.h"
 
-InspectorWindow::InspectorWindow(PixieEngineApp& app, PixieEngineInterface& inter) :
-	PixieEngineInterfaceWindow(app, inter) {}
+InspectorWindow::InspectorWindow(PixieEngineApp& app, Interface& inter) :
+	InterfaceWindow(app, inter) {}
 
 void InspectorWindow::Draw() {
 	ImGui::SetNextWindowSize(ImVec2(400, 400));
 	if (ImGui::Begin("Inspector", 0)) {
-		SceneObject* object = m_app.GetSelectedObject();
+		SceneObject* object = SceneManager::GetSelectedObject();
 		if (object) {
 			ImGui::Text(object->GetName().c_str());
 			ImGui::Spacing();

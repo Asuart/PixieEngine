@@ -1,40 +1,52 @@
 #include "pch.h"
-#include "PixieEngineInterface.h"
+#include "Interface.h"
 #include "PixieEngineApp.h"
+#include "AssetsBrowserWindow.h"
+#include "SceneTreeWindow.h"
+#include "InspectorWindow.h"
+#include "MaterialsBrowserWindow.h"
+#include "StatsWindow.h"
+#include "ViewportSettingsWindow.h"
+#include "ViewportWindow.h"
 
-PixieEngineInterface::PixieEngineInterface(PixieEngineApp& app) :
+Interface::Interface(PixieEngineApp& app) :
 	m_app(app) {
 	m_openWindows.push_back(new SceneTreeWindow(m_app, *this));
 	m_openWindows.push_back(new AssetsBrowserWindow(m_app, *this));
 	m_openWindows.push_back(new InspectorWindow(m_app, *this));
 	m_openWindows.push_back(new MaterialsBrowserWindow(m_app, *this));
-	m_openWindows.push_back(new RayTracingSettingsWindow(m_app, *this));
-	m_openWindows.push_back(new DefaultViewportWindow(m_app, *this));
-	m_openWindows.push_back(new RayTracingViewportWindow(m_app, *this));
-	m_openWindows.push_back(new StereoscopicViewportWindow(m_app, *this));
-	m_openWindows.push_back(new StereoscopicViewportSettingsWindow(m_app, *this));
-	m_openWindows.push_back(new VRViewportWindow(m_app, *this));
-	m_openWindows.push_back(new VRViewportSettingsWindow(m_app, *this));
+	m_openWindows.push_back(new ViewportWindow(m_app, *this));
 	m_openWindows.push_back(new StatsWindow(m_app, *this));
-	m_openWindows.push_back(new RendererViewportSettingsWindow(m_app, *this));
-	m_openWindows.push_back(new GPURayTracingViewportWindow(m_app, *this));
-	m_openWindows.push_back(new DefferedViewportWindow(m_app, *this));
+	m_openWindows.push_back(new ViewportSettingsWindow(m_app, *this));
 }
 
-PixieEngineInterface::~PixieEngineInterface() {
+Interface::~Interface() {
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 }
 
-void PixieEngineInterface::Initialize() {
+void Interface::Initialize() {
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
+	ImGui::StyleColorsDark();
+
+	ImGui_ImplGlfw_InitForOpenGL(m_app.m_window.GetGLFWWindow(), true);
+	ImGui_ImplOpenGL3_Init();
+
 	ComponentRenderer::Initialize(&m_app);
 	for (size_t i = 0; i < m_openWindows.size(); i++) {
 		m_openWindows[i]->Initialize();
 	}
 }
 
-void PixieEngineInterface::Draw() {
+void Interface::Draw() {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
@@ -74,31 +86,31 @@ void PixieEngineInterface::Draw() {
 		}
 		if (ImGui::BeginMenu("Test Scenes")) {
 			if (ImGui::MenuItem("Empty Scene")) {
-				m_app.LoadDemoScene(GeneratedScene::Empty);
+				SceneManager::LoadDemoScene(GeneratedScene::Empty);
 			}
 			if (ImGui::MenuItem("Demo Sphere")) {
-				m_app.LoadDemoScene(GeneratedScene::DemoSphere);
+				SceneManager::LoadDemoScene(GeneratedScene::DemoSphere);
 			}
 			if (ImGui::MenuItem("Small And Big Spheres")) {
-				m_app.LoadDemoScene(GeneratedScene::SmallAndBigSpheres);
+				SceneManager::LoadDemoScene(GeneratedScene::SmallAndBigSpheres);
 			}
 			if (ImGui::MenuItem("Test Materials")) {
-				m_app.LoadDemoScene(GeneratedScene::TestMaterials);
+				SceneManager::LoadDemoScene(GeneratedScene::TestMaterials);
 			}
 			if (ImGui::MenuItem("Randomized Spheres")) {
-				m_app.LoadDemoScene(GeneratedScene::RandomizedSpheres);
+				SceneManager::LoadDemoScene(GeneratedScene::RandomizedSpheres);
 			}
 			ImGui::EndMenu();
 		}
-		if (ImGui::BeginMenu("Add Object")) {
+		if (ImGui::BeginMenu("Create Object")) {
 			if (ImGui::MenuItem("Sphere")) {
-				m_app.AddObject(GeneratedObject::Sphere);
+				SceneManager::CreateObject(GeneratedObject::Sphere);
 			}
 			if (ImGui::MenuItem("Point Light")) {
-				m_app.AddObject(GeneratedObject::PointLight);
+				SceneManager::CreateObject(GeneratedObject::PointLight);
 			}
 			if (ImGui::MenuItem("Directional Light")) {
-				m_app.AddObject(GeneratedObject::DirectionalLight);
+				SceneManager::CreateObject(GeneratedObject::DirectionalLight);
 			}
 			ImGui::EndMenu();
 		}

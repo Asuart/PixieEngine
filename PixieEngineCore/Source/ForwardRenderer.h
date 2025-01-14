@@ -5,17 +5,19 @@
 #include "Components.h"
 #include "EngineTime.h"
 #include "ResourceManager.h"
+#include "GlobalRenderer.h"
+#include "FrameBuffer.h"
 
 class ForwardRenderer {
 public:
+	FrameBuffer m_frameBuffer;
+
 	ForwardRenderer();
 
 	void DrawFrame(Scene* scene, Camera* camera);
-	void DrawTexture(GLuint texture, glm::ivec2 textureResolution, glm::ivec2 viewportResolution, int32_t samples = 1);
 
 protected:
 	Shader m_defaultShader;
-	Shader m_quadShader;
 	GLuint m_LTC1Texture = 0;
 	GLuint m_LTC2Texture = 0;
 
@@ -23,5 +25,5 @@ protected:
 	void SetupCamera(Camera* camera);
 	void SetupLights(Scene* scene);
 	void SetupMaterial(Material* material);
-	GLuint LoadLTCTexture(const float* matrixTable);
+	GLuint LoadLTCTexture(const Float* matrixTable);
 };

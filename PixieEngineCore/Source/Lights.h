@@ -139,6 +139,7 @@ public:
 	Spectrum L(Vec3 p, Vec3 n, Vec2 uv, Vec3 w) const override;
 	std::optional<LightLiSample> SampleLi(LightSampleContext context, Vec2 u, bool allowIncompletePDF = false) const override;
 	Float SampleLiPDF(LightSampleContext context, Vec3 wi, bool allowIncompletePDF = false) const override;
+	Spectrum Le(const Ray& ray) const override;
 	std::optional<LightLeSample> SampleLe(Vec2 u1, Vec2 u2) const override;
 	void SampleLePDF(const Ray& ray, Float* pdfPos, Float* pdfDir) const override;
 	void SampleLePDF(const RayInteraction& intr, Vec3 w, Float* pdfPos, Float* pdfDir) const override;

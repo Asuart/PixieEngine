@@ -3,9 +3,9 @@
 #include "InterfaceWindow.h"
 #include "ComponentRenderer.h"
 
-class InspectorWindow : public InterfaceWindow {
+class ViewportSettingsWindow : public InterfaceWindow {
 public:
-	InspectorWindow(PixieEngineApp& app, Interface& inter);
+	ViewportSettingsWindow(PixieEngineApp& app, Interface& inter);
 
 	void Draw() override;
 };

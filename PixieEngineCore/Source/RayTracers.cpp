@@ -38,6 +38,11 @@ RayTracer* CreateRayTracer(RayTracingMode mode) {
 
 void RayTracer::SetSceneSnapshot(SceneSnapshot* sceneSnapshot) {
     m_sceneSnapshot = sceneSnapshot;
+    Bounds3f sceneBounds = m_sceneSnapshot->GetBounds();
+    const std::vector<Light*>& lights = m_sceneSnapshot->GetInfiniteLights();
+    for (size_t i = 0; i < lights.size(); i++) {
+        lights[i]->Preprocess(sceneBounds);
+    }
 }
 
 bool RayTracer::Unoccluded(const RayInteraction& p0, const RayInteraction& p1, GBufferPixel& pixel) {
@@ -66,6 +71,11 @@ NaiveRayTracer::~NaiveRayTracer() {
 
 void NaiveRayTracer::SetSceneSnapshot(SceneSnapshot* sceneSnapshot) {
     m_sceneSnapshot = sceneSnapshot;
+    Bounds3f sceneBounds = m_sceneSnapshot->GetBounds();
+    const std::vector<Light*>& lights = m_sceneSnapshot->GetInfiniteLights();
+    for (size_t i = 0; i < lights.size(); i++) {
+        lights[i]->Preprocess(sceneBounds);
+    }
     if (m_lightSampler) {
         delete m_lightSampler;
     }

@@ -2,39 +2,81 @@
 #include "DefferedRenderer.h"
 
 DefferedRenderer::DefferedRenderer() :
-	m_gBuffer({ 1280, 720 }), m_viewportFrameBuffer({ 1280, 720 }) {
+	m_gBuffer({ 1280, 720 }), m_frameBuffer({ 1280, 720 }),
+	m_ssaoBuffer({ 1280, 720 }), m_ssaoBlurBuffer({ 1280, 720 }) {
 	m_shader = ResourceManager::LoadShader("DefferedVertexShader.glsl", "DefferedFragmentShader.glsl");
+	m_ssaoShader = ResourceManager::LoadShader("SSAOVertexShader.glsl", "SSAOFragmentShader.glsl");
+	m_ssaoBlurShader = ResourceManager::LoadShader("SSAOBlurVertexShader.glsl", "SSAOBlurFragmentShader.glsl");
 	m_lightingShader = ResourceManager::LoadShader("LightingPassVertexShader.glsl", "LightingPassFragmentShader.glsl");
+	m_noiseTexture = TextureGenerator::SSAONoiseTexture(SSAONoiseResolution);
 	m_LTC1Texture = LoadLTCTexture(LTC1);
 	m_LTC2Texture = LoadLTCTexture(LTC2);
 }
 
 void DefferedRenderer::DrawFrame(Scene* scene, Camera* camera) {
+	// Store Original Viewport
 	GLint originalViewport[4];
 	glGetIntegerv(GL_VIEWPORT, originalViewport);
 
+	// Fill GBuffer
 	m_gBuffer.Resize(camera->GetResolution());
-	m_viewportFrameBuffer.Resize(camera->GetResolution());
-	glViewport(0, 0, camera->GetResolution().x, camera->GetResolution().y);
 	m_gBuffer.Bind();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	m_gBuffer.ResizeViewport();
+	m_gBuffer.Clear();
 	m_shader.Bind();
-	SetupCamera(camera);
+	m_shader.SetUniform3f("cameraPos", camera->GetTransform().GetPosition());
+	m_shader.SetUniformMat4f("mView", camera->GetViewMatrix());
+	m_shader.SetUniformMat4f("mProjection", camera->GetProjectionMatrix());
 	DrawObject(scene->GetRootObject());
-	m_viewportFrameBuffer.Bind();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	m_lightingShader.Bind();
+	m_gBuffer.Unbind();
 
-	m_lightingShader.SetUniform3f("cameraPos", camera->GetTransform().GetPosition());
-	
-	m_gBuffer.BindTextures();
-	SetupLights(scene);
-	m_lightingShader.SetUniform1i("gAlbedoSpec", 0);
-	m_lightingShader.SetUniform1i("gPositionRoughness", 1);
-	m_lightingShader.SetUniform1i("gNormalMetallic", 2);
+	// Generate SSAO Texture
+	m_ssaoBuffer.Resize(camera->GetResolution());
+	m_ssaoBuffer.Bind();
+	m_ssaoBuffer.ResizeViewport();
+	m_ssaoBuffer.Clear();
+	m_ssaoShader.Bind();
+	m_ssaoShader.SetUniform3fv("ssaoKernel", &m_ssaoKernel.vectors[0][0], m_ssaoKernel.Size());
+	m_ssaoShader.SetUniformMat4f("mView", camera->GetViewMatrix());
+	m_ssaoShader.SetUniformMat4f("mProjection", camera->GetProjectionMatrix());
+	m_ssaoShader.SetTexture("gPositionRoughness", m_gBuffer.m_positionRoughness, 1);
+	m_ssaoShader.SetTexture("gNormalMetallic", m_gBuffer.m_normalMetallic, 2);
+	m_ssaoShader.SetTexture("noiseTexture", m_noiseTexture, 3);
+	m_ssaoShader.SetUniform2f("noiseScale", Vec2(camera->GetResolution()) / Vec2(SSAONoiseResolution));
+	m_ssaoShader.SetUniform3f("cameraPos", camera->GetTransform().GetPosition());
 	ResourceManager::GetQuadMesh()->Draw();
+	m_ssaoBuffer.Unbind();
 
-	m_viewportFrameBuffer.Unbind();
+	// Blur SSAO Texture
+	m_ssaoBlurBuffer.Resize(camera->GetResolution());
+	m_ssaoBlurBuffer.Bind();
+	m_ssaoBlurBuffer.ResizeViewport();
+	m_ssaoBlurBuffer.Clear();
+	m_ssaoBlurShader.Bind();
+	m_ssaoBlurShader.SetTexture("inputTexture", m_ssaoBuffer.m_texture, 0);
+	m_ssaoBlurShader.SetUniform1i("uBlurRange", 2);
+	ResourceManager::GetQuadMesh()->Draw();
+	m_ssaoBlurBuffer.Unbind();
+
+	// Lighting Pass
+	m_frameBuffer.Resize(camera->GetResolution());
+	m_frameBuffer.Bind();
+	m_frameBuffer.ResizeViewport();
+	m_frameBuffer.Clear();
+	m_lightingShader.Bind();
+	m_lightingShader.SetUniform3f("cameraPos", camera->GetTransform().GetPosition());
+	m_lightingShader.SetTexture("gAlbedoSpec", m_gBuffer.m_albedoSpec, 0);
+	m_lightingShader.SetTexture("gPositionRoughness", m_gBuffer.m_positionRoughness, 1);
+	m_lightingShader.SetTexture("gNormalMetallic", m_gBuffer.m_normalMetallic, 2);
+	m_lightingShader.SetTexture("LTC1", m_LTC1Texture, 3);
+	m_lightingShader.SetTexture("LTC2", m_LTC2Texture, 4);
+	m_lightingShader.SetTexture("ssaoTexture", m_ssaoBuffer.m_texture, 5);
+	SetupLights(scene);
+	ResourceManager::GetQuadMesh()->Draw();
+	m_frameBuffer.Unbind();
+
+	// Restore original viewport
+	glViewport(originalViewport[0], originalViewport[1], originalViewport[2], originalViewport[3]);
 }
 
 void DefferedRenderer::DrawObject(SceneObject* object, Mat4 parentTransform) {
@@ -44,7 +86,7 @@ void DefferedRenderer::DrawObject(SceneObject* object, Mat4 parentTransform) {
 	if (const MeshAnimatorComponent* animatorComponent = object->GetComponent<MeshAnimatorComponent>()) {
 		std::array<Mat4, MaxBonesPerModel> boneMatricesBuffer;
 		animatorComponent->GetBoneMatrices(0.0f, boneMatricesBuffer);
-		m_shader.SetUniformMat4fv("finalBonesMatrices", &boneMatricesBuffer[0][0][0], boneMatricesBuffer.size());
+		m_shader.SetUniformMat4fv("finalBonesMatrices", &boneMatricesBuffer[0][0][0], (int32_t)boneMatricesBuffer.size());
 	}
 	if (const MeshComponent* mesh = object->GetComponent<MeshComponent>()) {
 		m_shader.SetUniformMat4f("mModel", objectTransform);
@@ -58,12 +100,6 @@ void DefferedRenderer::DrawObject(SceneObject* object, Mat4 parentTransform) {
 	for (size_t i = 0; i < object->GetChildren().size(); i++) {
 		DrawObject(object->GetChild((int32_t)i), objectTransform);
 	}
-}
-
-void DefferedRenderer::SetupCamera(Camera* camera) {
-	m_shader.SetUniform3f("cameraPos", camera->GetTransform().GetPosition());
-	m_shader.SetUniformMat4f("mView", camera->GetViewMatrix());
-	m_shader.SetUniformMat4f("mProjection", camera->GetProjectionMatrix());
 }
 
 void DefferedRenderer::SetupLights(Scene* scene) {
@@ -100,9 +136,6 @@ void DefferedRenderer::SetupLights(Scene* scene) {
 		if (nAreaLights >= MaxAreaLights) break;
 	}
 	m_lightingShader.SetUniform1i("nAreaLights", nAreaLights);
-
-	m_lightingShader.SetTexture("LTC1", m_LTC1Texture, 3);
-	m_lightingShader.SetTexture("LTC2", m_LTC2Texture, 4);
 }
 
 void DefferedRenderer::SetupMaterial(Material* material) {

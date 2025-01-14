@@ -17,17 +17,17 @@ void ComponentRenderer::DrawTransform(Transform& transform, bool showHead, bool 
 		Vec3 position = transform.GetPosition();
 		if (ImGui::DragScalarN("Position", ImGuiFloat, &position, 3, 0.01f, &minPosition, &maxPosition)) {
 			transform.SetPosition(position);
-			m_app->UpdateSceneSnapshot();
+			SceneManager::UpdateSceneSnapshot();
 		}
 		Vec3 rotation = transform.GetEulerRotation();
 		if (ImGui::DragScalarN("Rotation", ImGuiFloat, &rotation, 3, 0.1f, &minRotation, &maxRotation)) {
 			transform.SetEulerRotation(rotation);
-			m_app->UpdateSceneSnapshot();
+			SceneManager::UpdateSceneSnapshot();
 		}
 		Vec3 scale = transform.GetScale();
 		if (ImGui::DragScalarN("Scale", ImGuiFloat, &scale, 3, 0.01f, &minScale, &maxScale)) {
 			transform.SetScale(scale);
-			m_app->UpdateSceneSnapshot();
+			SceneManager::UpdateSceneSnapshot();
 		}
 	}
 }
@@ -42,34 +42,27 @@ void ComponentRenderer::DrawMaterial(Material* material, bool showHead, bool def
 		glm::fvec3 albedoEditBuffer = material->m_albedo.GetRGB();
 		if (ImGui::ColorEdit3("Albedo", &albedoEditBuffer[0])) {
 			material->m_albedo.SetRGB((Vec3)albedoEditBuffer);
-			m_app->ResetRayTracers();
-			m_app->UpdateSceneSnapshot();
+			SceneManager::UpdateSceneSnapshot();
 		}
 		glm::fvec3 emissionColorEditBuffer = material->m_emissionColor.GetRGB();
 		if (ImGui::ColorEdit3("Emission Color", &emissionColorEditBuffer[0])) {
 			material->m_emissionColor.SetRGB((Vec3)emissionColorEditBuffer);
-			m_app->ResetRayTracers();
-			m_app->UpdateSceneSnapshot();
+			SceneManager::UpdateSceneSnapshot();
 		}
 		if (ImGui::DragScalar("Emission Strength", ImGuiFloat, &material->m_emissionStrength)) {
-			m_app->ResetRayTracers();
-			m_app->UpdateSceneSnapshot();
+			SceneManager::UpdateSceneSnapshot();
 		}
 		if (ImGui::DragScalar("Roughness", ImGuiFloat, &material->m_roughness, 0.01f, &minZero, &maxOne)) {
-			m_app->ResetRayTracers();
-			m_app->UpdateSceneSnapshot();
+			SceneManager::UpdateSceneSnapshot();
 		}
 		if (ImGui::DragScalar("Metallic", ImGuiFloat, &material->m_metallic, 0.01f, &minZero, &maxOne)) {
-			m_app->ResetRayTracers();
-			m_app->UpdateSceneSnapshot();
+			SceneManager::UpdateSceneSnapshot();
 		}
 		if (ImGui::DragScalar("Transparency", ImGuiFloat, &material->m_transparency, 0.01f, &minZero, &maxOne)) {
-			m_app->ResetRayTracers();
-			m_app->UpdateSceneSnapshot();
+			SceneManager::UpdateSceneSnapshot();
 		}
 		if (ImGui::DragScalar("Refraction", ImGuiFloat, &material->m_refraction, 0.01f, &minZero, &maxTen)) {
-			m_app->ResetRayTracers();
-			m_app->UpdateSceneSnapshot();
+			SceneManager::UpdateSceneSnapshot();
 		}
 	}
 }
@@ -101,7 +94,6 @@ void ComponentRenderer::DrawComponent(Component* component, bool showHead, bool 
 			Float fovy = camera.GetFieldOfViewY();
 			if (ImGui::DragScalar("Field of Voew Y", ImGuiFloat, &fovy, 0.01f, &minZero, &maxNinety)) {
 				camera.SetFieldOfViewY(fovy);
-				m_app->ResetRayTracers();
 			}
 			break;
 		}
@@ -110,14 +102,12 @@ void ComponentRenderer::DrawComponent(Component* component, bool showHead, bool 
 			Vec3 color = plComponent->GetColor();
 			if (ImGui::ColorEdit3("Emission Color", &color[0])) {
 				plComponent->SetColor(color);
-				m_app->ResetRayTracers();
-				m_app->UpdateSceneSnapshot();
+				SceneManager::UpdateSceneSnapshot();
 			}
 			Float strength = plComponent->GetStrength();
 			if (ImGui::DragScalar("Emission Strength", ImGuiFloat, &strength, 0.01f, &minZero, &maxNinety)) {
 				plComponent->SetStrength(strength);
-				m_app->ResetRayTracers();
-				m_app->UpdateSceneSnapshot();
+				SceneManager::UpdateSceneSnapshot();
 			}
 			break;
 		}
@@ -126,14 +116,12 @@ void ComponentRenderer::DrawComponent(Component* component, bool showHead, bool 
 			Vec3 color = dlComponent->GetColor();
 			if (ImGui::ColorEdit3("Emission Color", &color[0])) {
 				dlComponent->SetColor(color);
-				m_app->ResetRayTracers();
-				m_app->UpdateSceneSnapshot();
+				SceneManager::UpdateSceneSnapshot();
 			}
 			Float strength = dlComponent->GetStrength();
 			if (ImGui::DragScalar("Emission Strength", ImGuiFloat, &strength, 0.01f, &minZero, &maxNinety)) {
 				dlComponent->SetStrength(strength);
-				m_app->ResetRayTracers();
-				m_app->UpdateSceneSnapshot();
+				SceneManager::UpdateSceneSnapshot();
 			}
 			break;
 		}
@@ -142,7 +130,7 @@ void ComponentRenderer::DrawComponent(Component* component, bool showHead, bool 
 			Float radius = sphereComponent->GetRadius();
 			if (ImGui::DragScalar("Radius", ImGuiFloat, &radius, 0.01f, &minZero, &maxNinety)) {
 				sphereComponent->SetRadius(radius);
-				m_app->UpdateSceneSnapshot();
+				SceneManager::UpdateSceneSnapshot();
 			}
 			break;
 		}

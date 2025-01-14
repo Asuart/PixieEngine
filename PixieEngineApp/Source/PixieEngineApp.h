@@ -1,10 +1,9 @@
 #pragma once
 #include "PixieEngineWindow.h"
-#include "PixieEngineInterface.h"
+#include "Interface.h"
 #include "ResourceManager.h"
-#include "DefferedRenderer.h"
-
-class PixieEngineInterface;
+#include "SceneManager.h"
+#include "GlobalRenderer.h"
 
 class PixieEngineApp {
 public:
@@ -14,39 +13,13 @@ public:
 	void Start();
 	GLFWwindow* GetGLFWWindow();
 	void HandleResize(uint32_t width, uint32_t height);
-	void ResetRayTracers();
-	Scene* GetScene();
-	SceneSnapshot* GetSceneSnapshot();
-	const SceneObject* GetSelectedObject() const;
-	SceneObject* GetSelectedObject();
-	void SelectObject(SceneObject* object);
-	void RemoveSelectedObject();
-	void RestoreViewportSize();
-	ForwardRenderer* GetDefaultRenderer();
-	DefferedRenderer* GetDefferedRenderer();
-	const std::filesystem::path& GetAssetsPath();
-	void SetAssetsPath(const std::filesystem::path& path);
-	void UpdateSceneSnapshot();
-
-	void LoadDemoScene(GeneratedScene type);
-	void AddObject(GeneratedObject type);
-	void LoadScene(const std::filesystem::path& filePath);
-	void LoadModel(const std::filesystem::path& filePath);
 
 protected:
-	std::filesystem::path m_currentScenePath = "../Assets/Scenes/default-min.obj";
-	std::filesystem::path m_assetsPath = "../Assets/Scenes";
 	PixieEngineWindow m_window;
-	PixieEngineInterface m_interface;
-	Scene* m_scene;
-	SceneSnapshot* m_sceneSnapsot;
-	ForwardRenderer* m_defaultRenderer;
-	DefferedRenderer* m_defferedRenderer;
-	SceneObject* m_selectedObject = nullptr;
+	Interface m_interface;
 
-	void ReloadScene();
 	void HandleUserInput();
 
 	friend class RayTracingRenderer;
-	friend class PixieEngineInterface;
+	friend class Interface;
 };

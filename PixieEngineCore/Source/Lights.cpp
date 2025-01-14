@@ -222,6 +222,10 @@ Float DiffuseAreaLight::SampleLiPDF(LightSampleContext context, Vec3 wi, bool al
 	return m_shape->SamplePDF(shapeCtx, wi);
 }
 
+Spectrum DiffuseAreaLight::Le(const Ray& ray) const {
+	return ResourceManager::GetMaterial(m_materialIndex)->GetEmission();
+}
+
 std::optional<LightLeSample> DiffuseAreaLight::SampleLe(Vec2 u1, Vec2 u2) const {
 	std::optional<ShapeSample> ss = m_shape->Sample(u1);
 	if (!ss) {

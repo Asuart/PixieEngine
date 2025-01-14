@@ -2,13 +2,13 @@
 #include "SceneTreeWindow.h"
 #include "PixieEngineApp.h"
 
-SceneTreeWindow::SceneTreeWindow(PixieEngineApp& app, PixieEngineInterface& inter) :
-	PixieEngineInterfaceWindow(app, inter) {}
+SceneTreeWindow::SceneTreeWindow(PixieEngineApp& app, Interface& inter) :
+	InterfaceWindow(app, inter) {}
 
 void SceneTreeWindow::Draw() {
 	ImGui::SetNextWindowSize(ImVec2(400, 400));
 	if (ImGui::Begin("Scene", 0)) {
-		Scene* scene = m_app.GetScene();
+		Scene* scene = SceneManager::GetScene().get();
 		if (scene) {
 			DrawSceneTree(scene->GetRootObject());
 		}
@@ -21,12 +21,12 @@ void SceneTreeWindow::Draw() {
 
 void SceneTreeWindow::DrawSceneTree(SceneObject* object) {
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
-	if (object == m_app.GetScene()->GetRootObject()) flags |= ImGuiTreeNodeFlags_DefaultOpen;
+	if (object == SceneManager::GetScene().get()->GetRootObject()) flags |= ImGuiTreeNodeFlags_DefaultOpen;
 	if (object->GetChildren().size() == 0) flags |= ImGuiTreeNodeFlags_Leaf;
-	if (object == m_app.GetSelectedObject()) flags |= ImGuiTreeNodeFlags_Selected;
+	if (object == SceneManager::GetSelectedObject()) flags |= ImGuiTreeNodeFlags_Selected;
 	bool openTreeNode = ImGui::TreeNodeEx(object->GetName().c_str(), flags);
 	if (ImGui::IsItemClicked()) {
-		m_app.SelectObject(const_cast<SceneObject*>(object));
+		SceneManager::SetSelectedObject(object);
 	}
 	if (openTreeNode) {
 		for (size_t i = 0; i < object->GetChildren().size(); i++) {
@@ -38,6 +38,6 @@ void SceneTreeWindow::DrawSceneTree(SceneObject* object) {
 
 void SceneTreeWindow::HandleUserInput() {
 	if (UserInput::GetKey(GLFW_KEY_DELETE)) {
-		m_app.RemoveSelectedObject();
+		SceneManager::RemoveSelectedObject();
 	}
 }

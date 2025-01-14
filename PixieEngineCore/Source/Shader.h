@@ -25,9 +25,19 @@ public:
 		glUniform1i(loc, value);
 	}
 
+	inline void SetUniform1iv(const std::string& name, GLint* start, int32_t count) const {
+		GLuint loc = glGetUniformLocation(m_programID, name.c_str());
+		glUniform1iv(loc, count, start);
+	}
+
 	inline void SetUniform1f(const std::string& name, Float value) const {
 		GLuint loc = glGetUniformLocation(m_programID, name.c_str());
 		glUniform1f(loc, value);
+	}
+
+	inline void SetUniform1fv(const std::string& name, GLfloat* start, int32_t count) const {
+		GLuint loc = glGetUniformLocation(m_programID, name.c_str());
+		glUniform1fv(loc, count, start);
 	}
 
 	inline void SetUniform2f(const std::string& name, Vec2 v) const {
@@ -35,14 +45,29 @@ public:
 		glUniform2f(loc, v.x, v.y);
 	}
 
+	inline void SetUniform2fv(const std::string& name, GLfloat* start, int32_t count) const {
+		GLuint loc = glGetUniformLocation(m_programID, name.c_str());
+		glUniform2fv(loc, count, start);
+	}
+
 	inline void SetUniform3f(const std::string& name, Vec3 v) const {
 		GLuint loc = glGetUniformLocation(m_programID, name.c_str());
 		glUniform3f(loc, v.x, v.y, v.z);
 	}
 
+	inline void SetUniform3fv(const std::string& name, GLfloat* start, int32_t count) const {
+		GLuint loc = glGetUniformLocation(m_programID, name.c_str());
+		glUniform3fv(loc, count, start);
+	}
+
 	inline void SetUniform4f(const std::string& name, Vec4 v) const {
 		GLuint loc = glGetUniformLocation(m_programID, name.c_str());
 		glUniform4f(loc, v.x, v.y, v.z, v.w);
+	}
+
+	inline void SetUniform4fv(const std::string& name, GLfloat* start, int32_t count) const {
+		GLuint loc = glGetUniformLocation(m_programID, name.c_str());
+		glUniform4fv(loc, count, start);
 	}
 
 	inline void SetUniformMat3f(const std::string& name, const Mat3& m, GLboolean transpose = GL_FALSE) const {

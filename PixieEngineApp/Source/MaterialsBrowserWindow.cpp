@@ -2,8 +2,8 @@
 #include "MaterialsBrowserWindow.h"
 #include "PixieEngineApp.h"
 
-MaterialsBrowserWindow::MaterialsBrowserWindow(PixieEngineApp& app, PixieEngineInterface& inter) :
-	PixieEngineInterfaceWindow(app, inter) {}
+MaterialsBrowserWindow::MaterialsBrowserWindow(PixieEngineApp& app, Interface& inter) :
+	InterfaceWindow(app, inter) {}
 
 void MaterialsBrowserWindow::Draw() {
 	ImGui::SetNextWindowSize(ImVec2(400, 400));

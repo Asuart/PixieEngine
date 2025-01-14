@@ -1,10 +1,10 @@
 #pragma once
 #include "pch.h"
-#include "PixieEngineInterfaceWindow.h"
+#include "InterfaceWindow.h"
 
-class AssetsBrowserWindow: public PixieEngineInterfaceWindow {
+class AssetsBrowserWindow: public InterfaceWindow {
 public:
-	AssetsBrowserWindow(PixieEngineApp& app, PixieEngineInterface& inter);
+	AssetsBrowserWindow(PixieEngineApp& app, Interface& inter);
 
 	void Initialize() override;
 	void Draw() override;

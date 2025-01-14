@@ -2,8 +2,8 @@
 #include "AssetsBrowserWindow.h"
 #include "PixieEngineApp.h"
 
-AssetsBrowserWindow::AssetsBrowserWindow(PixieEngineApp& app, PixieEngineInterface& inter) :
-	PixieEngineInterfaceWindow(app, inter) {}
+AssetsBrowserWindow::AssetsBrowserWindow(PixieEngineApp& app, Interface& inter) :
+	InterfaceWindow(app, inter) {}
 
 void AssetsBrowserWindow::Initialize() {
 	m_folderIcon = ResourceManager::LoadRGBATexture("folder-icon.png")->id;
@@ -20,12 +20,12 @@ void AssetsBrowserWindow::Draw() {
 
 		ImGui::Columns(columsCount, 0, false);
 
-		std::filesystem::path assetPath = m_app.GetAssetsPath();
+		std::filesystem::path assetPath = ResourceManager::GetAssetsPath();
 
 		if (assetPath.parent_path() != "") {
 			ImGui::ImageButton((ImTextureID)(uint64_t)m_parentFolderIcon, { m_thumbnailSize, m_thumbnailSize }, { 0, 0 }, { 1, 1 });
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-				m_app.SetAssetsPath(assetPath.parent_path());
+				ResourceManager::SetAssetsPath(assetPath.parent_path());
 			}
 			ImGui::TextWrapped("../");
 			ImGui::NextColumn();
@@ -47,7 +47,7 @@ void AssetsBrowserWindow::Draw() {
 			const std::string fileName = path.filename().string();
 			ImGui::ImageButton((ImTextureID)(uint64_t)m_folderIcon, { m_thumbnailSize, m_thumbnailSize }, { 0, 0 }, { 1, 1 });
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-				m_app.SetAssetsPath(assetPath.string() + "/" + fileName);
+				ResourceManager::SetAssetsPath(assetPath.string() + std::string("/") + fileName);
 			}
 			ImGui::TextWrapped(fileName.c_str());
 			ImGui::NextColumn();
@@ -58,10 +58,10 @@ void AssetsBrowserWindow::Draw() {
 			ImGui::ImageButton((ImTextureID)(uint64_t)m_fileIcon, { m_thumbnailSize, m_thumbnailSize }, { 0, 0 }, { 1, 1 });
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 				if (ResourceManager::IsValidScenePath(path)) {
-					m_app.LoadScene(path);
+					SceneManager::LoadScene(path);
 				}
 				else if (ResourceManager::IsValidModelPath(path)) {
-					m_app.LoadModel(path);
+					SceneManager::LoadModel(path);
 				}
 			}
 			ImGui::TextWrapped(fileName.c_str());

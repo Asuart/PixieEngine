@@ -1,12 +1,13 @@
 #pragma once
 #include "pch.h"
-#include "PixieEngineInterfaceWindow.h"
+#include "InterfaceWindow.h"
+#include "SceneManager.h"
 
 class PixieEngineApp;
 
-class SceneTreeWindow : public PixieEngineInterfaceWindow {
+class SceneTreeWindow : public InterfaceWindow {
 public:
-	SceneTreeWindow(PixieEngineApp& app, PixieEngineInterface& inter);
+	SceneTreeWindow(PixieEngineApp& app, Interface& inter);
 
 	void Draw() override;
 

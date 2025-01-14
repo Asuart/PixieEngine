@@ -9,7 +9,18 @@ PixieEngineWindow::PixieEngineWindow(uint32_t width, uint32_t height) {
 
 	m_window = glfwCreateWindow(width, height, "Pixie Engine", NULL, NULL);
 	glfwMakeContextCurrent(m_window);
+
+	if (!gladLoadGL()) {
+		std::cout << "GLAD initialization failed.\n";
+		exit(1);
+	}
+
 	UserInput::SetInputWindow(m_window);
+
+	glEnable(GL_DEBUG_OUTPUT);
+	glDebugMessageCallback(openglCallbackFunction, 0);
+
+	glEnable(GL_DEPTH_TEST);
 }
 
 PixieEngineWindow::~PixieEngineWindow() {

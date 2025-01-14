@@ -25,6 +25,8 @@ public:
 	static void SetApplicationPath(const std::string& path);
 	static std::filesystem::path GetApplicationPath();
 	static std::filesystem::path GetApplicationDirectory();
+	static std::filesystem::path GetAssetsPath();
+	static void SetAssetsPath(std::filesystem::path path);
 	static void Initialize();
 	static Scene* LoadScene(std::filesystem::path filePath);
 	static bool SaveScene(std::filesystem::path filePath, Scene* scene);
@@ -50,6 +52,7 @@ public:
 protected:
 	static std::filesystem::path m_applicationPath;
 	static std::filesystem::path m_currentFilePath;
+	static std::filesystem::path m_assetsPath;
 	static std::map<std::filesystem::path, SceneObject*> m_Models;
 	static std::map<std::filesystem::path, Texture<Vec3>*> m_RGBTextures;
 	static std::map<std::filesystem::path, Texture<Vec4>*> m_RGBATextures;

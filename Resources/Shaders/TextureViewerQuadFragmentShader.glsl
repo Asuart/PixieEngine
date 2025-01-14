@@ -13,5 +13,5 @@ void main() {
 	if (pixel.a < 0.1) {
 		discard;
 	}
-	else color = vec4(pixel.rgb / uSamples, 1.0);
+	else color = vec4(pixel.rgb / uSamples, 1.0f);
 }

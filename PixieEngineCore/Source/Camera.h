@@ -11,7 +11,6 @@ struct CameraSample {
 
 class Camera {
 public:
-
 	Camera(Vec3 lookFrom, Vec3 lookAt, Vec3 up, Float fovy, glm::ivec2 resolution, Float aperture = 0, Float focusDistance = 0, Float _near = 0.01f, Float _far = 1000.0);
 	Camera(Transform transform, Float fovy, glm::ivec2 resolution, Float aperture = 0, Float focusDistance = 0, Float _near = 0.01f, Float _far = 1000.0);
 
@@ -27,6 +26,9 @@ public:
 	const Mat4& GetViewMatrix() const;
 	const Mat4& GetInverseViewMatrix() const;
 	const Mat4& GetProjectionMatrix() const;
+
+	bool operator!=(const Camera& other);
+	bool operator==(const Camera& other);
 
 protected:
 	Transform m_transform;

@@ -6,6 +6,7 @@
 
 std::filesystem::path ResourceManager::m_applicationPath = "";
 std::filesystem::path ResourceManager::m_currentFilePath = "";
+std::filesystem::path ResourceManager::m_assetsPath = "../Assets/Scenes";
 std::map<std::filesystem::path, SceneObject*> ResourceManager::m_Models = {};
 std::map<std::filesystem::path, Texture<Vec3>*> ResourceManager::m_RGBTextures = {};
 std::map<std::filesystem::path, Texture<Vec4>*> ResourceManager::m_RGBATextures = {};
@@ -64,6 +65,14 @@ std::filesystem::path ResourceManager::GetApplicationPath() {
 
 std::filesystem::path ResourceManager::GetApplicationDirectory() {
 	return m_applicationPath.parent_path();
+}
+
+std::filesystem::path ResourceManager::GetAssetsPath() {
+	return m_assetsPath;
+}
+
+void ResourceManager::SetAssetsPath(std::filesystem::path path) {
+	m_assetsPath = path;
 }
 
 void ResourceManager::Initialize() {
@@ -696,13 +705,14 @@ Material* ResourceManager::ProcessAssimpMaterial(const aiMaterial* aiMaterial) {
 	}
 
 	aiColor4D color, colorEmissive;
-	float emissionInt = 0.0f, roughness = 0.0f, opacity = 0.0f, eta = 0.0f;
+	float emissionInt = 0.0f, metallic = 0.0f, opacity = 0.0f, eta = 0.0f;
 	aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_DIFFUSE, &color);
 	aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_EMISSIVE, &colorEmissive);
 	aiGetMaterialFloat(aiMaterial, AI_MATKEY_EMISSIVE_INTENSITY, &emissionInt);
-	aiGetMaterialFloat(aiMaterial, AI_MATKEY_ROUGHNESS_FACTOR, &roughness);
+	aiGetMaterialFloat(aiMaterial, AI_MATKEY_METALLIC_FACTOR, &metallic);
 	aiGetMaterialFloat(aiMaterial, AI_MATKEY_OPACITY, &opacity);
 	aiGetMaterialFloat(aiMaterial, AI_MATKEY_REFRACTI, &eta);
+	
 
 	Vec3 glmEmissionColor = Vec3(colorEmissive.r, colorEmissive.g, colorEmissive.b);
 	float emissionNormaizer = (float)MaxComponent(glmEmissionColor);
@@ -717,7 +727,8 @@ Material* ResourceManager::ProcessAssimpMaterial(const aiMaterial* aiMaterial) {
 	if (diffuseMaps.size() > 0) {
 		material.m_albedoTexture = diffuseMaps[0];
 	}
-	material.m_roughness = roughness;
+	material.m_roughness = 1.0f - metallic;
+	material.m_metallic = metallic;
 	if (specularMaps.size() > 0) {
 
 	}

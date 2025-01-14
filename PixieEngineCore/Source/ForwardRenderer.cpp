@@ -2,44 +2,29 @@
 #include "ForwardRenderer.h"
 #include "LTC_Matrix.h"
 
-ForwardRenderer::ForwardRenderer() {
+ForwardRenderer::ForwardRenderer() :
+	m_frameBuffer({1280, 720}) {
 	m_defaultShader = ResourceManager::LoadShader("PhysicallyBasedVertexShader.glsl", "PhysicallyBasedFragmentShader.glsl");
-	m_quadShader = ResourceManager::LoadShader("TextureViewerQuadVertexShader.glsl", "TextureViewerQuadFragmentShader.glsl");
 	m_LTC1Texture = LoadLTCTexture(LTC1);
 	m_LTC2Texture = LoadLTCTexture(LTC2);
 }
 
 void ForwardRenderer::DrawFrame(Scene* scene, Camera* camera) {
+	GLint originalViewport[4];
+	glGetIntegerv(GL_VIEWPORT, originalViewport);
+
+	m_frameBuffer.Resize(camera->GetResolution());
+	m_frameBuffer.Bind();
+	m_frameBuffer.ResizeViewport();
+	m_frameBuffer.Clear();
+
 	m_defaultShader.Bind();
 	SetupCamera(camera);
 	SetupLights(scene);
 	DrawObject(scene->GetRootObject());
-}
+	m_frameBuffer.Unbind();
 
-void ForwardRenderer::DrawTexture(GLuint texture, glm::ivec2 textureResolution, glm::ivec2 viewportResolution, int32_t samples) {
-	m_quadShader.Bind();
-
-	Vec2 pos(0.0f, 0.0f), size(1.0f, 1.0f);
-	Float textureAspect = Aspect(textureResolution);
-	Float viewportAspect = Aspect(viewportResolution);
-	if (viewportAspect > textureAspect) {
-		size.x = textureAspect / viewportAspect;
-		pos.x = (1.0f - size.x) * 0.5f;
-	}
-	else {
-		size.y = viewportAspect / textureAspect;
-		pos.y = (1.0f - size.y) * 0.5f;
-	}
-
-	m_quadShader.SetUniform2f("uPos", pos);
-	m_quadShader.SetUniform2f("uSize", size);
-	m_quadShader.SetUniform1f("uSamples", samples);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	m_quadShader.SetUniform1i("ourTexture", 0);
-
-	ResourceManager::GetQuadMesh()->Draw();
+	glViewport(originalViewport[0], originalViewport[1], originalViewport[2], originalViewport[3]);
 }
 
 void ForwardRenderer::DrawObject(SceneObject* object, Mat4 parentTransform) {
@@ -120,7 +105,7 @@ void ForwardRenderer::SetupMaterial(Material* material) {
 	}
 }
 
-GLuint ForwardRenderer::LoadLTCTexture(const float* matrixTable) {
+GLuint ForwardRenderer::LoadLTCTexture(const Float* matrixTable) {
 	GLuint texture = 0;
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);

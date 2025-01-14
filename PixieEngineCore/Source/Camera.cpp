@@ -65,3 +65,11 @@ const Mat4& Camera::GetProjectionMatrix() const {
 void Camera::UpdateProjection() {
 	m_mProjection = glm::perspective(m_fovy, m_aspect, m_near, m_far);
 }
+
+bool Camera::operator!=(const Camera& other) {
+	return m_mProjection != other.m_mProjection || m_transform != other.m_transform || m_resolution != other.m_resolution;
+}
+
+bool Camera::operator==(const Camera& other) {
+	return m_mProjection == other.m_mProjection && m_transform == other.m_transform && m_resolution == other.m_resolution;
+}

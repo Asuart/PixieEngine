@@ -34,6 +34,7 @@ uniform sampler2D gPositionRoughness;
 uniform sampler2D gNormalMetallic;
 uniform sampler2D LTC1; // for inverse M
 uniform sampler2D LTC2; // GGX norm, fresnel, 0(unused), sphere
+uniform sampler2D ssaoTexture;
 
 // Vector form without project to the plane (dot with the normal)
 // Use for proxy sphere clipping
@@ -167,6 +168,7 @@ void main() {
     float mRoughness = texture(gPositionRoughness, fTexCoord).a;
     vec3 mNormal = texture(gNormalMetallic, fTexCoord).rgb;
     float mMetallic = texture(gNormalMetallic, fTexCoord).a;
+    float mSSAO = texture(ssaoTexture, fTexCoord).x;
     vec3 toCamera = normalize(cameraPos - mWorldPos);
     float dotNV = clamp(dot(mNormal, toCamera), 0.0f, 1.0f);
 
@@ -183,7 +185,7 @@ void main() {
         vec3(t1.z, 0, t1.w)
     );
 
-    vec3 ambientLighting = mAlbedo * 0.03f;
+    vec3 ambientLighting = mAlbedo * 0.3f * mSSAO;
 
     vec3 areaLighting = vec3(0.0f);
 	for (int i = 0; i < nAreaLights; i++) {
