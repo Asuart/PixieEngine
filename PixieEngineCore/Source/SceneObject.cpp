@@ -4,58 +4,16 @@
 SceneObject::SceneObject(const std::string& name, Transform transform) :
 	m_name(name), m_localTransform(transform), m_parent(nullptr) {}
 
-void SceneObject::AddChild(SceneObject* object) {
-	object->Detach();
-	object->m_parent = this;
-	m_children.push_back(object);
-}
 
-void SceneObject::Detach() {
-	if (m_parent) {
-		auto it = std::find(m_parent->m_children.begin(), m_parent->m_children.end(), this);
-		if (it != m_parent->m_children.end()) {
-			m_parent->m_children.erase(it);
-		}
-		m_parent = nullptr;
-	}
-}
-
-void SceneObject::Remove() {
-	Detach();
-	delete this;
-}
-
-void SceneObject::AddComponent(Component* component) {
-	m_components.push_back(component);
-}
-
-void SceneObject::RemoveComponent(Component* component) {
-	for (size_t i = 0; i < m_components.size(); i++) {
-		if (m_components[i] == component) {
-			m_components.erase(m_components.begin() + i);
-			break;
-		}
-	}
-}
-
-void SceneObject::RemoveComponent(ComponentType type) {
-	for (size_t i = 0; i < m_components.size(); i++) {
-		if (m_components[i]->type == type) {
-			m_components.erase(m_components.begin() + i);
-			break;
-		}
-	}
-}
-
-std::vector<Component*>& SceneObject::GetComponents() {
+const std::vector<Component*>& SceneObject::GetComponents() const {
 	return m_components;
 }
 
-Component* SceneObject::GetComponent(int32_t index) {
+Component* SceneObject::GetComponent(int32_t index) const {
 	return m_components[index];
 }
 
-Component* SceneObject::GetComponent(ComponentType type) {
+Component* SceneObject::GetComponent(ComponentType type) const {
 	for (size_t i = 0; i < m_components.size(); i++) {
 		if (m_components[i]->type == type) {
 			return m_components[i];
@@ -103,15 +61,19 @@ Transform& SceneObject::GetTransform() {
 	return m_localTransform;
 }
 
-std::vector<SceneObject*>& SceneObject::GetChildren() {
+const Transform& SceneObject::GetTransform() const {
+	return m_localTransform;
+}
+
+const std::vector<SceneObject*>& SceneObject::GetChildren() const {
 	return m_children;
 }
 
-SceneObject* SceneObject::GetChild(int32_t index) {
+SceneObject* SceneObject::GetChild(int32_t index) const {
 	return m_children[index];
 }
 
-SceneObject* SceneObject::FindObject(const std::string& objectName) {
+SceneObject* SceneObject::FindObject(const std::string& objectName) const {
 	for (size_t i = 0; i < m_children.size(); i++) {
 		if (m_children[i]->m_name == objectName) {
 			return m_children[i];
@@ -120,7 +82,7 @@ SceneObject* SceneObject::FindObject(const std::string& objectName) {
 	return nullptr;
 }
 
-std::vector<SceneObject*> SceneObject::FindObjects(const std::string& objectName) {
+std::vector<SceneObject*> SceneObject::FindObjects(const std::string& objectName) const {
 	std::vector<SceneObject*> objects;
 	for (size_t i = 0; i < m_children.size(); i++) {
 		if (m_children[i]->m_name == objectName) {
@@ -132,7 +94,7 @@ std::vector<SceneObject*> SceneObject::FindObjects(const std::string& objectName
 	return objects;
 }
 
-SceneObject* SceneObject::FindObjectWithComponent(ComponentType type) {
+SceneObject* SceneObject::FindObjectWithComponent(ComponentType type) const {
 	for (size_t i = 0; i < m_children.size(); i++) {
 		if (m_children[i]->GetComponent(type)) {
 			return m_children[i];
@@ -141,7 +103,7 @@ SceneObject* SceneObject::FindObjectWithComponent(ComponentType type) {
 	return nullptr;
 }
 
-std::vector<SceneObject*> SceneObject::FindObjectsWithComponent(ComponentType type) {
+std::vector<SceneObject*> SceneObject::FindObjectsWithComponent(ComponentType type) const {
 	std::vector<SceneObject*> objects;
 	for (size_t i = 0; i < m_children.size(); i++) {
 		if (m_children[i]->GetComponent(type)) {

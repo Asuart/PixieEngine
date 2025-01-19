@@ -14,38 +14,38 @@ class Scene {
 public:
 	const UID id;
 
+	Scene() = default;
 	Scene(const std::string& name);
+	~Scene();
 
 	void Start();
 	void Update();
 	void FixedUpdate();
 
-	const std::string& GetName();
+	const std::string& GetName() const;
 	void SetName(const std::string& name);
-	void AddObject(SceneObject* object, SceneObject* parent = nullptr);
-	void AddObject(SceneObject* object, const std::string& parentName);
-	void RemoveObject(const std::string& objectName);
-	void RemoveObjects(const std::string& objectName);
-	SceneObject* FindObject(const std::string& objectName);
-	std::vector<SceneObject*> FindObjects(const std::string& objectName);
-	SceneObject* FindObjectWithComponent(ComponentType type);
-	std::vector<SceneObject*> FindObjectsWithComponent(ComponentType type);
-	const SceneObject* GetRootObject() const;
-	SceneObject* GetRootObject();
-	std::vector<AreaLightComponent*>& GetAreaLights();
-	std::vector<DirectionalLightComponent*>& GetDirectionalLights();
-	std::vector<PointLightComponent*>& GetPointLights();
-	std::vector<CameraComponent*>& GetCameras();
-	Bounds3f GetBounds();
+	SceneObject* GetRootObject() const;
+	Bounds3f GetBounds() const;
+	Skybox* GetSkybox() const;
 	void SetSkybox(Skybox* skybox);
-	Skybox* GetSkybox();
+
+	SceneObject* FindObject(const std::string& objectName) const;
+	std::vector<SceneObject*> FindObjects(const std::string& objectName) const;
+	SceneObject* FindObjectWithComponent(ComponentType type) const;
+	std::vector<SceneObject*> FindObjectsWithComponent(ComponentType type) const;
+	const std::vector<AreaLightComponent*>& GetAreaLights() const;
+	const std::vector<DirectionalLightComponent*>& GetDirectionalLights() const;
+	const std::vector<PointLightComponent*>& GetPointLights() const;
+	const std::vector<CameraComponent*>& GetCameras() const;
 
 protected:
-	std::string m_name;
-	SceneObject* m_rootObject = nullptr;
+	std::string m_name = "New Scene";
+	SceneObject* m_rootObject = new SceneObject("root");
 	std::vector<CameraComponent*> m_cameras;
 	std::vector<DirectionalLightComponent*> m_directionalLights;
 	std::vector<PointLightComponent*> m_pointLights;
 	std::vector<AreaLightComponent*> m_areaLights;
 	Skybox* m_skybox = nullptr;
+
+	friend class SceneManager;
 };

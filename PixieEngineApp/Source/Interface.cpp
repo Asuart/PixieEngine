@@ -86,31 +86,31 @@ void Interface::Draw() {
 		}
 		if (ImGui::BeginMenu("Test Scenes")) {
 			if (ImGui::MenuItem("Empty Scene")) {
-				SceneManager::LoadDemoScene(GeneratedScene::Empty);
+				SceneGenerator::CreateScene(GeneratedScene::Empty);
 			}
 			if (ImGui::MenuItem("Demo Sphere")) {
-				SceneManager::LoadDemoScene(GeneratedScene::DemoSphere);
+				SceneGenerator::CreateScene(GeneratedScene::DemoSphere);
 			}
 			if (ImGui::MenuItem("Small And Big Spheres")) {
-				SceneManager::LoadDemoScene(GeneratedScene::SmallAndBigSpheres);
+				SceneGenerator::CreateScene(GeneratedScene::SmallAndBigSpheres);
 			}
 			if (ImGui::MenuItem("Test Materials")) {
-				SceneManager::LoadDemoScene(GeneratedScene::TestMaterials);
+				SceneGenerator::CreateScene(GeneratedScene::TestMaterials);
 			}
 			if (ImGui::MenuItem("Randomized Spheres")) {
-				SceneManager::LoadDemoScene(GeneratedScene::RandomizedSpheres);
+				SceneGenerator::CreateScene(GeneratedScene::RandomizedSpheres);
 			}
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("Create Object")) {
 			if (ImGui::MenuItem("Sphere")) {
-				SceneManager::CreateObject(GeneratedObject::Sphere);
+				SceneGenerator::CreateObject(GeneratedObject::Sphere);
 			}
 			if (ImGui::MenuItem("Point Light")) {
-				SceneManager::CreateObject(GeneratedObject::PointLight);
+				SceneGenerator::CreateObject(GeneratedObject::PointLight);
 			}
 			if (ImGui::MenuItem("Directional Light")) {
-				SceneManager::CreateObject(GeneratedObject::DirectionalLight);
+				SceneGenerator::CreateObject(GeneratedObject::DirectionalLight);
 			}
 			ImGui::EndMenu();
 		}

@@ -6,7 +6,7 @@ class SceneObject;
 
 class MaterialComponent : public Component {
 public:
-	MaterialComponent(Material* material, SceneObject* parent);
+	MaterialComponent(SceneObject* parent, Material* material);
 
 	Material* GetMaterial();
 	void SetMaterial(Material* material);

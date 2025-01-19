@@ -28,7 +28,7 @@ public:
 	static std::filesystem::path GetAssetsPath();
 	static void SetAssetsPath(std::filesystem::path path);
 	static void Initialize();
-	static Scene* LoadScene(std::filesystem::path filePath);
+	static std::shared_ptr<Scene> LoadScene(std::filesystem::path filePath);
 	static bool SaveScene(std::filesystem::path filePath, Scene* scene);
 	static SceneObject* LoadModel(std::filesystem::path filePath);
 	static Texture<Vec3>* LoadRGBTexture(std::filesystem::path filePath);
@@ -60,8 +60,8 @@ protected:
 	static std::vector<Mesh*> m_meshes;
 
 	static bool CheckFileExtensionSupport(std::filesystem::path filePath, ResourceType type);
-	static Scene* LoadPixieEngineScene(std::filesystem::path path);
-	static Scene* LoadPBRTScene(std::filesystem::path filePath);
+	static std::shared_ptr<Scene> LoadPixieEngineScene(std::filesystem::path path);
+	static std::shared_ptr<Scene> LoadPBRTScene(std::filesystem::path filePath);
 	static SceneObject* ProcessAssimpNode(const aiScene* scene, const aiNode* node, std::map<std::string, BoneInfo>& boneInfoMap);
 	static std::vector<Bone> ProcessAssimpAnimation(const aiAnimation* animation, std::map<std::string, BoneInfo>& boneInfoMap);
 	static Mesh* ProcessAssimpMesh(const aiMesh* mesh, std::map<std::string, BoneInfo>& boneInfoMap);

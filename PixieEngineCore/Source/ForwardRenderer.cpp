@@ -34,7 +34,7 @@ void ForwardRenderer::DrawObject(SceneObject* object, Mat4 parentTransform) {
 	if (const MeshAnimatorComponent* animatorComponent = object->GetComponent<MeshAnimatorComponent>()) {
 		std::array<Mat4, MaxBonesPerModel> boneMatricesBuffer;
 		animatorComponent->GetBoneMatrices(0.0f, boneMatricesBuffer);
-		m_defaultShader.SetUniformMat4fv("finalBonesMatrices", &boneMatricesBuffer[0][0][0], boneMatricesBuffer.size());
+		m_defaultShader.SetUniformMat4fv("finalBonesMatrices", &boneMatricesBuffer[0][0][0], (int32_t)boneMatricesBuffer.size());
 	}
 	if (const MeshComponent* mesh = object->GetComponent<MeshComponent>()) {
 		m_defaultShader.SetUniformMat4f("mModel", objectTransform);

@@ -1,6 +1,7 @@
 #pragma once
 #include "pch.h"
 #include "Scene.h"
+#include "Scenemanager.h"
 
 enum class GeneratedObject : int32_t {
 	Sphere = 0,
@@ -18,15 +19,14 @@ enum class GeneratedScene : int32_t {
 
 class SceneGenerator {
 public:
-
-	static Scene* CreateScene(GeneratedScene type) {
+	static void CreateScene(GeneratedScene type) {
 		switch (type) {
-		case GeneratedScene::Empty: return CreateEmptyScene();
-		case GeneratedScene::DemoSphere: return CreateDemoSphereScene();
-		case GeneratedScene::SmallAndBigSpheres: return CreateSmallAndBigSpheresScene();
-		case GeneratedScene::TestMaterials: return CreateTestMaterialsScene();
-		case GeneratedScene::RandomizedSpheres: return CreateRandomizedSpheresScene();
-		default: return CreateEmptyScene();
+		case GeneratedScene::Empty: CreateEmptyScene(); break;
+		case GeneratedScene::DemoSphere: CreateDemoSphereScene(); break;
+		case GeneratedScene::SmallAndBigSpheres: CreateSmallAndBigSpheresScene(); break;
+		case GeneratedScene::TestMaterials: CreateTestMaterialsScene(); break;
+		case GeneratedScene::RandomizedSpheres: CreateRandomizedSpheresScene(); break;
+		default: CreateEmptyScene(); break;
 		}
 	}
 
@@ -39,46 +39,42 @@ public:
 		}
 	}
 
-	static Scene* CreateEmptyScene() {
-		Scene* scene = new Scene("Empty Scene");
-		return scene;
+	static void CreateEmptyScene() {
+		SceneManager::CreateScene();
 	}
 
-	static Scene* CreateDemoSphereScene() {
-		Scene* scene = new Scene("Demo Sphere");
+	static void CreateDemoSphereScene() {
+		std::shared_ptr<Scene> scene = SceneManager::CreateScene("Demo Sphere");
 		scene->SetSkybox(new GradientColorSkybox(Vec3(1.0f, 1.0f, 1.0f), Vec3(0.5f, 0.7f, 1.0f)));
-		scene->AddObject(CreateSphere(Vec3(-8.0f, 0.0f, 0.0f), 0.5f));
-		scene->AddObject(CreateDirectionalLight(Vec3(1.0f), 4.0f, LookAt(Vec3(-1.0f, 1.0f, -1.0f), Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f))));
-		return scene;
+		CreateSphere(Vec3(-8.0f, 0.0f, 0.0f), 0.5f);
+		CreateDirectionalLight(Vec3(1.0f), 4.0f, LookAt(Vec3(-1.0f, 1.0f, -1.0f), Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f)));
 	}
 
-	static Scene* CreateSmallAndBigSpheresScene() {
-		Scene* scene = new Scene("Small And Big Spheres");
+	static void CreateSmallAndBigSpheresScene() {
+		std::shared_ptr<Scene> scene = SceneManager::CreateScene("Small And Big Spheres");
 		scene->SetSkybox(new GradientColorSkybox(Vec3(1.0f, 1.0f, 1.0f), Vec3(0.5f, 0.7f, 1.0f)));
-		scene->AddObject(CreateSphere(Vec3(-8.0f, 0.0f, 0.0f), 0.5f));
-		scene->AddObject(CreateSphere(Vec3(-8.0f, -100.5f, 0.0f), 100.0f));
-		scene->AddObject(CreateDirectionalLight(Vec3(1.0f), 2.0f, LookAt(Vec3(-1.0f, 1.0f, -1.0f), Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f))));
-		return scene;
+		CreateSphere(Vec3(-8.0f, 0.0f, 0.0f), 0.5f);
+		CreateSphere(Vec3(-8.0f, -100.5f, 0.0f), 100.0f);
+		CreateDirectionalLight(Vec3(1.0f), 2.0f, LookAt(Vec3(-1.0f, 1.0f, -1.0f), Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f)));
 	}
 
-	static Scene* CreateTestMaterialsScene() {
-		Scene* scene = new Scene("Test Materials Scene");
+	static void CreateTestMaterialsScene() {
+		std::shared_ptr<Scene> scene = SceneManager::CreateScene("Test Materials Scene");
 		scene->SetSkybox(new GradientColorSkybox(Vec3(1.0f, 1.0f, 1.0f), Vec3(0.5f, 0.7f, 1.0f)));
-		scene->AddObject(CreateSphere(Vec3(-7.0f, -100.5f, 0.0f), 100.0f));
-		scene->AddObject(CreateSphere(Vec3(-7.0f, 0.0f, 0.0f), 0.5f));
-		scene->AddObject(CreateSphere(Vec3(-7.0f, 0.0f, -1.0f), 0.5f, CreateGlassMaterial()));
-		scene->AddObject(CreateSphere(Vec3(-7.0f, 0.0f, 1.0f), 0.5f, CreateMetalMaterial(Vec3(0.8f, 0.6f, 0.2f))));
-		scene->AddObject(CreateDirectionalLight(Vec3(1.0f), 2.0f, LookAt(Vec3(-1.0f, 1.0f, -1.0f), Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f))));
-		scene->AddObject(CreatePointLight(Vec3(-7.0f, 2.0f, 0.0f), Vec3(1.0f, 0.0f, 0.0f), 10.0f));
-		return scene;
+		CreateSphere(Vec3(-7.0f, -100.5f, 0.0f), 100.0f);
+		CreateSphere(Vec3(-7.0f, 0.0f, 0.0f), 0.5f);
+		CreateSphere(Vec3(-7.0f, 0.0f, -1.0f), 0.5f, CreateGlassMaterial());
+		CreateSphere(Vec3(-7.0f, 0.0f, 1.0f), 0.5f, CreateMetalMaterial(Vec3(0.8f, 0.6f, 0.2f)));
+		CreateDirectionalLight(Vec3(1.0f), 2.0f, LookAt(Vec3(-1.0f, 1.0f, -1.0f), Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f)));
+		CreatePointLight(Vec3(-7.0f, 2.0f, 0.0f), Vec3(1.0f, 0.0f, 0.0f), 10.0f);
 	}
 
-	static Scene* CreateRandomizedSpheresScene() {
-		Scene* scene = new Scene("Randomized Spheres Scene");
+	static void CreateRandomizedSpheresScene() {
+		std::shared_ptr<Scene> scene = SceneManager::CreateScene("Randomized Spheres Scene");
 		scene->SetSkybox(new GradientColorSkybox(Vec3(1.0f, 1.0f, 1.0f), Vec3(0.5f, 0.7f, 1.0f)));
-		scene->AddObject(CreateDirectionalLight(Vec3(1.0f), 2.0f, LookAt(Vec3(-1, 1, -1), Vec3(0, 0, 0), Vec3(0, 1, 0))));
+		CreateDirectionalLight(Vec3(1.0f), 2.0f, LookAt(Vec3(-1, 1, -1), Vec3(0, 0, 0), Vec3(0, 1, 0)));
 
-		scene->AddObject(CreateSphere(Vec3(0.0f, -1000.0f, 0.0f), 1000.0f, CreateDiffuseMaterial(Vec3(0.5f))));
+		CreateSphere(Vec3(0.0f, -1000.0f, 0.0f), 1000.0f, CreateDiffuseMaterial(Vec3(0.5f)));
 
 		for (int32_t a = -11; a < 11; a++) {
 			for (int32_t b = -11; b < 11; b++) {
@@ -87,61 +83,53 @@ public:
 				if ((center - Vec3(4.0f, 0.2f, 0.0f)).length() > 0.9f) {
 					if (chooseMaterial < 0.8f) {
 						Vec3 albedo = RandomVector() * RandomVector();
-						scene->AddObject(CreateSphere(center, 0.2f, CreateDiffuseMaterial(albedo)));
+						CreateSphere(center, 0.2f, CreateDiffuseMaterial(albedo));
 					}
 					else if (chooseMaterial < 0.95f) {
 						Vec3 albedo = (RandomVector() + Vec3(1.0f)) / 2.0f;
 						Float fuzz = RandomFloat(0.0f, 0.5f);
-						scene->AddObject(CreateSphere(center, 0.2f, CreateMetalMaterial(albedo, fuzz)));
+						CreateSphere(center, 0.2f, CreateMetalMaterial(albedo, fuzz));
 					}
 					else {
-						scene->AddObject(CreateSphere(center, 0.2f, CreateGlassMaterial(1.5f)));
+						CreateSphere(center, 0.2f, CreateGlassMaterial(1.5f));
 					}
 				}
 			}
 		}
 
-		scene->AddObject(CreateSphere(Vec3(0.0f, 1.0f, 0.0f), 1.0f, CreateGlassMaterial(1.5)));
-		scene->AddObject(CreateSphere(Vec3(-4.0f, 1.0f, 0.0f), 1.0f, CreateDiffuseMaterial(Vec3(0.4f, 0.2f, 0.1f))));
-		scene->AddObject(CreateSphere(Vec3(4.0f, 1.0f, 0.0f), 1.0f, CreateMetalMaterial(Vec3(0.7f, 0.6f, 0.5f), 0.0f)));
+		CreateSphere(Vec3(0.0f, 1.0f, 0.0f), 1.0f, CreateGlassMaterial(1.5));
+		CreateSphere(Vec3(-4.0f, 1.0f, 0.0f), 1.0f, CreateDiffuseMaterial(Vec3(0.4f, 0.2f, 0.1f)));
+		CreateSphere(Vec3(4.0f, 1.0f, 0.0f), 1.0f, CreateMetalMaterial(Vec3(0.7f, 0.6f, 0.5f), 0.0f));
 
-		scene->AddObject(CreateCamera(Vec3(13.0f, 2.0f, 3.0f), Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f), {1280, 720}, glm::radians(20.0f)));
-
-		return scene;
+		CreateCamera(Vec3(13.0f, 2.0f, 3.0f), Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f), {1280, 720}, glm::radians(20.0f));
 	}
 
 	static SceneObject* CreateSphere(Vec3 position, Float radius, Material* material = nullptr) {
 		static int32_t sphereCounter = 0;
-		SceneObject* sphere = new SceneObject(std::string("Sphere ") + std::to_string(sphereCounter++), Transform(position));
-		SphereComponent* sphereComponent = new SphereComponent(sphere, radius);
-		sphere->AddComponent(sphereComponent);
-		MaterialComponent* materialComponent = new MaterialComponent(material ? material : ResourceManager::GetDefaultMaterial(), sphere);
-		sphere->AddComponent(materialComponent);
+		SceneObject* sphere = SceneManager::CreateObject(std::string("Sphere ") + std::to_string(sphereCounter++), nullptr, Transform(position));
+		SceneManager::CreateComponent<SphereComponent>(sphere, radius);
+		SceneManager::CreateComponent<MaterialComponent>(sphere, material ? material : ResourceManager::GetDefaultMaterial());
 		return sphere;
 	}
 
 	static SceneObject* CreatePointLight(Vec3 position, Vec3 color, Float strength) {
 		static int32_t pointLightCounter = 0;
-		SceneObject* object = new SceneObject(std::string("Point Light ") + std::to_string(pointLightCounter++), Transform(position));
-		PointLightComponent* pointLight = new PointLightComponent(object, color, strength);
-		object->AddComponent(pointLight);
+		SceneObject* object = SceneManager::CreateObject(std::string("Point Light ") + std::to_string(pointLightCounter++), nullptr, Transform(position));
+		SceneManager::CreateComponent<PointLightComponent>(object, color, strength);
 		return object;
 	}
 
 	static SceneObject* CreateDirectionalLight(Vec3 color, Float strength, Transform orientation) {
 		static int32_t directionalLightCounter = 0;
-		SceneObject* object = new SceneObject(std::string("Directional Light ") + std::to_string(directionalLightCounter++), orientation);
-		DirectionalLightComponent* directionalLight = new DirectionalLightComponent(object, orientation.GetForward(), color, strength);
-		object->AddComponent(directionalLight);
+		SceneObject* object = SceneManager::CreateObject(std::string("Directional Light ") + std::to_string(directionalLightCounter++), nullptr, orientation);
+		SceneManager::CreateComponent<DirectionalLightComponent>(object, orientation.GetForward(), color, strength);
 		return object;
 	}
 
-	static SceneObject* CreateCamera(Vec3 from, Vec3 to, Vec3 up, glm::ivec2 resolution = { 1280, 720 }, Float fovy = 39.6f) {
+	static SceneObject* CreateCamera(Vec3 from, Vec3 to, Vec3 up, glm::ivec2 resolution = { 1280, 720 }, Float fovy = 39.6f, Float near = 0.01f, Float far = 100.0f) {
 		static int32_t cameraCounter = 0;
-		Transform t = LookAt(from, to, up);
-		SceneObject* object = new SceneObject(std::string("Camera ") + std::to_string(cameraCounter++), t);
-		CameraComponent* camera = new CameraComponent(object, resolution, fovy, 0.01f, 100.0f);
-		object->AddComponent(camera);
+		SceneObject* object = SceneManager::CreateObject(std::string("Camera ") + std::to_string(cameraCounter++), nullptr, LookAt(from, to, up));
+		SceneManager::CreateComponent<CameraComponent>(object, resolution, fovy, near, far);
 		return object;
 	}
 

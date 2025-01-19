@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "ResourceManager.h"
+#include "SceneManager.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -94,21 +95,18 @@ void ResourceManager::Initialize() {
 	AddMaterial(Material(c_deafultMaterial));
 }
 
-Scene* ResourceManager::LoadScene(std::filesystem::path filePath) {
+std::shared_ptr<Scene> ResourceManager::LoadScene(std::filesystem::path filePath) {
 	m_currentFilePath = filePath;
+	std::shared_ptr<Scene> scene = nullptr;
 	if (!CheckFileExtensionSupport(filePath, ResourceType::Scene)) {
-		return nullptr;
+		return scene;
 	}
 
-	Scene* scene = nullptr;
 	if (filePath.extension() == ".scene") {
 		scene = LoadPixieEngineScene(filePath);
 	} 
 	else if (filePath.extension() == ".pbrt") {
 		scene = LoadPBRTScene(filePath);
-	}
-	else {
-		return nullptr;
 	}
 
 	return scene;
@@ -144,8 +142,7 @@ SceneObject* ResourceManager::LoadModel(std::filesystem::path filePath) {
 	}
 	if (animations.size() > 0) {
 		Mat4 globalInverseTransform = glm::inverse(AssimpGLMHelpers::ConvertMatrixToGLMFormat(scene->mRootNode->mTransformation));
-		MeshAnimatorComponent* animator = new MeshAnimatorComponent(animations, rootObject, globalInverseTransform);
-		rootObject->AddComponent(animator);
+		SceneManager::CreateComponent<MeshAnimatorComponent>(rootObject, animations, globalInverseTransform);
 	}
 
 	importer.FreeScene();
@@ -283,17 +280,17 @@ bool ResourceManager::CheckFileExtensionSupport(std::filesystem::path filePath, 
 	}
 }
 
-Scene* ResourceManager::LoadPixieEngineScene(std::filesystem::path path) {
+std::shared_ptr<Scene> ResourceManager::LoadPixieEngineScene(std::filesystem::path path) {
 	std::cout << "Error: Pixie Engine scene loading is not implemented.\n";
 	return nullptr;
 }
 
-Scene* ResourceManager::LoadPBRTScene(std::filesystem::path filePath) {
+std::shared_ptr<Scene> ResourceManager::LoadPBRTScene(std::filesystem::path filePath) {
 	std::ifstream reader;
 	reader.open(filePath);
 	std::string line;
 
-	Scene* scene = new Scene(filePath.filename().string());
+	std::shared_ptr<Scene> scene = SceneManager::CreateScene(filePath.filename().string());
 
 	const int32_t maxDepth = 6;
 	int32_t depth = 0;
@@ -330,8 +327,7 @@ Scene* ResourceManager::LoadPBRTScene(std::filesystem::path filePath) {
 				std::cout << "Error parsing PBRT scene. Max node depth exceeded.\n";
 				return scene;
 			}
-			objects[depth] = new SceneObject("node");
-			objects[depth - 1]->AddChild(objects[depth]);
+			objects[depth] = SceneManager::CreateObject("node", objects[depth - 1]);
 			continue;
 		}
 		else if (tokens[0] == "AttributeEnd" || tokens[0] == "ObjectEnd") {
@@ -371,23 +367,20 @@ Scene* ResourceManager::LoadPBRTScene(std::filesystem::path filePath) {
 				materialComponent->SetMaterial(material);
 			}
 			else {
-				materialComponent = new MaterialComponent(material, objects[depth]);
-				objects[depth]->AddComponent(materialComponent);
+				materialComponent = SceneManager::CreateComponent<MaterialComponent>(objects[depth], material);
 			}
 			continue;
 		}
 		else if (tokens[0] == "Shape") {
 			if (!objects[depth]->GetComponent<MaterialComponent>()) {
-				MaterialComponent* materialComponent = new MaterialComponent(GetDefaultMaterial(), objects[depth]);
-				objects[depth]->AddComponent(materialComponent);
+				SceneManager::CreateComponent< MaterialComponent>(objects[depth], GetDefaultMaterial());
 			}
 			if (tokens[1] == "trianglemesh") {
 				if (tokens.size() != 2) {
 					std::cout << "Unexpected tokens amount parsing Shape trianglemesh: " << tokens.size() << "\n";
 					break;
 				}
-				MeshComponent* meshComponent = new MeshComponent(new Mesh({}, {}), objects[depth]);
-				objects[depth]->AddComponent(meshComponent);
+				SceneManager::CreateComponent< MeshComponent>(objects[depth], new Mesh({}, {}));
 				continue;
 			}
 			else if (tokens[1] == "plymesh") {
@@ -404,7 +397,7 @@ Scene* ResourceManager::LoadPBRTScene(std::filesystem::path filePath) {
 				if (!model) {
 					break;
 				}
-				objects[depth]->AddChild(model);
+				SceneManager::SetObjectParent(model, objects[depth]);
 				continue;
 			}
 			std::cout << "Unexpected tokens amount parsing Shape - unexpected shape: " << tokens[1] << "\n";
@@ -564,44 +557,39 @@ SceneObject* ResourceManager::ProcessAssimpNode(const aiScene* scene, const aiNo
 	std::cout << "  Node: " << node->mName.C_Str() << " (children: " << node->mNumChildren << ", meshes: " << node->mNumMeshes << ")\n";
 	
 	Transform transform = Transform(AssimpGLMHelpers::ConvertMatrixToGLMFormat(node->mTransformation));
-	SceneObject* nodeObject = new SceneObject(node->mName.data, transform);
-	
+	SceneObject* nodeObject = SceneManager::CreateObject(node->mName.data, nullptr, transform);
+
 	if (node->mNumMeshes == 1) {
 		aiMesh* aiMesh = scene->mMeshes[node->mMeshes[0]];
 		Mesh* mesh = ProcessAssimpMesh(aiMesh, boneInfoMap);
-		MeshComponent* meshComponent = new MeshComponent(mesh, nodeObject);
-		nodeObject->AddComponent(meshComponent);
+		SceneManager::CreateComponent<MeshComponent>(nodeObject, mesh);
 		Material* material = GetDefaultMaterial();
 		if (aiMesh->mMaterialIndex >= 0) {
 			material = ProcessAssimpMaterial(scene->mMaterials[aiMesh->mMaterialIndex]);
 		}
-		MaterialComponent* materialComponent = new MaterialComponent(material, nodeObject);
-		nodeObject->AddComponent(materialComponent);
+		SceneManager::CreateComponent<MaterialComponent>(nodeObject, material);
 		if (material->GetEmission()) {
-			AreaLightComponent* areaLightComponent = new AreaLightComponent(nodeObject, material->GetEmission().GetRGB(), 1.0f);
-			nodeObject->AddComponent(areaLightComponent);
+			SceneManager::CreateComponent<AreaLightComponent>(nodeObject, material->GetEmission().GetRGB(), 1.0f);
 		}
 	}
 	else {
 		for (uint32_t meshIndex = 0; meshIndex < node->mNumMeshes; meshIndex++) {
-			SceneObject* child = new SceneObject("mesh holder");
+			SceneObject* child = SceneManager::CreateObject("mesh holder", nodeObject);
 			aiMesh* aiMesh = scene->mMeshes[node->mMeshes[meshIndex]];
 			Mesh* mesh = ProcessAssimpMesh(aiMesh, boneInfoMap);
-			MeshComponent* meshComponent = new MeshComponent(mesh, child);
-			child->AddComponent(meshComponent);
+			SceneManager::CreateComponent<MeshComponent>(child, mesh);
 			Material* material = GetDefaultMaterial();
 			if (aiMesh->mMaterialIndex >= 0) {
 				material = ProcessAssimpMaterial(scene->mMaterials[aiMesh->mMaterialIndex]);
 			}
-			MaterialComponent* materialComponent = new MaterialComponent(material, nodeObject);
-			child->AddComponent(materialComponent);
-			nodeObject->AddChild(child);
+			SceneManager::CreateComponent<MaterialComponent>(nodeObject, material);
+			SceneManager::SetObjectParent(child, nodeObject);
 		}
 	}
 
 	for (uint32_t i = 0; i < node->mNumChildren; i++) {
 		SceneObject* child = ProcessAssimpNode(scene, node->mChildren[i], boneInfoMap);
-		nodeObject->AddChild(child);
+		SceneManager::SetObjectParent(child, nodeObject);
 	}
 
 	return nodeObject;

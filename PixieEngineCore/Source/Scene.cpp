@@ -2,9 +2,13 @@
 #include "Scene.h"
 
 Scene::Scene(const std::string& name) :
-	m_name(name), m_rootObject(new SceneObject(name)) {}
+	m_name(name) {}
 
-const std::string& Scene::GetName() {
+Scene::~Scene() {
+	delete m_rootObject;
+}
+
+const std::string& Scene::GetName() const {
 	return m_name;
 }
 
@@ -12,94 +16,43 @@ void Scene::SetName(const std::string& name) {
 	m_name = name;
 }
 
-void Scene::AddObject(SceneObject* object, SceneObject* parent) {
-	if (PointLightComponent* pointLight = object->GetComponent<PointLightComponent>()) {
-		m_pointLights.push_back(pointLight);
-	}
-	if (DirectionalLightComponent* pointLight = object->GetComponent<DirectionalLightComponent>()) {
-		m_directionalLights.push_back(pointLight);
-	}
-	if (AreaLightComponent* areaLight = object->GetComponent<AreaLightComponent>()) {
-		m_areaLights.push_back(areaLight);
-	}
-	if (parent) {
-		parent->AddChild(object);
-	}
-	else {
-		m_rootObject->AddChild(object);
-	}
-}
-
-void Scene::AddObject(SceneObject* object, const std::string& parentName) {
-	SceneObject* parent = FindObject(parentName);
-	if (parent == nullptr) {
-		return;
-	}
-	AddObject(object, parent);
-}
-
-void Scene::RemoveObject(const std::string& objectName) {
-	SceneObject* object = FindObject(objectName);
-	if (object) {
-		object->Remove();
-	}
-}
-
-void Scene::RemoveObjects(const std::string& objectName) {
-	std::vector<SceneObject*> objects = FindObjects(objectName);
-	for (int32_t i = 0; i < objects.size(); i++) {
-		objects[i]->Remove();
-	}
-}
-
-SceneObject* Scene::FindObject(const std::string& objectName) {
+SceneObject* Scene::FindObject(const std::string& objectName) const {
 	return m_rootObject->FindObject(objectName);
 }
 
-std::vector<SceneObject*> Scene::FindObjects(const std::string& objectName) {
+std::vector<SceneObject*> Scene::FindObjects(const std::string& objectName) const {
 	return m_rootObject->FindObjects(objectName);
 }
 
-SceneObject* Scene::FindObjectWithComponent(ComponentType type) {
+SceneObject* Scene::FindObjectWithComponent(ComponentType type) const {
 	return m_rootObject->FindObjectWithComponent(type);
 }
 
-std::vector<SceneObject*> Scene::FindObjectsWithComponent(ComponentType type) {
+std::vector<SceneObject*> Scene::FindObjectsWithComponent(ComponentType type) const  {
 	return m_rootObject->FindObjectsWithComponent(type);
 }
 
-const SceneObject* Scene::GetRootObject() const {
+SceneObject* Scene::GetRootObject() const {
 	return m_rootObject;
 }
 
-SceneObject* Scene::GetRootObject() {
-	return m_rootObject;
-}
-
-std::vector<AreaLightComponent*>& Scene::GetAreaLights() {
-	m_areaLights.clear();
-	std::vector<SceneObject*> objects = m_rootObject->FindObjectsWithComponent(ComponentType::DiffuseAreaLight);
-	for (size_t i = 0; i < objects.size(); i++) {
-		if (AreaLightComponent* areaLight = objects[i]->GetComponent<AreaLightComponent>()) {
-			m_areaLights.push_back(areaLight);
-		}
-	}
+const std::vector<AreaLightComponent*>& Scene::GetAreaLights() const {
 	return m_areaLights;
 }
 
-std::vector<DirectionalLightComponent*>& Scene::GetDirectionalLights() {
+const std::vector<DirectionalLightComponent*>& Scene::GetDirectionalLights() const {
 	return m_directionalLights;
 }
 
-std::vector<PointLightComponent*>& Scene::GetPointLights() {
+const std::vector<PointLightComponent*>& Scene::GetPointLights() const {
 	return m_pointLights;
 }
 
-std::vector<CameraComponent*>& Scene::GetCameras() {
+const std::vector<CameraComponent*>& Scene::GetCameras() const {
 	return m_cameras;
 }
 
-Bounds3f Scene::GetBounds() {
+Bounds3f Scene::GetBounds() const {
 	return Bounds3f();
 }
 
@@ -107,7 +60,7 @@ void Scene::SetSkybox(Skybox* skybox) {
 	m_skybox = skybox;
 }
 
-Skybox* Scene::GetSkybox() {
+Skybox* Scene::GetSkybox() const {
 	return m_skybox;
 }
 

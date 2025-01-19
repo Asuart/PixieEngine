@@ -7,7 +7,7 @@
 
 class MeshAnimatorComponent : public Component {
 public:
-	MeshAnimatorComponent(const std::vector<Animation*>& animations, SceneObject* parent, Mat4 globalInverseTransform);
+	MeshAnimatorComponent(SceneObject* parent, const std::vector<Animation*>& animations, Mat4 globalInverseTransform);
 	~MeshAnimatorComponent();
 
 	void OnUpdate() override;

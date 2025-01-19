@@ -16,7 +16,7 @@ void InspectorWindow::Draw() {
 			ComponentRenderer::DrawTransform(object->GetTransform());
 			ImGui::Spacing();
 
-			std::vector<Component*>& components = object->GetComponents();
+			const std::vector<Component*>& components = object->GetComponents();
 			if (components.size() > 0) {
 				ImGui::Text("Components");
 				ImGui::Spacing();

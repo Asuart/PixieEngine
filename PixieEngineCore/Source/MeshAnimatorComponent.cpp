@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "MeshAnimatorComponent.h"
 
-MeshAnimatorComponent::MeshAnimatorComponent(const std::vector<Animation*>& animations, SceneObject* parent, Mat4 globalInverseTransform) :
+MeshAnimatorComponent::MeshAnimatorComponent(SceneObject* parent, const std::vector<Animation*>& animations, Mat4 globalInverseTransform) :
 	Component(ComponentType::MeshAnimator, parent), m_animations(animations), m_animator(nullptr) {
 	if (animations.size() > 0) {
 		m_animator = new Animator(animations[0], globalInverseTransform);

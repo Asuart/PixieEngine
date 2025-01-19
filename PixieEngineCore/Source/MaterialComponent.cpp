@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "MaterialComponent.h"
 
-MaterialComponent::MaterialComponent(Material* material, SceneObject* parent) :
+MaterialComponent::MaterialComponent(SceneObject* parent, Material* material) :
 	Component(ComponentType::Material, parent), m_material(material) {}
 
 Material* MaterialComponent::GetMaterial() {
