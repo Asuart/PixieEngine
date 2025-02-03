@@ -20,9 +20,11 @@ struct Mesh {
 	std::vector<int32_t> m_indices;
 
 	Mesh(const std::vector<Vertex>& vertices, const std::vector<int32_t>& indices);
+	~Mesh();
 
 	Vec3 GetCenter() const;
 	void Draw() const;
+	void DrawWireframe() const;
 	void Upload();
 	void Bind() const;
 	void FreeCPUData();

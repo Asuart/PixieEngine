@@ -23,12 +23,16 @@ project "PixieEngineCore"
       "../Dependencies/glm",
       "../Dependencies/glad/include",
       "../Dependencies/stb",
+      "../Dependencies/freetype/include",
    }
 
    links
    {
-	  "assimp-vc143-mt.lib"
+	  "assimp-vc143-mt.lib",
+      "freetype.lib"
    }
+
+   libdirs { "../Dependencies/freetype/lib" }
 
    targetdir ("../Build/" .. OutputDir .. "/%{prj.name}")
    objdir ("../Build/Intermediates/" .. OutputDir .. "/%{prj.name}")

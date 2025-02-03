@@ -9,6 +9,8 @@
 #include "LTC_Matrix.h"
 #include "TextureGenerator.h"
 #include "SSAOKernel.h"
+#include "Renderer.h"
+#include "GlobalRenderer.h"
 
 class DefferedRenderer {
 public:

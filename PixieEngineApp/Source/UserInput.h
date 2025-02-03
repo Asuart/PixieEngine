@@ -21,6 +21,9 @@ public:
 	static double mouseDeltaX;
 	static double mouseDeltaY;
 
+	static double mouseScrollX;
+	static double mouseScrollY;
+
 	static void Reset();
 
 	static int32_t GetKey(int32_t keyCode);

@@ -43,6 +43,12 @@ bool Vertex::AddWeight(int32_t boneID, float weight, bool overrideSmallest) {
 Mesh::Mesh(const std::vector<Vertex>& _vertices, const std::vector<int32_t>& _indices) :
 	m_vertices(_vertices), m_indices(_indices) {}
 
+Mesh::~Mesh() {
+	if(m_vao) glDeleteVertexArrays(1, &m_vao);
+	if(m_vbo) glDeleteBuffers(1, &m_vbo);
+	if(m_ibo) glDeleteBuffers(1, &m_ibo);
+}
+
 Vec3 Mesh::GetCenter() const {
 	Vec3 min = Vec3(INFINITY);
 	Vec3 max = Vec3(-INFINITY);
@@ -58,6 +64,15 @@ void Mesh::Draw() const {
 	glBindVertexArray(m_vao);
 	glDrawElements(GL_TRIANGLES, m_indicesCount, GL_UNSIGNED_INT, NULL);
 	glBindVertexArray(0);
+}
+
+void Mesh::DrawWireframe() const {
+	if (!m_vao) return;
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glBindVertexArray(m_vao);
+	glDrawElements(GL_TRIANGLES, m_indicesCount, GL_UNSIGNED_INT, NULL);
+	glBindVertexArray(0);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void Mesh::Upload() {

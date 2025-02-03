@@ -25,6 +25,11 @@ public:
 		glUniform1i(loc, value);
 	}
 
+	inline void SetUniform2i(const std::string& name, glm::ivec2 v) const {
+		GLuint loc = glGetUniformLocation(m_programID, name.c_str());
+		glUniform2i(loc, v.x, v.y);
+	}
+
 	inline void SetUniform1iv(const std::string& name, GLint* start, int32_t count) const {
 		GLuint loc = glGetUniformLocation(m_programID, name.c_str());
 		glUniform1iv(loc, count, start);

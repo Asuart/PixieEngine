@@ -8,6 +8,7 @@
 #include "StatsWindow.h"
 #include "ViewportSettingsWindow.h"
 #include "ViewportWindow.h"
+#include "ShaderGraphWindow.h"
 
 Interface::Interface(PixieEngineApp& app) :
 	m_app(app) {
@@ -18,6 +19,7 @@ Interface::Interface(PixieEngineApp& app) :
 	m_openWindows.push_back(new ViewportWindow(m_app, *this));
 	m_openWindows.push_back(new StatsWindow(m_app, *this));
 	m_openWindows.push_back(new ViewportSettingsWindow(m_app, *this));
+	m_openWindows.push_back(new ShaderGraphWindow(m_app, *this));
 }
 
 Interface::~Interface() {

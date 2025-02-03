@@ -19,6 +19,9 @@ double UserInput::mouseY = 0;
 double UserInput::mouseDeltaX = 0;
 double UserInput::mouseDeltaY = 0;
 
+double UserInput::mouseScrollX = 0;
+double UserInput::mouseScrollY = 0;
+
 void key_callback(GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods) {
 	UserInput::buttonPressed = true;
 	UserInput::key = key;
@@ -41,11 +44,18 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 	UserInput::mouseMods = mods;
 }
 
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+	UserInput::mouseScrollX = xoffset;
+	UserInput::mouseScrollY = yoffset;
+}
+
 void UserInput::Reset() {
-	UserInput::buttonPressed = false;
-	UserInput::mouseButtonPressed = false;
-	UserInput::mouseDeltaX = 0;
-	UserInput::mouseDeltaY = 0;
+	buttonPressed = false;
+	mouseButtonPressed = false;
+	mouseDeltaX = 0;
+	mouseDeltaY = 0;
+	mouseScrollX = 0;
+	mouseScrollY = 0;
 }
 
 int32_t UserInput::GetKey(int32_t keyCode) {
@@ -61,4 +71,5 @@ void UserInput::SetInputWindow(GLFWwindow* _window) {
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetCursorPosCallback(window, cursor_position_callback);
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
+	glfwSetScrollCallback(window, scroll_callback);
 }

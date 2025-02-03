@@ -7,6 +7,7 @@
 #include "ResourceManager.h"
 #include "GlobalRenderer.h"
 #include "FrameBuffer.h"
+#include "GlobalRenderer.h"
 
 class ForwardRenderer {
 public:

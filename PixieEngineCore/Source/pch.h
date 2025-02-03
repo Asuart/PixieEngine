@@ -35,6 +35,9 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
+#include "ft2build.h"
+#include FT_FREETYPE_H  
+
 #ifdef PIXIE_ENGINE_DOUBLE_PRECISION
 typedef double Float;
 typedef glm::dvec2 Vec2;

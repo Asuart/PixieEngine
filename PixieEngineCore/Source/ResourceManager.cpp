@@ -13,10 +13,11 @@ std::map<std::filesystem::path, Texture<Vec3>*> ResourceManager::m_RGBTextures =
 std::map<std::filesystem::path, Texture<Vec4>*> ResourceManager::m_RGBATextures = {};
 std::vector<Material> ResourceManager::m_materials = {};
 std::vector<Mesh*> ResourceManager::m_meshes = {};
+std::map<char, FontCharacter> ResourceManager::m_characters = {};
+uint32_t ResourceManager::m_defaultFontSize = 64;
 
 static const std::string c_deafultMaterial = "Default Material";
 static const int32_t c_maxMaterials = 512;
-
 
 inline void ltrim(std::string& s) {
 	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
@@ -93,6 +94,8 @@ void ResourceManager::Initialize() {
 	m_meshes.push_back(quadMesh);
 	m_materials.reserve(c_maxMaterials);
 	AddMaterial(Material(c_deafultMaterial));
+
+	LoadDefaultFont();
 }
 
 std::shared_ptr<Scene> ResourceManager::LoadScene(std::filesystem::path filePath) {
@@ -895,4 +898,59 @@ ComputeShader ResourceManager::CompileComputeShader(const char* computeShaderSrc
 	std::cout << &programError[0] << std::endl;
 
 	return ComputeShader(rayProgram);
+}
+
+const FontCharacter& ResourceManager::GetFontCharacter(char c) {
+	return m_characters[c];
+}
+
+uint32_t ResourceManager::GetDefaultFontSize() {
+	return m_defaultFontSize;
+}
+
+void ResourceManager::LoadDefaultFont() {
+	const std::string fontsPath = GetApplicationDirectory().string() + std::string("/Resources/Fonts/");
+	FT_Library ft;
+	if (FT_Init_FreeType(&ft)) {
+		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+		//return -1;
+	}
+	FT_Face face;
+	if (FT_New_Face(ft, (fontsPath + std::string("Arial.ttf")).c_str(), 0, &face)) {
+		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+		//return -1;
+	}
+	FT_Set_Pixel_Sizes(face, 0, m_defaultFontSize);
+	if (FT_Load_Char(face, 'X', FT_LOAD_RENDER)) {
+		std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
+		//return -1;
+	}
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // disable byte-alignment restriction
+	for (int32_t c = 0; c < 128; c++) {
+		if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
+			std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
+			continue;
+		}
+
+		GLuint texture;
+		glGenTextures(1, &texture);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, face->glyph->bitmap.width, face->glyph->bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		FontCharacter character = {
+			texture,
+			glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+			glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+			face->glyph->advance.x
+		};
+		m_characters.insert(std::pair<char, FontCharacter>(c, character));
+	}
+
+	FT_Done_Face(face);
+	FT_Done_FreeType(ft);
 }

@@ -20,6 +20,13 @@ public:
 	static Quaternion GetGLMQuat(const aiQuaternion& pOrientation);
 };
 
+struct FontCharacter {
+	GLuint textureID;
+	glm::ivec2 size;
+	glm::ivec2 bearing;
+	uint32_t advance;
+};
+
 class ResourceManager {
 public:
 	static void SetApplicationPath(const std::string& path);
@@ -48,6 +55,8 @@ public:
 	static Shader CompileShader(const char* vertexSource, const char* fragmentSource);
 	static ComputeShader LoadComputeShader(const std::string& computePath);
 	static ComputeShader CompileComputeShader(const char* computeSource);
+	static const FontCharacter& GetFontCharacter(char c);
+	static uint32_t GetDefaultFontSize();
 
 protected:
 	static std::filesystem::path m_applicationPath;
@@ -58,6 +67,8 @@ protected:
 	static std::map<std::filesystem::path, Texture<Vec4>*> m_RGBATextures;
 	static std::vector<Material> m_materials;
 	static std::vector<Mesh*> m_meshes;
+	static std::map<char, FontCharacter> m_characters;
+	static uint32_t m_defaultFontSize;
 
 	static bool CheckFileExtensionSupport(std::filesystem::path filePath, ResourceType type);
 	static std::shared_ptr<Scene> LoadPixieEngineScene(std::filesystem::path path);
@@ -70,4 +81,5 @@ protected:
 	static std::vector<std::string> SplitPBRTFileLine(const std::string& line);
 	static Float StringToFloat(const std::string& str);
 	static Material* FindMaterial(const std::string& name);
+	static void LoadDefaultFont();
 };
