@@ -10,12 +10,13 @@ public:
 	PixieEngineApp();
 	~PixieEngineApp();
 
+	void Initialize();
 	void Start();
 	GLFWwindow* GetGLFWWindow();
-	void HandleResize(uint32_t width, uint32_t height);
+	void HandleWindowResize(uint32_t width, uint32_t height);
 
 protected:
-	PixieEngineWindow m_window;
+	PixieEngineWindow m_mainWindow;
 	Interface m_interface;
 
 	void HandleUserInput();

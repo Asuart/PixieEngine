@@ -11,16 +11,7 @@
 #include "ShaderGraphWindow.h"
 
 Interface::Interface(PixieEngineApp& app) :
-	m_app(app) {
-	m_openWindows.push_back(new SceneTreeWindow(m_app, *this));
-	m_openWindows.push_back(new AssetsBrowserWindow(m_app, *this));
-	m_openWindows.push_back(new InspectorWindow(m_app, *this));
-	m_openWindows.push_back(new MaterialsBrowserWindow(m_app, *this));
-	m_openWindows.push_back(new ViewportWindow(m_app, *this));
-	m_openWindows.push_back(new StatsWindow(m_app, *this));
-	m_openWindows.push_back(new ViewportSettingsWindow(m_app, *this));
-	m_openWindows.push_back(new ShaderGraphWindow(m_app, *this));
-}
+	m_app(app) {}
 
 Interface::~Interface() {
 	ImGui_ImplOpenGL3_Shutdown();
@@ -29,6 +20,15 @@ Interface::~Interface() {
 }
 
 void Interface::Initialize() {
+	m_openWindows.push_back(new SceneTreeWindow(m_app, *this));
+	m_openWindows.push_back(new AssetsBrowserWindow(m_app, *this));
+	m_openWindows.push_back(new InspectorWindow(m_app, *this));
+	m_openWindows.push_back(new MaterialsBrowserWindow(m_app, *this));
+	m_openWindows.push_back(new ViewportWindow(m_app, *this));
+	m_openWindows.push_back(new StatsWindow(m_app, *this));
+	m_openWindows.push_back(new ViewportSettingsWindow(m_app, *this));
+	m_openWindows.push_back(new ShaderGraphWindow(m_app, *this));
+
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
@@ -39,10 +39,9 @@ void Interface::Initialize() {
 
 	ImGui::StyleColorsDark();
 
-	ImGui_ImplGlfw_InitForOpenGL(m_app.m_window.GetGLFWWindow(), true);
+	ImGui_ImplGlfw_InitForOpenGL(m_app.m_mainWindow.GetGLFWWindow(), true);
 	ImGui_ImplOpenGL3_Init();
 
-	ComponentRenderer::Initialize(&m_app);
 	for (size_t i = 0; i < m_openWindows.size(); i++) {
 		m_openWindows[i]->Initialize();
 	}
@@ -82,7 +81,7 @@ void Interface::Draw() {
 	if (ImGui::BeginMenuBar()) {
 		if (ImGui::BeginMenu("File")) {
 			if (ImGui::MenuItem("Close")) {
-				glfwSetWindowShouldClose(m_app.m_window.GetGLFWWindow(), true);
+				glfwSetWindowShouldClose(m_app.m_mainWindow.GetGLFWWindow(), true);
 			}
 			ImGui::EndMenu();
 		}

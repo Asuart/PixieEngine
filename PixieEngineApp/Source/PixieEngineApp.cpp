@@ -3,19 +3,21 @@
 #include "OpenGLInterface.h"
 
 PixieEngineApp::PixieEngineApp() :
-	m_interface(*this) {
+	m_interface(*this) {}
+
+PixieEngineApp::~PixieEngineApp() {
+	glfwTerminate();
+}
+
+void PixieEngineApp::Initialize() {
 	ResourceManager::Initialize();
 	GlobalRenderer::Initialize();
 	SceneManager::Initialize();
 	m_interface.Initialize();
 }
 
-PixieEngineApp::~PixieEngineApp() {
-	glfwTerminate();
-}
-
 void PixieEngineApp::Start() {
-	while (!m_window.IsShouldClose()) {
+	while (!m_mainWindow.IsShouldClose()) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		Time::Update();
 		UserInput::Reset();
@@ -23,15 +25,15 @@ void PixieEngineApp::Start() {
 		HandleUserInput();
 		SceneManager::Update();
 		m_interface.Draw();
-		glfwSwapBuffers(m_window.GetGLFWWindow());
+		glfwSwapBuffers(m_mainWindow.GetGLFWWindow());
 	}
 }
 
 GLFWwindow* PixieEngineApp::GetGLFWWindow() {
-	return m_window.GetGLFWWindow();
+	return m_mainWindow.GetGLFWWindow();
 }
 
-void PixieEngineApp::HandleResize(uint32_t width, uint32_t height) {
+void PixieEngineApp::HandleWindowResize(uint32_t width, uint32_t height) {
 	glViewport(0, 0, width, height);
 }
 

@@ -2,12 +2,6 @@
 #include "ComponentRenderer.h"
 #include "PixieEngineApp.h"
 
-PixieEngineApp* ComponentRenderer::m_app = nullptr;
-
-void ComponentRenderer::Initialize(PixieEngineApp* app) {
-	m_app = app;
-}
-
 void ComponentRenderer::DrawTransform(Transform& transform, bool showHead, bool defaultOpen) {
 	ImGuiTreeNodeFlags flags = defaultOpen ? ImGuiTreeNodeFlags_DefaultOpen : ImGuiTreeNodeFlags_None;
 	if(!showHead || ImGui::CollapsingHeader("Transform", flags)) {

@@ -19,9 +19,7 @@ PixieEngineWindow::PixieEngineWindow(uint32_t width, uint32_t height) {
 
 	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback(openglCallbackFunction, 0);
-
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 	glEnable(GL_DEPTH_TEST);
 }
 
