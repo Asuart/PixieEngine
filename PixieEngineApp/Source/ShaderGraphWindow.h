@@ -124,44 +124,7 @@ public:
 		m_bezierShader = ResourceManager::LoadShader("Bezier2DVertexShader.glsl", "Bezier2DFragmentShader.glsl");
 	}
 
-	void Draw() override {
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		if (ImGui::Begin((std::string("ShaderGraph##") + id.ToString()).c_str())) {
-			if (ImGui::IsWindowFocused()) {
-				HandleUserInput();
-			}
-
-			ImVec2 viewportResolution = ImGui::GetContentRegionAvail();
-			ImVec2 cursorScreenPos = ImGui::GetCursorScreenPos();
-			ImVec2 mousePos = ImGui::GetMousePos();
-			m_cursorViewportPosition = { mousePos.x - cursorScreenPos.x, mousePos.y - cursorScreenPos.y };
-			m_prevCursorPos = m_cursorPos;
-			m_cursorPos = m_cursorViewportPosition * m_viewScale + m_viewOffset;
-			ImGui::SetNextWindowSize(viewportResolution);
-			glm::ivec2 glmViewportResolution = { viewportResolution.x, viewportResolution.y };
-			m_frameBuffer.Resize(glmViewportResolution);
-			UpdateProjection();
-
-			GLint originalViewport[4];
-			glGetIntegerv(GL_VIEWPORT, originalViewport);
-
-			m_frameBuffer.Resize(glmViewportResolution);
-			m_frameBuffer.Bind();
-			m_frameBuffer.ResizeViewport();
-			m_frameBuffer.Clear();
-
-			DrawConnections();
-			DrawNodes();
-
-			m_frameBuffer.Unbind();
-
-			glViewport(originalViewport[0], originalViewport[1], originalViewport[2], originalViewport[3]);
-
-			ImGui::Image((void*)(uint64_t)m_frameBuffer.m_texture, viewportResolution, { 0.0f, 1.0f }, { 1.0f, 0.0f });
-		}
-		ImGui::End();
-		ImGui::PopStyleVar();
-	}
+	void Draw() override;
 
 protected:
 	FrameBuffer m_frameBuffer;

@@ -68,7 +68,7 @@ std::string to_string(RenderMode renderMode) {
 
 ViewportWindow::ViewportWindow(PixieEngineApp& app, Interface& inter) :
 	InterfaceWindow(app, inter), m_frameBuffer({ 1280, 720 }), m_vrFrameBuffer({1280, 720}),
-	m_viewportCamera(Vec3(-10, 0, 0), Vec3(0, 0, 0), Vec3(0, 1, 0), glm::radians(39.6f), { 1280, 720 }, 0, 10),
+	m_viewportCamera(Vec3(-10, 0, 0), Vec3(0, 0, 0), Vec3(0, 1, 0), glm::radians(39.6f), { 1280, 720 }, 0, 100),
 	m_cameraController(m_viewportCamera), m_stereoscopicFrameBuffer({ 1280, 720 }) {
 	m_vrShader = ResourceManager::LoadShader("VRQuadVertexShader.glsl", "VRQuadFragmentShader.glsl");
 	m_stereoscopicShader = ResourceManager::LoadShader("StereoscopicQuadVertexShader.glsl", "StereoscopicQuadFragmentShader.glsl");
@@ -377,4 +377,8 @@ Float ViewportWindow::GetVRDistortion() const {
 
 void ViewportWindow::SetVRDistortion(Float distortion) {
 	m_vrDistortion = distortion;
+}
+
+const FrameBuffer& ViewportWindow::GetFrameBuffer() {
+	return m_frameBuffer;
 }

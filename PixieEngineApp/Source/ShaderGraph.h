@@ -3,6 +3,9 @@
 #include "BezierCurves.h"
 #include "ShaderGraph.h"
 #include "MeshGenerator.h"
+#include "SSAOKernel.h"
+#include "TextureGenerator.h"
+#include "LTC_Matrix.h"
 
 enum ShaderConnectionType : int32_t {
 	undefined = 0,
@@ -63,6 +66,54 @@ public:
 			}
 		}
 		return nullptr;
+	}
+
+	int32_t GetInputInt(const std::string& name) {
+		ShaderNodeIn* input = GetInput(name);
+		if (!input || !input->connection || !input->connection->from) {
+			return 0;
+		}
+		return *((int32_t*)input->connection->from->value);
+	}
+
+	Float GetInputFloat(const std::string& name) {
+		ShaderNodeIn* input = GetInput(name);
+		if (!input || !input->connection || !input->connection->from) {
+			return 0.0f;
+		}
+		return *((Float*)input->connection->from->value);
+	}
+
+	Vec2 GetInputVec2(const std::string& name) {
+		ShaderNodeIn* input = GetInput(name);
+		if (!input || !input->connection || !input->connection->from) {
+			return Vec2();
+		}
+		return *((Vec2*)input->connection->from->value);
+	}
+
+	Vec3 GetInputVec3(const std::string& name) {
+		ShaderNodeIn* input = GetInput(name);
+		if (!input || !input->connection || !input->connection->from) {
+			return Vec3();
+		}
+		return *((Vec3*)input->connection->from->value);
+	}
+
+	Vec4 GetInputVec4(const std::string& name) {
+		ShaderNodeIn* input = GetInput(name);
+		if (!input || !input->connection || !input->connection->from) {
+			return Vec4();
+		}
+		return *((Vec4*)input->connection->from->value);
+	}
+
+	GLuint GetInputTexture(const std::string& name) {
+		ShaderNodeIn* input = GetInput(name);
+		if (!input || !input->connection || !input->connection->from) {
+			return 0;
+		}
+		return *((GLuint*)input->connection->from->value);
 	}
 
 	ShaderNodeOut* GetOutput(const std::string& name) {
@@ -138,6 +189,8 @@ public:
 		m_outputs.push_back(ShaderNodeOut(this, "Metallic", &m_metallic, ShaderConnectionType::textureR));
 		m_outputs.push_back(ShaderNodeOut(this, "Roughness", &m_roughness, ShaderConnectionType::textureR));
 		m_outputs.push_back(ShaderNodeOut(this, "Depth", &m_depth, ShaderConnectionType::textureR));
+
+		m_program = ResourceManager::LoadShader("DefferedRenderNodeVertexShader.glsl", "DefferedRenderNodeFragmentShader.glsl");
 
 		const glm::ivec2 resolution = { 1280, 720 };
 
@@ -221,9 +274,8 @@ public:
 	void Process() override {
 		std::shared_ptr<Scene> scene = SceneManager::GetScene();
 		if (!scene) return;
-		const std::vector<CameraComponent*>& cameras = scene->GetCameras();
-		if (cameras.size() == 0) return;
-		Camera* camera = &cameras[0]->GetCamera();
+		Camera camera = Camera(Vec3(-10, 0, 0), Vec3(0, 0, 0), Vec3(0, 1, 0), glm::radians(39.6f), { 1280, 720 }, 0, 100);
+		camera.SetResolution({ 1280, 720 });
 
 		// Store Original Viewport
 		GLint originalViewport[4];
@@ -234,22 +286,16 @@ public:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		m_program.Bind();
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, m_albedo);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, m_normal);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, m_position);
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, m_specular);
-		glActiveTexture(GL_TEXTURE4);
-		glBindTexture(GL_TEXTURE_2D, m_metallic);
-		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_2D, m_roughness);
+		m_program.SetTexture("gAlbedo", m_albedo, 0);
+		m_program.SetTexture("gNormal", m_normal, 1);
+		m_program.SetTexture("gPosition", m_position, 2);
+		m_program.SetTexture("gSpecular", m_specular, 3);
+		m_program.SetTexture("gMetallic", m_metallic, 4);
+		m_program.SetTexture("gRoughness", m_roughness, 5);
 
-		m_program.SetUniform3f("cameraPos", camera->GetTransform().GetPosition());
-		m_program.SetUniformMat4f("mView", camera->GetViewMatrix());
-		m_program.SetUniformMat4f("mProjection", camera->GetProjectionMatrix());
+		m_program.SetUniform3f("cameraPos", camera.GetTransform().GetPosition());
+		m_program.SetUniformMat4f("mView", camera.GetViewMatrix());
+		m_program.SetUniformMat4f("mProjection", camera.GetProjectionMatrix());
 		DrawObject(scene->GetRootObject(), Mat4(1.0f));
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -286,7 +332,7 @@ public:
 		m_program.SetUniform1f("roughness", material->m_roughness);
 		m_program.SetUniform1i("useDiffuseMap", material->m_albedoTexture != nullptr);
 		if (material->m_albedoTexture) {
-			m_program.SetTexture("albedoTexture", material->m_albedoTexture->id, 3);
+			m_program.SetTexture("albedoTexture", material->m_albedoTexture->id, 6);
 		}
 	}
 
@@ -335,21 +381,126 @@ public:
 		m_inputs.push_back(ShaderNodeIn(this, "AO", ShaderConnectionType::textureR));
 
 		m_outputs.push_back(ShaderNodeOut(this, "Frame", &m_frame, ShaderConnectionType::textureRGB));
+
+		m_program = ResourceManager::LoadShader("DefferedLightingNodeVertexShader.glsl", "DefferedLightingNodeFragmentShader.glsl");
+
+		m_noiseTexture = TextureGenerator::SSAONoiseTexture(SSAONoiseResolution);
+		m_LTC1Texture = LoadLTCTexture(LTC1);
+		m_LTC2Texture = LoadLTCTexture(LTC2);
+
+		const glm::ivec2 resolution = { 1280, 720 };
+
+		glGenFramebuffers(1, &m_frameBuffer);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer);
+
+		glGenTextures(1, &m_frame);
+		glBindTexture(GL_TEXTURE_2D, m_frame);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, resolution.x, resolution.y, 0, GL_RGB, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_frame, 0);
 	}
 
 	void Process() override {
+		std::shared_ptr<Scene> scene = SceneManager::GetScene();
+		if (!scene) return;
+		Camera camera = Camera(Vec3(-10, 0, 0), Vec3(0, 0, 0), Vec3(0, 1, 0), glm::radians(39.6f), { 1280, 720 }, 0, 100);
+		camera.SetResolution({ 1280, 720 });
 
+		// Store Original Viewport
+		GLint originalViewport[4];
+		glGetIntegerv(GL_VIEWPORT, originalViewport);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer);
+		glViewport(0, 0, 1280, 720);
+		glClear(GL_COLOR_BUFFER_BIT);
+		m_program.Bind();
+		m_program.SetUniform3f("cameraPos", camera.GetTransform().GetPosition());
+		m_program.SetTexture("gAlbedo", GetInputTexture("Albedo"), 0);
+		m_program.SetTexture("gNormal", GetInputTexture("Normal"), 1);
+		m_program.SetTexture("gPosition", GetInputTexture("Position"), 2);
+		m_program.SetTexture("gSpecular", GetInputTexture("Specular"), 3);
+		m_program.SetTexture("gMetallic", GetInputTexture("Metallic"), 4);
+		m_program.SetTexture("gRoughness", GetInputTexture("Roughness"), 5);
+		m_program.SetTexture("LTC1", m_LTC1Texture, 6);
+		m_program.SetTexture("LTC2", m_LTC2Texture, 7);
+		//m_program.SetTexture("ssaoTexture", m_ssaoBuffer.m_texture, 8);
+		SetupLights(scene);
+		ResourceManager::GetQuadMesh()->Draw();
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		// Restore original viewport
+		glViewport(originalViewport[0], originalViewport[1], originalViewport[2], originalViewport[3]);
 	}
 
 protected:
-	GLuint m_frame;
+	const glm::ivec2 SSAONoiseResolution = { 4, 4 };
+	Shader m_program;
+	GLuint m_frameBuffer = 0;
+	GLuint m_frame = 0;
+	GLuint m_noiseTexture = 0;
+	GLuint m_LTC1Texture = 0;
+	GLuint m_LTC2Texture = 0;
+	SSAOKernel<64> m_ssaoKernel;
+
+	void SetupLights(std::shared_ptr<Scene> scene) {
+		// Point lights
+		const size_t MaxPointLights = 32;
+		int32_t nPointLights = 0;
+		const std::vector<PointLightComponent*>& pointLights = scene->GetPointLights();
+		for (size_t i = 0; i < pointLights.size() && i < MaxPointLights; i++) {
+			const std::string base = std::string("pointLights[") + std::to_string(nPointLights) + std::string("].");
+			m_program.SetUniform3f(base + std::string("position"), pointLights[i]->GetParent()->GetTransform().GetPosition());
+			m_program.SetUniform3f(base + std::string("emission"), pointLights[i]->GetEmission());
+			nPointLights++;
+		}
+		m_program.SetUniform1i("nPointLights", nPointLights);
+
+		// Area lights
+		const size_t MaxAreaLights = 32;
+		int32_t nAreaLights = 0;
+		const std::vector<AreaLightComponent*>& areaLights = scene->GetAreaLights();
+		for (size_t i = 0; i < areaLights.size(); i++) {
+			MeshComponent* meshComponent = areaLights[i]->GetParent()->GetComponent<MeshComponent>();
+			if (!meshComponent) continue;
+			Mesh* mesh = meshComponent->GetMesh();
+			if (!mesh) continue;
+			for (int32_t firstIndex = 0; firstIndex < mesh->m_indices.size() && nAreaLights < MaxAreaLights; firstIndex += 3) {
+				const std::string base = std::string("areaLights[") + std::to_string(nAreaLights) + std::string("].");
+				m_program.SetUniform3f(base + std::string("emission"), areaLights[i]->GetEmission());
+				m_program.SetUniform1i(base + std::string("twoSided"), 1);
+				m_program.SetUniform3f(base + std::string("points[0]"), mesh->m_vertices[mesh->m_indices[firstIndex + 0]].position);
+				m_program.SetUniform3f(base + std::string("points[1]"), mesh->m_vertices[mesh->m_indices[firstIndex + 1]].position);
+				m_program.SetUniform3f(base + std::string("points[2]"), mesh->m_vertices[mesh->m_indices[firstIndex + 2]].position);
+				nAreaLights++;
+			}
+			if (nAreaLights >= MaxAreaLights) break;
+		}
+		m_program.SetUniform1i("nAreaLights", nAreaLights);
+	}
+
+	GLuint LoadLTCTexture(const float* matrixTable) {
+		GLuint texture = 0;
+		glGenTextures(1, &texture);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 64, 64, 0, GL_RGBA, GL_FLOAT, matrixTable);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		return texture;
+	}
+
 };
 
 class DisplayTextureNode : public ShaderNode {
 public:
 	DisplayTextureNode() :
-		ShaderNode("Display Texture") {
-		m_inputs.push_back(ShaderNodeIn(this, "Texture", ShaderConnectionType::texture));
+		ShaderNode("Display Frame") {
+		m_inputs.push_back(ShaderNodeIn(this, "Frame", ShaderConnectionType::texture));
 	}
 
 	void Process() override {
@@ -392,6 +543,12 @@ public:
 
 	void RemoveConnection(ShaderNodeConnection* connection) {
 
+	}
+
+	void Process() {
+		for (size_t i = 0; i < m_nodes.size(); i++) {
+			m_nodes[i]->Process();
+		}
 	}
 
 	std::vector<ShaderNode*> m_nodes;

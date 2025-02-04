@@ -50,6 +50,8 @@ public:
 	Float GetVRDistortion() const;
 	void SetVRDistortion(Float distortion);
 
+	const FrameBuffer& GetFrameBuffer();
+
 protected:
 	FrameBuffer m_frameBuffer;
 	ForwardRenderer m_forwardRenderer;
