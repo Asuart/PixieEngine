@@ -5,5 +5,5 @@
 
 class TextureGenerator {
 public:
-	static GLuint SSAONoiseTexture(glm::ivec2 resolution);
+	static Texture SSAONoiseTexture(glm::ivec2 resolution);
 };

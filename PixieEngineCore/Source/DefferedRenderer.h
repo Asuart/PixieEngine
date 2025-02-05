@@ -29,13 +29,12 @@ protected:
 	Shader m_ssaoShader;
 	Shader m_ssaoBlurShader;
 	Shader m_lightingShader;
-	GLuint m_LTC1Texture = 0;
-	GLuint m_LTC2Texture = 0;
-	GLuint m_noiseTexture = 0;
+	Texture m_LTC1Texture;
+	Texture m_LTC2Texture;
+	Texture m_noiseTexture;
 	SSAOKernel<64> m_ssaoKernel;
 
 	void DrawObject(SceneObject* object, Mat4 parentTransform = Mat4(1.0f));
 	void SetupMaterial(Material* material);
 	void SetupLights(Scene* scene);
-	GLuint LoadLTCTexture(const float* matrixTable);
 };

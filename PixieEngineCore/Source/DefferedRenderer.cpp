@@ -3,14 +3,14 @@
 
 DefferedRenderer::DefferedRenderer() :
 	m_gBuffer({ 1280, 720 }), m_frameBuffer({ 1280, 720 }),
-	m_ssaoBuffer({ 1280, 720 }), m_ssaoBlurBuffer({ 1280, 720 }) {
+	m_ssaoBuffer({ 1280, 720 }), m_ssaoBlurBuffer({ 1280, 720 }),
+	m_LTC1Texture({ 64, 64 }, GL_RGBA, GL_RGBA, GL_FLOAT, (void*)LTC1, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_LINEAR),
+	m_LTC2Texture({ 64, 64 }, GL_RGBA, GL_RGBA, GL_FLOAT, (void*)LTC2, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_LINEAR),
+	m_noiseTexture(TextureGenerator::SSAONoiseTexture(SSAONoiseResolution)) {
 	m_shader = ResourceManager::LoadShader("DefferedVertexShader.glsl", "DefferedFragmentShader.glsl");
 	m_ssaoShader = ResourceManager::LoadShader("SSAOVertexShader.glsl", "SSAOFragmentShader.glsl");
 	m_ssaoBlurShader = ResourceManager::LoadShader("SSAOBlurVertexShader.glsl", "SSAOBlurFragmentShader.glsl");
 	m_lightingShader = ResourceManager::LoadShader("LightingPassVertexShader.glsl", "LightingPassFragmentShader.glsl");
-	m_noiseTexture = TextureGenerator::SSAONoiseTexture(SSAONoiseResolution);
-	m_LTC1Texture = LoadLTCTexture(LTC1);
-	m_LTC2Texture = LoadLTCTexture(LTC2);
 }
 
 void DefferedRenderer::DrawFrame(Scene* scene, Camera* camera) {
@@ -41,7 +41,7 @@ void DefferedRenderer::DrawFrame(Scene* scene, Camera* camera) {
 	m_ssaoShader.SetUniformMat4f("mProjection", camera->GetProjectionMatrix());
 	m_ssaoShader.SetTexture("gPositionRoughness", m_gBuffer.m_positionRoughness, 1);
 	m_ssaoShader.SetTexture("gNormalMetallic", m_gBuffer.m_normalMetallic, 2);
-	m_ssaoShader.SetTexture("noiseTexture", m_noiseTexture, 3);
+	m_ssaoShader.SetTexture("noiseTexture", m_noiseTexture.m_id, 3);
 	m_ssaoShader.SetUniform2f("noiseScale", Vec2(camera->GetResolution()) / Vec2(SSAONoiseResolution));
 	m_ssaoShader.SetUniform3f("cameraPos", camera->GetTransform().GetPosition());
 	ResourceManager::GetQuadMesh()->Draw();
@@ -68,8 +68,8 @@ void DefferedRenderer::DrawFrame(Scene* scene, Camera* camera) {
 	m_lightingShader.SetTexture("gAlbedoSpec", m_gBuffer.m_albedoSpec, 0);
 	m_lightingShader.SetTexture("gPositionRoughness", m_gBuffer.m_positionRoughness, 1);
 	m_lightingShader.SetTexture("gNormalMetallic", m_gBuffer.m_normalMetallic, 2);
-	m_lightingShader.SetTexture("LTC1", m_LTC1Texture, 3);
-	m_lightingShader.SetTexture("LTC2", m_LTC2Texture, 4);
+	m_lightingShader.SetTexture("LTC1", m_LTC1Texture.m_id, 3);
+	m_lightingShader.SetTexture("LTC2", m_LTC2Texture.m_id, 4);
 	m_lightingShader.SetTexture("ssaoTexture", m_ssaoBuffer.m_texture, 5);
 	SetupLights(scene);
 	ResourceManager::GetQuadMesh()->Draw();
@@ -143,17 +143,4 @@ void DefferedRenderer::SetupMaterial(Material* material) {
 	m_shader.SetUniform1f("metallic", material->m_metallic);
 	m_shader.SetUniform1f("roughness", material->m_roughness);
 	m_shader.SetTexture("albedoTexture", material->m_albedoTexture.GetID(), 3);
-}
-
-GLuint DefferedRenderer::LoadLTCTexture(const float* matrixTable) {
-	GLuint texture = 0;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 64, 64, 0, GL_RGBA, GL_FLOAT, matrixTable);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	return texture;
 }

@@ -11,13 +11,13 @@ public:
 protected:
 	Shader m_program;
 	GLuint m_frameBuffer = 0;
-	GLuint m_albedo = 0;
-	GLuint m_normal = 0;
-	GLuint m_position = 0;
-	GLuint m_specular = 0;
-	GLuint m_metallic = 0;
-	GLuint m_roughness = 0;
 	GLuint m_depth = 0;
+	Texture m_albedo;
+	Texture m_normal;
+	Texture m_position;
+	Texture m_specular;
+	Texture m_metallic;
+	Texture m_roughness;
 
 	void DrawObject(SceneObject* object, Mat4 parentTransform);
 	void SetupMaterial(Material* material);

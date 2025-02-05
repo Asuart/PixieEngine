@@ -22,6 +22,20 @@ Texture::Texture(glm::ivec2 resolution, GLint internalFormat, GLenum format, GLe
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, resolution.x, resolution.y, 0, format, type, NULL);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	Texture::s_counters[m_id]++;
+}
+
+Texture::Texture(glm::ivec2 resolution, GLint internalFormat, GLenum format, GLenum type, void* data, GLint wrapS, GLint wrapT, GLint minFilter, GLint magFilter) :
+	m_resolution(resolution), m_internalFormat(internalFormat), m_format(format), m_type(type) {
+	glGenTextures(1, &m_id);
+	glBindTexture(GL_TEXTURE_2D, m_id);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, resolution.x, resolution.y, 0, format, type, data);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	Texture::s_counters[m_id]++;
 }

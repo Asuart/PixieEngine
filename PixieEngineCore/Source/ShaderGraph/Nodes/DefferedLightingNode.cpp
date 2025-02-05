@@ -1,8 +1,14 @@
 #include "pch.h"
 #include "DefferedLightingNode.h"
 
+const glm::ivec2 initialResolution = { 1280, 720 };
+
 DefferedLightingNode::DefferedLightingNode() :
-	ShaderNode("Deffered Lighting") {
+	ShaderNode("Deffered Lighting"),
+	m_frame(initialResolution, GL_RGB, GL_RGB, GL_FLOAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE),
+	m_LTC1Texture({ 64, 64 }, GL_RGBA, GL_RGBA, GL_FLOAT, (void*)LTC1, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_LINEAR),
+	m_LTC2Texture({ 64, 64 }, GL_RGBA, GL_RGBA, GL_FLOAT, (void*)LTC2, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_LINEAR),
+	m_noiseTexture(TextureGenerator::SSAONoiseTexture(SSAONoiseResolution)) {
 
 	m_inputs.push_back({ *this, "Albedo", ShaderNodeIOType::textureRGB });
 	m_inputs.push_back({ *this, "Normal", ShaderNodeIOType::textureRGB });
@@ -16,23 +22,10 @@ DefferedLightingNode::DefferedLightingNode() :
 
 	m_program = ResourceManager::LoadShader("DefferedLightingNodeVertexShader.glsl", "DefferedLightingNodeFragmentShader.glsl");
 
-	m_noiseTexture = TextureGenerator::SSAONoiseTexture(SSAONoiseResolution);
-	m_LTC1Texture = LoadLTCTexture(LTC1);
-	m_LTC2Texture = LoadLTCTexture(LTC2);
-
-	const glm::ivec2 resolution = { 1280, 720 };
-
 	glGenFramebuffers(1, &m_frameBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer);
-
-	glGenTextures(1, &m_frame);
-	glBindTexture(GL_TEXTURE_2D, m_frame);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, resolution.x, resolution.y, 0, GL_RGB, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_frame, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_frame.m_id, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void DefferedLightingNode::Process(const Scene& scene, const Camera& camera) {
@@ -41,7 +34,7 @@ void DefferedLightingNode::Process(const Scene& scene, const Camera& camera) {
 	glGetIntegerv(GL_VIEWPORT, originalViewport);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer);
-	glViewport(0, 0, 1280, 720);
+	glViewport(0, 0, initialResolution.x, initialResolution.y);
 	glClear(GL_COLOR_BUFFER_BIT);
 	m_program.Bind();
 	m_program.SetUniform3f("cameraPos", camera.GetTransform().GetPosition());
@@ -51,8 +44,8 @@ void DefferedLightingNode::Process(const Scene& scene, const Camera& camera) {
 	m_program.SetTexture("gSpecular", GetInputTexture("Specular"), 3);
 	m_program.SetTexture("gMetallic", GetInputTexture("Metallic"), 4);
 	m_program.SetTexture("gRoughness", GetInputTexture("Roughness"), 5);
-	m_program.SetTexture("LTC1", m_LTC1Texture, 6);
-	m_program.SetTexture("LTC2", m_LTC2Texture, 7);
+	m_program.SetTexture("LTC1", m_LTC1Texture.m_id, 6);
+	m_program.SetTexture("LTC2", m_LTC2Texture.m_id, 7);
 	//m_program.SetTexture("ssaoTexture", m_ssaoBuffer.m_texture, 8);
 	SetupLights(scene);
 	ResourceManager::GetQuadMesh()->Draw();
@@ -96,17 +89,4 @@ void DefferedLightingNode::SetupLights(const Scene& scene) {
 		if (nAreaLights >= MaxAreaLights) break;
 	}
 	m_program.SetUniform1i("nAreaLights", nAreaLights);
-}
-
-GLuint DefferedLightingNode::LoadLTCTexture(const float* matrixTable) {
-	GLuint texture = 0;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 64, 64, 0, GL_RGBA, GL_FLOAT, matrixTable);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	return texture;
 }
