@@ -81,6 +81,8 @@ void ViewportWindow::Draw() {
 			m_cameraController.Update();
 		}
 
+		HighPrecisionTimer::StartTimer("Viewport Render Time");
+
 		ImVec2 viewportResolution = ImGui::GetContentRegionAvail();
 		ImGui::SetNextWindowSize(viewportResolution);
 		glm::ivec2 glmViewportResolution = { viewportResolution.x, viewportResolution.y };
@@ -309,6 +311,7 @@ void ViewportWindow::Draw() {
 
 			ImGui::Image((void*)(uint64_t)m_frameBuffer.m_texture, viewportResolution, { 0.0, 1.0 }, { 1.0, 0.0 });
 		}
+		HighPrecisionTimer::StopTimer("Viewport Render Time");
 	}
 	ImGui::End();
 	ImGui::PopStyleVar();

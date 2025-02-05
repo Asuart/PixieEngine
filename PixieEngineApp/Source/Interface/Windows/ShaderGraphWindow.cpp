@@ -119,7 +119,9 @@ void ShaderGraphWindow::Draw() {
 		std::shared_ptr<Scene> scene = SceneManager::GetScene();
 		Camera camera = Camera(Vec3(-10, 0, 0), Vec3(0, 0, 0), Vec3(0, 1, 0), glm::radians(39.6f), { 1280, 720 }, 0, 100);
 
+		HighPrecisionTimer::StartTimer("Shader Graph Frame Time");
 		m_shaderGraph.Process(*scene.get(), camera);
+		HighPrecisionTimer::StopTimer("Shader Graph Frame Time");
 
 		m_frameBuffer.Resize(glmViewportResolution);
 		m_frameBuffer.Bind();

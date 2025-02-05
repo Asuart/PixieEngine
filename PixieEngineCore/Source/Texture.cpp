@@ -99,3 +99,7 @@ void Texture::SetMagFilter(GLint magFilter) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
+
+size_t Texture::GetActiveTexturesCount() {
+	return s_counters.size();
+}
