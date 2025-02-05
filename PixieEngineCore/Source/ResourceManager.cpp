@@ -8,9 +8,8 @@
 std::filesystem::path ResourceManager::m_applicationPath = "";
 std::filesystem::path ResourceManager::m_currentFilePath = "";
 std::filesystem::path ResourceManager::m_assetsPath = "../Assets/Scenes";
-std::map<std::filesystem::path, SceneObject*> ResourceManager::m_Models = {};
-std::map<std::filesystem::path, Texture<Vec3>*> ResourceManager::m_RGBTextures = {};
-std::map<std::filesystem::path, Texture<Vec4>*> ResourceManager::m_RGBATextures = {};
+std::map<std::filesystem::path, SceneObject*> ResourceManager::m_models = {};
+std::map<std::filesystem::path, Texture> ResourceManager::m_textures = {};
 std::vector<Material> ResourceManager::m_materials = {};
 std::vector<Mesh*> ResourceManager::m_meshes = {};
 std::map<char, FontCharacter> ResourceManager::m_characters = {};
@@ -73,7 +72,7 @@ std::filesystem::path ResourceManager::GetAssetsPath() {
 	return m_assetsPath;
 }
 
-void ResourceManager::SetAssetsPath(std::filesystem::path path) {
+void ResourceManager::SetAssetsPath(const std::filesystem::path& path) {
 	m_assetsPath = path;
 }
 
@@ -98,7 +97,7 @@ void ResourceManager::Initialize() {
 	LoadDefaultFont();
 }
 
-std::shared_ptr<Scene> ResourceManager::LoadScene(std::filesystem::path filePath) {
+std::shared_ptr<Scene> ResourceManager::LoadScene(const std::filesystem::path& filePath) {
 	m_currentFilePath = filePath;
 	std::shared_ptr<Scene> scene = nullptr;
 	if (!CheckFileExtensionSupport(filePath, ResourceType::Scene)) {
@@ -115,13 +114,13 @@ std::shared_ptr<Scene> ResourceManager::LoadScene(std::filesystem::path filePath
 	return scene;
 }
 
-bool ResourceManager::SaveScene(std::filesystem::path filePath, Scene* scene) {
+bool ResourceManager::SaveScene(const std::filesystem::path& filePath, Scene* scene) {
 	m_currentFilePath = filePath;
 	std::cout << "Error: Scene saving is not implemented.\n";
 	return false;
 }
 
-SceneObject* ResourceManager::LoadModel(std::filesystem::path filePath) {
+SceneObject* ResourceManager::LoadModel(const std::filesystem::path& filePath) {
 	m_currentFilePath = filePath;
 	std::cout << "Loading model from file: " << filePath << "\n";
 	Assimp::Importer importer;
@@ -153,44 +152,90 @@ SceneObject* ResourceManager::LoadModel(std::filesystem::path filePath) {
 	return rootObject;
 }
 
-Texture<Vec3>* ResourceManager::LoadRGBTexture(std::filesystem::path filePath) {
+Texture ResourceManager::LoadTexture(const std::filesystem::path& filePath) {
+	std::filesystem::path fullPath = GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
 	std::cout << "  Loading texture: " << filePath << "\n";
-	if (m_RGBTextures.find(filePath) != m_RGBTextures.end()) {
+	if (m_textures.find(filePath) != m_textures.end()) {
 		std::cout << "  Log: Texture already loaded.\n";
-		return m_RGBTextures[filePath];
+		return m_textures[filePath];
 	}
 	int32_t width, height, nrChannels;
-	uint8_t* data = stbi_load(filePath.string().c_str(), &width, &height, &nrChannels, 0);
+	uint8_t* data = stbi_load(fullPath.string().c_str(), &width, &height, &nrChannels, 0);
 	if (!data) {
 		std::cout << "  Error: Failed to load texture.\n";
-		return nullptr;
+		return Texture();
 	}
-	if (nrChannels != 3 && nrChannels != 4) {
-		std::cout << "  Error: Only 3 and 4 channel textures are suported.\n";
+	switch (nrChannels) {
+	case 1: {
+		Texture texture({ width, height }, GL_RED, GL_RED, GL_UNSIGNED_BYTE);
+		glBindTexture(GL_TEXTURE_2D, texture.m_id);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, data);
+		glBindTexture(GL_TEXTURE_2D, 0);
 		stbi_image_free(data);
-		return nullptr;
+		return texture;
 	}
-	Texture<Vec3>* texture = new Texture<Vec3>(width, height, data, nrChannels);
-	stbi_image_free(data);
-	return texture;
+	case 3: {
+		Texture texture({ width, height }, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE);
+		glBindTexture(GL_TEXTURE_2D, texture.m_id);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		stbi_image_free(data);
+		return texture;
+	}
+	case 4: {
+		Texture texture({ width, height }, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
+		glBindTexture(GL_TEXTURE_2D, texture.m_id);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		stbi_image_free(data);
+		return texture;
+	}
+	default:
+		std::cout << "  Error: Only 1, 3 and 4 channel textures are suported.\n";
+		stbi_image_free(data);
+		return Texture();
+	}
 }
 
-Texture<Vec4>* ResourceManager::LoadRGBATexture(std::filesystem::path filePath) {
+Buffer2DTexture<Vec3> ResourceManager::LoadRGBBuffer2DTexture(const std::filesystem::path& filePath) {
+	std::filesystem::path fullPath = GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
 	std::cout << "  Loading texture: " << filePath << "\n";
-	if (m_RGBATextures.find(filePath) != m_RGBATextures.end()) {
-		std::cout << "  Log: Texture already loaded.\n";
-		return m_RGBATextures[filePath];
-	}
 	int32_t width, height, nrChannels;
-	std::string fullPath = GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
-	uint8_t* data = stbi_load(fullPath.c_str(), &width, &height, &nrChannels, 0);
+	uint8_t* data = stbi_load(fullPath.string().c_str(), &width, &height, &nrChannels, 0);
 	if (!data) {
 		std::cout << "  Error: Failed to load texture.\n";
-		return nullptr;
+		return Buffer2DTexture<Vec3>();
 	}
-	Texture<Vec4>* texture = new Texture<Vec4>(width, height, data, nrChannels);
-	stbi_image_free(data);
-	return texture;
+	switch (nrChannels) {
+	case 1: {
+		Buffer2D<Vec3> buffer({ width, height });
+		for (int32_t i = 0; i < width * height; i++) {
+			buffer.m_data[i] = Vec3(Float(data[i]) / 255.0f);
+		}
+		stbi_image_free(data);
+		return Buffer2DTexture<Vec3>(buffer);
+	}
+	case 3: {
+		Buffer2D<Vec3> buffer({ width, height });
+		for (int32_t i = 0; i < width * height; i++) {
+			buffer.m_data[i] = Vec3(Float(data[i * 3 + 0]) / 255.0f, Float(data[i * 3 + 1]) / 255.0f, Float(data[i * 3 + 2]) / 255.0f);
+		}
+		stbi_image_free(data);
+		return Buffer2DTexture<Vec3>(buffer);
+	}
+	case 4: {
+		Buffer2D<Vec3> buffer({ width, height });
+		for (int32_t i = 0; i < width * height; i++) {
+			buffer.m_data[i] = Vec3(Float(data[i * 4 + 0]) / 255.0f, Float(data[i * 4 + 1]) / 255.0f, Float(data[i * 4 + 2]) / 255.0f);
+		}
+		stbi_image_free(data);
+		return Buffer2DTexture<Vec3>(buffer);
+	}
+	default:
+		std::cout << "  Error: Only 1, 3 and 4 channel textures are suported.\n";
+		stbi_image_free(data);
+		return Buffer2DTexture<Vec3>();
+	}
 }
 
 Material* ResourceManager::GetDefaultMaterial() {
@@ -269,7 +314,7 @@ Mesh* ResourceManager::GetQuadMesh() {
 	return m_meshes[0];
 }
 
-bool ResourceManager::CheckFileExtensionSupport(std::filesystem::path filePath, ResourceType type) {
+bool ResourceManager::CheckFileExtensionSupport(const std::filesystem::path& filePath, ResourceType type) {
 	switch (type) {
 	case ResourceType::Scene:
 		return IsValidScenePath(filePath);
@@ -283,12 +328,12 @@ bool ResourceManager::CheckFileExtensionSupport(std::filesystem::path filePath, 
 	}
 }
 
-std::shared_ptr<Scene> ResourceManager::LoadPixieEngineScene(std::filesystem::path path) {
+std::shared_ptr<Scene> ResourceManager::LoadPixieEngineScene(const std::filesystem::path& path) {
 	std::cout << "Error: Pixie Engine scene loading is not implemented.\n";
 	return nullptr;
 }
 
-std::shared_ptr<Scene> ResourceManager::LoadPBRTScene(std::filesystem::path filePath) {
+std::shared_ptr<Scene> ResourceManager::LoadPBRTScene(const std::filesystem::path& filePath) {
 	std::ifstream reader;
 	reader.open(filePath);
 	std::string line;
@@ -710,8 +755,8 @@ Material* ResourceManager::ProcessAssimpMaterial(const aiMaterial* aiMaterial) {
 	glmEmissionColor /= emissionNormaizer;
 	emissionInt = emissionNormaizer * (emissionInt ? emissionInt : 1.0f);
 
-	std::vector<Texture<Vec3>*> diffuseMaps = ProcessAssimpMaterialTextures(aiMaterial, aiTextureType_DIFFUSE, "texture_diffuse");
-	std::vector<Texture<Vec3>*> specularMaps = ProcessAssimpMaterialTextures(aiMaterial, aiTextureType_SPECULAR, "texture_specular");
+	std::vector<Buffer2DTexture<Vec3>> diffuseMaps = ProcessAssimpMaterialTextures(aiMaterial, aiTextureType_DIFFUSE, "texture_diffuse");
+	std::vector<Buffer2DTexture<Vec3>> specularMaps = ProcessAssimpMaterialTextures(aiMaterial, aiTextureType_SPECULAR, "texture_specular");
 
 	Material material = Material(materialName);
 	material.m_albedo = Vec3(color.r, color.g, color.b);
@@ -739,13 +784,13 @@ Material* ResourceManager::ProcessAssimpMaterial(const aiMaterial* aiMaterial) {
 	return AddMaterial(material);
 }
 
-std::vector<Texture<Vec3>*> ResourceManager::ProcessAssimpMaterialTextures(const aiMaterial* material, aiTextureType type, const std::string& name) {
-	std::vector<Texture<Vec3>*> textures;
+std::vector<Buffer2DTexture<Vec3>> ResourceManager::ProcessAssimpMaterialTextures(const aiMaterial* material, aiTextureType type, const std::string& name) {
+	std::vector<Buffer2DTexture<Vec3>> textures;
 	for (uint32_t i = 0; i < material->GetTextureCount(type); i++) {
 		aiString str;
 		material->GetTexture(type, i, &str);
 		std::filesystem::path texturePath = m_currentFilePath.parent_path().string() + "/" + str.C_Str();
-		textures.push_back(LoadRGBTexture(texturePath));
+		textures.push_back(LoadRGBBuffer2DTexture(texturePath));
 	}
 	return textures;
 }
@@ -946,7 +991,7 @@ void ResourceManager::LoadDefaultFont() {
 			texture,
 			glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
 			glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-			face->glyph->advance.x
+			(uint32_t)face->glyph->advance.x
 		};
 		m_characters.insert(std::pair<char, FontCharacter>(c, character));
 	}

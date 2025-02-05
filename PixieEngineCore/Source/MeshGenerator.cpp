@@ -6,12 +6,12 @@ Mesh* MeshGenerator::BezierMesh(const BezierCurve2D& curve, Float width, uint32_
 	Float stepsCount = subdivisions + 1;
 	Float stepSize = 1.0f / stepsCount;
 
-	std::vector<Vec2> points(stepsCount + 1);
+	std::vector<Vec2> points((int32_t)(stepsCount + 1));
 	for (int32_t i = 0; i <= stepsCount; i++) {
 		points[i] = curve.GetPoint(stepSize * i);
 	}
 
-	std::vector<Vec2> normals(stepsCount);
+	std::vector<Vec2> normals((int32_t)stepsCount);
 	for (int32_t i = 1; i < stepsCount; i++) {
 		Vec2 direction = glm::normalize(points[i + 1] - points[i]);
 		normals[i] = Vec2(direction.y, -direction.x);

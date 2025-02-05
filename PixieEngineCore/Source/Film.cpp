@@ -2,20 +2,18 @@
 #include "Film.h"
 
 Film::Film(glm::ivec2 resolution) :
-	m_resolution(resolution), m_pixelSize(Vec2(1.0f) / (Vec2)resolution) {
-	texture = new Texture<glm::fvec4>(resolution);
-	texture->Upload();
+	m_resolution(resolution), m_pixelSize(Vec2(1.0f) / (Vec2)resolution), m_texture(resolution) {
 	m_filter = new GaussianFilter(Vec2(4.0), 0.85f);
 }
 
 void Film::Reset() {
-	texture->Reset();
+	m_texture.Clear();
 }
 
 void Film::Resize(glm::ivec2 resolution) {
 	m_resolution = resolution;
 	m_pixelSize = Vec2(1.0f) / (Vec2)resolution;
-	texture->Resize(resolution);
+	m_texture.Resize(resolution);
 }
 
 void Film::SetSample(int32_t x, int32_t y, Spectrum L, Float weight) {
@@ -24,7 +22,7 @@ void Film::SetSample(int32_t x, int32_t y, Spectrum L, Float weight) {
 	if (max > m_maxSampleBrightness) {
 		rgb *= m_maxSampleBrightness / max;
 	}
-	texture->SetPixel(x, y, glm::fvec4(rgb * weight, weight));
+	m_texture.SetPixel({ x, y }, glm::fvec4(rgb * weight, weight));
 }
 
 void Film::AddSample(int32_t x, int32_t y, Spectrum L, Float weight) {
@@ -33,7 +31,7 @@ void Film::AddSample(int32_t x, int32_t y, Spectrum L, Float weight) {
 	if (max > m_maxSampleBrightness) {
 		rgb *= m_maxSampleBrightness / max;
 	}
-	texture->AccumulatePixel(x, y, glm::fvec4(rgb * weight, weight));
+	m_texture.AddPixel({ x, y }, glm::fvec4(rgb * weight, weight));
 }
 
 Vec2 Film::GetUV(int32_t x, int32_t y) const {

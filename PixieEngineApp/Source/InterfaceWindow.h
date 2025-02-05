@@ -6,8 +6,6 @@ class Interface;
 
 class InterfaceWindow {
 public:
-	UID id;
-
 	InterfaceWindow(PixieEngineApp& app, Interface& inter);
 
 	virtual void Initialize();

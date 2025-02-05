@@ -4,6 +4,8 @@
 template <typename T>
 class Buffer2D {
 public:
+	std::vector<T> m_data;
+	glm::ivec2 m_resolution;
 
 	Buffer2D(const glm::ivec2& resolution) :
 		m_resolution(resolution), m_data(std::vector<T>(resolution.x* resolution.y)) {}
@@ -64,10 +66,6 @@ public:
 	T* Data() {
 		return m_data.data();
 	}
-
-protected:
-	std::vector<T> m_data;
-	glm::ivec2 m_resolution;
 };
 
 class CountersBuffer2D : public Buffer2D<uint64_t> {

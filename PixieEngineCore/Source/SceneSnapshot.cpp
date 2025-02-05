@@ -84,11 +84,7 @@ SceneSnapshot::SceneSnapshot(Scene* scene) {
 		m_cameras.push_back(camera);
 	}
 
-	std::vector<Material>& materials = ResourceManager::GetMaterials();
-	m_materials.resize(materials.size());
-	for (int32_t i = 0; i < materials.size(); i++) {
-		m_materials[i] = new ProceduralMaterial(materials[i]);
-	}
+	m_materials = ResourceManager::GetMaterials();
 
 	BuildObjectsBVHRecoursive(objects, 0, (int32_t)objects.size());
 }
@@ -381,7 +377,7 @@ uint32_t SceneSnapshot::GetNodesCount() {
 	return (int32_t)m_nodes.size();
 }
 
-ProceduralMaterial* SceneSnapshot::GetMaterial(int32_t index) {
+Material& SceneSnapshot::GetMaterial(int32_t index) {
 	return m_materials[index];
 }
 

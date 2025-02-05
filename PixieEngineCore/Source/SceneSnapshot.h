@@ -7,7 +7,6 @@
 #include "MaterialComponent.h"
 #include "Shapes.h"
 #include "SphereComponent.h"
-#include "ProceduralMaterial.h"
 
 class Scene;
 
@@ -33,13 +32,13 @@ public:
 	uint32_t GetTrianglesCount();
 	uint32_t GetInvalidTrianglesCount();
 	uint32_t GetNodesCount();
-	ProceduralMaterial* GetMaterial(int32_t index);
+	Material& GetMaterial(int32_t index);
 
 	std::optional<ShapeIntersection> Intersect(const Ray& ray, int32_t* boxChecks, int32_t* shapeChecks, Float tMax = Infinity);
 	bool IsIntersected(const Ray& ray, int32_t* boxChecks, int32_t* shapeChecks, Float tMax = Infinity);
 
 private:
-	std::vector<ProceduralMaterial*> m_materials;
+	std::vector<Material> m_materials;
 	std::vector<Triangle> m_triangles;
 	std::vector<Sphere> m_spheres;
 	std::vector<ObjectBVHNode> m_objects;

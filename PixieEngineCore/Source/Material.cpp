@@ -35,9 +35,7 @@ Spectrum Material::GetEmission() {
 
 Spectrum Material::Evaluate(const RayInteraction& intr) {
 	Vec3 color = m_albedo.GetRGB();
-	if (m_albedoTexture) {
-		color *= m_albedoTexture->GetPixel(intr.uv);
-	}
+	color *= m_albedoTexture.Sample(intr.uv);
 	return color / Pi;
 }
 
@@ -47,4 +45,8 @@ Float Material::Pdf() {
 
 BSDF Material::GetBSDF(const RayInteraction& intr) {
 	return BSDF(*this, intr);
+}
+
+BxDFFlags Material::Flags() {
+	return BxDFFlags::Unset;
 }

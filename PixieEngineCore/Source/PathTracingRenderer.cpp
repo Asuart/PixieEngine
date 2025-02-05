@@ -19,8 +19,8 @@ void PathTracingRenderer::DrawFrame() {
 	m_frameBuffer.Bind();
 	m_frameBuffer.ResizeViewport();
 	m_frameBuffer.Clear();
-	m_film.texture->Upload();
-	GlobalRenderer::DrawAccumulatorTextureFitted(m_film.texture->id, m_samples, m_film.texture->resolution, m_frameBuffer.m_resolution);
+	m_film.m_texture.Upload();
+	GlobalRenderer::DrawAccumulatorTextureFitted(m_film.m_texture.GetID(), m_samples, m_film.m_texture.GetResolution(), m_frameBuffer.m_resolution);
 	m_frameBuffer.Unbind();
 
 	glViewport(originalViewport[0], originalViewport[1], originalViewport[2], originalViewport[3]);
@@ -147,10 +147,10 @@ void PathTracingRenderer::PerPixel(uint32_t x, uint32_t y, Sampler* sampler) {
 	Vec2 uv = m_film.GetUV(cameraSample.pFilm);
 	Ray ray = m_camera.GetRay(uv);
 	GBufferPixel pixel = m_rayTracer->SampleLightRay(ray, sampler);
-	m_boxTestsTexture.SetPixel(x, y, (Float)pixel.boxChecks);
-	m_shapeTestsTexture.SetPixel(x, y, (Float)pixel.shapeChecks);
-	m_normalTexture.SetPixel(x, y, glm::abs(pixel.normal));
-	m_depthTexture.SetPixel(x, y, pixel.depth);
+	m_boxTestsTexture.SetPixel({ x, y }, (Float)pixel.boxChecks);
+	m_shapeTestsTexture.SetPixel({ x, y }, (Float)pixel.shapeChecks);
+	m_normalTexture.SetPixel({ x, y }, glm::abs(pixel.normal));
+	m_depthTexture.SetPixel({ x, y }, pixel.depth);
 	m_film.AddSample(x, y, pixel.light, cameraSample.filterWeight);
 }
 

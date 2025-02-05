@@ -131,9 +131,9 @@ GBufferPixel NaiveRayTracer::SampleLightRay(Ray ray, Sampler* sampler) {
             break;
         }
 
-        ProceduralMaterial* material = m_sceneSnapshot->GetMaterial(intr.materialIndex);
+        Material& material = m_sceneSnapshot->GetMaterial(intr.materialIndex);
 
-        if (IsNonSpecular(material->Flags())) {
+        if (IsNonSpecular(material.Flags())) {
             Spectrum Ld = SampleLd(intr, material, sampler, pixel);
             L += beta * Ld;
         }
@@ -178,14 +178,14 @@ GBufferPixel NaiveRayTracer::SampleLightRay(Ray ray, Sampler* sampler) {
     return pixel;
 }
 
-MaterialSample NaiveRayTracer::SampleMaterial(ProceduralMaterial* material, RayInteraction& inter, Vec3 wo, Vec3 wi) {
+MaterialSample NaiveRayTracer::SampleMaterial(const Material& material, RayInteraction& inter, Vec3 wo, Vec3 wi) {
     Frame frame = Frame::FromZ(inter.normal);
     Vec3 woLocal = frame.ToLocal(wo);
     Vec3 wiLocal = frame.ToLocal(wi);
     if (!SameHemisphere(woLocal, wiLocal)) {
         return { Spectrum(0), wi, 0 };
     }
-    Spectrum f = material->m_albedo->Sample(inter.uv) * InvPi;
+    Spectrum f = material.m_albedoTexture.Sample(inter.uv) * InvPi;
     Float pdf = CosineHemispherePDF(AbsCosTheta(wiLocal));
     return { f, wi, pdf };
 }
@@ -196,15 +196,15 @@ static Float Reflectance(Float cosine, Float refraction_index) {
     return r0 + (1.0f - r0) * glm::pow((1.0f - cosine), 5.0f);
 }
 
-MaterialSample NaiveRayTracer::SampleMaterial(ProceduralMaterial* material, RayInteraction& inter, Sampler* sampler) {
+MaterialSample NaiveRayTracer::SampleMaterial(const Material& material, RayInteraction& inter, Sampler* sampler) {
     Frame frame = Frame::FromZ(inter.normal);
     Vec3 wo = frame.ToLocal(inter.wo);
     Float transperencyTest = RandomFloat();
-    Float roughness = material->m_roughness->Sample(inter.uv);
-    if (transperencyTest < material->m_transparency) {
+    Float roughness = material.m_roughnessTexture.Sample(inter.uv);
+    if (transperencyTest < material.m_transparency) {
         // Transmission
-        Spectrum attenuation = material->m_albedo->Sample(inter.uv);
-        Float ri = glm::dot(inter.normal, inter.wo) > 0.0f ? (1.0f / material->m_refraction) : material->m_refraction;
+        Spectrum attenuation = material.m_albedoTexture.Sample(inter.uv);
+        Float ri = glm::dot(inter.normal, inter.wo) > 0.0f ? (1.0f / material.m_refraction) : material.m_refraction;
         Float cos_theta = CosTheta(wo);
         Float sin_theta = SinTheta(wo);
         bool cannot_refract = ri * sin_theta > 1.0;
@@ -215,13 +215,13 @@ MaterialSample NaiveRayTracer::SampleMaterial(ProceduralMaterial* material, RayI
             flags = BxDFFlags::SpecularReflection;
         }
         else {
-            wi = glm::refract(-wo, Vec3(0.0f, 0.0f, 1.0f), (Float)(glm::dot(inter.normal, inter.wo) > 0.0f ? (1.0f / material->m_refraction) : material->m_refraction));
+            wi = glm::refract(-wo, Vec3(0.0f, 0.0f, 1.0f), (Float)(glm::dot(inter.normal, inter.wo) > 0.0f ? (1.0f / material.m_refraction) : material.m_refraction));
             flags = BxDFFlags::SpecularTransmission;
         }
         if (wi == Vec3(0.0f)) {
             return { Spectrum(0.0f), frame.FromLocal(wi), 0 };
         }
-        return { Spectrum(1.0f), frame.FromLocal(wi), material->m_transparency, flags };
+        return { Spectrum(1.0f), frame.FromLocal(wi), material.m_transparency, flags };
     }
     else {
         Vec3 wi = Vec3(-wo.x, -wo.y, wo.z);
@@ -234,12 +234,12 @@ MaterialSample NaiveRayTracer::SampleMaterial(ProceduralMaterial* material, RayI
         if (scattered.z < 0) {
             scattered.z = -scattered.z;
         }
-        Spectrum f = material->m_albedo->Sample(inter.uv) / (1 + Pi * roughness);
-        return { f, frame.FromLocal(scattered), (1.0f - material->m_transparency) * 1.0f / (1.0f + roughness * Pi), BxDFFlags::DiffuseReflection};
+        Spectrum f = material.m_albedoTexture.Sample(inter.uv) / (1 + Pi * roughness);
+        return { f, frame.FromLocal(scattered), (1.0f - material.m_transparency) * 1.0f / (1.0f + roughness * Pi), BxDFFlags::DiffuseReflection};
     }
 }
 
-Spectrum NaiveRayTracer::SampleLd(RayInteraction& intr, ProceduralMaterial* material, Sampler* sampler, GBufferPixel& pixel) {
+Spectrum NaiveRayTracer::SampleLd(RayInteraction& intr, const Material& material, Sampler* sampler, GBufferPixel& pixel) {
     std::optional<SampledLight> sampledLight = m_lightSampler->Sample(sampler->Get1D());
     if (!sampledLight) {
         return Spectrum();

@@ -330,10 +330,7 @@ public:
 		m_program.SetUniform3f("albedo", material->m_albedo.GetRGB());
 		m_program.SetUniform1f("metallic", material->m_metallic);
 		m_program.SetUniform1f("roughness", material->m_roughness);
-		m_program.SetUniform1i("useDiffuseMap", material->m_albedoTexture != nullptr);
-		if (material->m_albedoTexture) {
-			m_program.SetTexture("albedoTexture", material->m_albedoTexture->id, 6);
-		}
+		m_program.SetTexture("albedoTexture", material->m_albedoTexture.GetID(), 6);
 	}
 
 protected:

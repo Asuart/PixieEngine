@@ -47,10 +47,10 @@ protected:
 	std::chrono::microseconds m_renderStartTime = std::chrono::microseconds(0);
 	std::chrono::microseconds m_sampleStartTime = std::chrono::microseconds(0);
 	std::chrono::microseconds m_lastSampleTime = std::chrono::microseconds(0);
-	Texture<Float> m_boxTestsTexture;
-	Texture<Float> m_shapeTestsTexture;
-	Texture<Vec3> m_normalTexture;
-	Texture<Float> m_depthTexture;
+	Buffer2DTexture<Float> m_boxTestsTexture;
+	Buffer2DTexture<Float> m_shapeTestsTexture;
+	Buffer2DTexture<Vec3> m_normalTexture;
+	Buffer2DTexture<Float> m_depthTexture;
 
 	void GenerateTiles();
 	void ResetTileQueue();

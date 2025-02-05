@@ -4,7 +4,7 @@
 #include "Samplers.h"
 #include "LightSamplers.h"
 #include "GBufferPixel.h"
-#include "ProceduralMaterial.h"
+#include "MaterialSample.h"
 
 class SceneSnapshot;
 
@@ -53,9 +53,9 @@ public:
 protected:
 	LightSampler* m_lightSampler = nullptr;
 
-	MaterialSample SampleMaterial(ProceduralMaterial* material, RayInteraction& inter, Vec3 wo, Vec3 wi);
-	MaterialSample SampleMaterial(ProceduralMaterial* material, RayInteraction& inter, Sampler* sampler);
-	Spectrum SampleLd(RayInteraction& intr, ProceduralMaterial* material, Sampler* sampler, GBufferPixel& pixel);
+	MaterialSample SampleMaterial(const Material& material, RayInteraction& inter, Vec3 wo, Vec3 wi);
+	MaterialSample SampleMaterial(const Material& material, RayInteraction& inter, Sampler* sampler);
+	Spectrum SampleLd(RayInteraction& intr, const Material& material, Sampler* sampler, GBufferPixel& pixel);
 };
 
 class VolumetricRayTracer : public RayTracer {

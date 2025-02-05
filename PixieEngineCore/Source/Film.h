@@ -1,10 +1,10 @@
 #pragma once
-#include "Texture.h"
+#include "Buffer2DTexture.h"
 #include "FilmFilters.h"
 
 class Film {
 public:
-	Texture<glm::fvec4>* texture;
+	Buffer2DTexture<Vec4> m_texture;
 	glm::ivec2 m_resolution;
 	Vec2 m_pixelSize;
 	FilmFilter* m_filter;

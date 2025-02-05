@@ -5,6 +5,7 @@
 #include "MeshAnimator.h"
 #include "MeshAnimatorComponent.h"
 #include "Shader.h"
+#include "Buffer2DTexture.h"
 
 enum class ResourceType : int32_t {
 	Scene,
@@ -33,13 +34,13 @@ public:
 	static std::filesystem::path GetApplicationPath();
 	static std::filesystem::path GetApplicationDirectory();
 	static std::filesystem::path GetAssetsPath();
-	static void SetAssetsPath(std::filesystem::path path);
+	static void SetAssetsPath(const std::filesystem::path& path);
 	static void Initialize();
-	static std::shared_ptr<Scene> LoadScene(std::filesystem::path filePath);
-	static bool SaveScene(std::filesystem::path filePath, Scene* scene);
-	static SceneObject* LoadModel(std::filesystem::path filePath);
-	static Texture<Vec3>* LoadRGBTexture(std::filesystem::path filePath);
-	static Texture<Vec4>* LoadRGBATexture(std::filesystem::path filePath);
+	static std::shared_ptr<Scene> LoadScene(const std::filesystem::path& filePath);
+	static bool SaveScene(const std::filesystem::path& filePath, Scene* scene);
+	static SceneObject* LoadModel(const std::filesystem::path& filePath);
+	static Texture LoadTexture(const std::filesystem::path& filePath);
+	static Buffer2DTexture<Vec3> LoadRGBBuffer2DTexture(const std::filesystem::path& filePath);
 	static Material* GetDefaultMaterial();
 	static Material* AddMaterial(const Material& material);
 	static Material* GetMaterial(uint32_t index);
@@ -62,22 +63,21 @@ protected:
 	static std::filesystem::path m_applicationPath;
 	static std::filesystem::path m_currentFilePath;
 	static std::filesystem::path m_assetsPath;
-	static std::map<std::filesystem::path, SceneObject*> m_Models;
-	static std::map<std::filesystem::path, Texture<Vec3>*> m_RGBTextures;
-	static std::map<std::filesystem::path, Texture<Vec4>*> m_RGBATextures;
+	static std::map<std::filesystem::path, SceneObject*> m_models;
+	static std::map<std::filesystem::path, Texture> m_textures;
 	static std::vector<Material> m_materials;
 	static std::vector<Mesh*> m_meshes;
 	static std::map<char, FontCharacter> m_characters;
 	static uint32_t m_defaultFontSize;
 
-	static bool CheckFileExtensionSupport(std::filesystem::path filePath, ResourceType type);
-	static std::shared_ptr<Scene> LoadPixieEngineScene(std::filesystem::path path);
-	static std::shared_ptr<Scene> LoadPBRTScene(std::filesystem::path filePath);
+	static bool CheckFileExtensionSupport(const std::filesystem::path& filePath, ResourceType type);
+	static std::shared_ptr<Scene> LoadPixieEngineScene(const std::filesystem::path& path);
+	static std::shared_ptr<Scene> LoadPBRTScene(const std::filesystem::path& filePath);
 	static SceneObject* ProcessAssimpNode(const aiScene* scene, const aiNode* node, std::map<std::string, BoneInfo>& boneInfoMap);
 	static std::vector<Bone> ProcessAssimpAnimation(const aiAnimation* animation, std::map<std::string, BoneInfo>& boneInfoMap);
 	static Mesh* ProcessAssimpMesh(const aiMesh* mesh, std::map<std::string, BoneInfo>& boneInfoMap);
 	static Material* ProcessAssimpMaterial(const aiMaterial* material);
-	static std::vector<Texture<Vec3>*> ProcessAssimpMaterialTextures(const aiMaterial* material, aiTextureType type, const std::string& name);
+	static std::vector<Buffer2DTexture<Vec3>> ProcessAssimpMaterialTextures(const aiMaterial* material, aiTextureType type, const std::string& name);
 	static std::vector<std::string> SplitPBRTFileLine(const std::string& line);
 	static Float StringToFloat(const std::string& str);
 	static Material* FindMaterial(const std::string& name);

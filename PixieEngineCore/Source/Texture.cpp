@@ -1,40 +1,85 @@
 #include "pch.h"
 #include "Texture.h"
 
-template <>
-Texture<Vec3>::Texture(int32_t width, int32_t height, uint8_t* data, int32_t numChannels) :
-	resolution(width, height), pixels(width * height) {
-	for (int32_t i = 0; i < pixels.size(); i++) {
-		pixels[i] = Vec3(data[i * numChannels + 0], data[i * numChannels + 1], data[i * numChannels + 2]) / 255.0f;
+std::map<GLuint, std::atomic<uint32_t>> Texture::s_counters;
+
+Texture::Texture() {
+	glGenTextures(1, &m_id);
+	glBindTexture(GL_TEXTURE_2D, m_id);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	Texture::s_counters[m_id]++;
+}
+
+Texture::Texture(glm::ivec2 resolution, GLint internalFormat, GLenum format, GLenum type, GLint wrapS, GLint wrapT, GLint minFilter, GLint magFilter) :
+	m_resolution(resolution), m_internalFormat(internalFormat), m_format(format), m_type(type) {
+	glGenTextures(1, &m_id);
+	glBindTexture(GL_TEXTURE_2D, m_id);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	Texture::s_counters[m_id]++;
+}
+
+Texture::~Texture() {
+	Texture::s_counters[m_id]--;
+	if (Texture::s_counters[m_id] == 0) {
+		glDeleteTextures(1, &m_id);
 	}
-	Upload();
 }
 
-template <>
-Texture<Vec4>::Texture(int32_t width, int32_t height, uint8_t* data, int32_t numChannels) :
-	resolution(width, height), pixels(width * height) {
-	for (int32_t i = 0; i < pixels.size(); i++) {
-		pixels[i] = Vec4(data[i * numChannels + 0], data[i * numChannels + 1], data[i * numChannels + 2], data[i * numChannels + 3]) / 255.0f;
+Texture::Texture(const Texture& other) {
+	m_id = other.m_id;
+	m_resolution = other.m_resolution;
+	m_internalFormat = other.m_internalFormat;
+	m_format = other.m_format;
+	m_type = other.m_type;
+	Texture::s_counters[m_id]++;
+}
+
+Texture& Texture::operator= (const Texture& other) {
+	if (m_id != other.m_id) {
+		Texture::s_counters[m_id]--;
+		if (Texture::s_counters[m_id] == 0) {
+			glDeleteTextures(1, &m_id);
+		}
 	}
-	Upload();
+	m_id = other.m_id;
+	m_resolution = other.m_resolution;
+	m_internalFormat = other.m_internalFormat;
+	m_format = other.m_format;
+	m_type = other.m_type;
+	Texture::s_counters[m_id]++;
+	return *this;
 }
 
-template <>
-void Texture<glm::fvec3>::TexImage2D() {
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, resolution.x, resolution.y, 0, GL_RGB, GL_FLOAT, &pixels[0]);
+void Texture::SetWrap(GLint wrapS, GLint wrapT) {
+	glBindTexture(GL_TEXTURE_2D, m_id);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-template <>
-void Texture<glm::fvec4>::TexImage2D() {
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, resolution.x, resolution.y, 0, GL_RGBA, GL_FLOAT, &pixels[0]);
+void Texture::SetFilters(GLint minFilter, GLint magFilter) {
+	glBindTexture(GL_TEXTURE_2D, m_id);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-template <>
-void Texture<Spectrum>::TexImage2D() {
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, resolution.x, resolution.y, 0, GL_RGB, GL_FLOAT_TYPE, &pixels[0]);
+void Texture::SetMinFilter(GLint minFilter) {
+	glBindTexture(GL_TEXTURE_2D, m_id);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-template <>
-void Texture<float>::TexImage2D() {
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, resolution.x, resolution.y, 0, GL_RED, GL_FLOAT, &pixels[0]);
+void Texture::SetMagFilter(GLint magFilter) {
+	glBindTexture(GL_TEXTURE_2D, m_id);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }

@@ -99,10 +99,7 @@ void ForwardRenderer::SetupMaterial(Material* material) {
 	m_defaultShader.SetUniform3f("albedo", material->m_albedo.GetRGB());
 	m_defaultShader.SetUniform1f("metallic", material->m_metallic);
 	m_defaultShader.SetUniform1f("roughness", material->m_roughness);
-	m_defaultShader.SetUniform1i("useDiffuseMap", material->m_albedoTexture != nullptr);
-	if (material->m_albedoTexture) {
-		m_defaultShader.SetTexture("albedoTexture", material->m_albedoTexture->id, 0);
-	}
+	m_defaultShader.SetTexture("albedoTexture", material->m_albedoTexture.GetID(), 0);
 }
 
 GLuint ForwardRenderer::LoadLTCTexture(const Float* matrixTable) {

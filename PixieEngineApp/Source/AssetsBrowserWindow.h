@@ -12,7 +12,7 @@ public:
 protected:
 	float m_thumbnailSize = 96.0f;
 	float m_thumbnailPadding = 12.0f;
-	GLuint m_fileIcon = 0;
-	GLuint m_folderIcon = 0;
-	GLuint m_parentFolderIcon = 0;
+	Texture m_fileIcon;
+	Texture m_folderIcon;
+	Texture m_parentFolderIcon;
 };

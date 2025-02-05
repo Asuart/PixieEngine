@@ -188,7 +188,7 @@ protected:
 			// Scele viewport
 			if (UserInput::mouseScrollY) {
 				Float initilScale = m_viewScale;
-				m_viewScale -= UserInput::mouseScrollY * 0.1f;
+				m_viewScale -= (Float)UserInput::mouseScrollY * 0.1f;
 				m_viewScale = glm::clamp(m_viewScale, minViewScale, maxViewScale);
 				m_viewOffset += (m_cursorViewportPosition) * (initilScale - m_viewScale);
 				return;
@@ -265,7 +265,7 @@ protected:
 			// Scale viewport
 			if (UserInput::mouseScrollY) {
 				Float initilScale = m_viewScale;
-				m_viewScale -= UserInput::mouseScrollY * 0.1f;
+				m_viewScale -= (Float)UserInput::mouseScrollY * 0.1f;
 				m_viewScale = glm::clamp(m_viewScale, minViewScale, maxViewScale);
 				m_viewOffset += (m_cursorViewportPosition) * (initilScale - m_viewScale);
 				return;
@@ -330,12 +330,12 @@ protected:
 				break;
 			}
 		}
-		delete c;
 		for (int32_t i = 0; i < m_shaderGraph.m_connections.size(); i++) {
 			if (m_shaderGraph.m_connections[i] == c) {
 				m_shaderGraph.m_connections.erase(m_shaderGraph.m_connections.begin() + i);
 				break;
 			}
 		}
+		delete c;
 	}
 };

@@ -142,10 +142,7 @@ void DefferedRenderer::SetupMaterial(Material* material) {
 	m_shader.SetUniform3f("albedo", material->m_albedo.GetRGB());
 	m_shader.SetUniform1f("metallic", material->m_metallic);
 	m_shader.SetUniform1f("roughness", material->m_roughness);
-	m_shader.SetUniform1i("useDiffuseMap", material->m_albedoTexture != nullptr);
-	if (material->m_albedoTexture) {
-		m_shader.SetTexture("albedoTexture", material->m_albedoTexture->id, 3);
-	}
+	m_shader.SetTexture("albedoTexture", material->m_albedoTexture.GetID(), 3);
 }
 
 GLuint DefferedRenderer::LoadLTCTexture(const float* matrixTable) {

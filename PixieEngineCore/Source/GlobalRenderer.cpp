@@ -94,7 +94,7 @@ void GlobalRenderer::DrawText(const std::string& text, Vec2 position, Float font
 
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
-
+	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 }
 
