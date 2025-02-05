@@ -13,3 +13,5 @@
 #include "AreaLightComponent.h"
 #include "Shapes.h"
 #include "SceneGenerator.h"
+#include "ShaderGraph/ShaderGraph.h"
+#include "ShaderGraph/Nodes/Nodes.h"

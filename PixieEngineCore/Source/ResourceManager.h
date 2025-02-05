@@ -58,6 +58,7 @@ public:
 	static ComputeShader CompileComputeShader(const char* computeSource);
 	static const FontCharacter& GetFontCharacter(char c);
 	static uint32_t GetDefaultFontSize();
+	static void FreeTextures();
 
 protected:
 	static std::filesystem::path m_applicationPath;

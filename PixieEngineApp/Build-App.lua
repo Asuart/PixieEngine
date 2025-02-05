@@ -24,8 +24,9 @@ project "PixieEngineApp"
    includedirs
    {
       "Source",
+      "Source/Interface",
+      "Source/Interface/Windows",
       "../PixieEngineCore/Source",
-      "../PixieEngineCore/Source/shaders",
       "../Dependencies/glad/include",
       "../Dependencies",
       "../Dependencies/imgui",

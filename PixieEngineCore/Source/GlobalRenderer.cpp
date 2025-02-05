@@ -56,8 +56,6 @@ void GlobalRenderer::DrawAccumulatorTexture(GLuint id, int32_t samples, Vec2 pos
 }
 
 void GlobalRenderer::DrawText(const std::string& text, Vec2 position, Float fontSize, Vec3 color, Mat4 projection, bool rightToLeft) {
-	glEnable(GL_BLEND);
-	glDisable(GL_DEPTH_TEST);
 	glActiveTexture(GL_TEXTURE0);
 
 	m_textShader.Bind();
@@ -91,11 +89,8 @@ void GlobalRenderer::DrawText(const std::string& text, Vec2 position, Float font
 		position.x += (ch.advance >> 6) * scale;
 	}
 
-
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_BLEND);
 }
 
 void GlobalRenderer::DrawUIBox(Vec2 position, Vec2 size, Vec4 baseColor, Float borderRadius, Float borderWidth, Vec4 borderColor, Mat4 projection) {

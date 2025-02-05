@@ -27,9 +27,11 @@ Texture::Texture(glm::ivec2 resolution, GLint internalFormat, GLenum format, GLe
 }
 
 Texture::~Texture() {
-	Texture::s_counters[m_id]--;
-	if (Texture::s_counters[m_id] == 0) {
-		glDeleteTextures(1, &m_id);
+	if (!Texture::s_counters.empty()) {
+		Texture::s_counters[m_id]--;
+		if (Texture::s_counters[m_id] == 0) {
+			glDeleteTextures(1, &m_id);
+		}
 	}
 }
 

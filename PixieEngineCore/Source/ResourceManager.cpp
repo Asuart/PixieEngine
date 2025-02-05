@@ -953,6 +953,13 @@ uint32_t ResourceManager::GetDefaultFontSize() {
 	return m_defaultFontSize;
 }
 
+void ResourceManager::FreeTextures() {
+	for (auto it = Texture::s_counters.begin(); it != Texture::s_counters.end(); it++) {
+		glDeleteTextures(1, &it->first);
+	}
+	Texture::s_counters.clear();
+}
+
 void ResourceManager::LoadDefaultFont() {
 	const std::string fontsPath = GetApplicationDirectory().string() + std::string("/Resources/Fonts/");
 	FT_Library ft;

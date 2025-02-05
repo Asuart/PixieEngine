@@ -19,7 +19,8 @@ project "PixieEngineCore"
    includedirs
    {
       "Source",
-      "Source/shaders",
+      "Source/ShaderGraph",
+      "Source/ShaderGraph/Nodes",
       "../Dependencies/glm",
       "../Dependencies/glad/include",
       "../Dependencies/stb",

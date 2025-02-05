@@ -24,4 +24,6 @@ struct Texture {
 
 protected:
 	static std::map<GLuint, std::atomic<uint32_t>> s_counters;
+
+	friend class ResourceManager;
 };
