@@ -10,6 +10,8 @@ Texture::Texture() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	constexpr Vec4 defaultTextureData(1.0f, 1.0f, 1.0f, 1.0f);
+	glTexImage2D(GL_TEXTURE_2D, 0, m_internalFormat, m_resolution.x, m_resolution.y, 0, m_format, m_type, &defaultTextureData[0]);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	Texture::s_counters[m_id]++;
 }

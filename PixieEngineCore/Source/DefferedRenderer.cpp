@@ -142,5 +142,5 @@ void DefferedRenderer::SetupMaterial(Material* material) {
 	m_shader.SetUniform3f("albedo", material->m_albedo.GetRGB());
 	m_shader.SetUniform1f("metallic", material->m_metallic);
 	m_shader.SetUniform1f("roughness", material->m_roughness);
-	m_shader.SetTexture("albedoTexture", material->m_albedoTexture.GetID(), 3);
+	m_shader.SetTexture("albedoTexture", material->m_albedoTexture.GetID(), 4);
 }

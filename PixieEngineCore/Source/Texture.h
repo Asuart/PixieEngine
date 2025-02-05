@@ -5,7 +5,7 @@
 
 struct Texture {
 	GLuint m_id = 0;
-	glm::ivec2 m_resolution = { 0, 0 };
+	glm::ivec2 m_resolution = { 1, 1 };
 	GLint m_internalFormat = GL_RGBA;
 	GLenum m_format = GL_RGBA;
 	GLenum m_type = GL_FLOAT;

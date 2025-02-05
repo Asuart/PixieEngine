@@ -160,10 +160,13 @@ Texture ResourceManager::LoadTexture(const std::filesystem::path& filePath) {
 		return m_textures[filePath];
 	}
 	int32_t width, height, nrChannels;
-	uint8_t* data = stbi_load(fullPath.string().c_str(), &width, &height, &nrChannels, 0);
+	uint8_t* data = stbi_load(filePath.string().c_str(), &width, &height, &nrChannels, 0);
 	if (!data) {
-		std::cout << "  Error: Failed to load texture.\n";
-		return Texture();
+		data = stbi_load(fullPath.string().c_str(), &width, &height, &nrChannels, 0);
+		if (!data) {
+			std::cout << "  Error: Failed to load texture.\n";
+			return Texture();
+		}
 	}
 	switch (nrChannels) {
 	case 1: {
@@ -198,13 +201,16 @@ Texture ResourceManager::LoadTexture(const std::filesystem::path& filePath) {
 }
 
 Buffer2DTexture<Vec3> ResourceManager::LoadRGBBuffer2DTexture(const std::filesystem::path& filePath) {
-	std::filesystem::path fullPath = GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
 	std::cout << "  Loading texture: " << filePath << "\n";
 	int32_t width, height, nrChannels;
-	uint8_t* data = stbi_load(fullPath.string().c_str(), &width, &height, &nrChannels, 0);
+	uint8_t* data = stbi_load(filePath.string().c_str(), &width, &height, &nrChannels, 0);
 	if (!data) {
-		std::cout << "  Error: Failed to load texture.\n";
-		return Buffer2DTexture<Vec3>();
+		std::filesystem::path fullPath = GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
+		data = stbi_load(fullPath.string().c_str(), &width, &height, &nrChannels, 0);
+		if (!data) {
+			std::cout << "  Error: Failed to load texture.\n";
+			return Buffer2DTexture<Vec3>();
+		}
 	}
 	switch (nrChannels) {
 	case 1: {

@@ -11,17 +11,14 @@ void ComponentRenderer::DrawTransform(Transform& transform, bool showHead, bool 
 		Vec3 position = transform.GetPosition();
 		if (ImGui::DragScalarN("Position", ImGuiFloat, &position, 3, 0.01f, &minPosition, &maxPosition)) {
 			transform.SetPosition(position);
-			SceneManager::UpdateSceneSnapshot();
 		}
 		Vec3 rotation = transform.GetEulerRotation();
 		if (ImGui::DragScalarN("Rotation", ImGuiFloat, &rotation, 3, 0.1f, &minRotation, &maxRotation)) {
 			transform.SetEulerRotation(rotation);
-			SceneManager::UpdateSceneSnapshot();
 		}
 		Vec3 scale = transform.GetScale();
 		if (ImGui::DragScalarN("Scale", ImGuiFloat, &scale, 3, 0.01f, &minScale, &maxScale)) {
 			transform.SetScale(scale);
-			SceneManager::UpdateSceneSnapshot();
 		}
 	}
 }
@@ -36,28 +33,16 @@ void ComponentRenderer::DrawMaterial(Material* material, bool showHead, bool def
 		glm::fvec3 albedoEditBuffer = material->m_albedo.GetRGB();
 		if (ImGui::ColorEdit3("Albedo", &albedoEditBuffer[0])) {
 			material->m_albedo.SetRGB((Vec3)albedoEditBuffer);
-			SceneManager::UpdateSceneSnapshot();
 		}
 		glm::fvec3 emissionColorEditBuffer = material->m_emissionColor.GetRGB();
 		if (ImGui::ColorEdit3("Emission Color", &emissionColorEditBuffer[0])) {
 			material->m_emissionColor.SetRGB((Vec3)emissionColorEditBuffer);
-			SceneManager::UpdateSceneSnapshot();
 		}
-		if (ImGui::DragScalar("Emission Strength", ImGuiFloat, &material->m_emissionStrength)) {
-			SceneManager::UpdateSceneSnapshot();
-		}
-		if (ImGui::DragScalar("Roughness", ImGuiFloat, &material->m_roughness, 0.01f, &minZero, &maxOne)) {
-			SceneManager::UpdateSceneSnapshot();
-		}
-		if (ImGui::DragScalar("Metallic", ImGuiFloat, &material->m_metallic, 0.01f, &minZero, &maxOne)) {
-			SceneManager::UpdateSceneSnapshot();
-		}
-		if (ImGui::DragScalar("Transparency", ImGuiFloat, &material->m_transparency, 0.01f, &minZero, &maxOne)) {
-			SceneManager::UpdateSceneSnapshot();
-		}
-		if (ImGui::DragScalar("Refraction", ImGuiFloat, &material->m_refraction, 0.01f, &minZero, &maxTen)) {
-			SceneManager::UpdateSceneSnapshot();
-		}
+		ImGui::DragScalar("Emission Strength", ImGuiFloat, &material->m_emissionStrength);
+		ImGui::DragScalar("Roughness", ImGuiFloat, &material->m_roughness, 0.01f, &minZero, &maxOne);
+		ImGui::DragScalar("Metallic", ImGuiFloat, &material->m_metallic, 0.01f, &minZero, &maxOne);
+		ImGui::DragScalar("Transparency", ImGuiFloat, &material->m_transparency, 0.01f, &minZero, &maxOne);
+		ImGui::DragScalar("Refraction", ImGuiFloat, &material->m_refraction, 0.01f, &minZero, &maxTen);
 	}
 }
 

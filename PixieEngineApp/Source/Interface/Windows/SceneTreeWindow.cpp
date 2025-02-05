@@ -8,12 +8,12 @@ SceneTreeWindow::SceneTreeWindow(PixieEngineApp& app, Interface& inter) :
 void SceneTreeWindow::Draw() {
 	ImGui::SetNextWindowSize(ImVec2(400, 400));
 	if (ImGui::Begin("Scene", 0)) {
+		if (ImGui::IsWindowFocused()) {
+			HandleUserInput();
+		}
 		Scene* scene = SceneManager::GetScene().get();
 		if (scene) {
 			DrawSceneTree(scene->GetRootObject());
-		}
-		if (ImGui::IsWindowFocused()) {
-			HandleUserInput();
 		}
 	}
 	ImGui::End();

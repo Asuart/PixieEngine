@@ -13,8 +13,6 @@ in vec3 fNormal;
 uniform vec3 albedo;
 uniform float metallic;
 uniform float roughness;
-
-uniform int useDiffuseMap;
 uniform sampler2D albedoTexture;
 
 const float gamma = 2.2;
@@ -35,10 +33,7 @@ void main() {
     gMetallic = metallic;
 
     float mSpecular = pow(0.23f, gamma);
-	vec3 mDiffuse = albedo;
-	if(useDiffuseMap == 1) {
-		mDiffuse *= texture(albedoTexture, fTexCoords).xyz;
-	}
+	vec3 mDiffuse = albedo * texture(albedoTexture, fTexCoords).xyz;
     gAlbedo = mDiffuse;
     gSpecular = mSpecular;
 }  

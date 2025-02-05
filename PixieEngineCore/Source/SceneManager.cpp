@@ -34,10 +34,6 @@ void SceneManager::LoadScene(const std::filesystem::path& filePath) {
 void SceneManager::LoadModel(const std::filesystem::path& filePath) {
 	if (!m_activeScene) return;
 	SceneObject* object = ResourceManager::LoadModel(filePath);
-	if (!object) {
-		return;
-	}
-	m_activeScene->m_rootObject->m_children.push_back(object);
 }
 
 void SceneManager::ReloadScene() {
@@ -154,6 +150,27 @@ std::vector<SceneObject*> SceneManager::FindObjectsWithComponent(ComponentType t
 
 void SceneManager::RemoveComponent(Component* component) {
 	if (!component || !component->m_parent) return;
+	if (component->type == ComponentType::PointLight) {
+		for (size_t i = 0; i < m_activeScene->m_pointLights.size(); i++) {
+			if (m_activeScene->m_pointLights[i] == component) {
+				m_activeScene->m_pointLights.erase(m_activeScene->m_pointLights.begin() + i);
+			}
+		}
+	}
+	else if (component->type == ComponentType::DiffuseAreaLight) {
+		for (size_t i = 0; i < m_activeScene->m_areaLights.size(); i++) {
+			if (m_activeScene->m_areaLights[i] == component) {
+				m_activeScene->m_areaLights.erase(m_activeScene->m_areaLights.begin() + i);
+			}
+		}
+	}
+	else if (component->type == ComponentType::DirectionalLight) {
+		for (size_t i = 0; i < m_activeScene->m_directionalLights.size(); i++) {
+			if (m_activeScene->m_directionalLights[i] == component) {
+				m_activeScene->m_directionalLights.erase(m_activeScene->m_directionalLights.begin() + i);
+			}
+		}
+	}
 	for (int32_t i = 0; i < component->m_parent->m_components.size(); i++) {
 		if (component->m_parent->m_components[i] == component) {
 			component->m_parent->m_components.erase(component->m_parent->m_components.begin() + i);
@@ -185,8 +202,29 @@ void SceneManager::UpdateSceneSnapshot() {
 }
 
 void SceneManager::RemoveSelectedObject() {
-	if (!m_selectedObject || (m_activeScene && m_selectedObject == m_activeScene->GetRootObject())) {
+	if (!m_selectedObject || !m_activeScene || m_selectedObject == m_activeScene->GetRootObject()) {
 		return;
 	}
-	UpdateSceneSnapshot();
+	for (size_t i = 0; i < m_selectedObject->m_parent->m_children.size(); i++) {
+		if (m_selectedObject->m_parent->m_children[i] == m_selectedObject) {
+			m_selectedObject->m_parent->m_children.erase(m_selectedObject->m_parent->m_children.begin() + i);
+			break;
+		}
+	}
+	std::queue<SceneObject*> objectsList;
+	objectsList.push(m_selectedObject);
+	m_selectedObject = nullptr;
+	while (objectsList.size() > 0) {
+		SceneObject* obj = objectsList.front();
+		objectsList.pop();
+		for (size_t i = 0; i < obj->m_children.size(); i++) {
+			objectsList.push(obj->m_children[i]);
+		}
+		while (obj->m_components.size() > 0) {
+			RemoveComponent(obj->m_components.back());
+		}
+		delete obj;
+	}
 }
+
+
