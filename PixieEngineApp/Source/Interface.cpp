@@ -11,7 +11,7 @@
 #include "ShaderGraphWindow.h"
 
 Interface::Interface(PixieEngineApp& app) :
-	m_app(app) {}
+	m_app(app), m_menu(app, *this) {}
 
 Interface::~Interface() {
 	ImGui_ImplOpenGL3_Shutdown();
@@ -78,45 +78,7 @@ void Interface::Draw() {
 	ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
 	ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspaceFlags);
 
-	if (ImGui::BeginMenuBar()) {
-		if (ImGui::BeginMenu("File")) {
-			if (ImGui::MenuItem("Close")) {
-				glfwSetWindowShouldClose(m_app.m_mainWindow.GetGLFWWindow(), true);
-			}
-			ImGui::EndMenu();
-		}
-		if (ImGui::BeginMenu("Test Scenes")) {
-			if (ImGui::MenuItem("Empty Scene")) {
-				SceneGenerator::CreateScene(GeneratedScene::Empty);
-			}
-			if (ImGui::MenuItem("Demo Sphere")) {
-				SceneGenerator::CreateScene(GeneratedScene::DemoSphere);
-			}
-			if (ImGui::MenuItem("Small And Big Spheres")) {
-				SceneGenerator::CreateScene(GeneratedScene::SmallAndBigSpheres);
-			}
-			if (ImGui::MenuItem("Test Materials")) {
-				SceneGenerator::CreateScene(GeneratedScene::TestMaterials);
-			}
-			if (ImGui::MenuItem("Randomized Spheres")) {
-				SceneGenerator::CreateScene(GeneratedScene::RandomizedSpheres);
-			}
-			ImGui::EndMenu();
-		}
-		if (ImGui::BeginMenu("Create Object")) {
-			if (ImGui::MenuItem("Sphere")) {
-				SceneGenerator::CreateObject(GeneratedObject::Sphere);
-			}
-			if (ImGui::MenuItem("Point Light")) {
-				SceneGenerator::CreateObject(GeneratedObject::PointLight);
-			}
-			if (ImGui::MenuItem("Directional Light")) {
-				SceneGenerator::CreateObject(GeneratedObject::DirectionalLight);
-			}
-			ImGui::EndMenu();
-		}
-		ImGui::EndMenuBar();
-	}
+	m_menu.Draw();
 
 	ImGui::ShowDemoWindow();
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "pch.h"
 #include "InterfaceWindow.h"
+#include "MainWindowMenu.h"
 
 class PixieEngineApp;
 
@@ -15,6 +16,7 @@ public:
 protected:
 	PixieEngineApp& m_app;
 	std::vector<InterfaceWindow*> m_openWindows;
+	MainWindowMenu m_menu;
 
 public:
 	template<typename T>

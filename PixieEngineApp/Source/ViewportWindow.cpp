@@ -76,7 +76,7 @@ ViewportWindow::ViewportWindow(PixieEngineApp& app, Interface& inter) :
 
 void ViewportWindow::Draw() {
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-	if (ImGui::Begin((std::string("Viewport##") + id.ToString()).c_str())) {
+	if (ImGui::Begin((std::string("Viewport##")).c_str())) {
 		if (ImGui::IsWindowFocused()) {
 			m_cameraController.Update();
 		}

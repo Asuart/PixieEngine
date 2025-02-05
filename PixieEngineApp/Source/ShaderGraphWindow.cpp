@@ -27,7 +27,7 @@ void ShaderNodeConnectionObject::UpdateTempMesh(Vec2 end) {
 
 void ShaderGraphWindow::Draw() {
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-	if (ImGui::Begin((std::string("ShaderGraph##") + id.ToString()).c_str())) {
+	if (ImGui::Begin((std::string("ShaderGraph##")).c_str())) {
 		if (ImGui::IsWindowFocused()) {
 			HandleUserInput();
 		}
