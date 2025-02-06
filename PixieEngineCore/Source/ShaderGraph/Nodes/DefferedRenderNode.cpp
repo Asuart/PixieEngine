@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "DefferedRenderNode.h"
+#include "SphereComponent.h"
 
 const glm::ivec2 initialResolution = { 1280, 720 };
-
 
 DefferedRenderNode::DefferedRenderNode() :
 	ShaderNode("Deffered Render"),
@@ -20,8 +20,7 @@ DefferedRenderNode::DefferedRenderNode() :
 	m_outputs.push_back({ *this, "Roughness", ShaderNodeIOType::textureR, &m_roughness });
 	m_outputs.push_back({ *this, "Depth", ShaderNodeIOType::textureR, &m_depth });
 
-	m_program = ResourceManager::LoadShader("DefferedRenderNodeVertexShader.glsl", "DefferedRenderNodeFragmentShader.glsl");
-
+	m_program = ResourceManager::LoadShader("DefferedRenderNode");
 
 	glGenFramebuffers(1, &m_frameBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer);
@@ -95,6 +94,15 @@ void DefferedRenderNode::DrawObject(SceneObject* object, Mat4 parentTransform) {
 		}
 		SetupMaterial(material);
 		mesh->Draw();
+	}
+	if (const SphereComponent* sphere = object->GetComponent<SphereComponent>()) {
+		m_program.SetUniformMat4f("mModel", glm::scale(objectTransform, Vec3(sphere->GetRadius())));
+		Material* material = ResourceManager::GetDefaultMaterial();
+		if (MaterialComponent* materialComponent = object->GetComponent<MaterialComponent>()) {
+			material = materialComponent->GetMaterial();
+		}
+		SetupMaterial(material);
+		sphere->Draw();
 	}
 	for (size_t i = 0; i < object->GetChildren().size(); i++) {
 		DrawObject(object->GetChild((int32_t)i), objectTransform);

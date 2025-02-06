@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "ViewportWindow.h"
+#include "GlobalRenderer.h"
 
 struct AlignedTriangle {
 	glm::fvec3 p0 = glm::fvec3(0.0f);
@@ -70,8 +71,8 @@ ViewportWindow::ViewportWindow(PixieEngineApp& app, Interface& inter) :
 	InterfaceWindow(app, inter), m_frameBuffer({ 1280, 720 }), m_vrFrameBuffer({1280, 720}),
 	m_viewportCamera(Vec3(-10, 0, 0), Vec3(0, 0, 0), Vec3(0, 1, 0), glm::radians(39.6f), { 1280, 720 }, 0, 100),
 	m_cameraController(m_viewportCamera), m_stereoscopicFrameBuffer({ 1280, 720 }) {
-	m_vrShader = ResourceManager::LoadShader("VRQuadVertexShader.glsl", "VRQuadFragmentShader.glsl");
-	m_stereoscopicShader = ResourceManager::LoadShader("StereoscopicQuadVertexShader.glsl", "StereoscopicQuadFragmentShader.glsl");
+	m_vrShader = ResourceManager::LoadShader("VRQuad");
+	m_stereoscopicShader = ResourceManager::LoadShader("StereoscopicQuad");
 }
 
 void ViewportWindow::Draw() {
@@ -117,7 +118,7 @@ void ViewportWindow::Draw() {
 					m_stereoscopicShader.SetUniform1f("uDistance", m_stereoscopicDistance);
 					m_stereoscopicShader.SetUniform3f("uBalance", m_stereoscopicBalance);
 					m_stereoscopicShader.SetUniform3f("uScale", m_stereoscopicScale);
-					ResourceManager::GetQuadMesh()->Draw();
+					GlobalRenderer::DrawMesh(ResourceManager::GetQuadMesh());
 					m_stereoscopicFrameBuffer.Unbind();
 				}
 				else {
@@ -133,7 +134,7 @@ void ViewportWindow::Draw() {
 					m_stereoscopicShader.SetUniform1f("uDistance", m_stereoscopicDistance);
 					m_stereoscopicShader.SetUniform3f("uBalance", m_stereoscopicBalance);
 					m_stereoscopicShader.SetUniform3f("uScale", m_stereoscopicScale);
-					ResourceManager::GetQuadMesh()->Draw();
+					GlobalRenderer::DrawMesh(ResourceManager::GetQuadMesh());
 					m_stereoscopicFrameBuffer.Unbind();
 				}
 
@@ -163,7 +164,7 @@ void ViewportWindow::Draw() {
 					m_vrShader.SetTexture("textureRight", m_secondaryDefferedRenderer.m_frameBuffer.m_texture, 1);
 					m_vrShader.SetUniform1f("uDistance", m_vrDistance);
 					m_vrShader.SetUniform1f("uK", m_vrDistortion);
-					ResourceManager::GetQuadMesh()->Draw();
+					GlobalRenderer::DrawMesh(ResourceManager::GetQuadMesh());
 					m_vrFrameBuffer.Unbind();
 				}
 				else {
@@ -178,7 +179,7 @@ void ViewportWindow::Draw() {
 					m_vrShader.SetTexture("textureRight", m_secondaryForwardRenderer.m_frameBuffer.m_texture, 1);
 					m_vrShader.SetUniform1f("uDistance", m_vrDistance);
 					m_vrShader.SetUniform1f("uK", m_vrDistortion);
-					ResourceManager::GetQuadMesh()->Draw();
+					GlobalRenderer::DrawMesh(ResourceManager::GetQuadMesh());
 					m_vrFrameBuffer.Unbind();
 				}
 

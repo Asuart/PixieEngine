@@ -58,7 +58,8 @@ public:
 	static bool IsValidModelPath(const std::filesystem::path& filePath);
 	static bool IsValidTexturePath(const std::filesystem::path& filePath);
 	static Mesh* GetQuadMesh();
-	static Mesh* GetQubeMesh();
+	static Mesh* GetCubeMesh();
+	static Mesh* GetSphereMesh();
 	static std::string ReadFile(const std::string& filePath);
 	static Shader LoadShader(const std::string& name);
 	static Shader LoadShader(const std::string& vertexName, const std::string& fragmentName);

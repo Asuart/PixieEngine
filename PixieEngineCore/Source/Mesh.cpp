@@ -61,22 +61,6 @@ Vec3 Mesh::GetCenter() const {
 	return min + (max - min) / (Float)2;
 }
 
-void Mesh::Draw() const {
-	if (!m_vao) return;
-	glBindVertexArray(m_vao);
-	glDrawElements(GL_TRIANGLES, m_indicesCount, GL_UNSIGNED_INT, NULL);
-	glBindVertexArray(0);
-}
-
-void Mesh::DrawWireframe() const {
-	if (!m_vao) return;
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glBindVertexArray(m_vao);
-	glDrawElements(GL_TRIANGLES, m_indicesCount, GL_UNSIGNED_INT, NULL);
-	glBindVertexArray(0);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-}
-
 void Mesh::Upload() {
 	if (m_vertices.size() == 0 || m_indices.size() == 0) {
 		return;
@@ -114,10 +98,6 @@ void Mesh::Upload() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	m_indicesCount = (uint32_t)m_indices.size();
-}
-
-void Mesh::Bind() const {
-	glBindVertexArray(m_vao);
 }
 
 void Mesh::FreeCPUData() {

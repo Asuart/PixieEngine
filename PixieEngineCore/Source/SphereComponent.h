@@ -6,7 +6,9 @@ class SphereComponent : public Component {
 public:
 	SphereComponent(SceneObject* parent, Float radius);
 
-	Float GetRadius();
+	void Draw() const;
+
+	Float GetRadius() const;
 	void SetRadius(Float radius);
 
 protected:

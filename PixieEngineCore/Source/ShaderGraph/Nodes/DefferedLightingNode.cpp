@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "DefferedLightingNode.h"
+#include "GlobalRenderer.h"
 
 const glm::ivec2 initialResolution = { 1280, 720 };
 
@@ -20,7 +21,7 @@ DefferedLightingNode::DefferedLightingNode() :
 
 	m_outputs.push_back({ *this, "Frame", ShaderNodeIOType::textureRGB, &m_frame });
 
-	m_program = ResourceManager::LoadShader("DefferedLightingNodeVertexShader.glsl", "DefferedLightingNodeFragmentShader.glsl");
+	m_program = ResourceManager::LoadShader("DefferedLightingNode");
 
 	glGenFramebuffers(1, &m_frameBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer);
@@ -48,7 +49,7 @@ void DefferedLightingNode::Process(const Scene& scene, const Camera& camera) {
 	m_program.SetTexture("LTC2", m_LTC2Texture.m_id, 7);
 	//m_program.SetTexture("ssaoTexture", m_ssaoBuffer.m_texture, 8);
 	SetupLights(scene);
-	ResourceManager::GetQuadMesh()->Draw();
+	GlobalRenderer::DrawMesh(ResourceManager::GetQuadMesh());
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// Restore original viewport

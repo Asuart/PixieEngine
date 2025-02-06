@@ -6,7 +6,7 @@ ForwardRenderer::ForwardRenderer() :
 	m_frameBuffer({1280, 720}),
 	m_LTC1Texture({ 64, 64 }, GL_RGBA, GL_RGBA, GL_FLOAT, (void*)LTC1, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_LINEAR),
 	m_LTC2Texture({ 64, 64 }, GL_RGBA, GL_RGBA, GL_FLOAT, (void*)LTC2, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_LINEAR) {
-	m_defaultShader = ResourceManager::LoadShader("PhysicallyBasedVertexShader.glsl", "PhysicallyBasedFragmentShader.glsl");
+	m_defaultShader = ResourceManager::LoadShader("PhysicallyBased");
 }
 
 void ForwardRenderer::DrawFrame(Scene* scene, Camera* camera) {
@@ -46,6 +46,15 @@ void ForwardRenderer::DrawObject(SceneObject* object, Mat4 parentTransform) {
 		}
 		SetupMaterial(material);
 		mesh->Draw();
+	}
+	if (const SphereComponent* sphere = object->GetComponent<SphereComponent>()) {
+		m_defaultShader.SetUniformMat4f("mModel", glm::scale(objectTransform, Vec3(sphere->GetRadius())));
+		Material* material = ResourceManager::GetDefaultMaterial();
+		if (MaterialComponent* materialComponent = object->GetComponent<MaterialComponent>()) {
+			material = materialComponent->GetMaterial();
+		}
+		SetupMaterial(material);
+		sphere->Draw();
 	}
 	for (size_t i = 0; i < object->GetChildren().size(); i++) {
 		DrawObject(object->GetChild((int32_t)i), objectTransform);

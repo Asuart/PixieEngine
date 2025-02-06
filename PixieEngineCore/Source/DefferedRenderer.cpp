@@ -7,10 +7,10 @@ DefferedRenderer::DefferedRenderer() :
 	m_LTC1Texture({ 64, 64 }, GL_RGBA, GL_RGBA, GL_FLOAT, (void*)LTC1, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_LINEAR),
 	m_LTC2Texture({ 64, 64 }, GL_RGBA, GL_RGBA, GL_FLOAT, (void*)LTC2, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_LINEAR),
 	m_noiseTexture(TextureGenerator::SSAONoiseTexture(SSAONoiseResolution)) {
-	m_shader = ResourceManager::LoadShader("DefferedVertexShader.glsl", "DefferedFragmentShader.glsl");
-	m_ssaoShader = ResourceManager::LoadShader("SSAOVertexShader.glsl", "SSAOFragmentShader.glsl");
-	m_ssaoBlurShader = ResourceManager::LoadShader("SSAOBlurVertexShader.glsl", "SSAOBlurFragmentShader.glsl");
-	m_lightingShader = ResourceManager::LoadShader("LightingPassVertexShader.glsl", "LightingPassFragmentShader.glsl");
+	m_shader = ResourceManager::LoadShader("Deffered");
+	m_ssaoShader = ResourceManager::LoadShader("SSAO");
+	m_ssaoBlurShader = ResourceManager::LoadShader("SSAOBlur");
+	m_lightingShader = ResourceManager::LoadShader("LightingPass");
 }
 
 void DefferedRenderer::DrawFrame(Scene* scene, Camera* camera) {
@@ -44,7 +44,7 @@ void DefferedRenderer::DrawFrame(Scene* scene, Camera* camera) {
 	m_ssaoShader.SetTexture("noiseTexture", m_noiseTexture.m_id, 3);
 	m_ssaoShader.SetUniform2f("noiseScale", Vec2(camera->GetResolution()) / Vec2(SSAONoiseResolution));
 	m_ssaoShader.SetUniform3f("cameraPos", camera->GetTransform().GetPosition());
-	ResourceManager::GetQuadMesh()->Draw();
+	GlobalRenderer::DrawMesh(ResourceManager::GetQuadMesh());
 	m_ssaoBuffer.Unbind();
 
 	// Blur SSAO Texture
@@ -55,7 +55,7 @@ void DefferedRenderer::DrawFrame(Scene* scene, Camera* camera) {
 	m_ssaoBlurShader.Bind();
 	m_ssaoBlurShader.SetTexture("inputTexture", m_ssaoBuffer.m_texture, 0);
 	m_ssaoBlurShader.SetUniform1i("uBlurRange", 2);
-	ResourceManager::GetQuadMesh()->Draw();
+	GlobalRenderer::DrawMesh(ResourceManager::GetQuadMesh());
 	m_ssaoBlurBuffer.Unbind();
 
 	// Lighting Pass
@@ -72,7 +72,7 @@ void DefferedRenderer::DrawFrame(Scene* scene, Camera* camera) {
 	m_lightingShader.SetTexture("LTC2", m_LTC2Texture.m_id, 4);
 	m_lightingShader.SetTexture("ssaoTexture", m_ssaoBuffer.m_texture, 5);
 	SetupLights(scene);
-	ResourceManager::GetQuadMesh()->Draw();
+	GlobalRenderer::DrawMesh(ResourceManager::GetQuadMesh());
 	m_frameBuffer.Unbind();
 
 	// Restore original viewport
@@ -96,6 +96,15 @@ void DefferedRenderer::DrawObject(SceneObject* object, Mat4 parentTransform) {
 		}
 		SetupMaterial(material);
 		mesh->Draw();
+	}
+	if (const SphereComponent* sphere = object->GetComponent<SphereComponent>()) {
+		m_shader.SetUniformMat4f("mModel", glm::scale(objectTransform, Vec3(sphere->GetRadius())));
+		Material* material = ResourceManager::GetDefaultMaterial();
+		if (MaterialComponent* materialComponent = object->GetComponent<MaterialComponent>()) {
+			material = materialComponent->GetMaterial();
+		}
+		SetupMaterial(material);
+		sphere->Draw();
 	}
 	for (size_t i = 0; i < object->GetChildren().size(); i++) {
 		DrawObject(object->GetChild((int32_t)i), objectTransform);

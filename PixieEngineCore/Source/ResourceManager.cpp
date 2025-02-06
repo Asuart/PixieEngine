@@ -2,6 +2,8 @@
 #include "ResourceManager.h"
 #include "SceneManager.h"
 #include "GlobalRenderer.h"
+#include "TextureGenerator.h"
+#include "MeshGenerator.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -18,70 +20,6 @@ uint32_t ResourceManager::m_defaultFontSize = 64;
 
 static const std::string c_deafultMaterial = "Default Material";
 static const int32_t c_maxMaterials = 512;
-
-const Vec2 quadMin(0.0), quadMax(1.0);
-std::vector<Vertex> quadVertices {
-	Vertex(Vec3(quadMin.x, quadMin.y, 0)),
-	Vertex(Vec3(quadMin.x, quadMax.y, 0)),
-	Vertex(Vec3(quadMax.x, quadMax.y, 0)),
-	Vertex(Vec3(quadMax.x, quadMin.y, 0)),
-};
-std::vector<int32_t> quadIndices {
-	0, 1, 2,
-	0, 2, 3
-};
-
-std::vector<Vertex> qubeVertices {
-	Vertex(Vec3(-0.5f, -0.5f, -0.5f), Vec3(0, 0, -1), Vec2(0.0f, 0.0f)),
-	Vertex(Vec3( 0.5f, -0.5f, -0.5f), Vec3(0, 0, -1), Vec2(1.0f, 0.0f)),
-	Vertex(Vec3( 0.5f,  0.5f, -0.5f), Vec3(0, 0, -1), Vec2(1.0f, 1.0f)),
-	Vertex(Vec3( 0.5f,  0.5f, -0.5f), Vec3(0, 0, -1), Vec2(1.0f, 1.0f)),
-	Vertex(Vec3(-0.5f,  0.5f, -0.5f), Vec3(0, 0, -1), Vec2(0.0f, 1.0f)),
-	Vertex(Vec3(-0.5f, -0.5f, -0.5f), Vec3(0, 0, -1), Vec2(0.0f, 0.0f)),
-
-	Vertex(Vec3(-0.5f, -0.5f,  0.5f), Vec3(0, 0, 1), Vec2(0.0f, 0.0f)),
-	Vertex(Vec3( 0.5f, -0.5f,  0.5f), Vec3(0, 0, 1), Vec2(1.0f, 0.0f)),
-	Vertex(Vec3( 0.5f,  0.5f,  0.5f), Vec3(0, 0, 1), Vec2(1.0f, 1.0f)),
-	Vertex(Vec3( 0.5f,  0.5f,  0.5f), Vec3(0, 0, 1), Vec2(1.0f, 1.0f)),
-	Vertex(Vec3(-0.5f,  0.5f,  0.5f), Vec3(0, 0, 1), Vec2(0.0f, 1.0f)),
-	Vertex(Vec3(-0.5f, -0.5f,  0.5f), Vec3(0, 0, 1), Vec2(0.0f, 0.0f)),
-
-	Vertex(Vec3(-0.5f,  0.5f,  0.5f), Vec3(-1, 0, 0), Vec2(1.0f, 0.0f)),
-	Vertex(Vec3(-0.5f,  0.5f, -0.5f), Vec3(-1, 0, 0), Vec2(1.0f, 1.0f)),
-	Vertex(Vec3(-0.5f, -0.5f, -0.5f), Vec3(-1, 0, 0), Vec2(0.0f, 1.0f)),
-	Vertex(Vec3(-0.5f, -0.5f, -0.5f), Vec3(-1, 0, 0), Vec2(0.0f, 1.0f)),
-	Vertex(Vec3(-0.5f, -0.5f,  0.5f), Vec3(-1, 0, 0), Vec2(0.0f, 0.0f)),
-	Vertex(Vec3(-0.5f,  0.5f,  0.5f), Vec3(-1, 0, 0), Vec2(1.0f, 0.0f)),
-
-	Vertex(Vec3( 0.5f,  0.5f,  0.5f), Vec3(1, 0, 0), Vec2(1.0f, 0.0f)),
-	Vertex(Vec3( 0.5f,  0.5f, -0.5f), Vec3(1, 0, 0), Vec2(1.0f, 1.0f)),
-	Vertex(Vec3( 0.5f, -0.5f, -0.5f), Vec3(1, 0, 0), Vec2(0.0f, 1.0f)),
-	Vertex(Vec3( 0.5f, -0.5f, -0.5f), Vec3(1, 0, 0), Vec2(0.0f, 1.0f)),
-	Vertex(Vec3( 0.5f, -0.5f,  0.5f), Vec3(1, 0, 0), Vec2(0.0f, 0.0f)),
-	Vertex(Vec3( 0.5f,  0.5f,  0.5f), Vec3(1, 0, 0), Vec2(1.0f, 0.0f)),
-
-	Vertex(Vec3(-0.5f, -0.5f, -0.5f), Vec3(0, -1, 0), Vec2(0.0f, 1.0f)),
-	Vertex(Vec3( 0.5f, -0.5f, -0.5f), Vec3(0, -1, 0), Vec2(1.0f, 1.0f)),
-	Vertex(Vec3( 0.5f, -0.5f,  0.5f), Vec3(0, -1, 0), Vec2(1.0f, 0.0f)),
-	Vertex(Vec3( 0.5f, -0.5f,  0.5f), Vec3(0, -1, 0), Vec2(1.0f, 0.0f)),
-	Vertex(Vec3(-0.5f, -0.5f,  0.5f), Vec3(0, -1, 0), Vec2(0.0f, 0.0f)),
-	Vertex(Vec3(-0.5f, -0.5f, -0.5f), Vec3(0, -1, 0), Vec2(0.0f, 1.0f)),
-
-	Vertex(Vec3(-0.5f,  0.5f, -0.5f), Vec3(0, 1, 0), Vec2(0.0f, 1.0f)),
-	Vertex(Vec3( 0.5f,  0.5f, -0.5f), Vec3(0, 1, 0), Vec2(1.0f, 1.0f)),
-	Vertex(Vec3( 0.5f,  0.5f,  0.5f), Vec3(0, 1, 0), Vec2(1.0f, 0.0f)),
-	Vertex(Vec3( 0.5f,  0.5f,  0.5f), Vec3(0, 1, 0), Vec2(1.0f, 0.0f)),
-	Vertex(Vec3(-0.5f,  0.5f,  0.5f), Vec3(0, 1, 0), Vec2(0.0f, 0.0f)),
-	Vertex(Vec3(-0.5f,  0.5f, -0.5f), Vec3(0, 1, 0), Vec2(0.0f, 1.0f))
-};
-std::vector<int32_t> qubeIndices{
-	 0,  1,  2,  3,  4,  5,
-	 6,  7,  8,  9, 10, 11,
-	12, 13, 14, 15, 16, 17,
-	18, 19, 20, 21, 22, 23,
-	24, 25, 26, 27, 28, 29,
-	30, 31, 32, 33, 34, 35
-};
 
 inline void ltrim(std::string& s) {
 	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
@@ -142,8 +80,9 @@ void ResourceManager::SetAssetsPath(const std::filesystem::path& path) {
 }
 
 void ResourceManager::Initialize() {
-	m_meshes.push_back(new Mesh(quadVertices, quadIndices));
-	m_meshes.push_back(new Mesh(qubeVertices, qubeIndices));
+	m_meshes.push_back(MeshGenerator::Quad({ 0, 0 }, { 1, 1 }));
+	m_meshes.push_back(MeshGenerator::Cube(Vec3(1)));
+	m_meshes.push_back(MeshGenerator::SphereFromOctahedron(1.0f, 6));
 
 	m_materials.reserve(c_maxMaterials);
 	AddMaterial(Material(c_deafultMaterial));
@@ -354,24 +293,16 @@ Buffer2DTexture<Vec4> ResourceManager::LoadBuffer2DTextureRGBA(const std::filesy
 
 HDRISkybox ResourceManager::LoadSkybox(const std::filesystem::path& path) {
 	const glm::ivec2 resolution{ 512, 512 };
+	const glm::ivec2 irradianceResolution{ 32, 32 };
 
 	Buffer2DTexture<Vec3> sphericalMap = LoadBuffer2DTextureRGB(GetApplicationDirectory().string() + std::string("/Resources/Skymaps/") + path.string());
 
-	GLuint envCubemap;
-	glGenTextures(1, &envCubemap);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
-	for (int32_t i = 0; i < 6; i++) {
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, resolution.x, resolution.y, 0, GL_RGB, GL_FLOAT, nullptr);
-	}
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	Texture envCubemap = TextureGenerator::CreateCubemap(resolution);
+	Texture irradianceMap = TextureGenerator::CreateCubemap(irradianceResolution);
 
-	GlobalRenderer::DrawCubeMap(resolution, sphericalMap.GetID(), envCubemap);
+	GlobalRenderer::DrawCubeMap(sphericalMap.GetID(), resolution, envCubemap.m_id, irradianceResolution, irradianceMap.m_id);
 
-	return HDRISkybox(sphericalMap, Texture(resolution, envCubemap));
+	return HDRISkybox(sphericalMap, envCubemap, irradianceMap);
 }
 
 Material* ResourceManager::GetDefaultMaterial() {
@@ -450,8 +381,12 @@ Mesh* ResourceManager::GetQuadMesh() {
 	return m_meshes[0];
 }
 
-Mesh* ResourceManager::GetQubeMesh() {
+Mesh* ResourceManager::GetCubeMesh() {
 	return m_meshes[1];
+}
+
+Mesh* ResourceManager::GetSphereMesh() {
+	return m_meshes[2];
 }
 
 bool ResourceManager::CheckFileExtensionSupport(const std::filesystem::path& filePath, ResourceType type) {

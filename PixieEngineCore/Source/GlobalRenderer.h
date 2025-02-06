@@ -7,6 +7,8 @@ public:
 	static void Initialize();
 
 	// Draw scene
+	static void DrawMesh(Mesh* mesh);
+	static void DrawMeshWireframe(Mesh* mesh);
 	static void DrawSkybox(const Camera& camera, GLuint skyboxTexture);
 
 	// Draw texture fitting it to screen
@@ -22,13 +24,14 @@ public:
 	static void DrawUIBox(Vec2 position, Vec2 size, Vec4 baseColor, Float borderRadius = 5.0f, Float borderWidth = 1.0f, Vec4 borderColor = Vec4(1.0f), Mat4 projection = Mat4(1.0f));
 
 	// Resource Generation
-	static void DrawCubeMap(glm::ivec2 resolution, GLuint equirectangularTexture, GLuint cubemapTexture);
+	static void DrawCubeMap(GLuint equirectangularTexture, glm::ivec2 cubemapResolution, GLuint cubemapTexture, glm::ivec2 lighmapResolution, GLuint lightmapTextrue);
 
 protected:
 	static Shader m_quadShader;
 	static Shader m_textShader;
 	static Shader m_uiBoxShader;
 	static Shader m_equirectangularToCubemapShader;
+	static Shader m_cubemapConvolutionShader;
 	static Shader m_skyboxShader;
 	static GLuint m_textVAO;
 	static GLuint m_textVBO;

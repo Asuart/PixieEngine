@@ -6,15 +6,30 @@ Shader GlobalRenderer::m_textShader;
 Shader GlobalRenderer::m_uiBoxShader;
 Shader GlobalRenderer::m_skyboxShader;
 Shader GlobalRenderer::m_equirectangularToCubemapShader;
+Shader GlobalRenderer::m_cubemapConvolutionShader;
 GLuint GlobalRenderer::m_textVAO;
 GLuint GlobalRenderer::m_textVBO;
 
+void GlobalRenderer::DrawMesh(Mesh* mesh) {
+	if (!mesh->m_vao) return;
+	glBindVertexArray(mesh->m_vao);
+	glDrawElements(GL_TRIANGLES, mesh->m_indicesCount, GL_UNSIGNED_INT, NULL);
+	glBindVertexArray(0);
+}
+
+void GlobalRenderer::DrawMeshWireframe(Mesh* mesh) {
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	DrawMesh(mesh);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
 void GlobalRenderer::Initialize() {
-	m_quadShader = ResourceManager::LoadShader("TextureViewerQuadVertexShader.glsl", "TextureViewerQuadFragmentShader.glsl");
-	m_textShader = ResourceManager::LoadShader("TextVertexShader.glsl", "TextFragmentShader.glsl");
-	m_uiBoxShader = ResourceManager::LoadShader("UIBoxVertexShader.glsl", "UIBoxFragmentShader.glsl");
-	m_skyboxShader = ResourceManager::LoadShader("SkyboxVertexShader.glsl", "SkyboxFragmentShader.glsl");
-	m_equirectangularToCubemapShader = ResourceManager::LoadShader("EquirectangularToCubemapVertexShader.glsl", "EquirectangularToCubemapFragmentShader.glsl");
+	m_quadShader = ResourceManager::LoadShader("TextureViewerQuad");
+	m_textShader = ResourceManager::LoadShader("Text");
+	m_uiBoxShader = ResourceManager::LoadShader("UIBox");
+	m_skyboxShader = ResourceManager::LoadShader("Skybox");
+	m_cubemapConvolutionShader = ResourceManager::LoadShader("CubemapConvolution");
+	m_equirectangularToCubemapShader = ResourceManager::LoadShader("EquirectangularToCubemap");
 
 	glGenVertexArrays(1, &m_textVAO);
 	glGenBuffers(1, &m_textVBO);
@@ -33,7 +48,7 @@ void GlobalRenderer::DrawSkybox(const Camera& camera, GLuint skyboxTexture) {
 	m_skyboxShader.SetUniformMat4f("mProjection", camera.GetProjectionMatrix());
 	m_skyboxShader.SetUniformMat4f("mView", camera.GetViewMatrix());
 	m_skyboxShader.SetCubeMap("environmentMap", skyboxTexture, 0);
-	ResourceManager::GetQubeMesh()->Draw();
+	DrawMesh(ResourceManager::GetCubeMesh());
 }
 
 void GlobalRenderer::DrawTextureFitted(GLuint id, glm::ivec2 textureResolution, glm::ivec2 viewportResolution) {
@@ -65,7 +80,7 @@ void GlobalRenderer::DrawAccumulatorTexture(GLuint id, int32_t samples, Vec2 pos
 	m_quadShader.SetUniform2f("uSize", size);
 	m_quadShader.SetUniform1f("uSamples", (Float)samples);
 	m_quadShader.SetTexture("ourTexture", id, 2);
-	ResourceManager::GetQuadMesh()->Draw();
+	DrawMesh(ResourceManager::GetQuadMesh());
 }
 
 void GlobalRenderer::DrawText(const std::string& text, Vec2 position, Float fontSize, Vec3 color, Mat4 projection, bool rightToLeft) {
@@ -97,7 +112,7 @@ void GlobalRenderer::DrawText(const std::string& text, Vec2 position, Float font
 
 		glBindTexture(GL_TEXTURE_2D, ch.textureID);
 
-		ResourceManager::GetQuadMesh()->Draw();
+		DrawMesh(ResourceManager::GetQuadMesh());
 
 		position.x += (ch.advance >> 6) * scale;
 	}
@@ -114,25 +129,14 @@ void GlobalRenderer::DrawUIBox(Vec2 position, Vec2 size, Vec4 baseColor, Float b
 	m_uiBoxShader.SetUniform1f("uBorderRadius", borderRadius);
 	m_uiBoxShader.SetUniform4f("uBaseColor", baseColor);
 	m_uiBoxShader.SetUniformMat4f("mProjection", projection);
-	ResourceManager::GetQuadMesh()->Draw();
+	DrawMesh(ResourceManager::GetQuadMesh());
 	m_uiBoxShader.Unbind();
 }
 
-void GlobalRenderer::DrawCubeMap(glm::ivec2 resolution, GLuint equirectangularTexture, GLuint cubemapTexture) {
+void GlobalRenderer::DrawCubeMap(GLuint equirectangularTexture, glm::ivec2 cubemapResolution, GLuint cubemapTexture, glm::ivec2 lighmapResolution, GLuint lightmapTextrue) {
 	// Store Original Viewport
 	GLint originalViewport[4];
 	glGetIntegerv(GL_VIEWPORT, originalViewport);
-
-	GLuint captureFBO;
-	glGenFramebuffers(1, &captureFBO);
-
-	GLuint captureRBO;
-	glGenRenderbuffers(1, &captureRBO);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, resolution.x, resolution.y);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
 
 	glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
 	glm::mat4 captureViews[] = {
@@ -144,20 +148,47 @@ void GlobalRenderer::DrawCubeMap(glm::ivec2 resolution, GLuint equirectangularTe
 	   glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
 	};
 
+	GLuint captureFBO;
+	glGenFramebuffers(1, &captureFBO);
+
+	GLuint captureRBO;
+	glGenRenderbuffers(1, &captureRBO);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, cubemapResolution.x, cubemapResolution.y);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
+	glViewport(0, 0, cubemapResolution.x, cubemapResolution.y);
+
 	m_equirectangularToCubemapShader.Bind();
 	m_equirectangularToCubemapShader.SetUniform1i("equirectangularMap", 0);
 	m_equirectangularToCubemapShader.SetUniformMat4f("projection", captureProjection);
+
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, equirectangularTexture);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-	glViewport(0, 0, resolution.x, resolution.y);
 	for (int32_t i = 0; i < 6; i++) {
 		m_equirectangularToCubemapShader.SetUniformMat4f("view", captureViews[i]);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubemapTexture, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		ResourceManager::GetQubeMesh()->Draw();
+		DrawMesh(ResourceManager::GetCubeMesh());
 	}
+
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, lighmapResolution.x, lighmapResolution.y);
+	glViewport(0, 0, lighmapResolution.x, lighmapResolution.y);
+
+	m_cubemapConvolutionShader.Bind();
+	m_cubemapConvolutionShader.SetUniform1i("environmentMap", 0);
+	m_cubemapConvolutionShader.SetUniformMat4f("projection", captureProjection);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+	for (int32_t i = 0; i < 6; i++) {
+		m_cubemapConvolutionShader.SetUniformMat4f("view", captureViews[i]);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, lightmapTextrue, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		DrawMesh(ResourceManager::GetCubeMesh());
+	}
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// Restore original viewport

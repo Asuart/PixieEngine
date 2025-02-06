@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "MeshComponent.h"
+#include "GlobalRenderer.h"
 
 MeshComponent::MeshComponent(SceneObject* parent, Mesh* mesh) :
 	Component(ComponentType::Mesh, parent), m_mesh(mesh) {
@@ -15,7 +16,7 @@ Mesh* MeshComponent::GetMesh() {
 }
 
 void MeshComponent::Draw() const {
-	m_mesh->Draw();
+	GlobalRenderer::DrawMesh(m_mesh);
 }
 
 void MeshComponent::UploadMesh() {

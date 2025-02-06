@@ -92,7 +92,7 @@ Vec2 ShaderGraphObject::GetNodeSize(ShaderNode* node) {
 
 ShaderGraphWindow::ShaderGraphWindow(PixieEngineApp& app, Interface& inter) :
 	InterfaceWindow(app, inter), m_frameBuffer({ 1280, 720 }), m_shaderGraphObject(m_shaderGraph) {
-	m_bezierShader = ResourceManager::LoadShader("Bezier2DVertexShader.glsl", "Bezier2DFragmentShader.glsl");
+	m_bezierShader = ResourceManager::LoadShader("Bezier2D");
 }
 
 void ShaderGraphWindow::Draw() {
@@ -169,11 +169,11 @@ void ShaderGraphWindow::DrawConnections() {
 	m_bezierShader.Bind();
 	m_bezierShader.SetUniformMat4f("mProjection", m_projection);
 	for (auto& pair : m_shaderGraphObject.m_connections) {
-		pair.second->mesh->Draw();
+		GlobalRenderer::DrawMesh(pair.second->mesh);
 	}
 	if (m_grabbedConnection) {
 		m_grabbedConnection->UpdateMesh(m_cursorPos);
-		m_grabbedConnection->mesh->Draw();
+		GlobalRenderer::DrawMesh(m_grabbedConnection->mesh);
 	}
 }
 
