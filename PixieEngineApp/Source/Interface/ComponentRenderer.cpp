@@ -81,12 +81,10 @@ void ComponentRenderer::DrawComponent(Component* component, bool showHead, bool 
 			Vec3 color = plComponent->GetColor();
 			if (ImGui::ColorEdit3("Emission Color", &color[0])) {
 				plComponent->SetColor(color);
-				SceneManager::UpdateSceneSnapshot();
 			}
 			Float strength = plComponent->GetStrength();
 			if (ImGui::DragScalar("Emission Strength", ImGuiFloat, &strength, 0.01f, &minZero, &maxNinety)) {
 				plComponent->SetStrength(strength);
-				SceneManager::UpdateSceneSnapshot();
 			}
 			break;
 		}
@@ -95,12 +93,10 @@ void ComponentRenderer::DrawComponent(Component* component, bool showHead, bool 
 			Vec3 color = dlComponent->GetColor();
 			if (ImGui::ColorEdit3("Emission Color", &color[0])) {
 				dlComponent->SetColor(color);
-				SceneManager::UpdateSceneSnapshot();
 			}
 			Float strength = dlComponent->GetStrength();
 			if (ImGui::DragScalar("Emission Strength", ImGuiFloat, &strength, 0.01f, &minZero, &maxNinety)) {
 				dlComponent->SetStrength(strength);
-				SceneManager::UpdateSceneSnapshot();
 			}
 			break;
 		}
@@ -109,7 +105,6 @@ void ComponentRenderer::DrawComponent(Component* component, bool showHead, bool 
 			Float radius = sphereComponent->GetRadius();
 			if (ImGui::DragScalar("Radius", ImGuiFloat, &radius, 0.01f, &minZero, &maxNinety)) {
 				sphereComponent->SetRadius(radius);
-				SceneManager::UpdateSceneSnapshot();
 			}
 			break;
 		}

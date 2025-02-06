@@ -155,10 +155,6 @@ SceneObject* ResourceManager::LoadModel(const std::filesystem::path& filePath) {
 Texture ResourceManager::LoadTexture(const std::filesystem::path& filePath) {
 	std::filesystem::path fullPath = GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
 	std::cout << "  Loading texture: " << filePath << "\n";
-	if (m_textures.find(filePath) != m_textures.end()) {
-		std::cout << "  Log: Texture already loaded.\n";
-		return m_textures[filePath];
-	}
 	int32_t width, height, nrChannels;
 	uint8_t* data = stbi_load(filePath.string().c_str(), &width, &height, &nrChannels, 0);
 	if (!data) {
@@ -170,26 +166,17 @@ Texture ResourceManager::LoadTexture(const std::filesystem::path& filePath) {
 	}
 	switch (nrChannels) {
 	case 1: {
-		Texture texture({ width, height }, GL_RED, GL_RED, GL_UNSIGNED_BYTE);
-		glBindTexture(GL_TEXTURE_2D, texture.m_id);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, data);
-		glBindTexture(GL_TEXTURE_2D, 0);
+		Texture texture({ width, height }, GL_R32F, GL_RED, GL_UNSIGNED_BYTE, data);
 		stbi_image_free(data);
 		return texture;
 	}
 	case 3: {
-		Texture texture({ width, height }, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE);
-		glBindTexture(GL_TEXTURE_2D, texture.m_id);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glBindTexture(GL_TEXTURE_2D, 0);
+		Texture texture({ width, height }, GL_RGB32F, GL_RGB, GL_UNSIGNED_BYTE, data);
 		stbi_image_free(data);
 		return texture;
 	}
 	case 4: {
-		Texture texture({ width, height }, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
-		glBindTexture(GL_TEXTURE_2D, texture.m_id);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		glBindTexture(GL_TEXTURE_2D, 0);
+		Texture texture({ width, height }, GL_RGBA32F, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		stbi_image_free(data);
 		return texture;
 	}
@@ -200,48 +187,115 @@ Texture ResourceManager::LoadTexture(const std::filesystem::path& filePath) {
 	}
 }
 
-Buffer2DTexture<Vec3> ResourceManager::LoadRGBBuffer2DTexture(const std::filesystem::path& filePath) {
+Texture ResourceManager::LoadTextureFloat(const std::filesystem::path& filePath) {
+	std::filesystem::path fullPath = GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
 	std::cout << "  Loading texture: " << filePath << "\n";
 	int32_t width, height, nrChannels;
-	uint8_t* data = stbi_load(filePath.string().c_str(), &width, &height, &nrChannels, 0);
+	uint8_t* data = stbi_load(filePath.string().c_str(), &width, &height, &nrChannels, 1);
+	if (!data) {
+		data = stbi_load(fullPath.string().c_str(), &width, &height, &nrChannels, 1);
+		if (!data) {
+			std::cout << "  Error: Failed to load texture.\n";
+			return Texture();
+		}
+	}
+	Texture texture({ width, height }, GL_R32F, GL_RED, GL_UNSIGNED_BYTE, data);
+	stbi_image_free(data);
+	return texture;
+}
+
+Texture ResourceManager::LoadTextureRGB(const std::filesystem::path& filePath) {
+	std::filesystem::path fullPath = GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
+	std::cout << "  Loading texture: " << filePath << "\n";
+	int32_t width, height, nrChannels;
+	uint8_t* data = stbi_load(filePath.string().c_str(), &width, &height, &nrChannels, 3);
+	if (!data) {
+		data = stbi_load(fullPath.string().c_str(), &width, &height, &nrChannels, 3);
+		if (!data) {
+			std::cout << "  Error: Failed to load texture.\n";
+			return Texture();
+		}
+	}
+	Texture texture({ width, height }, GL_RGB32F, GL_RGB, GL_UNSIGNED_BYTE, data);
+	stbi_image_free(data);
+	return texture;
+}
+
+Texture ResourceManager::LoadTextureRGBA(const std::filesystem::path& filePath) {
+	std::filesystem::path fullPath = GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
+	std::cout << "  Loading texture: " << filePath << "\n";
+	int32_t width, height, nrChannels;
+	uint8_t* data = stbi_load(filePath.string().c_str(), &width, &height, &nrChannels, 4);
+	if (!data) {
+		data = stbi_load(fullPath.string().c_str(), &width, &height, &nrChannels, 4);
+		if (!data) {
+			std::cout << "  Error: Failed to load texture.\n";
+			return Texture();
+		}
+	}
+	Texture texture({ width, height }, GL_RGBA32F, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	stbi_image_free(data);
+	return texture;
+}
+
+Buffer2DTexture<Float> ResourceManager::LoadBuffer2DTextureFloat(const std::filesystem::path& filePath) {
+	std::cout << "  Loading texture: " << filePath << "\n";
+	int32_t width, height, nrChannels;
+	float* data = stbi_loadf(filePath.string().c_str(), &width, &height, &nrChannels, 1);
 	if (!data) {
 		std::filesystem::path fullPath = GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
-		data = stbi_load(fullPath.string().c_str(), &width, &height, &nrChannels, 0);
+		data = stbi_loadf(fullPath.string().c_str(), &width, &height, &nrChannels, 1);
+		if (!data) {
+			std::cout << "  Error: Failed to load texture.\n";
+			return Buffer2DTexture<Float>();
+		}
+	}
+	Buffer2D<Float> buffer({ width, height });
+	for (int32_t i = 0; i < width * height; i++) {
+		buffer.m_data[i] = data[i];
+	}
+	stbi_image_free(data);
+	return Buffer2DTexture<Float>(buffer);
+}
+
+Buffer2DTexture<Vec3> ResourceManager::LoadBuffer2DTextureRGB(const std::filesystem::path& filePath) {
+	std::cout << "  Loading texture: " << filePath << "\n";
+	int32_t width, height, nrChannels;
+	float* data = stbi_loadf(filePath.string().c_str(), &width, &height, &nrChannels, 3);
+	if (!data) {
+		std::filesystem::path fullPath = GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
+		data = stbi_loadf(fullPath.string().c_str(), &width, &height, &nrChannels, 3);
 		if (!data) {
 			std::cout << "  Error: Failed to load texture.\n";
 			return Buffer2DTexture<Vec3>();
 		}
 	}
-	switch (nrChannels) {
-	case 1: {
-		Buffer2D<Vec3> buffer({ width, height });
-		for (int32_t i = 0; i < width * height; i++) {
-			buffer.m_data[i] = Vec3(Float(data[i]) / 255.0f);
+	Buffer2D<Vec3> buffer({ width, height });
+	for (int32_t i = 0; i < width * height; i++) {
+		buffer.m_data[i] = Vec3(data[i * 3 + 0], data[i * 3 + 1], data[i * 3 + 2]);
+	}
+	stbi_image_free(data);
+	return Buffer2DTexture<Vec3>(buffer);
+}
+
+Buffer2DTexture<Vec4> ResourceManager::LoadBuffer2DTextureRGBA(const std::filesystem::path& filePath) {
+	std::cout << "  Loading texture: " << filePath << "\n";
+	int32_t width, height, nrChannels;
+	float* data = stbi_loadf(filePath.string().c_str(), &width, &height, &nrChannels, 4);
+	if (!data) {
+		std::filesystem::path fullPath = GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
+		data = stbi_loadf(fullPath.string().c_str(), &width, &height, &nrChannels, 4);
+		if (!data) {
+			std::cout << "  Error: Failed to load texture.\n";
+			return Buffer2DTexture<Vec4>();
 		}
-		stbi_image_free(data);
-		return Buffer2DTexture<Vec3>(buffer);
 	}
-	case 3: {
-		Buffer2D<Vec3> buffer({ width, height });
-		for (int32_t i = 0; i < width * height; i++) {
-			buffer.m_data[i] = Vec3(Float(data[i * 3 + 0]) / 255.0f, Float(data[i * 3 + 1]) / 255.0f, Float(data[i * 3 + 2]) / 255.0f);
-		}
-		stbi_image_free(data);
-		return Buffer2DTexture<Vec3>(buffer);
+	Buffer2D<Vec4> buffer({ width, height });
+	for (int32_t i = 0; i < width * height; i++) {
+		buffer.m_data[i] = Vec4(data[i * 4 + 0], data[i * 4 + 1], data[i * 4 + 2], data[i * 4 + 3]);
 	}
-	case 4: {
-		Buffer2D<Vec3> buffer({ width, height });
-		for (int32_t i = 0; i < width * height; i++) {
-			buffer.m_data[i] = Vec3(Float(data[i * 4 + 0]) / 255.0f, Float(data[i * 4 + 1]) / 255.0f, Float(data[i * 4 + 2]) / 255.0f);
-		}
-		stbi_image_free(data);
-		return Buffer2DTexture<Vec3>(buffer);
-	}
-	default:
-		std::cout << "  Error: Only 1, 3 and 4 channel textures are suported.\n";
-		stbi_image_free(data);
-		return Buffer2DTexture<Vec3>();
-	}
+	stbi_image_free(data);
+	return Buffer2DTexture<Vec4>(buffer);
 }
 
 Material* ResourceManager::GetDefaultMaterial() {
@@ -796,7 +850,7 @@ std::vector<Buffer2DTexture<Vec3>> ResourceManager::ProcessAssimpMaterialTexture
 		aiString str;
 		material->GetTexture(type, i, &str);
 		std::filesystem::path texturePath = m_currentFilePath.parent_path().string() + "/" + str.C_Str();
-		textures.push_back(LoadRGBBuffer2DTexture(texturePath));
+		textures.push_back(LoadBuffer2DTextureRGB(texturePath));
 	}
 	return textures;
 }

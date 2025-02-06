@@ -39,8 +39,13 @@ public:
 	static std::shared_ptr<Scene> LoadScene(const std::filesystem::path& filePath);
 	static bool SaveScene(const std::filesystem::path& filePath, Scene* scene);
 	static SceneObject* LoadModel(const std::filesystem::path& filePath);
+	static Texture LoadTextureFloat(const std::filesystem::path& filePath);
 	static Texture LoadTexture(const std::filesystem::path& filePath);
-	static Buffer2DTexture<Vec3> LoadRGBBuffer2DTexture(const std::filesystem::path& filePath);
+	static Texture LoadTextureRGB(const std::filesystem::path& filePath);
+	static Texture LoadTextureRGBA(const std::filesystem::path& filePath);
+	static Buffer2DTexture<Float> LoadBuffer2DTextureFloat(const std::filesystem::path& filePath);
+	static Buffer2DTexture<Vec3> LoadBuffer2DTextureRGB(const std::filesystem::path& filePath);
+	static Buffer2DTexture<Vec4> LoadBuffer2DTextureRGBA(const std::filesystem::path& filePath);
 	static Material* GetDefaultMaterial();
 	static Material* AddMaterial(const Material& material);
 	static Material* GetMaterial(uint32_t index);
