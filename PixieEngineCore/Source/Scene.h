@@ -26,8 +26,8 @@ public:
 	void SetName(const std::string& name);
 	SceneObject* GetRootObject() const;
 	Bounds3f GetBounds() const;
-	Skybox* GetSkybox() const;
-	void SetSkybox(Skybox* skybox);
+	const HDRISkybox& GetSkybox() const;
+	void SetSkybox(const HDRISkybox& skybox);
 
 	SceneObject* FindObject(const std::string& objectName) const;
 	std::vector<SceneObject*> FindObjects(const std::string& objectName) const;
@@ -45,7 +45,7 @@ protected:
 	std::vector<DirectionalLightComponent*> m_directionalLights;
 	std::vector<PointLightComponent*> m_pointLights;
 	std::vector<AreaLightComponent*> m_areaLights;
-	Skybox* m_skybox = nullptr;
+	HDRISkybox m_skybox;
 
 	friend class SceneManager;
 };

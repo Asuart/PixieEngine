@@ -3,10 +3,10 @@
 #include "LTC_Matrix.h"
 
 ForwardRenderer::ForwardRenderer() :
-	m_frameBuffer({1280, 720}) {
+	m_frameBuffer({1280, 720}),
+	m_LTC1Texture({ 64, 64 }, GL_RGBA, GL_RGBA, GL_FLOAT, (void*)LTC1, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_LINEAR),
+	m_LTC2Texture({ 64, 64 }, GL_RGBA, GL_RGBA, GL_FLOAT, (void*)LTC2, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_LINEAR) {
 	m_defaultShader = ResourceManager::LoadShader("PhysicallyBasedVertexShader.glsl", "PhysicallyBasedFragmentShader.glsl");
-	m_LTC1Texture = LoadLTCTexture(LTC1);
-	m_LTC2Texture = LoadLTCTexture(LTC2);
 }
 
 void ForwardRenderer::DrawFrame(Scene* scene, Camera* camera) {
@@ -17,6 +17,8 @@ void ForwardRenderer::DrawFrame(Scene* scene, Camera* camera) {
 	m_frameBuffer.Bind();
 	m_frameBuffer.ResizeViewport();
 	m_frameBuffer.Clear();
+
+	GlobalRenderer::DrawSkybox(*camera, scene->GetSkybox().m_cubemapTexture.m_id);
 
 	m_defaultShader.Bind();
 	SetupCamera(camera);
@@ -91,8 +93,8 @@ void ForwardRenderer::SetupLights(Scene* scene) {
 	}
 	m_defaultShader.SetUniform1i("nAreaLights", nAreaLights);
 
-	m_defaultShader.SetTexture("LTC1", m_LTC1Texture, 1);
-	m_defaultShader.SetTexture("LTC2", m_LTC2Texture, 2);
+	m_defaultShader.SetTexture("LTC1", m_LTC1Texture.m_id, 1);
+	m_defaultShader.SetTexture("LTC2", m_LTC2Texture.m_id, 2);
 }
 
 void ForwardRenderer::SetupMaterial(Material* material) {
@@ -100,17 +102,4 @@ void ForwardRenderer::SetupMaterial(Material* material) {
 	m_defaultShader.SetUniform1f("metallic", material->m_metallic);
 	m_defaultShader.SetUniform1f("roughness", material->m_roughness);
 	m_defaultShader.SetTexture("albedoTexture", material->m_albedoTexture.GetID(), 0);
-}
-
-GLuint ForwardRenderer::LoadLTCTexture(const Float* matrixTable) {
-	GLuint texture = 0;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 64, 64, 0, GL_RGBA, GL_FLOAT, matrixTable);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	return texture;
 }

@@ -41,7 +41,9 @@ bool Vertex::AddWeight(int32_t boneID, float weight, bool overrideSmallest) {
 }
 
 Mesh::Mesh(const std::vector<Vertex>& _vertices, const std::vector<int32_t>& _indices) :
-	m_vertices(_vertices), m_indices(_indices) {}
+	m_vertices(_vertices), m_indices(_indices) {
+	Upload();
+}
 
 Mesh::~Mesh() {
 	if(m_vao) glDeleteVertexArrays(1, &m_vao);

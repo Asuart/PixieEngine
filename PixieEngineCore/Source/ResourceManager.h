@@ -6,6 +6,7 @@
 #include "MeshAnimatorComponent.h"
 #include "Shader.h"
 #include "Buffer2DTexture.h"
+#include "Skyboxes.h"
 
 enum class ResourceType : int32_t {
 	Scene,
@@ -46,6 +47,7 @@ public:
 	static Buffer2DTexture<Float> LoadBuffer2DTextureFloat(const std::filesystem::path& filePath);
 	static Buffer2DTexture<Vec3> LoadBuffer2DTextureRGB(const std::filesystem::path& filePath);
 	static Buffer2DTexture<Vec4> LoadBuffer2DTextureRGBA(const std::filesystem::path& filePath);
+	static HDRISkybox LoadSkybox(const std::filesystem::path& path);
 	static Material* GetDefaultMaterial();
 	static Material* AddMaterial(const Material& material);
 	static Material* GetMaterial(uint32_t index);
@@ -56,7 +58,9 @@ public:
 	static bool IsValidModelPath(const std::filesystem::path& filePath);
 	static bool IsValidTexturePath(const std::filesystem::path& filePath);
 	static Mesh* GetQuadMesh();
+	static Mesh* GetQubeMesh();
 	static std::string ReadFile(const std::string& filePath);
+	static Shader LoadShader(const std::string& name);
 	static Shader LoadShader(const std::string& vertexName, const std::string& fragmentName);
 	static Shader CompileShader(const char* vertexSource, const char* fragmentSource);
 	static ComputeShader LoadComputeShader(const std::string& computePath);

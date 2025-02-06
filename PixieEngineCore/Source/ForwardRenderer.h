@@ -19,12 +19,11 @@ public:
 
 protected:
 	Shader m_defaultShader;
-	GLuint m_LTC1Texture = 0;
-	GLuint m_LTC2Texture = 0;
+	Texture m_LTC1Texture;
+	Texture m_LTC2Texture;
 
 	void DrawObject(SceneObject* object, Mat4 parentTransform = Mat4(1.0f));
 	void SetupCamera(Camera* camera);
 	void SetupLights(Scene* scene);
 	void SetupMaterial(Material* material);
-	GLuint LoadLTCTexture(const Float* matrixTable);
 };

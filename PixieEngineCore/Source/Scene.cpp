@@ -1,8 +1,11 @@
 #include "pch.h"
 #include "Scene.h"
+#include "ResourceManager.h"
 
 Scene::Scene(const std::string& name) :
-	m_name(name) {}
+	m_name(name) {
+	m_skybox = ResourceManager::LoadSkybox("kloppenheim_01_puresky_4k.hdr");
+}
 
 Scene::~Scene() {
 	delete m_rootObject;
@@ -56,11 +59,11 @@ Bounds3f Scene::GetBounds() const {
 	return Bounds3f();
 }
 
-void Scene::SetSkybox(Skybox* skybox) {
+void Scene::SetSkybox(const HDRISkybox& skybox) {
 	m_skybox = skybox;
 }
 
-Skybox* Scene::GetSkybox() const {
+const HDRISkybox& Scene::GetSkybox() const {
 	return m_skybox;
 }
 

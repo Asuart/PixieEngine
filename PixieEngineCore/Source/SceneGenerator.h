@@ -45,14 +45,14 @@ public:
 
 	static void CreateDemoSphereScene() {
 		std::shared_ptr<Scene> scene = SceneManager::CreateScene("Demo Sphere");
-		scene->SetSkybox(new GradientColorSkybox(Vec3(1.0f, 1.0f, 1.0f), Vec3(0.5f, 0.7f, 1.0f)));
+		//scene->SetSkybox(new GradientColorSkybox(Vec3(1.0f, 1.0f, 1.0f), Vec3(0.5f, 0.7f, 1.0f)));
 		CreateSphere(Vec3(-8.0f, 0.0f, 0.0f), 0.5f);
 		CreateDirectionalLight(Vec3(1.0f), 4.0f, LookAt(Vec3(-1.0f, 1.0f, -1.0f), Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f)));
 	}
 
 	static void CreateSmallAndBigSpheresScene() {
 		std::shared_ptr<Scene> scene = SceneManager::CreateScene("Small And Big Spheres");
-		scene->SetSkybox(new GradientColorSkybox(Vec3(1.0f, 1.0f, 1.0f), Vec3(0.5f, 0.7f, 1.0f)));
+		//scene->SetSkybox(new GradientColorSkybox(Vec3(1.0f, 1.0f, 1.0f), Vec3(0.5f, 0.7f, 1.0f)));
 		CreateSphere(Vec3(-8.0f, 0.0f, 0.0f), 0.5f);
 		CreateSphere(Vec3(-8.0f, -100.5f, 0.0f), 100.0f);
 		CreateDirectionalLight(Vec3(1.0f), 2.0f, LookAt(Vec3(-1.0f, 1.0f, -1.0f), Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f)));
@@ -60,7 +60,7 @@ public:
 
 	static void CreateTestMaterialsScene() {
 		std::shared_ptr<Scene> scene = SceneManager::CreateScene("Test Materials Scene");
-		scene->SetSkybox(new GradientColorSkybox(Vec3(1.0f, 1.0f, 1.0f), Vec3(0.5f, 0.7f, 1.0f)));
+		//scene->SetSkybox(new GradientColorSkybox(Vec3(1.0f, 1.0f, 1.0f), Vec3(0.5f, 0.7f, 1.0f)));
 		CreateSphere(Vec3(-7.0f, -100.5f, 0.0f), 100.0f);
 		CreateSphere(Vec3(-7.0f, 0.0f, 0.0f), 0.5f);
 		CreateSphere(Vec3(-7.0f, 0.0f, -1.0f), 0.5f, CreateGlassMaterial());
@@ -71,7 +71,7 @@ public:
 
 	static void CreateRandomizedSpheresScene() {
 		std::shared_ptr<Scene> scene = SceneManager::CreateScene("Randomized Spheres Scene");
-		scene->SetSkybox(new GradientColorSkybox(Vec3(1.0f, 1.0f, 1.0f), Vec3(0.5f, 0.7f, 1.0f)));
+		//scene->SetSkybox(new GradientColorSkybox(Vec3(1.0f, 1.0f, 1.0f), Vec3(0.5f, 0.7f, 1.0f)));
 		CreateDirectionalLight(Vec3(1.0f), 2.0f, LookAt(Vec3(-1, 1, -1), Vec3(0, 0, 0), Vec3(0, 1, 0)));
 
 		CreateSphere(Vec3(0.0f, -1000.0f, 0.0f), 1000.0f, CreateDiffuseMaterial(Vec3(0.5f)));

@@ -46,19 +46,19 @@ SceneSnapshot::SceneSnapshot(Scene* scene) {
 		objects.push_back(ObjectCache(ObjectType::Sphere, (int32_t)m_spheres.size() - 1, m_spheres.back().Bounds()));
 	}
 
-	Skybox* skybox = scene->GetSkybox();
-	if (skybox) {
-		if (SolidColorSkybox* solidColorSkybox = dynamic_cast<SolidColorSkybox*>(skybox); solidColorSkybox) {
-			UniformInfiniteLight* light = new UniformInfiniteLight(solidColorSkybox->m_color, 1.0f, Transform());
-			m_infiniteLights.push_back(light);
-			m_lights.push_back(light);
-		}
-		else if (GradientColorSkybox* gradientColorSkybox = dynamic_cast<GradientColorSkybox*>(skybox); gradientColorSkybox) {
-			GradientInfiniteLight* light = new GradientInfiniteLight(gradientColorSkybox->m_topColor, gradientColorSkybox->m_bottomColor, 1.0f, Transform());
-			m_infiniteLights.push_back(light);
-			m_lights.push_back(light);
-		}
-	}
+	//Skybox* skybox = scene->GetSkybox();
+	//if (skybox) {
+	//	if (SolidColorSkybox* solidColorSkybox = dynamic_cast<SolidColorSkybox*>(skybox); solidColorSkybox) {
+	//		UniformInfiniteLight* light = new UniformInfiniteLight(solidColorSkybox->m_color, 1.0f, Transform());
+	//		m_infiniteLights.push_back(light);
+	//		m_lights.push_back(light);
+	//	}
+	//	else if (GradientColorSkybox* gradientColorSkybox = dynamic_cast<GradientColorSkybox*>(skybox); gradientColorSkybox) {
+	//		GradientInfiniteLight* light = new GradientInfiniteLight(gradientColorSkybox->m_topColor, gradientColorSkybox->m_bottomColor, 1.0f, Transform());
+	//		m_infiniteLights.push_back(light);
+	//		m_lights.push_back(light);
+	//	}
+	//}
 
 	std::vector<SceneObject*> directionalLights = scene->FindObjectsWithComponent(ComponentType::DirectionalLight);
 	for (int32_t i = 0; i < directionalLights.size(); i++) {

@@ -16,6 +16,11 @@ Texture::Texture() {
 	Texture::s_counters[m_id]++;
 }
 
+Texture::Texture(glm::ivec2 resolution, GLuint textureID) : 
+	m_resolution(resolution), m_id(textureID) {
+	Texture::s_counters[m_id]++;
+}
+
 Texture::Texture(glm::ivec2 resolution, GLint internalFormat, GLenum format, GLenum type, GLint wrapS, GLint wrapT, GLint minFilter, GLint magFilter) :
 	m_resolution(resolution), m_internalFormat(internalFormat), m_format(format), m_type(type) {
 	glGenTextures(1, &m_id);

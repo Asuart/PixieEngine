@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "ResourceManager.h"
 #include "SceneManager.h"
+#include "GlobalRenderer.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -17,6 +18,70 @@ uint32_t ResourceManager::m_defaultFontSize = 64;
 
 static const std::string c_deafultMaterial = "Default Material";
 static const int32_t c_maxMaterials = 512;
+
+const Vec2 quadMin(0.0), quadMax(1.0);
+std::vector<Vertex> quadVertices {
+	Vertex(Vec3(quadMin.x, quadMin.y, 0)),
+	Vertex(Vec3(quadMin.x, quadMax.y, 0)),
+	Vertex(Vec3(quadMax.x, quadMax.y, 0)),
+	Vertex(Vec3(quadMax.x, quadMin.y, 0)),
+};
+std::vector<int32_t> quadIndices {
+	0, 1, 2,
+	0, 2, 3
+};
+
+std::vector<Vertex> qubeVertices {
+	Vertex(Vec3(-0.5f, -0.5f, -0.5f), Vec3(0, 0, -1), Vec2(0.0f, 0.0f)),
+	Vertex(Vec3( 0.5f, -0.5f, -0.5f), Vec3(0, 0, -1), Vec2(1.0f, 0.0f)),
+	Vertex(Vec3( 0.5f,  0.5f, -0.5f), Vec3(0, 0, -1), Vec2(1.0f, 1.0f)),
+	Vertex(Vec3( 0.5f,  0.5f, -0.5f), Vec3(0, 0, -1), Vec2(1.0f, 1.0f)),
+	Vertex(Vec3(-0.5f,  0.5f, -0.5f), Vec3(0, 0, -1), Vec2(0.0f, 1.0f)),
+	Vertex(Vec3(-0.5f, -0.5f, -0.5f), Vec3(0, 0, -1), Vec2(0.0f, 0.0f)),
+
+	Vertex(Vec3(-0.5f, -0.5f,  0.5f), Vec3(0, 0, 1), Vec2(0.0f, 0.0f)),
+	Vertex(Vec3( 0.5f, -0.5f,  0.5f), Vec3(0, 0, 1), Vec2(1.0f, 0.0f)),
+	Vertex(Vec3( 0.5f,  0.5f,  0.5f), Vec3(0, 0, 1), Vec2(1.0f, 1.0f)),
+	Vertex(Vec3( 0.5f,  0.5f,  0.5f), Vec3(0, 0, 1), Vec2(1.0f, 1.0f)),
+	Vertex(Vec3(-0.5f,  0.5f,  0.5f), Vec3(0, 0, 1), Vec2(0.0f, 1.0f)),
+	Vertex(Vec3(-0.5f, -0.5f,  0.5f), Vec3(0, 0, 1), Vec2(0.0f, 0.0f)),
+
+	Vertex(Vec3(-0.5f,  0.5f,  0.5f), Vec3(-1, 0, 0), Vec2(1.0f, 0.0f)),
+	Vertex(Vec3(-0.5f,  0.5f, -0.5f), Vec3(-1, 0, 0), Vec2(1.0f, 1.0f)),
+	Vertex(Vec3(-0.5f, -0.5f, -0.5f), Vec3(-1, 0, 0), Vec2(0.0f, 1.0f)),
+	Vertex(Vec3(-0.5f, -0.5f, -0.5f), Vec3(-1, 0, 0), Vec2(0.0f, 1.0f)),
+	Vertex(Vec3(-0.5f, -0.5f,  0.5f), Vec3(-1, 0, 0), Vec2(0.0f, 0.0f)),
+	Vertex(Vec3(-0.5f,  0.5f,  0.5f), Vec3(-1, 0, 0), Vec2(1.0f, 0.0f)),
+
+	Vertex(Vec3( 0.5f,  0.5f,  0.5f), Vec3(1, 0, 0), Vec2(1.0f, 0.0f)),
+	Vertex(Vec3( 0.5f,  0.5f, -0.5f), Vec3(1, 0, 0), Vec2(1.0f, 1.0f)),
+	Vertex(Vec3( 0.5f, -0.5f, -0.5f), Vec3(1, 0, 0), Vec2(0.0f, 1.0f)),
+	Vertex(Vec3( 0.5f, -0.5f, -0.5f), Vec3(1, 0, 0), Vec2(0.0f, 1.0f)),
+	Vertex(Vec3( 0.5f, -0.5f,  0.5f), Vec3(1, 0, 0), Vec2(0.0f, 0.0f)),
+	Vertex(Vec3( 0.5f,  0.5f,  0.5f), Vec3(1, 0, 0), Vec2(1.0f, 0.0f)),
+
+	Vertex(Vec3(-0.5f, -0.5f, -0.5f), Vec3(0, -1, 0), Vec2(0.0f, 1.0f)),
+	Vertex(Vec3( 0.5f, -0.5f, -0.5f), Vec3(0, -1, 0), Vec2(1.0f, 1.0f)),
+	Vertex(Vec3( 0.5f, -0.5f,  0.5f), Vec3(0, -1, 0), Vec2(1.0f, 0.0f)),
+	Vertex(Vec3( 0.5f, -0.5f,  0.5f), Vec3(0, -1, 0), Vec2(1.0f, 0.0f)),
+	Vertex(Vec3(-0.5f, -0.5f,  0.5f), Vec3(0, -1, 0), Vec2(0.0f, 0.0f)),
+	Vertex(Vec3(-0.5f, -0.5f, -0.5f), Vec3(0, -1, 0), Vec2(0.0f, 1.0f)),
+
+	Vertex(Vec3(-0.5f,  0.5f, -0.5f), Vec3(0, 1, 0), Vec2(0.0f, 1.0f)),
+	Vertex(Vec3( 0.5f,  0.5f, -0.5f), Vec3(0, 1, 0), Vec2(1.0f, 1.0f)),
+	Vertex(Vec3( 0.5f,  0.5f,  0.5f), Vec3(0, 1, 0), Vec2(1.0f, 0.0f)),
+	Vertex(Vec3( 0.5f,  0.5f,  0.5f), Vec3(0, 1, 0), Vec2(1.0f, 0.0f)),
+	Vertex(Vec3(-0.5f,  0.5f,  0.5f), Vec3(0, 1, 0), Vec2(0.0f, 0.0f)),
+	Vertex(Vec3(-0.5f,  0.5f, -0.5f), Vec3(0, 1, 0), Vec2(0.0f, 1.0f))
+};
+std::vector<int32_t> qubeIndices{
+	 0,  1,  2,  3,  4,  5,
+	 6,  7,  8,  9, 10, 11,
+	12, 13, 14, 15, 16, 17,
+	18, 19, 20, 21, 22, 23,
+	24, 25, 26, 27, 28, 29,
+	30, 31, 32, 33, 34, 35
+};
 
 inline void ltrim(std::string& s) {
 	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
@@ -77,20 +142,9 @@ void ResourceManager::SetAssetsPath(const std::filesystem::path& path) {
 }
 
 void ResourceManager::Initialize() {
-	Vec2 min(0.0), max(1.0);
-	std::vector<Vertex> vertices = {
-		{Vertex(Vec3(min.x, min.y, 0))},
-		{Vertex(Vec3(min.x, max.y, 0))},
-		{Vertex(Vec3(max.x, max.y, 0))},
-		{Vertex(Vec3(max.x, min.y, 0))},
-	};
-	std::vector<int32_t> indices = {
-		0, 1, 2,
-		0, 2, 3
-	};
-	Mesh* quadMesh = new Mesh(vertices, indices);
-	quadMesh->Upload();
-	m_meshes.push_back(quadMesh);
+	m_meshes.push_back(new Mesh(quadVertices, quadIndices));
+	m_meshes.push_back(new Mesh(qubeVertices, qubeIndices));
+
 	m_materials.reserve(c_maxMaterials);
 	AddMaterial(Material(c_deafultMaterial));
 
@@ -298,6 +352,28 @@ Buffer2DTexture<Vec4> ResourceManager::LoadBuffer2DTextureRGBA(const std::filesy
 	return Buffer2DTexture<Vec4>(buffer);
 }
 
+HDRISkybox ResourceManager::LoadSkybox(const std::filesystem::path& path) {
+	const glm::ivec2 resolution{ 512, 512 };
+
+	Buffer2DTexture<Vec3> sphericalMap = LoadBuffer2DTextureRGB(GetApplicationDirectory().string() + std::string("/Resources/Skymaps/") + path.string());
+
+	GLuint envCubemap;
+	glGenTextures(1, &envCubemap);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+	for (int32_t i = 0; i < 6; i++) {
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, resolution.x, resolution.y, 0, GL_RGB, GL_FLOAT, nullptr);
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	GlobalRenderer::DrawCubeMap(resolution, sphericalMap.GetID(), envCubemap);
+
+	return HDRISkybox(sphericalMap, Texture(resolution, envCubemap));
+}
+
 Material* ResourceManager::GetDefaultMaterial() {
 	return &m_materials[0];
 }
@@ -372,6 +448,10 @@ bool ResourceManager::IsValidTexturePath(const std::filesystem::path& filePath) 
 
 Mesh* ResourceManager::GetQuadMesh() {
 	return m_meshes[0];
+}
+
+Mesh* ResourceManager::GetQubeMesh() {
+	return m_meshes[1];
 }
 
 bool ResourceManager::CheckFileExtensionSupport(const std::filesystem::path& filePath, ResourceType type) {
@@ -913,6 +993,10 @@ std::string ResourceManager::ReadFile(const std::string& filePath) {
 	std::ifstream t(filePath);
 	std::string file((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
 	return file;
+}
+
+Shader ResourceManager::LoadShader(const std::string& name) {
+	return LoadShader(name + std::string("VertexShader.glsl"), name + std::string("FragmentShader.glsl"));
 }
 
 Shader ResourceManager::LoadShader(const std::string& vertexName, const std::string& fragmentName) {

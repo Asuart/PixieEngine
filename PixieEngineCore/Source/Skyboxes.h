@@ -27,3 +27,13 @@ public:
 	GradientColorSkybox(Vec3 topColor, Vec3 bottomColor) :
 		m_topColor(topColor), m_bottomColor(bottomColor) {}
 };
+
+class HDRISkybox {
+public:
+	Buffer2DTexture<Vec3> m_equrectangularTexture;
+	Texture m_cubemapTexture;
+
+	HDRISkybox() = default;
+	HDRISkybox(Buffer2DTexture<Vec3>& equrectangularTexture, Texture cubemapTexture) :
+		m_equrectangularTexture(equrectangularTexture), m_cubemapTexture(cubemapTexture) {}
+};

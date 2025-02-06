@@ -100,6 +100,12 @@ public:
 		glBindTexture(GL_TEXTURE_2D, id);
 		SetUniform1i(name, index);
 	}
+
+	inline void SetCubeMap(const std::string& name, GLuint id, GLuint index) {
+		glActiveTexture(GL_TEXTURE0 + index);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, id);
+		SetUniform1i(name, index);
+	}
 };
 
 class Shader : public ShaderBase {

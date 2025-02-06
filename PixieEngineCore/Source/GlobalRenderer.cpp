@@ -4,6 +4,8 @@
 Shader GlobalRenderer::m_quadShader;
 Shader GlobalRenderer::m_textShader;
 Shader GlobalRenderer::m_uiBoxShader;
+Shader GlobalRenderer::m_skyboxShader;
+Shader GlobalRenderer::m_equirectangularToCubemapShader;
 GLuint GlobalRenderer::m_textVAO;
 GLuint GlobalRenderer::m_textVBO;
 
@@ -11,6 +13,8 @@ void GlobalRenderer::Initialize() {
 	m_quadShader = ResourceManager::LoadShader("TextureViewerQuadVertexShader.glsl", "TextureViewerQuadFragmentShader.glsl");
 	m_textShader = ResourceManager::LoadShader("TextVertexShader.glsl", "TextFragmentShader.glsl");
 	m_uiBoxShader = ResourceManager::LoadShader("UIBoxVertexShader.glsl", "UIBoxFragmentShader.glsl");
+	m_skyboxShader = ResourceManager::LoadShader("SkyboxVertexShader.glsl", "SkyboxFragmentShader.glsl");
+	m_equirectangularToCubemapShader = ResourceManager::LoadShader("EquirectangularToCubemapVertexShader.glsl", "EquirectangularToCubemapFragmentShader.glsl");
 
 	glGenVertexArrays(1, &m_textVAO);
 	glGenBuffers(1, &m_textVBO);
@@ -21,6 +25,15 @@ void GlobalRenderer::Initialize() {
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+}
+
+void GlobalRenderer::DrawSkybox(const Camera& camera, GLuint skyboxTexture) {
+	glDepthFunc(GL_LEQUAL);
+	m_skyboxShader.Bind();
+	m_skyboxShader.SetUniformMat4f("mProjection", camera.GetProjectionMatrix());
+	m_skyboxShader.SetUniformMat4f("mView", camera.GetViewMatrix());
+	m_skyboxShader.SetCubeMap("environmentMap", skyboxTexture, 0);
+	ResourceManager::GetQubeMesh()->Draw();
 }
 
 void GlobalRenderer::DrawTextureFitted(GLuint id, glm::ivec2 textureResolution, glm::ivec2 viewportResolution) {
@@ -103,4 +116,50 @@ void GlobalRenderer::DrawUIBox(Vec2 position, Vec2 size, Vec4 baseColor, Float b
 	m_uiBoxShader.SetUniformMat4f("mProjection", projection);
 	ResourceManager::GetQuadMesh()->Draw();
 	m_uiBoxShader.Unbind();
+}
+
+void GlobalRenderer::DrawCubeMap(glm::ivec2 resolution, GLuint equirectangularTexture, GLuint cubemapTexture) {
+	// Store Original Viewport
+	GLint originalViewport[4];
+	glGetIntegerv(GL_VIEWPORT, originalViewport);
+
+	GLuint captureFBO;
+	glGenFramebuffers(1, &captureFBO);
+
+	GLuint captureRBO;
+	glGenRenderbuffers(1, &captureRBO);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, resolution.x, resolution.y);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
+
+	glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
+	glm::mat4 captureViews[] = {
+	   glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+	   glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+	   glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
+	   glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
+	   glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+	   glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
+	};
+
+	m_equirectangularToCubemapShader.Bind();
+	m_equirectangularToCubemapShader.SetUniform1i("equirectangularMap", 0);
+	m_equirectangularToCubemapShader.SetUniformMat4f("projection", captureProjection);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, equirectangularTexture);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+	glViewport(0, 0, resolution.x, resolution.y);
+	for (int32_t i = 0; i < 6; i++) {
+		m_equirectangularToCubemapShader.SetUniformMat4f("view", captureViews[i]);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubemapTexture, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		ResourceManager::GetQubeMesh()->Draw();
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	// Restore original viewport
+	glViewport(originalViewport[0], originalViewport[1], originalViewport[2], originalViewport[3]);
 }
