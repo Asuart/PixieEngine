@@ -32,6 +32,7 @@ uniform int useDiffuseMap;
 uniform sampler2D albedoTexture;
 uniform sampler2D LTC1; // for inverse M
 uniform sampler2D LTC2; // GGX norm, fresnel, 0(unused), sphere
+uniform samplerCube irradianceMap;
 
 struct PointLight {
     vec3 position;
@@ -123,6 +124,10 @@ vec3 PowVec3(vec3 v, float p) {
 vec3 FresnelSchlick(float cosTheta, vec3 F0) {
     return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
+
+vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}  
 
 float DistributionGGX(vec3 N, vec3 H, float roughness) {
     float a = roughness * roughness;
@@ -228,7 +233,13 @@ void main() {
 		pointLighting += (kD * mDiffuse / PI + specular) * radiance * dotNL;
 	}
 
-	vec3 ambient = vec3(0.03) * mDiffuse * ambientOcclusion;
+	vec3 F0 = vec3(0.04f);
+    vec3 kS = FresnelSchlickRoughness(dotNV, F0, roughness);
+    vec3 kD = 1.0 - kS;
+    vec3 irradiance = texture(irradianceMap, mNormal).rgb;
+    vec3 diffuse = irradiance * mDiffuse;
+    vec3 ambient = (kD * diffuse); 
+
 	vec3 color = ambient + pointLighting + areaLighting;
 
 	color = color / (color + vec3(1.0f));

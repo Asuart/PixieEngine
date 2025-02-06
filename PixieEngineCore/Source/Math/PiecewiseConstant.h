@@ -1,6 +1,6 @@
 #pragma once
 #include "pch.h"
-#include "MathBase.h"
+#include "Math.h"
 #include "Buffer2D.h"
 #include "Bounds.h"
 

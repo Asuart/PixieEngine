@@ -104,6 +104,8 @@ void ForwardRenderer::SetupLights(Scene* scene) {
 
 	m_defaultShader.SetTexture("LTC1", m_LTC1Texture.m_id, 1);
 	m_defaultShader.SetTexture("LTC2", m_LTC2Texture.m_id, 2);
+
+	m_defaultShader.SetCubeMap("irradianceMap", scene->GetSkybox().m_lightmapTexture.m_id, 3);
 }
 
 void ForwardRenderer::SetupMaterial(Material* material) {

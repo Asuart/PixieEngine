@@ -1,5 +1,5 @@
 #pragma once
-#include "MathBase.h"
+#include "Math.h"
 #include "RayTracing/Ray.h"
 #include "RayTracing/RayInteraction.h"
 #include "Bounds.h"

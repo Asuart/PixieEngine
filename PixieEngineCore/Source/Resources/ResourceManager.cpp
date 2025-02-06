@@ -292,17 +292,8 @@ Buffer2DTexture<Vec4> ResourceManager::LoadBuffer2DTextureRGBA(const std::filesy
 }
 
 HDRISkybox ResourceManager::LoadSkybox(const std::filesystem::path& path) {
-	const glm::ivec2 resolution{ 512, 512 };
-	const glm::ivec2 irradianceResolution{ 32, 32 };
-
 	Buffer2DTexture<Vec3> sphericalMap = LoadBuffer2DTextureRGB(GetApplicationDirectory().string() + std::string("/Resources/Skymaps/") + path.string());
-
-	Texture envCubemap = TextureGenerator::CreateCubemap(resolution);
-	Texture irradianceMap = TextureGenerator::CreateCubemap(irradianceResolution);
-
-	GlobalRenderer::DrawCubeMap(sphericalMap.GetID(), resolution, envCubemap.m_id, irradianceResolution, irradianceMap.m_id);
-
-	return HDRISkybox(sphericalMap, envCubemap, irradianceMap);
+	return TextureGenerator::Skybox(sphericalMap, { 512, 512 }, { 32, 32 });
 }
 
 Material* ResourceManager::GetDefaultMaterial() {

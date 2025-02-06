@@ -1,6 +1,6 @@
 #pragma once
 #include "pch.h"
-#include "MathBase.h"
+#include "Math.h"
 
 template <typename T>
 struct Complex {

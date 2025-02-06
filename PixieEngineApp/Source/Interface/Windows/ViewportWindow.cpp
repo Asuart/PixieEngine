@@ -78,7 +78,11 @@ void ViewportWindow::Draw() {
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 	if (ImGui::Begin((std::string("Viewport##")).c_str())) {
 		if (ImGui::IsWindowFocused()) {
-			m_cameraController.Update();
+			if (m_cameraController.Update()) {
+				if (m_renderMode == RenderMode::PathTracing) {
+					m_pathTracingRenderer.Reset();
+				}
+			}
 		}
 
 		HighPrecisionTimer::StartTimer("Viewport Render Time");
