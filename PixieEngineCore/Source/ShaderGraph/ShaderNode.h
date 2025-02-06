@@ -1,8 +1,7 @@
 #pragma once
 #include "pch.h"
 #include "ShaderNodeIO.h"
-#include "Scene.h"
-#include "Camera.h"
+#include "Scene/Scene.h"
 
 class ShaderNode {
 public:

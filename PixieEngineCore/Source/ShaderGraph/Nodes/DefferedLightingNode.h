@@ -1,10 +1,10 @@
 #pragma once
 #include "pch.h"
 #include "ShaderNode.h"
-#include "Shader.h"
 #include "SSAOKernel.h"
-#include "ResourceManager.h"
-#include "TextureGenerator.h"
+#include "Resources/Shader.h"
+#include "Resources/ResourceManager.h"
+#include "Resources/TextureGenerator.h"
 #include "LTC_Matrix.h"
 
 class DefferedLightingNode : public ShaderNode {

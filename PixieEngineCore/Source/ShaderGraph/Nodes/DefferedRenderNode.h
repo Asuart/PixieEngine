@@ -1,6 +1,6 @@
 #pragma once
 #include "ShaderNode.h"
-#include "ResourceManager.h"
+#include "Resources/ResourceManager.h"
 
 class DefferedRenderNode : public ShaderNode {
 public:

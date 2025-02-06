@@ -1,7 +1,7 @@
 #pragma once
 #include "pch.h"
-#include "MathAndPhysics.h"
-#include "Ray.h"
+#include "Math/MathBase.h"
+#include "RayTracing/Ray.h"
 
 inline bool IsAABBIntersected(const Ray& ray, Vec3 pMin, Vec3 pMax, Float maxDistance, Float* tHit0, Float* tHit1) {
     Float t0 = 0, t1 = maxDistance;

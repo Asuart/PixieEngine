@@ -1,7 +1,6 @@
 #pragma once
 #include "pch.h"
 #include "InterfaceWindow.h"
-#include "SceneManager.h"
 
 class PixieEngineApp;
 

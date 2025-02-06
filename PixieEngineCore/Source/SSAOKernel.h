@@ -1,6 +1,6 @@
 #pragma once
 #include "pch.h"
-#include "Random.h"
+#include "Math/Random.h"
 
 template<uint32_t size>
 struct SSAOKernel {

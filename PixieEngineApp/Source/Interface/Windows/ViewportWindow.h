@@ -2,9 +2,6 @@
 #include "pch.h"
 #include "PixieEngineApp.h"
 #include "InterfaceWindow.h"
-#include "ForwardRenderer.h"
-#include "DefferedRenderer.h"
-#include "PathTracingRenderer.h"
 #include "ViewportCameraController.h"
 
 enum class ViewportMode {

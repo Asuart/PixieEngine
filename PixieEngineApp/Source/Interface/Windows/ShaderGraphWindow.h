@@ -2,9 +2,7 @@
 #include "pch.h"
 #include "InterfaceWindow.h"
 #include "UserInput.h"
-#include "BezierCurves.h"
-#include "ShaderGraph/ShaderNode.h"
-#include "MeshGenerator.h"
+#include "Resources/MeshGenerator.h"
 
 struct ShaderNodeConnectionObject;
 struct ShaderNodeObject;

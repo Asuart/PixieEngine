@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "ViewportWindow.h"
-#include "GlobalRenderer.h"
 
 struct AlignedTriangle {
 	glm::fvec3 p0 = glm::fvec3(0.0f);

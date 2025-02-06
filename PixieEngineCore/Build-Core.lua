@@ -11,7 +11,6 @@ project "PixieEngineCore"
    files { 
       "Source/**.h",
       "Source/**.cpp",
-      "Source/shaders/**.h",
       "../Dependencies/glad/src/**.c",
       "../Dependencies/stb/**.h",
     }
@@ -21,6 +20,13 @@ project "PixieEngineCore"
       "Source",
       "Source/ShaderGraph",
       "Source/ShaderGraph/Nodes",
+      "Source/Scene",
+      "Source/Scene/Components",
+      "Source/Rendering",
+      "Source/RayTracing",
+      "Source/Math",
+      "Source/Resources",
+      "Source/Animation",
       "../Dependencies/glm",
       "../Dependencies/glad/include",
       "../Dependencies/stb",
