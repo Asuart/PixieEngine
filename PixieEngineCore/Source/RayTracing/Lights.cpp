@@ -188,7 +188,7 @@ void DirectionalLight::Preprocess(const Bounds3f& sceneBounds) {
 	Diffuse Area Light
 */
 
-DiffuseAreaLight::DiffuseAreaLight(const Shape* shape, Transform transform,int32_t materialIndex) :
+DiffuseAreaLight::DiffuseAreaLight(const Shape* shape, Transform transform, int32_t materialIndex) :
 	Light(LightType::Area, transform), m_shape(shape), m_materialIndex(materialIndex) {}
 
 Spectrum DiffuseAreaLight::Phi() const {
@@ -391,4 +391,135 @@ Spectrum GradientInfiniteLight::GetSpectrum(Vec3 direction) const {
 	Float t = (direction.y + 1.0f) / 2.0f;
 	t = t * t;
 	return (m_topSpectrum * t + m_bottomSpectrum * (1.0f - t)) * m_scale;
+}
+
+/*
+	Image infinite light
+*/
+
+ImageInfiniteLight::ImageInfiniteLight(Transform renderFromLight, Buffer2D<Spectrum> image, Float scale) :
+	Light(LightType::Infinite, renderFromLight), image(image), scale(scale) {
+	Buffer2D<Float> d(image.GetResolution());
+	Float average = 0.0f;
+	for (size_t i = 0; i < image.GetSize(); i++) {
+		d.m_data[i] = image.m_data[i].Average();
+		average += d.m_data[i];
+	}
+	average /= (Float)image.GetSize();
+	Bounds2f domain = Bounds2f(Vec2(0, 0), Vec2(1, 1));
+	distribution = PiecewiseConstant2D(d, domain);
+	for (size_t i = 0; i < d.GetSize(); i++) {
+		d.m_data[i] = glm::max(d.m_data[i] - average, 0.0f);
+	}
+	bool allZero = true;
+	for (size_t i = 0; i < d.GetSize(); i++) {
+		if (d.m_data[i] > 0) {
+			allZero = false;
+			break;
+		}
+	}
+	if (allZero) {
+		for (size_t i = 0; i < d.GetSize(); i++) {
+			d.m_data[i] = 1.0f;
+		}
+	}
+	compensatedDistribution = PiecewiseConstant2D(d, domain);
+}
+
+void ImageInfiniteLight::Preprocess(const Bounds3f& sceneBounds) {
+	sceneBounds.BoundingSphere(&sceneCenter, &sceneRadius);
+}
+
+Spectrum ImageInfiniteLight::Phi() const {
+	Spectrum sumL(0.0f);
+	int32_t width = image.GetResolution().x;
+	int32_t height = image.GetResolution().y;
+	for (int32_t v = 0; v < height; v++) {
+		for (int32_t u = 0; u < width; u++) {
+			sumL += image.GetValue(v, u);
+		}
+	}
+	return 4 * Pi * Pi * Sqr(sceneRadius) * scale * sumL / (Float)(width * height);
+}
+
+
+Float ImageInfiniteLight::SampleLiPDF(LightSampleContext, Vec3 w, bool allowIncompletePDF) const {
+	Vec3 wLight = m_transform.ApplyInverseVector(w);
+	Vec2 uv = EqualAreaSphereToSquare(wLight);
+	Float pdf = 0;
+	if (allowIncompletePDF) {
+		pdf = compensatedDistribution.PDF(uv);
+	}
+	else {
+		pdf = distribution.PDF(uv);
+	}
+	return pdf / (4.0f * Pi);
+}
+
+
+std::optional<LightLeSample> ImageInfiniteLight::SampleLe(Vec2 u1, Vec2 u2) const {
+	Float mapPDF;
+	std::optional<Vec2> uv = distribution.Sample(u1, &mapPDF);
+	if (!uv) {
+		return {};
+	}
+	Vec3 wLight = EqualAreaSquareToSphere(*uv);
+	Vec3 w = -m_transform.ApplyVector(wLight);
+
+	Frame wFrame = Frame::FromZ(-w);
+	Vec2 cd = SampleUniformDiskConcentric(u2);
+	Vec3 pDisk = sceneCenter + sceneRadius * wFrame.FromLocal(Vec3(cd.x, cd.y, 0));
+	Ray ray(pDisk + (sceneRadius * -w), w);
+
+	Float pdfDir = mapPDF / (4 * Pi);
+	Float pdfPos = 1 / (Pi * Sqr(sceneRadius));
+
+	return LightLeSample(ImageLe(*uv), ray, pdfPos, pdfDir);
+}
+
+void ImageInfiniteLight::SampleLePDF(const Ray& ray, Float* pdfPos, Float* pdfDir) const {
+	Vec3 wl = -m_transform.ApplyInverseVector(ray.direction);
+	Float mapPDF = distribution.PDF(EqualAreaSphereToSquare(wl));
+	*pdfDir = mapPDF / (4.0f * Pi);
+	*pdfPos = 1.0f / (Pi * Sqr(sceneRadius));
+}
+
+void ImageInfiniteLight::SampleLePDF(const RayInteraction&, Vec3 w, Float* pdfPos, Float* pdfDir) const {
+	throw new std::exception("Shouldn't be called for non-area lights");
+}
+
+Spectrum ImageInfiniteLight::Le(const Ray& ray) const {
+	Vec3 wLight = glm::normalize(m_transform.ApplyInverseVector(ray.direction));
+	Vec2 uv = EqualAreaSphereToSquare(wLight);
+	return ImageLe(uv);
+}
+
+std::optional<LightLiSample> ImageInfiniteLight::SampleLi(LightSampleContext ctx, Vec2 u, bool allowIncompletePDF) const {
+	Float mapPDF = 0;
+	Vec2 uv;
+	if (allowIncompletePDF) {
+		uv = compensatedDistribution.Sample(u, &mapPDF);
+	}
+	else {
+		uv = distribution.Sample(u, &mapPDF);
+	}
+	if (mapPDF == 0) {
+		return {};
+	}
+
+	Vec3 wLight = EqualAreaSquareToSphere(uv);
+	Vec3 wi = m_transform.ApplyVector(wLight);
+
+	Float pdf = mapPDF / (4.0f * Pi);
+
+	return LightLiSample(ImageLe(uv), wi, pdf, RayInteraction(ctx.position + wi * (2 * sceneRadius)));
+}
+
+Bounds3f ImageInfiniteLight::Bounds() const {
+	return {};
+}
+
+Spectrum ImageInfiniteLight::ImageLe(Vec2 uv) const {
+	Spectrum rgb = image.GetValue(glm::ivec2(uv * Vec2(image.GetResolution() - glm::ivec2(1, 1))));
+	return scale * rgb;
 }

@@ -26,7 +26,7 @@ public:
 
 protected:
 	SceneSnapshot* m_sceneSnapshot = nullptr;
-	LightSampler* m_lightSampler;
+	LightSampler* m_lightSampler = nullptr;
 	bool m_regularize = true;
 
 	bool Unoccluded(const RayInteraction& p0, const RayInteraction& p1, GBufferPixel& pixel);

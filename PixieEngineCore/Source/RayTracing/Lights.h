@@ -6,6 +6,7 @@
 #include "Shapes.h"
 #include "Math/Bounds.h"
 #include "Math/Transform.h"
+#include "Math/PiecewiseConstant.h"
 #include "Resources/ResourceManager.h"
 
 enum class LightType : uint32_t {
@@ -193,4 +194,30 @@ protected:
 	Float m_sceneRadius = 0.0f;
 
 	Spectrum GetSpectrum(Vec3 direction) const;
+};
+
+class ImageInfiniteLight : public Light {
+public:
+	ImageInfiniteLight(Transform renderFromLight, Buffer2D<Spectrum> image, Float scale);
+
+	void Preprocess(const Bounds3f& sceneBounds) override;
+	Spectrum Phi() const override;
+	Float SampleLiPDF(LightSampleContext, Vec3 wi, bool allowIncompletePDF) const override;
+	std::optional<LightLeSample> SampleLe(Vec2 u1, Vec2 u2) const override;
+	void SampleLePDF(const Ray&, Float* pdfPos, Float* pdfDir) const override;
+	void SampleLePDF(const RayInteraction&, Vec3 w, Float* pdfPos, Float* pdfDir) const override;
+	Spectrum Le(const Ray& ray) const override;
+	std::optional<LightLiSample> SampleLi(LightSampleContext ctx, Vec2 u, bool allowIncompletePDF) const override;
+
+	Bounds3f Bounds() const override;
+
+private:
+	Buffer2D<Spectrum> image;
+	Float scale;
+	Vec3 sceneCenter;
+	Float sceneRadius;
+	PiecewiseConstant2D distribution;
+	PiecewiseConstant2D compensatedDistribution;
+
+	Spectrum ImageLe(Vec2 uv) const;
 };

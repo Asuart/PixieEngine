@@ -594,3 +594,57 @@ inline Float IntegrateEdge(Vec3 v1, Vec3 v2, Vec3 N) {
 	Float theta_sintheta = (x > 0.0f) ? v : 0.5f * (1.0f / sqrt(glm::max(1.0f - x * x, 1e-7f))) - v;
 	return glm::dot(glm::cross(v1, v2) * theta_sintheta, N);
 }
+
+inline Vec3 EqualAreaSquareToSphere(Vec2 p) {
+	Float u = 2 * p.x - 1, v = 2 * p.y - 1;
+	Float up = std::abs(u), vp = std::abs(v);
+
+	Float signedDistance = 1 - (up + vp);
+	Float d = std::abs(signedDistance);
+	Float r = 1 - d;
+
+	Float phi = (r == 0 ? 1 : (vp - up) / r + 1) * Pi / 4;
+
+	Float z = std::copysign(1 - Sqr(r), signedDistance);
+
+	Float cosPhi = std::copysign(std::cos(phi), u);
+	Float sinPhi = std::copysign(std::sin(phi), v);
+	return Vec3(cosPhi * r * SafeSqrt(2 - Sqr(r)), sinPhi * r * SafeSqrt(2 - Sqr(r)), z);
+}
+
+// Via source code from Clarberg: Fast Equal-Area Mapping of the (Hemi)Sphere using SIMD
+inline Vec2 EqualAreaSphereToSquare(Vec3 d) {
+	Float x = std::abs(d.x), y = std::abs(d.y), z = std::abs(d.z);
+
+	Float r = SafeSqrt(1 - z);
+
+	Float a = std::max(x, y), b = std::min(x, y);
+	b = a == 0 ? 0 : b / a;
+
+	const Float t1 = 0.406758566246788489601959989e-5f;
+	const Float t2 = 0.636226545274016134946890922156f;
+	const Float t3 = 0.61572017898280213493197203466e-2f;
+	const Float t4 = -0.247333733281268944196501420480f;
+	const Float t5 = 0.881770664775316294736387951347e-1f;
+	const Float t6 = 0.419038818029165735901852432784e-1f;
+	const Float t7 = -0.251390972343483509333252996350e-1f;
+	Float phi = EvaluatePolynomial(b, t1, t2, t3, t4, t5, t6, t7);
+
+	if (x < y) {
+		phi = 1 - phi;
+	}
+
+	Float v = phi * r;
+	Float u = r - v;
+
+	if (d.z < 0) {
+		std::swap(u, v);
+		u = 1 - u;
+		v = 1 - v;
+	}
+
+	u = std::copysign(u, d.x);
+	v = std::copysign(v, d.y);
+
+	return Vec2(0.5f * (u + 1), 0.5f * (v + 1));
+}

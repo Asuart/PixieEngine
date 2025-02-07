@@ -23,6 +23,10 @@ public:
 		return m_data[index];
 	}
 
+	T GetValue(glm::ivec2 coords) const {
+		return m_data[coords.y * m_resolution.x + coords.x];
+	}
+
 	T GetValue(uint32_t x, uint32_t y) const {
 		return m_data[y * m_resolution.x + x];
 	}

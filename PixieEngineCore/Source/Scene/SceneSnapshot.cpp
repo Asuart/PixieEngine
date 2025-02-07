@@ -86,6 +86,16 @@ SceneSnapshot::SceneSnapshot(Scene* scene) {
 
 	m_materials = ResourceManager::GetMaterials();
 
+	const HDRISkybox& skybox = scene->GetSkybox();
+	glm::ivec2 skyboxResolution = skybox.m_equrectangularTexture.GetResolution();
+	Buffer2D<Spectrum> skyboxSpectrum(skyboxResolution);
+	for (int32_t y = 0; y < skyboxResolution.y; y++) {
+		for (int32_t x = 0; x < skyboxResolution.x; x++) {
+			skyboxSpectrum.SetValue(x, y, Spectrum(skybox.m_equrectangularTexture.GetPixel({ x, y })));
+		}
+	}
+	m_infiniteLights.push_back(new ImageInfiniteLight(Transform(), skyboxSpectrum, 1.0f));
+
 	BuildObjectsBVHRecoursive(objects, 0, (int32_t)objects.size());
 }
 
