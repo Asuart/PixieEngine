@@ -4,9 +4,7 @@
 PathTracingRenderer::PathTracingRenderer() :
 	m_frameBuffer({1280, 720}), m_camera(Vec3(-10, 0, 0), Vec3(0, 0, 0), Vec3(0, 1, 0), glm::radians(39.6f), { 1280, 720 }, 0, 10),
 	m_film({ 1280, 720 }), m_boxTestsTexture({ 1280, 720 }), m_shapeTestsTexture({ 1280, 720 }),
-	m_normalTexture({ 1280, 720 }), m_depthTexture({ 1280, 720 }) {
-	m_rayTracer = CreateRayTracer(m_rayTracingMode);
-}
+	m_normalTexture({ 1280, 720 }), m_depthTexture({ 1280, 720 }) {}
 
 PathTracingRenderer::~PathTracingRenderer() {
 	StopRender();
@@ -47,7 +45,7 @@ void PathTracingRenderer::StartRender(std::shared_ptr<SceneSnapshot> sceneSnapsh
 	m_renderStartTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
 	m_sampleStartTime = m_renderStartTime;
 
-	m_rayTracer->SetSceneSnapshot(m_sceneSnapshot.get());
+	m_rayTracer.SetSceneSnapshot(m_sceneSnapshot.get());
 
 	GenerateTiles();
 	ResetTileQueue();
@@ -107,19 +105,6 @@ uint32_t PathTracingRenderer::GetSamplesCount() const {
 	return m_samples;
 }
 
-RayTracingMode PathTracingRenderer::GetRayTracingMode() {
-	return m_rayTracingMode;
-}
-
-void PathTracingRenderer::SetRayTracingMode(RayTracingMode mode) {
-	bool wasRendering = m_isRendering;
-	StopRender();
-	delete m_rayTracer;
-	m_rayTracingMode = mode;
-	m_rayTracer = CreateRayTracer(m_rayTracingMode);
-	if (wasRendering) StartRender(m_sceneSnapshot, m_camera);
-}
-
 int32_t PathTracingRenderer::GetMaxRenderThreads() {
 	return m_maxThreads;
 }
@@ -146,7 +131,7 @@ void PathTracingRenderer::PerPixel(uint32_t x, uint32_t y, Sampler* sampler) {
 	CameraSample cameraSample = GetCameraSample(x, y, filter, sampler);
 	Vec2 uv = m_film.GetUV(cameraSample.pFilm);
 	Ray ray = m_camera.GetRay(uv);
-	GBufferPixel pixel = m_rayTracer->SampleLightRay(ray, sampler);
+	GBufferPixel pixel = m_rayTracer.SampleLightRay(ray, sampler);
 	m_boxTestsTexture.SetPixel({ x, y }, (Float)pixel.boxChecks);
 	m_shapeTestsTexture.SetPixel({ x, y }, (Float)pixel.shapeChecks);
 	m_normalTexture.SetPixel({ x, y }, glm::abs(pixel.normal));

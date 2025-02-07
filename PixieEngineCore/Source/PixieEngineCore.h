@@ -3,7 +3,7 @@
 #include "EngineTime.h"
 #include "FrameBuffer.h"
 #include "Resources/ResourceManager.h"
-#include "RayTracing/RayTracers.h"
+#include "RayTracing/VolumetricRayTracer.h"
 #include "RayTracing/Film.h"
 #include "RayTracing/Shapes.h"
 #include "ShaderGraph/ShaderGraph.h"

@@ -1,7 +1,7 @@
 #pragma once
 #include "pch.h"
 #include "FrameBuffer.h"
-#include "RayTracing/RayTracers.h"
+#include "RayTracing/VolumetricRayTracer.h"
 #include "RayTracing/Film.h"
 #include "Scene/SceneManager.h"
 #include "GlobalRenderer.h"
@@ -21,8 +21,6 @@ public:
 	void PauseRender();
 	void StopRender();
 
-	RayTracingMode GetRayTracingMode();
-	void SetRayTracingMode(RayTracingMode mode);
 	int32_t GetMaxRenderThreads();
 	void SetMaxRenderThreads(int32_t count);
 	uint32_t GetSamplesCount() const;
@@ -31,8 +29,7 @@ public:
 
 protected:
 	const glm::ivec2 m_tileSize = glm::ivec2(32, 32);
-	RayTracingMode m_rayTracingMode = RayTracingMode::Naive;
-	RayTracer* m_rayTracer;
+	VolumetricRayTracer m_rayTracer;
 	Film m_film;
 	bool m_isRendering = false;
 	bool m_isPaused = false;

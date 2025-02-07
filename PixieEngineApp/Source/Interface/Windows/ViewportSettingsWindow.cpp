@@ -50,23 +50,7 @@ void ViewportSettingsWindow::Draw() {
 			}
 			ImGui::Spacing();
 
-			if (activeRenderMode == RenderMode::PathTracing) {	
-				RayTracingMode rayTracingMode = viewport->m_pathTracingRenderer.GetRayTracingMode();
-				if (ImGui::BeginCombo("Ray Tracing Mode", to_string(rayTracingMode).c_str())) {
-					for (int32_t n = 0; n < (int32_t)RayTracingMode::COUNT; n++) {
-						RayTracingMode mode = RayTracingMode(n);
-						bool isSelected = (rayTracingMode == mode);
-						if (ImGui::Selectable(to_string(mode).c_str(), isSelected)) {
-							viewport->m_pathTracingRenderer.SetRayTracingMode(mode);
-						}
-						if (isSelected) {
-							ImGui::SetItemDefaultFocus();
-						}
-					}
-					ImGui::EndCombo();
-				}
-				ImGui::Spacing();
-				
+			if (activeRenderMode == RenderMode::PathTracing) {					
 				int32_t maxRenderThreads = viewport->m_pathTracingRenderer.GetMaxRenderThreads();
 				if (ImGui::InputInt("Max Render Threads", &maxRenderThreads)) {
 					viewport->m_pathTracingRenderer.SetMaxRenderThreads(Clamp(maxRenderThreads, 1, 128));

@@ -17,6 +17,7 @@ void PixieEngineApp::Initialize() {
 }
 
 void PixieEngineApp::Start() {
+	SceneManager::Start();
 	while (!m_mainWindow.IsShouldClose()) {
 		HighPrecisionTimer::StartTimer("Total Frame Time");
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

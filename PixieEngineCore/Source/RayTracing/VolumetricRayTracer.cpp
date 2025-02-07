@@ -1,7 +1,9 @@
 #include "pch.h"
-#include "RayTracers.h"
+#include "VolumetricRayTracer.h"
 #include "Scene.h"
 #include "SceneSnapshot.h"
+
+constexpr int32_t MaxRayBounces = 4096;
 
 std::string to_string(RayTracingVisualization mode) {
 	switch (mode) {
@@ -14,42 +16,11 @@ std::string to_string(RayTracingVisualization mode) {
 	}
 }
 
-std::string to_string(RayTracingMode mode) {
-	switch (mode) {
-	case RayTracingMode::Naive: return "Naive";
-	case RayTracingMode::Volumetric: return "Volumetric";
-	default: return "Undefined Ray Tracing Mode";
-	}
-}
-
-RayTracer* CreateRayTracer(RayTracingMode mode) {
-	switch (mode) {
-    case RayTracingMode::Volumetric:
-        return new VolumetricRayTracer();
-	case RayTracingMode::Naive:
-	default:
-		return new NaiveRayTracer();
-	}
-}
-
-/*
-    Ray Tracer
-*/
-
-void RayTracer::SetSceneSnapshot(SceneSnapshot* sceneSnapshot) {
-    m_sceneSnapshot = sceneSnapshot;
-    Bounds3f sceneBounds = m_sceneSnapshot->GetBounds();
-    const std::vector<Light*>& lights = m_sceneSnapshot->GetInfiniteLights();
-    for (size_t i = 0; i < lights.size(); i++) {
-        lights[i]->Preprocess(sceneBounds);
-    }
-}
-
-bool RayTracer::Unoccluded(const RayInteraction& p0, const RayInteraction& p1, GBufferPixel& pixel) {
+bool VolumetricRayTracer::Unoccluded(const RayInteraction& p0, const RayInteraction& p1, GBufferPixel& pixel) {
     return Unoccluded(p0.position, p1.position, pixel);
 }
 
-bool RayTracer::Unoccluded(Vec3 p0, Vec3 p1, GBufferPixel& pixel) {
+bool VolumetricRayTracer::Unoccluded(Vec3 p0, Vec3 p1, GBufferPixel& pixel) {
     Vec3 dir = p1 - p0;
     Float tMax = glm::length(dir);
     if (tMax < ShadowEpsilon) {
@@ -58,223 +29,10 @@ bool RayTracer::Unoccluded(Vec3 p0, Vec3 p1, GBufferPixel& pixel) {
     return !m_sceneSnapshot->IsIntersected(Ray(p0, glm::normalize(dir)), &pixel.boxChecks, &pixel.shapeChecks, tMax - ShadowEpsilon);
 }
 
-/*
-    Naive Ray Tracer
-*/
-
-NaiveRayTracer::NaiveRayTracer()
-    : m_lightSampler(new UniformLightSampler()) {}
-
-NaiveRayTracer::~NaiveRayTracer() {
-    delete m_lightSampler;
-}
-
-void NaiveRayTracer::SetSceneSnapshot(SceneSnapshot* sceneSnapshot) {
-    m_sceneSnapshot = sceneSnapshot;
-    Bounds3f sceneBounds = m_sceneSnapshot->GetBounds();
-    const std::vector<Light*>& lights = m_sceneSnapshot->GetInfiniteLights();
-    for (size_t i = 0; i < lights.size(); i++) {
-        lights[i]->Preprocess(sceneBounds);
-    }
-    if (m_lightSampler) {
-        delete m_lightSampler;
-    }
-    if (sceneSnapshot) {
-        m_lightSampler = new UniformLightSampler(&sceneSnapshot->GetLights());
-    }
-    else {
-        m_lightSampler = new UniformLightSampler({});
-    }
-}
-
-GBufferPixel NaiveRayTracer::SampleLightRay(Ray ray, Sampler* sampler) {
-    GBufferPixel pixel;
-    Spectrum L(0.0f, 0.0f, 0.0f), beta(1.0f, 1.0f, 1.0f);
-    int32_t depth = 0;
-    Float p_b = 0.0f, etaScale = 1.0f;
-    bool specularBounce = false, anyNonSpecularBounces = false;
-    RayInteraction prevIntrCtx;
-
-    while (true) {
-        std::optional<ShapeIntersection> si = m_sceneSnapshot->Intersect(ray, &pixel.boxChecks, &pixel.shapeChecks);
-        if (!si) {
-            for (Light* light : m_sceneSnapshot->GetInfiniteLights()) {
-                Spectrum Le = light->Le(ray);
-                if (depth == 0 || specularBounce) {
-                    L += beta * Le;
-                }
-                else {
-                    Float p_l = m_lightSampler->PMF(prevIntrCtx, light) * light->SampleLiPDF(prevIntrCtx, ray.direction, true);
-                    Float w_b = PowerHeuristic(1, p_b, 1, p_l);
-                    L += beta * w_b * Le;
-                }
-            }
-            break;
-        }
-
-        RayInteraction intr = si->intr;
-        Light* light = intr.lightIndex >= 0 ? m_sceneSnapshot->GetAreaLight(intr.lightIndex) : nullptr;
-        Spectrum Le = Spectrum(0.0f);
-        if (light) {
-            Le = light ? light->L(intr.position, intr.normal, intr.uv, -ray.direction) : Spectrum();
-            if (depth == 0 || specularBounce) {
-                L += beta * Le;
-            }
-            else {
-                Float p_l = m_lightSampler->PMF(prevIntrCtx, light) * light->SampleLiPDF(prevIntrCtx, ray.direction, true);
-                Float w_l = PowerHeuristic(1, p_b, 1, p_l);
-                L += beta * w_l * Le;
-            }
-        }
-
-        if (depth++ == MaxRayBounces) {
-            break;
-        }
-
-        Material& material = m_sceneSnapshot->GetMaterial(intr.materialIndex);
-
-        if (IsNonSpecular(material.Flags())) {
-            Spectrum Ld = SampleLd(intr, material, sampler, pixel);
-            L += beta * Ld;
-        }
-
-        Vec3 wo = -ray.direction;
-        MaterialSample materialSample = SampleMaterial(material, intr, sampler);
-
-        if (depth == 1) {
-            pixel.albedo = materialSample.f;
-            pixel.depth = si->tHit;
-            pixel.normal = si->intr.normal;
-            pixel.position = si->intr.position;
-            pixel.uv = si->intr.uv;
-        }
-
-        if (!materialSample.f || !materialSample.pdf) {
-            break;
-        }
-
-        beta *= materialSample.f * AbsDot(materialSample.scattered, intr.normal) / materialSample.pdf;
-        p_b = materialSample.pdf;
-        specularBounce = IsSpecular(materialSample.flags);
-        anyNonSpecularBounces |= !IsSpecular(materialSample.flags);
-        if (materialSample.transmission) {
-            etaScale *= Sqr(materialSample.refraction);
-        }
-
-        Float rrBeta = MaxComponent(beta.GetRGB() * etaScale);
-        if (rrBeta < 1.0f && depth > 1) {
-            Float q = std::max<Float>(0.0f, 1.0f - rrBeta);
-            if (RandomFloat() < q) {
-                break;
-            }
-            beta /= 1.0f - q;
-        }
-
-        prevIntrCtx = intr;
-
-        ray = Ray(intr.position, materialSample.scattered);
-    }
-    pixel.light = L;
-    return pixel;
-}
-
-MaterialSample NaiveRayTracer::SampleMaterial(const Material& material, RayInteraction& inter, Vec3 wo, Vec3 wi) {
-    Frame frame = Frame::FromZ(inter.normal);
-    Vec3 woLocal = frame.ToLocal(wo);
-    Vec3 wiLocal = frame.ToLocal(wi);
-    if (!SameHemisphere(woLocal, wiLocal)) {
-        return { Spectrum(0), wi, 0 };
-    }
-    Spectrum f = material.m_albedoTexture.Sample(inter.uv) * InvPi;
-    Float pdf = CosineHemispherePDF(AbsCosTheta(wiLocal));
-    return { f, wi, pdf };
-}
-
-static Float Reflectance(Float cosine, Float refraction_index) {
-    Float r0 = (1.0f - refraction_index) / (1.0f + refraction_index);
-    r0 = r0 * r0;
-    return r0 + (1.0f - r0) * glm::pow((1.0f - cosine), 5.0f);
-}
-
-MaterialSample NaiveRayTracer::SampleMaterial(const Material& material, RayInteraction& inter, Sampler* sampler) {
-    Frame frame = Frame::FromZ(inter.normal);
-    Vec3 wo = frame.ToLocal(inter.wo);
-    Float transperencyTest = RandomFloat();
-    Float roughness = material.m_roughnessTexture.Sample(inter.uv);
-    if (transperencyTest < material.m_transparency) {
-        // Transmission
-        Spectrum attenuation = material.m_albedoTexture.Sample(inter.uv);
-        Float ri = glm::dot(inter.normal, inter.wo) > 0.0f ? (1.0f / material.m_refraction) : material.m_refraction;
-        Float cos_theta = CosTheta(wo);
-        Float sin_theta = SinTheta(wo);
-        bool cannot_refract = ri * sin_theta > 1.0;
-        Vec3 wi;
-        BxDFFlags flags = BxDFFlags::Unset;
-        if (cannot_refract || Reflectance(cos_theta, ri) > sampler->Get1D()) {
-            wi = Vec3(-wo.x, -wo.y, wo.z);
-            flags = BxDFFlags::SpecularReflection;
-        }
-        else {
-            wi = glm::refract(-wo, Vec3(0.0f, 0.0f, 1.0f), (Float)(glm::dot(inter.normal, inter.wo) > 0.0f ? (1.0f / material.m_refraction) : material.m_refraction));
-            flags = BxDFFlags::SpecularTransmission;
-        }
-        if (wi == Vec3(0.0f)) {
-            return { Spectrum(0.0f), frame.FromLocal(wi), 0 };
-        }
-        return { Spectrum(1.0f), frame.FromLocal(wi), material.m_transparency, flags };
-    }
-    else {
-        Vec3 wi = Vec3(-wo.x, -wo.y, wo.z);
-        Float theta = glm::acos(wi.z);
-        Float phi = glm::sign(wi.y) * glm::acos(wi.x / (glm::length(Vec2(wi.x, wi.y))));
-        Vec2 offset = Pi * SampleUniformDiskConcentric(sampler->Get2D()) * roughness;
-        theta += offset.x;
-        phi += offset.y;
-        Vec3 scattered = Vec3(glm::sin(theta) * glm::cos(phi), glm::sin(theta) * glm::sin(phi), glm::cos(theta));
-        if (scattered.z < 0) {
-            scattered.z = -scattered.z;
-        }
-        Spectrum f = material.m_albedoTexture.Sample(inter.uv) / (1 + Pi * roughness);
-        return { f, frame.FromLocal(scattered), (1.0f - material.m_transparency) * 1.0f / (1.0f + roughness * Pi), BxDFFlags::DiffuseReflection};
-    }
-}
-
-Spectrum NaiveRayTracer::SampleLd(RayInteraction& intr, const Material& material, Sampler* sampler, GBufferPixel& pixel) {
-    std::optional<SampledLight> sampledLight = m_lightSampler->Sample(sampler->Get1D());
-    if (!sampledLight) {
-        return Spectrum();
-    }
-
-    std::optional<LightLiSample> ls = sampledLight->light->SampleLi(intr, sampler->Get2D());
-    if (!ls || !ls->L || ls->pdf <= 0) {
-        return Spectrum();
-    }
-
-    Vec3 wo = intr.wo, wi = ls->wi;
-    MaterialSample materialSample = SampleMaterial(material, intr, wo, wi);
-    Spectrum f = materialSample.f * AbsDot(wi, intr.normal);
-    if (!f || !Unoccluded(intr, ls->pLight, pixel)) {
-        return Spectrum();
-    }
-
-    Float p_l = sampledLight->p * ls->pdf;
-    Float p_b = materialSample.pdf;
-    Float w_l = PowerHeuristic(1, p_l, 1, p_b);
-    return w_l * ls->L * f / p_l;
-}
-
-/*
-	Volumetric Ray Tracer
-*/
-
 struct RayMajorantSegment {
     Float tMin, tMax;
     Spectrum sigma_maj;
 };
-
-Spectrum ClampZero(Spectrum s) {
-    return Spectrum(glm::max(s.GetRGB(), Vec3(0.0f)));
-}
       
 //template <typename F>
 //Spectrum SampleT_maj(Ray ray, Float tMax, Float u, RNG& rng, F callback`) {
