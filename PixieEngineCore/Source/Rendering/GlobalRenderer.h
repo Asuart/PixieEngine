@@ -24,7 +24,8 @@ public:
 	static void DrawUIBox(Vec2 position, Vec2 size, Vec4 baseColor, Float borderRadius = 5.0f, Float borderWidth = 1.0f, Vec4 borderColor = Vec4(1.0f), Mat4 projection = Mat4(1.0f));
 
 	// Resource Generation
-	static void DrawCubeMap(GLuint equirectangularTexture, glm::ivec2 cubemapResolution, GLuint cubemapTexture, glm::ivec2 lighmapResolution, GLuint lightmapTextrue);
+	static void DrawCubeMap(GLuint equirectangularTexture, glm::ivec2 cubemapResolution, GLuint cubemapTexture, glm::ivec2 lighmapResolution, GLuint lightmapTextrue, glm::ivec2 prefilterResolution, GLuint prefilterMap);
+	static void DrawBRDFLookUpTexture(glm::ivec2 resolution, GLuint texture);
 
 protected:
 	static Shader m_quadShader;
@@ -32,6 +33,8 @@ protected:
 	static Shader m_uiBoxShader;
 	static Shader m_equirectangularToCubemapShader;
 	static Shader m_cubemapConvolutionShader;
+	static Shader m_prefilterShader;
+	static Shader m_brdfLUTShader;
 	static Shader m_skyboxShader;
 	static GLuint m_textVAO;
 	static GLuint m_textVBO;

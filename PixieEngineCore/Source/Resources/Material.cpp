@@ -20,6 +20,16 @@ Material::Material(const std::string& name, Spectrum albedo, Spectrum emissionCo
 	assert(!isnan(m_emissionColor.GetRGB().x) && !isnan(m_emissionColor.GetRGB().y) && !isnan(m_emissionColor.GetRGB().z));
 	assert(!isnan(m_emissionStrength) && !isnan(m_albedo.GetRGB().x) && !isnan(m_albedo.GetRGB().y) && !isnan(m_albedo.GetRGB().z));
 	assert(!isnan(m_roughness) && !isnan(m_metallic) && !isnan(m_transparency) && !isnan(m_refraction));
+	m_albedoTexture.SetPixel({ 0, 0 }, Vec3(1.0f));
+	m_albedoTexture.Upload();
+	m_emissionTexture.SetPixel({ 0, 0 }, Vec3(0.0f));
+	m_emissionTexture.Upload();
+	m_metallicTexture.SetPixel({ 0, 0 }, 1.0f);
+	m_metallicTexture.Upload();
+	m_roughnessTexture.SetPixel({ 0, 0 }, 1.0f);
+	m_roughnessTexture.Upload();
+	m_normalTexture.SetPixel({ 0, 0 }, Vec3(0.0f, 0.0f, 1.0f));
+	m_normalTexture.Upload();
 }
 
 bool Material::IsEmissive() {

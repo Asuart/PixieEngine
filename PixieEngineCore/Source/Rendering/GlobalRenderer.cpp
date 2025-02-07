@@ -7,6 +7,8 @@ Shader GlobalRenderer::m_uiBoxShader;
 Shader GlobalRenderer::m_skyboxShader;
 Shader GlobalRenderer::m_equirectangularToCubemapShader;
 Shader GlobalRenderer::m_cubemapConvolutionShader;
+Shader GlobalRenderer::m_prefilterShader;
+Shader GlobalRenderer::m_brdfLUTShader;
 GLuint GlobalRenderer::m_textVAO;
 GLuint GlobalRenderer::m_textVBO;
 
@@ -30,6 +32,8 @@ void GlobalRenderer::Initialize() {
 	m_skyboxShader = ResourceManager::LoadShader("Skybox");
 	m_cubemapConvolutionShader = ResourceManager::LoadShader("CubemapConvolution");
 	m_equirectangularToCubemapShader = ResourceManager::LoadShader("EquirectangularToCubemap");
+	m_prefilterShader = ResourceManager::LoadShader("Prefilter");
+	m_brdfLUTShader = ResourceManager::LoadShader("BRDFLookUpTexture");
 
 	glGenVertexArrays(1, &m_textVAO);
 	glGenBuffers(1, &m_textVBO);
@@ -133,7 +137,7 @@ void GlobalRenderer::DrawUIBox(Vec2 position, Vec2 size, Vec4 baseColor, Float b
 	m_uiBoxShader.Unbind();
 }
 
-void GlobalRenderer::DrawCubeMap(GLuint equirectangularTexture, glm::ivec2 cubemapResolution, GLuint cubemapTexture, glm::ivec2 lighmapResolution, GLuint lightmapTextrue) {
+void GlobalRenderer::DrawCubeMap(GLuint equirectangularTexture, glm::ivec2 cubemapResolution, GLuint cubemapTexture, glm::ivec2 lighmapResolution, GLuint lightmapTextrue, glm::ivec2 prefilterResolution, GLuint prefilterTexture) {
 	// Store Original Viewport
 	GLint originalViewport[4];
 	glGetIntegerv(GL_VIEWPORT, originalViewport);
@@ -150,12 +154,12 @@ void GlobalRenderer::DrawCubeMap(GLuint equirectangularTexture, glm::ivec2 cubem
 
 	GLuint captureFBO;
 	glGenFramebuffers(1, &captureFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 
 	GLuint captureRBO;
 	glGenRenderbuffers(1, &captureRBO);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, cubemapResolution.x, cubemapResolution.y);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
 	glViewport(0, 0, cubemapResolution.x, cubemapResolution.y);
@@ -189,7 +193,68 @@ void GlobalRenderer::DrawCubeMap(GLuint equirectangularTexture, glm::ivec2 cubem
 		DrawMesh(ResourceManager::GetCubeMesh());
 	}
 
+	glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterTexture);
+	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+	m_prefilterShader.Bind();
+	m_prefilterShader.SetUniform1i("environmentMap", 0);
+	m_prefilterShader.SetUniformMat4f("projection", captureProjection);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+	uint32_t maxMipLevels = 5;
+	for (uint32_t mip = 0; mip < maxMipLevels; mip++) {
+		uint32_t mipWidth = 128 * std::pow(0.5f, mip);
+		uint32_t mipHeight = 128 * std::pow(0.5f, mip);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
+		glViewport(0, 0, mipWidth, mipHeight);
+
+		Float roughness = (Float)mip / (Float)(maxMipLevels - 1);
+		m_prefilterShader.SetUniform1f("roughness", roughness);
+		for (int32_t i = 0; i < 6; i++) {
+			m_prefilterShader.SetUniformMat4f("view", captureViews[i]);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, prefilterTexture, mip);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			DrawMesh(ResourceManager::GetCubeMesh());
+		}
+	}
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glDeleteRenderbuffers(1, &captureRBO);
+	glDeleteFramebuffers(1, &captureFBO);
+
+	// Restore original viewport
+	glViewport(originalViewport[0], originalViewport[1], originalViewport[2], originalViewport[3]);
+}
+
+void GlobalRenderer::DrawBRDFLookUpTexture(glm::ivec2 resolution, GLuint texture) {
+	// Store Original Viewport
+	GLint originalViewport[4];
+	glGetIntegerv(GL_VIEWPORT, originalViewport);
+
+	GLuint captureFBO;
+	glGenFramebuffers(1, &captureFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+
+	GLuint captureRBO;
+	glGenRenderbuffers(1, &captureRBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, resolution.x, resolution.y);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+
+	glViewport(0, 0, resolution.x, resolution.y);
+	m_brdfLUTShader.Bind();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	DrawMesh(ResourceManager::GetQuadMesh());
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glDeleteRenderbuffers(1, &captureRBO);
+	glDeleteFramebuffers(1, &captureFBO);
 
 	// Restore original viewport
 	glViewport(originalViewport[0], originalViewport[1], originalViewport[2], originalViewport[3]);

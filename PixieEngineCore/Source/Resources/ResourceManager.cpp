@@ -17,6 +17,7 @@ std::vector<Material> ResourceManager::m_materials = {};
 std::vector<Mesh*> ResourceManager::m_meshes = {};
 std::map<char, FontCharacter> ResourceManager::m_characters = {};
 uint32_t ResourceManager::m_defaultFontSize = 64;
+Texture ResourceManager::m_brdfLUT;
 
 static const std::string c_deafultMaterial = "Default Material";
 static const int32_t c_maxMaterials = 512;
@@ -88,6 +89,9 @@ void ResourceManager::Initialize() {
 	AddMaterial(Material(c_deafultMaterial));
 
 	LoadDefaultFont();
+
+	m_brdfLUT = Texture({ 512, 512 }, GL_RG16F, GL_RG, GL_FLOAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
+	GlobalRenderer::DrawBRDFLookUpTexture({ 512, 512 }, m_brdfLUT.m_id);
 }
 
 std::shared_ptr<Scene> ResourceManager::LoadScene(const std::filesystem::path& filePath) {
@@ -293,7 +297,7 @@ Buffer2DTexture<Vec4> ResourceManager::LoadBuffer2DTextureRGBA(const std::filesy
 
 HDRISkybox ResourceManager::LoadSkybox(const std::filesystem::path& path) {
 	Buffer2DTexture<Vec3> sphericalMap = LoadBuffer2DTextureRGB(GetApplicationDirectory().string() + std::string("/Resources/Skymaps/") + path.string());
-	return TextureGenerator::Skybox(sphericalMap, { 512, 512 }, { 32, 32 });
+	return TextureGenerator::Skybox(sphericalMap, { 512, 512 }, { 32, 32 }, { 128, 128 });
 }
 
 Material* ResourceManager::GetDefaultMaterial() {
@@ -1075,4 +1079,8 @@ void ResourceManager::LoadDefaultFont() {
 
 	FT_Done_Face(face);
 	FT_Done_FreeType(ft);
+}
+
+const Texture& ResourceManager::GetBRDFLookUpTexture() {
+	return m_brdfLUT;
 }

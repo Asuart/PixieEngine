@@ -10,8 +10,8 @@ PixieEngineApp::~PixieEngineApp() {
 }
 
 void PixieEngineApp::Initialize() {
-	ResourceManager::Initialize();
 	GlobalRenderer::Initialize();
+	ResourceManager::Initialize();
 	SceneManager::Initialize();
 	m_interface.Initialize();
 }

@@ -62,7 +62,7 @@ void ForwardRenderer::DrawObject(SceneObject* object, Mat4 parentTransform) {
 }
 
 void ForwardRenderer::SetupCamera(Camera* camera) {
-	m_defaultShader.SetUniform3f("cameraPos", camera->GetTransform().GetPosition());
+	m_defaultShader.SetUniform3f("uCameraPos", camera->GetTransform().GetPosition());
 	m_defaultShader.SetUniformMat4f("mView", camera->GetViewMatrix());
 	m_defaultShader.SetUniformMat4f("mProjection", camera->GetProjectionMatrix());
 }
@@ -102,15 +102,20 @@ void ForwardRenderer::SetupLights(Scene* scene) {
 	}
 	m_defaultShader.SetUniform1i("nAreaLights", nAreaLights);
 
-	m_defaultShader.SetTexture("LTC1", m_LTC1Texture.m_id, 1);
-	m_defaultShader.SetTexture("LTC2", m_LTC2Texture.m_id, 2);
-
-	m_defaultShader.SetCubeMap("irradianceMap", scene->GetSkybox().m_lightmapTexture.m_id, 3);
+	m_defaultShader.SetTexture("LTC1", m_LTC1Texture.m_id, 5);
+	m_defaultShader.SetTexture("LTC2", m_LTC2Texture.m_id, 6);
+	m_defaultShader.SetTexture("brdfLUTMap", ResourceManager::GetBRDFLookUpTexture().m_id, 7);
+	m_defaultShader.SetCubeMap("irradianceMap", scene->GetSkybox().m_lightmapTexture.m_id, 8);
+	m_defaultShader.SetCubeMap("prefilterMap", scene->GetSkybox().m_prefilteredTexture.m_id, 9);
 }
 
 void ForwardRenderer::SetupMaterial(Material* material) {
-	m_defaultShader.SetUniform3f("albedo", material->m_albedo.GetRGB());
-	m_defaultShader.SetUniform1f("metallic", material->m_metallic);
-	m_defaultShader.SetUniform1f("roughness", material->m_roughness);
-	m_defaultShader.SetTexture("albedoTexture", material->m_albedoTexture.GetID(), 0);
+	m_defaultShader.SetTexture("albedoMap", material->m_albedoTexture.GetID(), 0);
+	m_defaultShader.SetTexture("normalMap", material->m_normalTexture.GetID(), 1);
+	m_defaultShader.SetTexture("metallicMap", material->m_metallicTexture.GetID(), 2);
+	m_defaultShader.SetTexture("roughnessMap", material->m_roughnessTexture.GetID(), 3);
+	//m_defaultShader.SetTexture("aoMap", material->m_aoMap.GetID(), 4);
+	m_defaultShader.SetUniform3f("uAlbedo", material->m_albedo.GetRGB());
+	m_defaultShader.SetUniform1f("uMetallic", material->m_metallic);
+	m_defaultShader.SetUniform1f("uRoughness", material->m_roughness);
 }
