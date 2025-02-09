@@ -10,26 +10,11 @@ Texture TextureGenerator::SSAONoiseTexture(glm::ivec2 resolution) {
 	return Texture(resolution, GL_RGBA32F, GL_RGB, GL_FLOAT, ssaoNoise.data());
 }
 
-Texture TextureGenerator::CreateCubemap(glm::ivec2 resolution, GLint internalFormat, GLenum format, GLenum type) {
-	GLuint cubemap;
-	glGenTextures(1, &cubemap);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap);
-	for (int32_t i = 0; i < 6; i++) {
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, resolution.x, resolution.y, 0, format, type, nullptr);
-	}
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	return Texture(resolution, cubemap);
-}
-
 HDRISkybox TextureGenerator::Skybox(Buffer2DTexture<Vec3>& equirectangularTexture, glm::ivec2 resolution, glm::ivec2 irradianceResolution, glm::ivec2 prefilterResoution) {
-	Texture envCubemap = TextureGenerator::CreateCubemap(resolution);
-	Texture irradianceMap = TextureGenerator::CreateCubemap(irradianceResolution);
-	Texture prefilterMap = TextureGenerator::CreateCubemap(prefilterResoution);
-	GlobalRenderer::DrawCubeMap(equirectangularTexture.GetID(), resolution, envCubemap.m_id, irradianceResolution, irradianceMap.m_id, prefilterResoution, prefilterMap.m_id);
+	Cubemap envCubemap = Cubemap();
+	Cubemap irradianceMap = Cubemap();
+	Cubemap prefilterMap = Cubemap();
+	GlobalRenderer::DrawCubeMap(equirectangularTexture.GetTexture(), resolution, envCubemap, irradianceResolution, irradianceMap, prefilterResoution, prefilterMap);
 	return HDRISkybox(equirectangularTexture, envCubemap, irradianceMap, prefilterMap);
 }
 

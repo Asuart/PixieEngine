@@ -9,6 +9,7 @@ public:
 	Buffer2DTexture(const Buffer2D<T>& buffer);
 
 	GLuint GetID() const;
+	const Texture& GetTexture() const;
 	glm::ivec2 GetResolution() const;
 	void Resize(glm::ivec2 resolution);
 	void Clear();
@@ -28,19 +29,22 @@ protected:
 
 template<class T>
 inline Buffer2DTexture<T>::Buffer2DTexture(glm::ivec2 resolution) :
-	m_buffer(resolution) {
-	m_texture.m_resolution = resolution;
-}
+	m_buffer(resolution), m_texture(resolution) {}
 
 template<class T>
 inline Buffer2DTexture<T>::Buffer2DTexture(const Buffer2D<T>& buffer) :
-	m_buffer(buffer), m_texture(Texture()) {
+	m_buffer(buffer) {
 	Upload();
 }
 
 template<class T>
 inline GLuint Buffer2DTexture<T>::GetID() const {
-	return m_texture.m_id;
+	return m_texture.GetHandle();
+}
+
+template<class T>
+inline const Texture& Buffer2DTexture<T>::GetTexture() const {
+	return m_texture;
 }
 
 template<class T>
@@ -50,7 +54,7 @@ inline glm::ivec2 Buffer2DTexture<T>::GetResolution() const {
 
 template<class T>
 inline void Buffer2DTexture<T>::Resize(glm::ivec2 resolution) {
-	m_texture.m_resolution = resolution;
+	m_texture.Resize(resolution);
 	m_buffer.Resize(resolution);
 }
 
@@ -106,35 +110,17 @@ inline T Buffer2DTexture<T>::GetPixel(glm::ivec2 coords) const {
 
 template<>
 inline void Buffer2DTexture<Float>::Upload() {
-	m_texture.m_resolution = m_buffer.m_resolution;
-	m_texture.m_internalFormat = GL_R32F;
-	m_texture.m_format = GL_RED;
-	m_texture.m_type = GL_FLOAT;
-	glBindTexture(GL_TEXTURE_2D, m_texture.m_id);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, m_texture.m_resolution.x, m_texture.m_resolution.y, 0, GL_RED, GL_FLOAT, m_buffer.Data());
-	glBindTexture(GL_TEXTURE_2D, 0);
+	m_texture.Upload(m_buffer.m_resolution, GL_R32F, GL_RED, GL_FLOAT, m_buffer.Data());
 }
 
 template<>
 inline void Buffer2DTexture<Vec3>::Upload() {
-	m_texture.m_resolution = m_buffer.m_resolution;
-	m_texture.m_internalFormat = GL_RGB32F;
-	m_texture.m_format = GL_RGBA;
-	m_texture.m_type = GL_FLOAT;
-	glBindTexture(GL_TEXTURE_2D, m_texture.m_id);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, m_texture.m_resolution.x, m_texture.m_resolution.y, 0, GL_RGB, GL_FLOAT, m_buffer.Data());
-	glBindTexture(GL_TEXTURE_2D, 0);
+	m_texture.Upload(m_buffer.m_resolution, GL_RGB32F, GL_RGB, GL_FLOAT, m_buffer.Data());
 }
 
 template<>
 inline void Buffer2DTexture<Vec4>::Upload() {
-	m_texture.m_resolution = m_buffer.m_resolution;
-	m_texture.m_internalFormat = GL_RGBA32F;
-	m_texture.m_format = GL_RGBA;
-	m_texture.m_type = GL_FLOAT;
-	glBindTexture(GL_TEXTURE_2D, m_texture.m_id);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, m_texture.m_resolution.x, m_texture.m_resolution.y, 0, GL_RGBA, GL_FLOAT, m_buffer.Data());
-	glBindTexture(GL_TEXTURE_2D, 0);
+	m_texture.Upload(m_buffer.m_resolution, GL_RGBA32F, GL_RGBA, GL_FLOAT, m_buffer.Data());
 }
 
 template<class T>

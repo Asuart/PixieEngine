@@ -4,8 +4,8 @@
 
 ForwardRenderer::ForwardRenderer() :
 	m_frameBuffer({1280, 720}),
-	m_LTC1Texture({ 64, 64 }, GL_RGBA, GL_RGBA, GL_FLOAT, (void*)LTC1, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_LINEAR),
-	m_LTC2Texture({ 64, 64 }, GL_RGBA, GL_RGBA, GL_FLOAT, (void*)LTC2, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_LINEAR) {
+	m_LTC1Texture({ 64, 64 }, GL_RGBA, GL_RGBA, GL_FLOAT, (void*)LTC1, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge, TextureFiltering::Linear, TextureFiltering::Linear),
+	m_LTC2Texture({ 64, 64 }, GL_RGBA, GL_RGBA, GL_FLOAT, (void*)LTC2, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge, TextureFiltering::Linear, TextureFiltering::Linear) {
 	m_defaultShader = ResourceManager::LoadShader("PhysicallyBased");
 }
 
@@ -18,7 +18,7 @@ void ForwardRenderer::DrawFrame(Scene* scene, Camera* camera) {
 	m_frameBuffer.ResizeViewport();
 	m_frameBuffer.Clear();
 
-	GlobalRenderer::DrawSkybox(*camera, scene->GetSkybox().m_cubemapTexture.m_id);
+	GlobalRenderer::DrawSkybox(*camera, scene->GetSkybox().m_cubemapTexture.GetHandle());
 
 	m_defaultShader.Bind();
 	SetupCamera(camera);
@@ -102,9 +102,9 @@ void ForwardRenderer::SetupLights(Scene* scene) {
 	}
 	m_defaultShader.SetUniform1i("nAreaLights", nAreaLights);
 
-	m_defaultShader.SetTexture("LTC1", m_LTC1Texture.m_id, 5);
-	m_defaultShader.SetTexture("LTC2", m_LTC2Texture.m_id, 6);
-	m_defaultShader.SetTexture("brdfLUTMap", ResourceManager::GetBRDFLookUpTexture().m_id, 7);
-	m_defaultShader.SetCubeMap("irradianceMap", scene->GetSkybox().m_lightmapTexture.m_id, 8);
-	m_defaultShader.SetCubeMap("prefilterMap", scene->GetSkybox().m_prefilteredTexture.m_id, 9);
+	m_defaultShader.SetTexture("LTC1", m_LTC1Texture.GetHandle(), 5);
+	m_defaultShader.SetTexture("LTC2", m_LTC2Texture.GetHandle(), 6);
+	m_defaultShader.SetTexture("brdfLUTMap", ResourceManager::GetBRDFLookUpTexture().GetHandle(), 7);
+	m_defaultShader.SetCubeMap("irradianceMap", scene->GetSkybox().m_lightmapTexture.GetHandle(), 8);
+	m_defaultShader.SetCubeMap("prefilterMap", scene->GetSkybox().m_prefilteredTexture.GetHandle(), 9);
 }

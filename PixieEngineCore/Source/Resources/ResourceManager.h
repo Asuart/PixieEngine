@@ -78,7 +78,6 @@ protected:
 	static std::vector<Mesh*> m_meshes;
 	static std::map<char, FontCharacter> m_characters;
 	static uint32_t m_defaultFontSize;
-	static Texture m_brdfLUT;
 
 	static bool CheckFileExtensionSupport(const std::filesystem::path& filePath, ResourceType type);
 	static std::shared_ptr<Scene> LoadPixieEngineScene(const std::filesystem::path& path);

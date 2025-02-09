@@ -137,7 +137,7 @@ void GlobalRenderer::DrawUIBox(Vec2 position, Vec2 size, Vec4 baseColor, Float b
 	m_uiBoxShader.Unbind();
 }
 
-void GlobalRenderer::DrawCubeMap(GLuint equirectangularTexture, glm::ivec2 cubemapResolution, GLuint cubemapTexture, glm::ivec2 lighmapResolution, GLuint lightmapTextrue, glm::ivec2 prefilterResolution, GLuint prefilterTexture) {
+void GlobalRenderer::DrawCubeMap(const Texture& equirectangularTexture, glm::ivec2 cubemapResolution, const Cubemap& cubemapTexture, glm::ivec2 lighmapResolution, const Cubemap& lightmapTextrue, glm::ivec2 prefilterResolution, const Cubemap& prefilterTexture) {
 	// Store Original Viewport
 	GLint originalViewport[4];
 	glGetIntegerv(GL_VIEWPORT, originalViewport);
@@ -169,10 +169,10 @@ void GlobalRenderer::DrawCubeMap(GLuint equirectangularTexture, glm::ivec2 cubem
 	m_equirectangularToCubemapShader.SetUniformMat4f("projection", captureProjection);
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, equirectangularTexture);
+	glBindTexture(GL_TEXTURE_2D, equirectangularTexture.GetHandle());
 	for (int32_t i = 0; i < 6; i++) {
 		m_equirectangularToCubemapShader.SetUniformMat4f("view", captureViews[i]);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubemapTexture, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubemapTexture.GetHandle(), 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		DrawMesh(ResourceManager::GetCubeMesh());
 	}
@@ -185,22 +185,22 @@ void GlobalRenderer::DrawCubeMap(GLuint equirectangularTexture, glm::ivec2 cubem
 	m_cubemapConvolutionShader.SetUniformMat4f("projection", captureProjection);
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture.GetHandle());
 	for (int32_t i = 0; i < 6; i++) {
 		m_cubemapConvolutionShader.SetUniformMat4f("view", captureViews[i]);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, lightmapTextrue, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, lightmapTextrue.GetHandle(), 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		DrawMesh(ResourceManager::GetCubeMesh());
 	}
 
-	glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterTexture);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterTexture.GetHandle());
 	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
 	m_prefilterShader.Bind();
 	m_prefilterShader.SetUniform1i("environmentMap", 0);
 	m_prefilterShader.SetUniformMat4f("projection", captureProjection);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture.GetHandle());
 
 	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 	uint32_t maxMipLevels = 5;
@@ -214,7 +214,7 @@ void GlobalRenderer::DrawCubeMap(GLuint equirectangularTexture, glm::ivec2 cubem
 		m_prefilterShader.SetUniform1f("roughness", roughness);
 		for (int32_t i = 0; i < 6; i++) {
 			m_prefilterShader.SetUniformMat4f("view", captureViews[i]);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, prefilterTexture, mip);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, prefilterTexture.GetHandle(), mip);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			DrawMesh(ResourceManager::GetCubeMesh());
 		}

@@ -1,40 +1,98 @@
 #pragma once
 #include "pch.h"
+#include "TextureManager.h"
 
-struct Texture {
-	GLuint m_id = 0;
-	glm::ivec2 m_resolution = { 1, 1 };
-	GLint m_internalFormat = GL_RGBA;
-	GLenum m_format = GL_RGBA;
-	GLenum m_type = GL_FLOAT;
+enum class TextureWrap {
+	Reapeat = 0,
+	MirroredRepeat,
+	ClampToEdge,
+	ClampToBorder,
+};
 
+enum class TextureFiltering {
+	Nearest,
+	Linear,
+	NearestMipmapNearest,
+	LinearMipmapNearest,
+	NearestMipmapLinear,
+	LinearMipmapLinear,
+};
+
+GLint glCastTextureWrap(TextureWrap wrap);
+GLint glCastTextureFiltering(TextureFiltering filtering);
+
+class Texture {
+public:
 	Texture();
-	Texture(glm::ivec2 resolution, GLuint textureID);
-	Texture(glm::ivec2 resolution, GLint internalFormat, GLenum format, GLenum type, GLint wrapS = GL_REPEAT, GLint wrapT = GL_REPEAT, GLint minFilter = GL_NEAREST, GLint magFilter = GL_NEAREST);
-	Texture(glm::ivec2 resolution, GLint internalFormat, GLenum format, GLenum type, void* data, GLint wrapS = GL_REPEAT, GLint wrapT = GL_REPEAT, GLint minFilter = GL_NEAREST, GLint magFilter = GL_NEAREST);
+	Texture(glm::uvec2 resolution, TextureWrap wrapS = TextureWrap::Reapeat, TextureWrap wrapT = TextureWrap::Reapeat, TextureFiltering minFilter = TextureFiltering::Nearest, TextureFiltering magFilter = TextureFiltering::Nearest);
+	Texture(glm::uvec2 resolution, GLint internalFormat, TextureWrap wrapS = TextureWrap::Reapeat, TextureWrap wrapT = TextureWrap::Reapeat, TextureFiltering minFilter = TextureFiltering::Nearest, TextureFiltering magFilter = TextureFiltering::Nearest);
+	Texture(glm::uvec2 resolution, GLint internalFormat, GLenum format, GLenum type, void* data, TextureWrap wrapS = TextureWrap::Reapeat, TextureWrap wrapT = TextureWrap::Reapeat, TextureFiltering minFilter = TextureFiltering::Nearest, TextureFiltering magFilter = TextureFiltering::Nearest);
 	~Texture();
 
 	Texture(const Texture& other);
 	Texture& operator= (const Texture& other);
 
-	void SetWrap(GLint wrapS, GLint wrapT);
-	void SetFilters(GLint minFilter, GLint magFilter);
-	void SetMinFilter(GLint minFilter);
-	void SetMagFilter(GLint magFilter);
+	void Upload(glm::ivec2 resolution, GLint internalFormat, GLenum format, GLenum type, void* data);
+	void Resize(glm::ivec2 resolution);
+	void GenerateMipmaps() const;
+
+	GLuint GetHandle() const;
+	GLint GetInternalFormat() const;
+	glm::uvec2 GetResolution() const;
+
+	void SetWrap(TextureWrap wrapS, TextureWrap wrapT) const;
+	void SetFilters(TextureFiltering minFilter, TextureFiltering magFilter) const;
+	void SetMinFilter(TextureFiltering minFilter) const;
+	void SetMagFilter(TextureFiltering magFilter) const;
 
 protected:
-	static std::map<GLuint, std::atomic<uint32_t>> s_counters;
+	GLuint m_id = 0;
+	glm::uvec2 m_resolution = { 1, 1 };
+	GLint m_internalFormat = GL_RGBA;
+};
 
+class MSTexture {
 public:
-	static size_t GetActiveTexturesCount();
+	MSTexture(glm::uvec2 resolution, uint32_t samples, GLint internalFormat = GL_RGBA, bool fixedSampleLocations = false, TextureWrap wrapS = TextureWrap::Reapeat, TextureWrap wrapT = TextureWrap::Reapeat, TextureFiltering minFilter = TextureFiltering::Nearest, TextureFiltering magFilter = TextureFiltering::Nearest);
+	~MSTexture();
 
-	friend class ResourceManager;
+	MSTexture(const MSTexture& other);
+	MSTexture& operator= (const MSTexture& other);
+
+	void Resize(glm::ivec2 resolution, uint32_t samples, bool fixedSampleLocations = false);
+
+	GLuint GetHandle() const;
+	GLint GetInternalFormat() const;
+	glm::uvec2 GetResolution() const;
+
+	void SetWrap(TextureWrap wrapS, TextureWrap wrapT) const;
+	void SetFilters(TextureFiltering minFilter, TextureFiltering magFilter) const;
+	void SetMinFilter(TextureFiltering minFilter) const;
+	void SetMagFilter(TextureFiltering magFilter) const;
+
+protected:
+	GLuint m_id = 0;
+	glm::uvec2 m_resolution = { 1, 1 };
+	GLint m_internalFormat = GL_RGBA;
 };
 
-struct CubemapTexture {
-	// TODO
-};
+class Cubemap {
+public:
+	Cubemap(TextureWrap wrapS = TextureWrap::ClampToEdge, TextureWrap wrapT = TextureWrap::ClampToEdge, TextureWrap wrapR = TextureWrap::ClampToEdge, TextureFiltering minFilter = TextureFiltering::Linear, TextureFiltering magFilter = TextureFiltering::Linear);
+	~Cubemap();
 
-struct MSTexture {
-	// TODO
+	Cubemap(const Cubemap& other);
+	Cubemap& operator= (const Cubemap& other);
+
+	void Upload(uint32_t sideIndex, glm::ivec2 resolution, GLint internalFormat, GLenum format, GLenum type, void* data);
+
+	GLuint GetHandle() const;
+
+	void SetWrap(TextureWrap wrapS, TextureWrap wrapT, TextureWrap wrapR) const;
+	void SetFilters(TextureFiltering minFilter, TextureFiltering magFilter) const;
+	void SetMinFilter(TextureFiltering minFilter) const;
+	void SetMagFilter(TextureFiltering magFilter) const;
+
+protected:
+	GLuint m_id = 0;
 };

@@ -17,7 +17,6 @@ std::vector<Material> ResourceManager::m_materials = {};
 std::vector<Mesh*> ResourceManager::m_meshes = {};
 std::map<char, FontCharacter> ResourceManager::m_characters = {};
 uint32_t ResourceManager::m_defaultFontSize = 64;
-Texture ResourceManager::m_brdfLUT;
 
 static const std::string c_deafultMaterial = "Default Material";
 static const int32_t c_maxMaterials = 512;
@@ -90,8 +89,8 @@ void ResourceManager::Initialize() {
 
 	LoadDefaultFont();
 
-	m_brdfLUT = Texture({ 512, 512 }, GL_RG16F, GL_RG, GL_FLOAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
-	GlobalRenderer::DrawBRDFLookUpTexture({ 512, 512 }, m_brdfLUT.m_id);
+	m_textures.insert({"brdfLUT", Texture({512, 512}, GL_RG16F, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge, TextureFiltering::Linear, TextureFiltering::Linear) });
+	GlobalRenderer::DrawBRDFLookUpTexture({ 512, 512 }, m_textures["brdfLUT"].GetHandle());
 }
 
 std::shared_ptr<Scene> ResourceManager::LoadScene(const std::filesystem::path& filePath) {
@@ -1028,10 +1027,7 @@ uint32_t ResourceManager::GetDefaultFontSize() {
 }
 
 void ResourceManager::FreeTextures() {
-	for (auto it = Texture::s_counters.begin(); it != Texture::s_counters.end(); it++) {
-		glDeleteTextures(1, &it->first);
-	}
-	Texture::s_counters.clear();
+
 }
 
 void ResourceManager::LoadDefaultFont() {
@@ -1082,5 +1078,5 @@ void ResourceManager::LoadDefaultFont() {
 }
 
 const Texture& ResourceManager::GetBRDFLookUpTexture() {
-	return m_brdfLUT;
+	return m_textures["brdfLUT"];
 }

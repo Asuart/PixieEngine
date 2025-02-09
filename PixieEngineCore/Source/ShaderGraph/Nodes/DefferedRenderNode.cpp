@@ -6,12 +6,12 @@ const glm::ivec2 initialResolution = { 1280, 720 };
 
 DefferedRenderNode::DefferedRenderNode() :
 	ShaderNode("Deffered Render"),
-	m_albedo(initialResolution, GL_RGB, GL_RGB, GL_FLOAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE),
-	m_normal(initialResolution, GL_RGB32F, GL_RGB, GL_FLOAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE),
-	m_position(initialResolution, GL_RGB32F, GL_RGB, GL_FLOAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE),
-	m_specular(initialResolution, GL_RED, GL_RED, GL_FLOAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE),
-	m_metallic(initialResolution, GL_RED, GL_RED, GL_FLOAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE),
-	m_roughness(initialResolution, GL_RED, GL_RED, GL_FLOAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE) {
+	m_albedo(initialResolution, GL_RGB, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge),
+	m_normal(initialResolution, GL_RGB32F, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge),
+	m_position(initialResolution, GL_RGB32F, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge),
+	m_specular(initialResolution, GL_RED, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge),
+	m_metallic(initialResolution, GL_RED, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge),
+	m_roughness(initialResolution, GL_RED, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge) {
 	m_outputs.push_back({ *this, "Albedo", ShaderNodeIOType::textureRGB, &m_albedo });
 	m_outputs.push_back({ *this, "Normal", ShaderNodeIOType::textureRGB, &m_normal });
 	m_outputs.push_back({ *this, "Position", ShaderNodeIOType::textureRGB, &m_position });
@@ -24,12 +24,12 @@ DefferedRenderNode::DefferedRenderNode() :
 
 	glGenFramebuffers(1, &m_frameBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_albedo.m_id, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_normal.m_id, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_position.m_id, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, m_specular.m_id, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, m_metallic.m_id, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT5, GL_TEXTURE_2D, m_roughness.m_id, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_albedo.GetHandle(), 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_normal.GetHandle(), 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_position.GetHandle(), 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, m_specular.GetHandle(), 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, m_metallic.GetHandle(), 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT5, GL_TEXTURE_2D, m_roughness.GetHandle(), 0);
 
 	GLuint attachments[6] = {
 		GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2,
@@ -60,12 +60,12 @@ void DefferedRenderNode::Process(const Scene& scene, const Camera& camera) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	m_program.Bind();
 
-	m_program.SetTexture("gAlbedo", m_albedo.m_id, 0);
-	m_program.SetTexture("gNormal", m_normal.m_id, 1);
-	m_program.SetTexture("gPosition", m_position.m_id, 2);
-	m_program.SetTexture("gSpecular", m_specular.m_id, 3);
-	m_program.SetTexture("gMetallic", m_metallic.m_id, 4);
-	m_program.SetTexture("gRoughness", m_roughness.m_id, 5);
+	m_program.SetTexture("gAlbedo", m_albedo.GetHandle(), 0);
+	m_program.SetTexture("gNormal", m_normal.GetHandle(), 1);
+	m_program.SetTexture("gPosition", m_position.GetHandle(), 2);
+	m_program.SetTexture("gSpecular", m_specular.GetHandle(), 3);
+	m_program.SetTexture("gMetallic", m_metallic.GetHandle(), 4);
+	m_program.SetTexture("gRoughness", m_roughness.GetHandle(), 5);
 
 	m_program.SetUniform3f("cameraPos", camera.GetTransform().GetPosition());
 	m_program.SetUniformMat4f("mView", camera.GetViewMatrix());

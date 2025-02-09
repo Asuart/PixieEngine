@@ -23,7 +23,7 @@ void AssetsBrowserWindow::Draw() {
 		std::filesystem::path assetPath = ResourceManager::GetAssetsPath();
 
 		if (assetPath.parent_path() != "") {
-			ImGui::ImageButton((ImTextureID)(uint64_t)m_parentFolderIcon.m_id, { m_thumbnailSize, m_thumbnailSize }, { 0, 0 }, { 1, 1 });
+			ImGui::ImageButton((ImTextureID)(uint64_t)m_parentFolderIcon.GetHandle(), { m_thumbnailSize, m_thumbnailSize }, { 0, 0 }, { 1, 1 });
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 				ResourceManager::SetAssetsPath(assetPath.parent_path());
 			}
@@ -45,7 +45,7 @@ void AssetsBrowserWindow::Draw() {
 
 		for (const auto& path : directories) {
 			const std::string fileName = path.filename().string();
-			ImGui::ImageButton((ImTextureID)(uint64_t)m_folderIcon.m_id, { m_thumbnailSize, m_thumbnailSize }, { 0, 0 }, { 1, 1 });
+			ImGui::ImageButton((ImTextureID)(uint64_t)m_folderIcon.GetHandle(), { m_thumbnailSize, m_thumbnailSize }, { 0, 0 }, { 1, 1 });
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 				ResourceManager::SetAssetsPath(assetPath.string() + std::string("/") + fileName);
 			}
@@ -55,7 +55,7 @@ void AssetsBrowserWindow::Draw() {
 
 		for (const auto& path : files) {
 			const std::string fileName = path.filename().string();
-			ImGui::ImageButton((ImTextureID)(uint64_t)m_fileIcon.m_id, { m_thumbnailSize, m_thumbnailSize }, { 0, 0 }, { 1, 1 });
+			ImGui::ImageButton((ImTextureID)(uint64_t)m_fileIcon.GetHandle(), { m_thumbnailSize, m_thumbnailSize }, { 0, 0 }, { 1, 1 });
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 				if (ResourceManager::IsValidScenePath(path)) {
 					SceneManager::LoadScene(path);

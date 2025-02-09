@@ -5,11 +5,11 @@
 class HDRISkybox {
 public:
 	Buffer2DTexture<Vec3> m_equrectangularTexture;
-	Texture m_cubemapTexture;
-	Texture m_lightmapTexture;
-	Texture m_prefilteredTexture;
+	Cubemap m_cubemapTexture;
+	Cubemap m_lightmapTexture;
+	Cubemap m_prefilteredTexture;
 
 	HDRISkybox() = default;
-	HDRISkybox(Buffer2DTexture<Vec3>& equrectangularTexture, Texture cubemapTexture, Texture lightmapTexture, Texture prefilteredTexture) :
+	HDRISkybox(Buffer2DTexture<Vec3>& equrectangularTexture, Cubemap cubemapTexture, Cubemap lightmapTexture, Cubemap prefilteredTexture) :
 		m_equrectangularTexture(equrectangularTexture), m_cubemapTexture(cubemapTexture), m_lightmapTexture(lightmapTexture), m_prefilteredTexture(prefilteredTexture) {}
 };

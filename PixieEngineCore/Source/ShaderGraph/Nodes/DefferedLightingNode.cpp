@@ -6,9 +6,9 @@ const glm::ivec2 initialResolution = { 1280, 720 };
 
 DefferedLightingNode::DefferedLightingNode() :
 	ShaderNode("Deffered Lighting"),
-	m_frame(initialResolution, GL_RGB, GL_RGB, GL_FLOAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE),
-	m_LTC1Texture({ 64, 64 }, GL_RGBA, GL_RGBA, GL_FLOAT, (void*)LTC1, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_LINEAR),
-	m_LTC2Texture({ 64, 64 }, GL_RGBA, GL_RGBA, GL_FLOAT, (void*)LTC2, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_LINEAR),
+	m_frame(initialResolution, GL_RGB, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge),
+	m_LTC1Texture({ 64, 64 }, GL_RGBA, GL_RGBA, GL_FLOAT, (void*)LTC1, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge, TextureFiltering::Linear, TextureFiltering::Linear),
+	m_LTC2Texture({ 64, 64 }, GL_RGBA, GL_RGBA, GL_FLOAT, (void*)LTC2, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge, TextureFiltering::Linear, TextureFiltering::Linear),
 	m_noiseTexture(TextureGenerator::SSAONoiseTexture(SSAONoiseResolution)) {
 
 	m_inputs.push_back({ *this, "Albedo", ShaderNodeIOType::textureRGB });
@@ -25,7 +25,7 @@ DefferedLightingNode::DefferedLightingNode() :
 
 	glGenFramebuffers(1, &m_frameBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_frame.m_id, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_frame.GetHandle(), 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -45,8 +45,8 @@ void DefferedLightingNode::Process(const Scene& scene, const Camera& camera) {
 	m_program.SetTexture("gSpecular", GetInputTexture("Specular"), 3);
 	m_program.SetTexture("gMetallic", GetInputTexture("Metallic"), 4);
 	m_program.SetTexture("gRoughness", GetInputTexture("Roughness"), 5);
-	m_program.SetTexture("LTC1", m_LTC1Texture.m_id, 6);
-	m_program.SetTexture("LTC2", m_LTC2Texture.m_id, 7);
+	m_program.SetTexture("LTC1", m_LTC1Texture.GetHandle(), 6);
+	m_program.SetTexture("LTC2", m_LTC2Texture.GetHandle(), 7);
 	//m_program.SetTexture("ssaoTexture", m_ssaoBuffer.m_texture, 8);
 	SetupLights(scene);
 	GlobalRenderer::DrawMesh(ResourceManager::GetQuadMesh());
