@@ -62,6 +62,7 @@ std::string to_string(RenderMode renderMode) {
 	case RenderMode::Deffered:	return "Deffered";
 	case RenderMode::PathTracing: return "PathTracing";
 	case RenderMode::GPUPathTracing: return "GPUPathTracing";
+	case RenderMode::SceneSnapshot: return "SceneSnapshot";
 	default: return "Wrong Render Mode";
 	}
 }
@@ -69,7 +70,7 @@ std::string to_string(RenderMode renderMode) {
 ViewportWindow::ViewportWindow(PixieEngineApp& app, Interface& inter) :
 	InterfaceWindow(app, inter), m_frameBuffer({ 1280, 720 }), m_vrFrameBuffer({1280, 720}),
 	m_viewportCamera(Vec3(-10, 0, 0), Vec3(0, 0, 0), Vec3(0, 1, 0), glm::radians(39.6f), { 1280, 720 }, 0, 100),
-	m_cameraController(m_viewportCamera), m_stereoscopicFrameBuffer({ 1280, 720 }) {
+	m_cameraController(m_viewportCamera), m_stereoscopicFrameBuffer({ 1280, 720 }), m_sceneSnapshtVisualizer({ 1280, 720 }) {
 	m_vrShader = ResourceManager::LoadShader("VRQuad");
 	m_stereoscopicShader = ResourceManager::LoadShader("StereoscopicQuad");
 }
@@ -308,6 +309,17 @@ void ViewportWindow::Draw() {
 					//glBufferData(GL_SHADER_STORAGE_BUFFER, materialsBufferSize, alignedMaterials.data(), GL_STATIC_READ);
 					//
 					//m_samples = 0;
+				}
+				else if (m_renderMode == RenderMode::SceneSnapshot) {
+					std::shared_ptr<SceneSnapshot> sceneSnapshot = SceneManager::GetSceneSnapshot();
+					if (sceneSnapshot) {
+						m_sceneSnapshtVisualizer.Draw(scene, *sceneSnapshot, camera);
+						m_frameBuffer.Bind();
+						m_frameBuffer.ResizeViewport();
+						m_frameBuffer.Clear();
+						GlobalRenderer::DrawTextureFitted(m_sceneSnapshtVisualizer.m_opaqueTexture, { 1280, 720 }, glmViewportResolution);
+						m_frameBuffer.Unbind();
+					}
 				}
 			}
 

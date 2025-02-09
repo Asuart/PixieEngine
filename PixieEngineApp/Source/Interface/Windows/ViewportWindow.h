@@ -3,6 +3,7 @@
 #include "PixieEngineApp.h"
 #include "InterfaceWindow.h"
 #include "ViewportCameraController.h"
+#include "SceneSnapshotVisualizer.h"
 
 enum class ViewportMode {
 	Default = 0,
@@ -16,6 +17,7 @@ enum class RenderMode {
 	Deffered,
 	PathTracing,
 	GPUPathTracing,
+	SceneSnapshot,
 	COUNT
 };
 
@@ -56,6 +58,7 @@ protected:
 	DefferedRenderer m_defferedRenderer;
 	DefferedRenderer m_secondaryDefferedRenderer;
 	PathTracingRenderer m_pathTracingRenderer;
+	SceneSnapshotVisualizer m_sceneSnapshtVisualizer;
 	Shader m_vrShader;
 	Shader m_stereoscopicShader;
 	Camera m_viewportCamera;

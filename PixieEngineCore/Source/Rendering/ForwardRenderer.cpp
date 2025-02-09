@@ -44,7 +44,7 @@ void ForwardRenderer::DrawObject(SceneObject* object, Mat4 parentTransform) {
 		if (MaterialComponent* materialComponent = object->GetComponent<MaterialComponent>()) {
 			material = materialComponent->GetMaterial();
 		}
-		SetupMaterial(material);
+		m_defaultShader.SetMaterial(material);
 		mesh->Draw();
 	}
 	if (const SphereComponent* sphere = object->GetComponent<SphereComponent>()) {
@@ -53,7 +53,7 @@ void ForwardRenderer::DrawObject(SceneObject* object, Mat4 parentTransform) {
 		if (MaterialComponent* materialComponent = object->GetComponent<MaterialComponent>()) {
 			material = materialComponent->GetMaterial();
 		}
-		SetupMaterial(material);
+		m_defaultShader.SetMaterial(material);
 		sphere->Draw();
 	}
 	for (size_t i = 0; i < object->GetChildren().size(); i++) {
@@ -107,15 +107,4 @@ void ForwardRenderer::SetupLights(Scene* scene) {
 	m_defaultShader.SetTexture("brdfLUTMap", ResourceManager::GetBRDFLookUpTexture().m_id, 7);
 	m_defaultShader.SetCubeMap("irradianceMap", scene->GetSkybox().m_lightmapTexture.m_id, 8);
 	m_defaultShader.SetCubeMap("prefilterMap", scene->GetSkybox().m_prefilteredTexture.m_id, 9);
-}
-
-void ForwardRenderer::SetupMaterial(Material* material) {
-	m_defaultShader.SetTexture("albedoMap", material->m_albedoTexture.GetID(), 0);
-	m_defaultShader.SetTexture("normalMap", material->m_normalTexture.GetID(), 1);
-	m_defaultShader.SetTexture("metallicMap", material->m_metallicTexture.GetID(), 2);
-	m_defaultShader.SetTexture("roughnessMap", material->m_roughnessTexture.GetID(), 3);
-	//m_defaultShader.SetTexture("aoMap", material->m_aoMap.GetID(), 4);
-	m_defaultShader.SetUniform3f("uAlbedo", material->m_albedo.GetRGB());
-	m_defaultShader.SetUniform1f("uMetallic", material->m_metallic);
-	m_defaultShader.SetUniform1f("uRoughness", material->m_roughness);
 }

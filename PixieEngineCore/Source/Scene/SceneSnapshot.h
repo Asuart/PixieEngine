@@ -35,7 +35,7 @@ public:
 	std::optional<ShapeIntersection> Intersect(const Ray& ray, int32_t* boxChecks, int32_t* shapeChecks, Float tMax = Infinity);
 	bool IsIntersected(const Ray& ray, int32_t* boxChecks, int32_t* shapeChecks, Float tMax = Infinity);
 
-private:
+protected:
 	std::vector<Material> m_materials;
 	std::vector<Triangle> m_triangles;
 	std::vector<Sphere> m_spheres;
@@ -50,4 +50,6 @@ private:
 	int32_t BuildMeshBVH(Mesh* mesh, Material* material);
 	int32_t BuildObjectsBVHRecoursive(std::vector<ObjectCache>& cache, int32_t start, int32_t objectsCount);
 	int32_t BuildBVHRecoursive(int32_t start, int32_t trianglesCount);
+
+	friend class SceneSnapshotVisualizer;
 };

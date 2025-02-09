@@ -30,3 +30,11 @@ public:
 
 	friend class ResourceManager;
 };
+
+struct CubemapTexture {
+	// TODO
+};
+
+struct MSTexture {
+	// TODO
+};

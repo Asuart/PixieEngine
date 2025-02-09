@@ -23,6 +23,7 @@ struct Material {
 	Float m_refraction = 1.0f;
 	Float m_transparency = 0.0f;
 	Buffer2DTexture<Vec3> m_normalTexture;
+	Buffer2DTexture<Float> m_aoTexture;
 
 	Material(const std::string& name = "Unnamed Material", Spectrum albedo = Spectrum(0.8f), Spectrum emissionColor = Spectrum(1.0f), float emissionStrength = 0.0f, float roughness = 1.0f, float metallic = 0.0f, float transparency = 0.0f, float refraction = 1.0f);
 

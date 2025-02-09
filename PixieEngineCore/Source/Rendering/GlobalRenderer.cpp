@@ -205,8 +205,8 @@ void GlobalRenderer::DrawCubeMap(GLuint equirectangularTexture, glm::ivec2 cubem
 	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 	uint32_t maxMipLevels = 5;
 	for (uint32_t mip = 0; mip < maxMipLevels; mip++) {
-		uint32_t mipWidth = 128 * std::pow(0.5f, mip);
-		uint32_t mipHeight = 128 * std::pow(0.5f, mip);
+		uint32_t mipWidth = glm::max(1, cubemapResolution.x >> mip);
+		uint32_t mipHeight = glm::max(1, cubemapResolution.y >> mip);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
 		glViewport(0, 0, mipWidth, mipHeight);
 

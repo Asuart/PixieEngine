@@ -23,5 +23,4 @@ protected:
 	void DrawObject(SceneObject* object, Mat4 parentTransform = Mat4(1.0f));
 	void SetupCamera(Camera* camera);
 	void SetupLights(Scene* scene);
-	void SetupMaterial(Material* material);
 };

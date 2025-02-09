@@ -106,6 +106,17 @@ public:
 		glBindTexture(GL_TEXTURE_CUBE_MAP, id);
 		SetUniform1i(name, index);
 	}
+
+	inline void SetMaterial(Material* material, int32_t startTextureIndex = 0) {
+		SetTexture("albedoMap", material->m_albedoTexture.GetID(), startTextureIndex + 0);
+		SetTexture("normalMap", material->m_normalTexture.GetID(), startTextureIndex + 1);
+		SetTexture("metallicMap", material->m_metallicTexture.GetID(), startTextureIndex + 2);
+		SetTexture("roughnessMap", material->m_roughnessTexture.GetID(), startTextureIndex + 3);
+		SetTexture("aoMap", material->m_aoTexture.GetID(), startTextureIndex + 4);
+		SetUniform3f("uAlbedo", material->m_albedo.GetRGB());
+		SetUniform1f("uMetallic", material->m_metallic);
+		SetUniform1f("uRoughness", material->m_roughness);
+	}
 };
 
 class Shader : public ShaderBase {
