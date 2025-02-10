@@ -1,20 +1,52 @@
 #pragma once
 #include "pch.h"
+#include "Resources/Texture.h"
 
 struct FrameBuffer {
 	FrameBuffer(glm::ivec2 resolution);
 	~FrameBuffer();
 
 	void Resize(glm::ivec2 resolution);
-	void ResizeViewport();
-	void Clear();
-	void Bind();
-	void Unbind();
+	glm::ivec2 GetResolution() const;
+	GLuint GetBufferHandle() const;
+	GLuint GetColorHandle() const;
+	GLuint GetDepthHandle() const;
+	void ResizeViewport() const;
+	void Clear() const;
+	void Bind() const;
+	void Unbind() const;
 
+protected:
 	GLuint m_frameBuffer;
 	GLuint m_texture;
 	GLuint m_depth;
 	glm::ivec2 m_resolution;
+};
+
+struct MultisampleFrameBuffer {
+	MultisampleFrameBuffer(glm::ivec2 resolution, int32_t samples);
+	~MultisampleFrameBuffer();
+
+	void Blit(const FrameBuffer& target);
+
+	void Resize(glm::ivec2 resolution);
+	glm::ivec2 GetResolution() const;
+	void SetSampleCount(int32_t samples);
+	int32_t GetSampleCount() const;
+	GLuint GetBufferHandle() const;
+	GLuint GetColorHandle() const;
+	GLuint GetDepthHandle() const;
+	void ResizeViewport() const;
+	void Clear() const;
+	void Bind() const;
+	void Unbind() const;
+
+protected:
+	glm::ivec2 m_resolution;
+	GLuint m_frameBuffer;
+	MSTexture m_texture;
+	GLuint m_depth;
+	int32_t m_samples;
 };
 
 struct GBuffer {

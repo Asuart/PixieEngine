@@ -141,7 +141,7 @@ void ShaderGraphWindow::Draw() {
 
 		glViewport(originalViewport[0], originalViewport[1], originalViewport[2], originalViewport[3]);
 
-		ImGui::Image((void*)(uint64_t)m_frameBuffer.m_texture, viewportResolution, { 0.0f, 1.0f }, { 1.0f, 0.0f });
+		ImGui::Image((void*)(uint64_t)m_frameBuffer.GetColorHandle(), viewportResolution, {0.0f, 1.0f}, {1.0f, 0.0f});
 	}
 	ImGui::End();
 	ImGui::PopStyleVar();
@@ -292,7 +292,7 @@ void ShaderGraphWindow::HandleUserInput() {
 }
 
 void ShaderGraphWindow::UpdateProjection() {
-	m_projection = glm::ortho(m_viewOffset.x, m_viewOffset.x + m_frameBuffer.m_resolution.x * m_viewScale, m_viewOffset.y + m_frameBuffer.m_resolution.y * m_viewScale, m_viewOffset.y);
+	m_projection = glm::ortho(m_viewOffset.x, m_viewOffset.x + m_frameBuffer.GetResolution().x * m_viewScale, m_viewOffset.y + m_frameBuffer.GetResolution().y * m_viewScale, m_viewOffset.y);
 }
 
 void ShaderGraphWindow::Connect(ShaderNodeOutputObject& from, ShaderNodeInputObject& to) {

@@ -66,7 +66,7 @@ public:
 	static const FontCharacter& GetFontCharacter(char c);
 	static uint32_t GetDefaultFontSize();
 	static const Texture& GetBRDFLookUpTexture();
-	static void FreeTextures();
+	static void FreeResources();
 
 protected:
 	static std::filesystem::path m_applicationPath;

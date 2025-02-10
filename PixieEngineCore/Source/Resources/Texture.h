@@ -59,32 +59,31 @@ public:
 	MSTexture(const MSTexture& other);
 	MSTexture& operator= (const MSTexture& other);
 
-	void Resize(glm::ivec2 resolution, uint32_t samples, bool fixedSampleLocations = false);
+	void Resize(glm::ivec2 resolution);
+	void SetSampleCount(int32_t samples);
 
 	GLuint GetHandle() const;
 	GLint GetInternalFormat() const;
 	glm::uvec2 GetResolution() const;
 
-	void SetWrap(TextureWrap wrapS, TextureWrap wrapT) const;
-	void SetFilters(TextureFiltering minFilter, TextureFiltering magFilter) const;
-	void SetMinFilter(TextureFiltering minFilter) const;
-	void SetMagFilter(TextureFiltering magFilter) const;
-
 protected:
 	GLuint m_id = 0;
 	glm::uvec2 m_resolution = { 1, 1 };
 	GLint m_internalFormat = GL_RGBA;
+	int32_t m_samples = 1;
+	bool m_fixedSampleLocations = false;
 };
 
 class Cubemap {
 public:
-	Cubemap(TextureWrap wrapS = TextureWrap::ClampToEdge, TextureWrap wrapT = TextureWrap::ClampToEdge, TextureWrap wrapR = TextureWrap::ClampToEdge, TextureFiltering minFilter = TextureFiltering::Linear, TextureFiltering magFilter = TextureFiltering::Linear);
+	Cubemap(glm::ivec2 resolution, TextureWrap wrapS = TextureWrap::ClampToEdge, TextureWrap wrapT = TextureWrap::ClampToEdge, TextureWrap wrapR = TextureWrap::ClampToEdge, TextureFiltering minFilter = TextureFiltering::Linear, TextureFiltering magFilter = TextureFiltering::Linear);
 	~Cubemap();
 
 	Cubemap(const Cubemap& other);
 	Cubemap& operator= (const Cubemap& other);
 
 	void Upload(uint32_t sideIndex, glm::ivec2 resolution, GLint internalFormat, GLenum format, GLenum type, void* data);
+	void GenerateMipmaps() const;
 
 	GLuint GetHandle() const;
 

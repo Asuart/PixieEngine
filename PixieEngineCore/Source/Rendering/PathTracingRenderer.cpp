@@ -18,7 +18,7 @@ void PathTracingRenderer::DrawFrame() {
 	m_frameBuffer.ResizeViewport();
 	m_frameBuffer.Clear();
 	m_film.m_texture.Upload();
-	GlobalRenderer::DrawAccumulatorTextureFitted(m_film.m_texture.GetID(), m_samples, m_film.m_texture.GetResolution(), m_frameBuffer.m_resolution);
+	GlobalRenderer::DrawAccumulatorTextureFitted(m_film.m_texture.GetID(), m_samples, m_film.m_texture.GetResolution(), m_frameBuffer.GetResolution());
 	m_frameBuffer.Unbind();
 
 	glViewport(originalViewport[0], originalViewport[1], originalViewport[2], originalViewport[3]);

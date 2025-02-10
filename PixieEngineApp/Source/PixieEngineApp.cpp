@@ -30,6 +30,7 @@ void PixieEngineApp::Start() {
 		glfwSwapBuffers(m_mainWindow.GetGLFWWindow());
 		HighPrecisionTimer::StopTimer("Total Frame Time");
 	}
+	ResourceManager::FreeResources();
 }
 
 GLFWwindow* PixieEngineApp::GetGLFWWindow() {

@@ -1,6 +1,7 @@
 #pragma once
 #include "pch.h"
 #include "Resources/ResourceManager.h"
+#include "FrameBuffer.h"
 
 class GlobalRenderer {
 public:

@@ -12,6 +12,5 @@ int32_t main(int32_t argc, char** argv) {
 	app.Initialize();
 	glfwSetWindowSizeCallback(app.GetGLFWWindow(), window_size_callback);
 	app.Start();
-	ResourceManager::FreeTextures();
 	return 0;
 }

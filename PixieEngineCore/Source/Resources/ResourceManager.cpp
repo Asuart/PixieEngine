@@ -1026,10 +1026,6 @@ uint32_t ResourceManager::GetDefaultFontSize() {
 	return m_defaultFontSize;
 }
 
-void ResourceManager::FreeTextures() {
-
-}
-
 void ResourceManager::LoadDefaultFont() {
 	const std::string fontsPath = GetApplicationDirectory().string() + std::string("/Resources/Fonts/");
 	FT_Library ft;
@@ -1079,4 +1075,8 @@ void ResourceManager::LoadDefaultFont() {
 
 const Texture& ResourceManager::GetBRDFLookUpTexture() {
 	return m_textures["brdfLUT"];
+}
+
+void ResourceManager::FreeResources() {
+	TextureManager::FreeTextures();
 }

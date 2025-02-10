@@ -34,6 +34,8 @@ public:
 	void SetViewportMode(ViewportMode mode);
 	RenderMode GetRenderMode() const;
 	void SetRenderMode(RenderMode renderMode);
+	AntiAliasing GetAntiAliasing() const;
+	void SetAntiAliasing(AntiAliasing mode);
 
 	// Stereoscopic Settings Access
 	Float GetStereoscopicDistance() const;

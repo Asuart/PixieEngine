@@ -174,15 +174,10 @@ void Texture::SetMagFilter(TextureFiltering magFilter) const {
 */
 
 MSTexture::MSTexture(glm::uvec2 resolution, uint32_t samples, GLint internalFormat, bool fixedSampleLocations, TextureWrap wrapS, TextureWrap wrapT, TextureFiltering minFilter, TextureFiltering magFilter) :
-	m_resolution(glm::max(resolution, { 1, 1 })), m_internalFormat(internalFormat) {
-	samples = glm::max((uint32_t)1, samples);
+	m_resolution(glm::max(resolution, { 1, 1 })), m_internalFormat(internalFormat), m_samples(glm::max((uint32_t)1, samples)), m_fixedSampleLocations(fixedSampleLocations){
 	glGenTextures(1, &m_id);
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_id);
-	glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_WRAP_S, glCastTextureWrap(wrapS));
-	glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_WRAP_T, glCastTextureWrap(wrapT));
-	glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, glCastTextureFiltering(minFilter));
-	glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, glCastTextureFiltering(magFilter));
-	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, m_internalFormat, m_resolution.x, m_resolution.y, fixedSampleLocations);
+	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_samples, m_internalFormat, m_resolution.x, m_resolution.y, m_fixedSampleLocations);
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 	TextureManager::msTextureCounters[m_id]++;
 }
@@ -200,6 +195,8 @@ MSTexture::MSTexture(const MSTexture& other) {
 	m_id = other.m_id;
 	m_resolution = other.m_resolution;
 	m_internalFormat = other.m_internalFormat;
+	m_samples = other.m_samples;
+	m_fixedSampleLocations = other.m_fixedSampleLocations;
 	TextureManager::msTextureCounters[m_id]++;
 }
 
@@ -213,15 +210,23 @@ MSTexture& MSTexture::operator= (const MSTexture& other) {
 	m_id = other.m_id;
 	m_resolution = other.m_resolution;
 	m_internalFormat = other.m_internalFormat;
+	m_samples = other.m_samples;
+	m_fixedSampleLocations = other.m_fixedSampleLocations;
 	TextureManager::msTextureCounters[m_id]++;
 	return *this;
 }
 
-void MSTexture::Resize(glm::ivec2 resolution, uint32_t samples, bool fixedSampleLocations) {
+void MSTexture::Resize(glm::ivec2 resolution) {
 	m_resolution = glm::max(resolution, { 1, 1 });
-	samples = glm::max((uint32_t)1, samples);
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_id);
-	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, m_internalFormat, m_resolution.x, m_resolution.y, fixedSampleLocations);
+	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_samples, m_internalFormat, m_resolution.x, m_resolution.y, m_fixedSampleLocations);
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+}
+
+void MSTexture::SetSampleCount(int32_t samples) {
+	m_samples = glm::max((int32_t)1, samples);
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_id);
+	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_samples, m_internalFormat, m_resolution.x, m_resolution.y, m_fixedSampleLocations);
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 }
 
@@ -237,41 +242,15 @@ glm::uvec2 MSTexture::GetResolution() const {
 	return m_resolution;
 }
 
-void MSTexture::SetWrap(TextureWrap wrapS, TextureWrap wrapT) const {
-	glBindTexture(GL_TEXTURE_2D, m_id);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, glCastTextureWrap(wrapS));
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, glCastTextureWrap(wrapT));
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void MSTexture::SetFilters(TextureFiltering minFilter, TextureFiltering magFilter) const {
-	glBindTexture(GL_TEXTURE_2D, m_id);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glCastTextureFiltering(minFilter));
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glCastTextureFiltering(magFilter));
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void MSTexture::SetMinFilter(TextureFiltering minFilter) const {
-	glBindTexture(GL_TEXTURE_2D, m_id);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glCastTextureFiltering(minFilter));
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void MSTexture::SetMagFilter(TextureFiltering magFilter) const {
-	glBindTexture(GL_TEXTURE_2D, m_id);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glCastTextureFiltering(magFilter));
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
-
 /*
 	Cubemap
 */
 
-Cubemap::Cubemap(TextureWrap wrapS, TextureWrap wrapT, TextureWrap wrapR, TextureFiltering minFilter, TextureFiltering magFilter) {
+Cubemap::Cubemap(glm::ivec2 resolution, TextureWrap wrapS, TextureWrap wrapT, TextureWrap wrapR, TextureFiltering minFilter, TextureFiltering magFilter) {
 	glGenTextures(1, &m_id);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_id);
 	for (int32_t i = 0; i < 6; i++) {
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, resolution.x, resolution.y, 0, GL_RGB, GL_FLOAT, NULL);
 	}
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, glCastTextureWrap(wrapS));
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, glCastTextureWrap(wrapT));
@@ -312,6 +291,12 @@ void Cubemap::Upload(uint32_t sideIndex, glm::ivec2 resolution, GLint internalFo
 	for (int32_t i = 0; i < 6; i++) {
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, resolution.x, resolution.y, 0, format, type, data);
 	}
+}
+
+void Cubemap::GenerateMipmaps() const {
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_id);
+	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
 GLuint Cubemap::GetHandle() const {

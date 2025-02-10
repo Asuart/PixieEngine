@@ -100,7 +100,7 @@ void ViewportWindow::Draw() {
 
 			Camera camera = m_viewportCamera;
 			if (!m_useCameraResolution) {
-				camera.SetResolution(m_frameBuffer.m_resolution);
+				camera.SetResolution(m_frameBuffer.GetResolution());
 			}
 
 			if (m_mode == ViewportMode::Stereoscopic) {
@@ -117,8 +117,8 @@ void ViewportWindow::Draw() {
 					m_stereoscopicFrameBuffer.ResizeViewport();
 					m_stereoscopicFrameBuffer.Clear();
 					m_stereoscopicShader.Bind();
-					m_stereoscopicShader.SetTexture("textureLeft", m_defferedRenderer.m_frameBuffer.m_texture, 0);
-					m_stereoscopicShader.SetTexture("textureRight", m_secondaryDefferedRenderer.m_frameBuffer.m_texture, 1);
+					m_stereoscopicShader.SetTexture("textureLeft", m_defferedRenderer.m_frameBuffer.GetColorHandle(), 0);
+					m_stereoscopicShader.SetTexture("textureRight", m_secondaryDefferedRenderer.m_frameBuffer.GetColorHandle(), 1);
 					m_stereoscopicShader.SetUniform1f("uDistance", m_stereoscopicDistance);
 					m_stereoscopicShader.SetUniform3f("uBalance", m_stereoscopicBalance);
 					m_stereoscopicShader.SetUniform3f("uScale", m_stereoscopicScale);
@@ -133,8 +133,8 @@ void ViewportWindow::Draw() {
 					m_stereoscopicFrameBuffer.ResizeViewport();
 					m_stereoscopicFrameBuffer.Clear();
 					m_stereoscopicShader.Bind();
-					m_stereoscopicShader.SetTexture("textureLeft", m_forwardRenderer.m_frameBuffer.m_texture, 0);
-					m_stereoscopicShader.SetTexture("textureRight", m_secondaryForwardRenderer.m_frameBuffer.m_texture, 1);
+					m_stereoscopicShader.SetTexture("textureLeft", m_forwardRenderer.GetFrameHandle(), 0);
+					m_stereoscopicShader.SetTexture("textureRight", m_secondaryForwardRenderer.GetFrameHandle(), 1);
 					m_stereoscopicShader.SetUniform1f("uDistance", m_stereoscopicDistance);
 					m_stereoscopicShader.SetUniform3f("uBalance", m_stereoscopicBalance);
 					m_stereoscopicShader.SetUniform3f("uScale", m_stereoscopicScale);
@@ -145,7 +145,7 @@ void ViewportWindow::Draw() {
 				m_frameBuffer.Bind();
 				m_frameBuffer.ResizeViewport();
 				m_frameBuffer.Clear();
-				GlobalRenderer::DrawTextureFitted(m_stereoscopicFrameBuffer.m_texture, camera.GetResolution(), glmViewportResolution);
+				GlobalRenderer::DrawTextureFitted(m_stereoscopicFrameBuffer.GetColorHandle(), camera.GetResolution(), glmViewportResolution);
 				m_frameBuffer.Unbind();
 			}
 			else if (m_mode == ViewportMode::VR) {
@@ -164,8 +164,8 @@ void ViewportWindow::Draw() {
 					m_vrFrameBuffer.ResizeViewport();
 					m_vrFrameBuffer.Clear();
 					m_vrShader.Bind();
-					m_vrShader.SetTexture("textureLeft", m_defferedRenderer.m_frameBuffer.m_texture, 0);
-					m_vrShader.SetTexture("textureRight", m_secondaryDefferedRenderer.m_frameBuffer.m_texture, 1);
+					m_vrShader.SetTexture("textureLeft", m_defferedRenderer.m_frameBuffer.GetColorHandle(), 0);
+					m_vrShader.SetTexture("textureRight", m_secondaryDefferedRenderer.m_frameBuffer.GetColorHandle(), 1);
 					m_vrShader.SetUniform1f("uDistance", m_vrDistance);
 					m_vrShader.SetUniform1f("uK", m_vrDistortion);
 					GlobalRenderer::DrawMesh(ResourceManager::GetQuadMesh());
@@ -179,8 +179,8 @@ void ViewportWindow::Draw() {
 					m_vrFrameBuffer.ResizeViewport();
 					m_vrFrameBuffer.Clear();
 					m_vrShader.Bind();
-					m_vrShader.SetTexture("textureLeft", m_forwardRenderer.m_frameBuffer.m_texture, 0);
-					m_vrShader.SetTexture("textureRight", m_secondaryForwardRenderer.m_frameBuffer.m_texture, 1);
+					m_vrShader.SetTexture("textureLeft", m_forwardRenderer.GetFrameHandle(), 0);
+					m_vrShader.SetTexture("textureRight", m_secondaryForwardRenderer.GetFrameHandle(), 1);
 					m_vrShader.SetUniform1f("uDistance", m_vrDistance);
 					m_vrShader.SetUniform1f("uK", m_vrDistortion);
 					GlobalRenderer::DrawMesh(ResourceManager::GetQuadMesh());
@@ -190,7 +190,7 @@ void ViewportWindow::Draw() {
 				m_frameBuffer.Bind();
 				m_frameBuffer.ResizeViewport();
 				m_frameBuffer.Clear();
-				GlobalRenderer::DrawTextureFitted(m_vrFrameBuffer.m_texture, camera.GetResolution(), glmViewportResolution);
+				GlobalRenderer::DrawTextureFitted(m_vrFrameBuffer.GetColorHandle(), camera.GetResolution(), glmViewportResolution);
 				m_frameBuffer.Unbind();
 			}
 			else {
@@ -199,7 +199,7 @@ void ViewportWindow::Draw() {
 					m_frameBuffer.Bind();
 					m_frameBuffer.ResizeViewport();
 					m_frameBuffer.Clear();
-					GlobalRenderer::DrawTextureFitted(m_forwardRenderer.m_frameBuffer.m_texture, camera.GetResolution(), glmViewportResolution);
+					GlobalRenderer::DrawTextureFitted(m_forwardRenderer.GetFrameHandle(), camera.GetResolution(), glmViewportResolution);
 					m_frameBuffer.Unbind();
 				}
 				else if (m_renderMode == RenderMode::Deffered) {
@@ -207,7 +207,7 @@ void ViewportWindow::Draw() {
 					m_frameBuffer.Bind();
 					m_frameBuffer.ResizeViewport();
 					m_frameBuffer.Clear();
-					GlobalRenderer::DrawTextureFitted(m_defferedRenderer.m_frameBuffer.m_texture, camera.GetResolution(), glmViewportResolution);
+					GlobalRenderer::DrawTextureFitted(m_defferedRenderer.m_frameBuffer.GetColorHandle(), camera.GetResolution(), glmViewportResolution);
 					m_frameBuffer.Unbind();
 				}
 				else if (m_renderMode == RenderMode::PathTracing) {
@@ -224,10 +224,10 @@ void ViewportWindow::Draw() {
 					m_frameBuffer.ResizeViewport();
 					m_frameBuffer.Clear();
 					if (m_pathTracingRenderer.GetSamplesCount() < 2) {
-						GlobalRenderer::DrawTextureFitted(m_forwardRenderer.m_frameBuffer.m_texture, camera.GetResolution(), glmViewportResolution);
+						GlobalRenderer::DrawTextureFitted(m_forwardRenderer.GetFrameHandle(), camera.GetResolution(), glmViewportResolution);
 						glClear(GL_DEPTH_BUFFER_BIT);
 					}
-					GlobalRenderer::DrawTextureFitted(m_pathTracingRenderer.m_frameBuffer.m_texture, m_pathTracingRenderer.m_frameBuffer.m_resolution, glmViewportResolution);
+					GlobalRenderer::DrawTextureFitted(m_pathTracingRenderer.m_frameBuffer.GetColorHandle(), m_pathTracingRenderer.m_frameBuffer.GetResolution(), glmViewportResolution);
 					m_frameBuffer.Unbind();
 				}
 				if (m_renderMode == RenderMode::GPUPathTracing) {
@@ -235,7 +235,7 @@ void ViewportWindow::Draw() {
 					m_frameBuffer.Bind();
 					m_frameBuffer.ResizeViewport();
 					m_frameBuffer.Clear();
-					GlobalRenderer::DrawTextureFitted(m_forwardRenderer.m_frameBuffer.m_texture, camera.GetResolution(), glmViewportResolution);
+					GlobalRenderer::DrawTextureFitted(m_forwardRenderer.GetFrameHandle(), camera.GetResolution(), glmViewportResolution);
 					m_frameBuffer.Unbind();
 
 					//ImVec2 viewportResolution = ImGui::GetContentRegionAvail();
@@ -325,7 +325,7 @@ void ViewportWindow::Draw() {
 
 			glViewport(originalViewport[0], originalViewport[1], originalViewport[2], originalViewport[3]);
 
-			ImGui::Image((void*)(uint64_t)m_frameBuffer.m_texture, viewportResolution, { 0.0, 1.0 }, { 1.0, 0.0 });
+			ImGui::Image((void*)(uint64_t)m_frameBuffer.GetColorHandle(), viewportResolution, { 0.0, 1.0 }, { 1.0, 0.0 });
 		}
 		HighPrecisionTimer::StopTimer("Viewport Render Time");
 	}
@@ -356,6 +356,15 @@ void ViewportWindow::SetRenderMode(RenderMode renderMode) {
 	if (m_renderMode == RenderMode::PathTracing || m_renderMode == RenderMode::GPUPathTracing) {
 		SetViewportMode(ViewportMode::Default);
 	}
+}
+
+AntiAliasing ViewportWindow::GetAntiAliasing() const {
+	return m_forwardRenderer.GetAntiAlisingMode();
+}
+
+void ViewportWindow::SetAntiAliasing(AntiAliasing mode) {
+	m_forwardRenderer.SetAntiAlisingMode(mode);
+	m_secondaryForwardRenderer.SetAntiAlisingMode(mode);
 }
 
 Float ViewportWindow::GetStereoscopicDistance() const {

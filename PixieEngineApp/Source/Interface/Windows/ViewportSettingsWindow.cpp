@@ -110,6 +110,25 @@ void ViewportSettingsWindow::Draw() {
 					}
 				}
 			}
+
+			if (activeRenderMode == RenderMode::Forward) {
+				AntiAliasing activeAntiAlising = viewport->GetAntiAliasing();
+				if (ImGui::BeginCombo("Anti Aliasing", to_string(activeAntiAlising).c_str())) {
+					for (int32_t n = 0; n < (int32_t)AntiAliasing::COUNT; n++) {
+						AntiAliasing mode = AntiAliasing(n);
+						bool isSelected = (activeAntiAlising == mode);
+						if (ImGui::Selectable(to_string(mode).c_str(), isSelected)) {
+							viewport->SetAntiAliasing(mode);
+						}
+						if (isSelected) {
+							activeAntiAlising = mode;
+							ImGui::SetItemDefaultFocus();
+						}
+					}
+					ImGui::EndCombo();
+				}
+				ImGui::Spacing();
+			}
 		}
 	}
 	ImGui::End();

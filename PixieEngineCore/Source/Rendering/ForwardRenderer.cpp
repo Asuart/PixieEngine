@@ -2,21 +2,47 @@
 #include "ForwardRenderer.h"
 #include "LTC_Matrix.h"
 
+std::string to_string(AntiAliasing mode) {
+	switch (mode) {
+	case AntiAliasing::None: return "None";
+	case AntiAliasing::SSAAx2: return "SSAAx2";
+	case AntiAliasing::SSAAx4: return "SSAAx4";
+	case AntiAliasing::SSAAx8: return "SSAAx8";
+	case AntiAliasing::MSAAx2: return "MSAAx2";
+	case AntiAliasing::MSAAx4: return "MSAAx4";
+	case AntiAliasing::MSAAx8: return "MSAAx8";
+	case AntiAliasing::MSAAx16: return "MSAAx16";
+	case AntiAliasing::FXAA: return "FXAA";
+	default: return "Undefined";
+	}
+}
+
 ForwardRenderer::ForwardRenderer() :
-	m_frameBuffer({1280, 720}),
+	m_frameBuffer({ 1280, 720 }),
+	m_fxaaFrameBuffer({ 1280, 720 }),
+	m_msFrameBuffer({ 1280, 720 }, 1),
 	m_LTC1Texture({ 64, 64 }, GL_RGBA, GL_RGBA, GL_FLOAT, (void*)LTC1, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge, TextureFiltering::Linear, TextureFiltering::Linear),
 	m_LTC2Texture({ 64, 64 }, GL_RGBA, GL_RGBA, GL_FLOAT, (void*)LTC2, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge, TextureFiltering::Linear, TextureFiltering::Linear) {
 	m_defaultShader = ResourceManager::LoadShader("PhysicallyBased");
+	m_fxaaShader = ResourceManager::LoadShader("FXAA");
 }
 
 void ForwardRenderer::DrawFrame(Scene* scene, Camera* camera) {
 	GLint originalViewport[4];
 	glGetIntegerv(GL_VIEWPORT, originalViewport);
 
-	m_frameBuffer.Resize(camera->GetResolution());
-	m_frameBuffer.Bind();
-	m_frameBuffer.ResizeViewport();
-	m_frameBuffer.Clear();
+	if (m_useMultisampleFramebuffer) {
+		m_msFrameBuffer.Resize(camera->GetResolution() * m_ssaaScale);
+		m_msFrameBuffer.Bind();
+		m_msFrameBuffer.ResizeViewport();
+		m_msFrameBuffer.Clear();
+	}
+	else {
+		m_frameBuffer.Resize(camera->GetResolution() * m_ssaaScale);
+		m_frameBuffer.Bind();
+		m_frameBuffer.ResizeViewport();
+		m_frameBuffer.Clear();
+	}
 
 	GlobalRenderer::DrawSkybox(*camera, scene->GetSkybox().m_cubemapTexture.GetHandle());
 
@@ -24,9 +50,85 @@ void ForwardRenderer::DrawFrame(Scene* scene, Camera* camera) {
 	SetupCamera(camera);
 	SetupLights(scene);
 	DrawObject(scene->GetRootObject());
-	m_frameBuffer.Unbind();
 
+	if (m_useMultisampleFramebuffer) {
+		m_msFrameBuffer.Blit(m_frameBuffer);
+	}
+
+	if (m_useFXAA) {
+		m_fxaaFrameBuffer.Resize(camera->GetResolution() * m_ssaaScale);
+		m_fxaaFrameBuffer.Bind();
+		m_fxaaFrameBuffer.ResizeViewport();
+		m_fxaaFrameBuffer.Clear();
+		m_fxaaShader.Bind();
+		m_fxaaShader.SetTexture("frameTexture", m_frameBuffer.GetColorHandle(), 0);
+		m_fxaaShader.SetUniform2f("uTextureSize", Vec2(m_frameBuffer.GetResolution()));
+		GlobalRenderer::DrawMesh(ResourceManager::GetQuadMesh());
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(originalViewport[0], originalViewport[1], originalViewport[2], originalViewport[3]);
+}
+
+void ForwardRenderer::SetResolution(glm::ivec2 resolution) {
+	m_frameBuffer.Resize(resolution * m_ssaaScale);
+	m_fxaaFrameBuffer.Resize(resolution);
+	m_msFrameBuffer.Resize(resolution);
+}
+
+glm::ivec2 ForwardRenderer::GetFrameResolution() const {
+	return m_frameBuffer.GetResolution();
+}
+
+GLuint ForwardRenderer::GetFrameHandle() const {
+	if (m_useFXAA) {
+		return m_fxaaFrameBuffer.GetColorHandle();
+	}
+	else {
+		return m_frameBuffer.GetColorHandle();
+	}
+}
+
+AntiAliasing ForwardRenderer::GetAntiAlisingMode() const {
+	return m_antiAliasing;
+}
+
+void ForwardRenderer::SetAntiAlisingMode(AntiAliasing mode) {
+	m_ssaaScale = 1;
+	m_useMultisampleFramebuffer = false;
+	m_antiAliasing = mode;
+	m_useFXAA = false;
+	switch (m_antiAliasing) {
+	case AntiAliasing::SSAAx2:
+		m_ssaaScale = 2; 
+		break;
+	case AntiAliasing::SSAAx4:
+		m_ssaaScale = 4; 
+		break;
+	case AntiAliasing::SSAAx8:
+		m_ssaaScale = 8; 
+		break;
+	case AntiAliasing::MSAAx2:
+		m_useMultisampleFramebuffer = true;
+		m_msFrameBuffer.SetSampleCount(2);
+		break;
+	case AntiAliasing::MSAAx4:
+		m_useMultisampleFramebuffer = true;
+		m_msFrameBuffer.SetSampleCount(4);
+		break;
+	case AntiAliasing::MSAAx8:
+		m_useMultisampleFramebuffer = true;
+		m_msFrameBuffer.SetSampleCount(8);
+		break;
+	case AntiAliasing::MSAAx16:
+		m_useMultisampleFramebuffer = true;
+		m_msFrameBuffer.SetSampleCount(16);
+		break;
+	case AntiAliasing::FXAA: 
+		m_useFXAA = true; 
+		break;
+	default: break;
+	}
 }
 
 void ForwardRenderer::DrawObject(SceneObject* object, Mat4 parentTransform) {

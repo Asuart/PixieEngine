@@ -11,9 +11,9 @@ Texture TextureGenerator::SSAONoiseTexture(glm::ivec2 resolution) {
 }
 
 HDRISkybox TextureGenerator::Skybox(Buffer2DTexture<Vec3>& equirectangularTexture, glm::ivec2 resolution, glm::ivec2 irradianceResolution, glm::ivec2 prefilterResoution) {
-	Cubemap envCubemap = Cubemap();
-	Cubemap irradianceMap = Cubemap();
-	Cubemap prefilterMap = Cubemap();
+	Cubemap envCubemap = Cubemap(resolution);
+	Cubemap irradianceMap = Cubemap(irradianceResolution);
+	Cubemap prefilterMap = Cubemap(prefilterResoution);
 	GlobalRenderer::DrawCubeMap(equirectangularTexture.GetTexture(), resolution, envCubemap, irradianceResolution, irradianceMap, prefilterResoution, prefilterMap);
 	return HDRISkybox(equirectangularTexture, envCubemap, irradianceMap, prefilterMap);
 }
