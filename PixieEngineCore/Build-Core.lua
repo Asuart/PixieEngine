@@ -27,19 +27,22 @@ project "PixieEngineCore"
       "Source/Math",
       "Source/Resources",
       "Source/Animation",
+      "Source/Physics",
       "../Dependencies/glm",
       "../Dependencies/glad/include",
       "../Dependencies/stb",
       "../Dependencies/freetype/include",
+      "../Dependencies/Jolt",
    }
 
    links
    {
 	  "assimp-vc143-mt.lib",
-      "freetype.lib"
+      "freetype.lib",
+      "Jolt.lib"
    }
 
-   libdirs { "../Dependencies/freetype/lib" }
+   libdirs { "../Dependencies/freetype/lib", "../Dependencies/JoltBinaries/" }
 
    targetdir ("../Build/" .. OutputDir .. "/%{prj.name}")
    objdir ("../Build/Intermediates/" .. OutputDir .. "/%{prj.name}")

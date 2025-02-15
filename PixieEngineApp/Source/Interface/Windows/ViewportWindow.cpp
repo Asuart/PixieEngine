@@ -86,7 +86,6 @@ void ViewportWindow::Draw() {
 			}
 		}
 
-		HighPrecisionTimer::StartTimer("Viewport Render Time");
 
 		ImVec2 viewportResolution = ImGui::GetContentRegionAvail();
 		ImGui::SetNextWindowSize(viewportResolution);
@@ -194,6 +193,7 @@ void ViewportWindow::Draw() {
 				m_frameBuffer.Unbind();
 			}
 			else {
+				HighPrecisionTimer::StartTimer("Viewport Render Time");
 				if (m_renderMode == RenderMode::Forward) {
 					m_forwardRenderer.DrawFrame(scene, &camera);
 					m_frameBuffer.Bind();
@@ -230,6 +230,8 @@ void ViewportWindow::Draw() {
 					GlobalRenderer::DrawTextureFitted(m_pathTracingRenderer.m_frameBuffer.GetColorHandle(), m_pathTracingRenderer.m_frameBuffer.GetResolution(), glmViewportResolution);
 					m_frameBuffer.Unbind();
 				}
+				HighPrecisionTimer::StopTimer("Viewport Render Time");
+
 				if (m_renderMode == RenderMode::GPUPathTracing) {
 					m_forwardRenderer.DrawFrame(scene, &camera);
 					m_frameBuffer.Bind();
@@ -327,7 +329,6 @@ void ViewportWindow::Draw() {
 
 			ImGui::Image((void*)(uint64_t)m_frameBuffer.GetColorHandle(), viewportResolution, { 0.0, 1.0 }, { 1.0, 0.0 });
 		}
-		HighPrecisionTimer::StopTimer("Viewport Render Time");
 	}
 	ImGui::End();
 	ImGui::PopStyleVar();

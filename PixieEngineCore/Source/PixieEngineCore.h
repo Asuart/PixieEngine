@@ -18,3 +18,4 @@
 #include "Rendering/DefferedRenderer.h"
 #include "Rendering/PathTracingRenderer.h"
 #include "Math/BezierCurves.h"
+#include "Physics/PhysicsEngine.h"

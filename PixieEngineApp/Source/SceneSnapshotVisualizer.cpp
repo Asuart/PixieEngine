@@ -103,6 +103,13 @@ void SceneSnapshotVisualizer::Draw(Scene* scene, const SceneSnapshot& sceneSnaps
 		m_transparentShader.SetUniform4f("uColor", glm::vec4(0.0f, 0.0f, 1.0f, 0.05f));
 		GlobalRenderer::DrawMesh(ResourceManager::GetCubeMesh());
 	}
+	for (size_t i = 0; i < sceneSnapshot.m_objects.size(); i++) {
+		Bounds3f bounds = Bounds3f(sceneSnapshot.m_objects[i].pMin, sceneSnapshot.m_objects[i].pMax);
+		if (bounds.IsEmpty()) continue;
+		m_transparentShader.SetUniformMat4f("mModel", glm::scale(glm::translate(bounds.Center()), bounds.Diagonal()));
+		m_transparentShader.SetUniform4f("uColor", glm::vec4(0.0f, 0.0f, 1.0f, 0.05f));
+		GlobalRenderer::DrawMesh(ResourceManager::GetCubeMesh());
+	}
 
 	glDepthFunc(GL_ALWAYS);
 	glEnable(GL_BLEND);

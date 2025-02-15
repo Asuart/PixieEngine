@@ -66,7 +66,7 @@ protected:
 	Camera m_viewportCamera;
 	ViewportCameraController m_cameraController;
 	ViewportMode m_mode = ViewportMode::Default;
-	RenderMode m_renderMode = RenderMode::Deffered;
+	RenderMode m_renderMode = RenderMode::Forward;
 	bool m_useCameraResolution = false;
 
 	// Stereoscopic Specific Config

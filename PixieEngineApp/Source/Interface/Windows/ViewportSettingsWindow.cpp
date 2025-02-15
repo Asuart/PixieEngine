@@ -129,6 +129,9 @@ void ViewportSettingsWindow::Draw() {
 				}
 				ImGui::Spacing();
 			}
+			if (ImGui::Button("Update Scene Snapshot")) {
+				SceneManager::UpdateSceneSnapshot();
+			}
 		}
 	}
 	ImGui::End();

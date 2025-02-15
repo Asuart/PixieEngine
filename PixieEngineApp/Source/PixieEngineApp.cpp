@@ -13,6 +13,7 @@ void PixieEngineApp::Initialize() {
 	GlobalRenderer::Initialize();
 	ResourceManager::Initialize();
 	SceneManager::Initialize();
+	PhysicsEngine::Initialize();
 	m_interface.Initialize();
 }
 

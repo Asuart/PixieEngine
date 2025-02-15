@@ -39,7 +39,7 @@ project "PixieEngineApp"
    links
    {
       "PixieEngineCore",
-	  "glfw3.lib"
+	  "glfw3.lib",
    }
 
    libdirs { "../Dependencies/GLFW/lib-vc2022-64" }

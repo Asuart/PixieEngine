@@ -24,10 +24,10 @@ void Interface::Initialize() {
 	m_openWindows.push_back(new AssetsBrowserWindow(m_app, *this));
 	m_openWindows.push_back(new InspectorWindow(m_app, *this));
 	m_openWindows.push_back(new MaterialsBrowserWindow(m_app, *this));
-	m_openWindows.push_back(new ViewportWindow(m_app, *this));
 	m_openWindows.push_back(new StatsWindow(m_app, *this));
 	m_openWindows.push_back(new ViewportSettingsWindow(m_app, *this));
 	m_openWindows.push_back(new ShaderGraphWindow(m_app, *this));
+	m_openWindows.push_back(new ViewportWindow(m_app, *this));
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
