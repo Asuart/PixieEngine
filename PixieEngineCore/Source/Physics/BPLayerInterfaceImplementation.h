@@ -24,6 +24,11 @@ public:
 		return mObjectToBroadPhase[inLayer];
 	}
 
+	virtual const char* GetBroadPhaseLayerName(JPH::BroadPhaseLayer inLayer) const override {
+		return "undefined";
+
+	}
+
 protected:
 	JPH::BroadPhaseLayer mObjectToBroadPhase[Layers::NUM_LAYERS];
 };

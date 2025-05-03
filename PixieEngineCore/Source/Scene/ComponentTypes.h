@@ -12,6 +12,7 @@ enum class ComponentType {
 	DiffuseAreaLight,
 	MeshAnimator,
 	Sphere,
+	SphereRigidbody
 };
 
 constexpr inline std::string to_string(ComponentType type) {

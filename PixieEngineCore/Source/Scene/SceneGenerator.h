@@ -77,7 +77,7 @@ public:
 		scene->SetSkybox(TextureGenerator::GradientSkybox(Vec3(1.0f, 1.0f, 1.0f), Vec3(0.5f, 0.7f, 1.0f)));
 		CreateDirectionalLight(Vec3(1.0f), 2.0f, LookAt(Vec3(-1, 1, -1), Vec3(0, 0, 0), Vec3(0, 1, 0)));
 
-		CreateSphere(Vec3(0.0f, -1000.0f, 0.0f), 1000.0f, CreateDiffuseMaterial(Vec3(0.5f)));
+		CreateSphere(Vec3(0.0f, -1000.0f, 0.0f), 1000.0f, CreateDiffuseMaterial(Vec3(0.5f)), false);
 
 		for (int32_t a = -11; a < 11; a++) {
 			for (int32_t b = -11; b < 11; b++) {
@@ -108,11 +108,12 @@ public:
 		SceneManager::UpdateSceneSnapshot();
 	}
 
-	static SceneObject* CreateSphere(Vec3 position, Float radius, Material* material = nullptr) {
+	static SceneObject* CreateSphere(Vec3 position, Float radius, Material* material = nullptr, bool active = true) {
 		static int32_t sphereCounter = 0;
 		SceneObject* sphere = SceneManager::CreateObject(std::string("Sphere ") + std::to_string(sphereCounter++), nullptr, Transform(position));
 		SceneManager::CreateComponent<SphereComponent>(sphere, radius);
 		SceneManager::CreateComponent<MaterialComponent>(sphere, material ? material : ResourceManager::GetDefaultMaterial());
+		SceneManager::CreateComponent<SphereRigidbodyComponent>(sphere, radius, active);
 		return sphere;
 	}
 

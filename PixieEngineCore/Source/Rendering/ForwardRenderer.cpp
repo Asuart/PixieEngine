@@ -131,6 +131,10 @@ void ForwardRenderer::SetAntiAlisingMode(AntiAliasing mode) {
 	}
 }
 
+void ForwardRenderer::SetShader(Shader shader) {
+	m_defaultShader = shader;
+}
+
 void ForwardRenderer::DrawObject(SceneObject* object, Mat4 parentTransform) {
 	if (!object) return;
 

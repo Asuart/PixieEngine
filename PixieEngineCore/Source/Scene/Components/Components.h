@@ -10,3 +10,4 @@
 #include "MeshAnimatorComponent.h"
 #include "SphereComponent.h"
 #include "AreaLightComponent.h"
+#include "SphereRigidbodyComponent.h"

@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "SceneManager.h"
+#include "MeshGenerator.h"
 
 std::filesystem::path SceneManager::m_currentScenePath = "../Assets/Scenes/default-min.obj";
 std::shared_ptr<Scene> SceneManager::m_currentScene = nullptr;
@@ -65,7 +66,7 @@ void SceneManager::Stop() {
 }
 
 void SceneManager::Update() {
-	if (!m_playing || m_paused) return;
+	//if (!m_playing || m_paused) return;
 	m_activeScene->Update();
 }
 

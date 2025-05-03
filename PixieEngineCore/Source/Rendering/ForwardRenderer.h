@@ -32,6 +32,7 @@ public:
 	GLuint GetFrameHandle() const;
 	AntiAliasing GetAntiAlisingMode() const;
 	void SetAntiAlisingMode(AntiAliasing mode);
+	void SetShader(Shader shader);
 
 protected:
 	FrameBuffer m_frameBuffer;

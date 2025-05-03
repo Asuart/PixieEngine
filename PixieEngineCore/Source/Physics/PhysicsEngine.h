@@ -3,10 +3,12 @@
 
 class PhysicsEngine {
 public:
-
 	static void Initialize();
 	static void Free();
-	static void Update(Float deltaTime);
+	static void Update();
+
+	static uint32_t CreateSphereBody(::Vec3 position, Float radius, bool activate);
+	static ::Vec3 GetBodyPosition(uint32_t id);
 
 protected:
 	static constexpr Float cTimeStep = 1.0f / 60.0f;

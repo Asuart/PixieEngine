@@ -4,3 +4,9 @@
 [submodule "Dependencies/Jolt"]
 	path = Dependencies/Jolt
 	url = https://github.com/jrouwe/JoltPhysics.git
+[submodule "PixieEngineCore/Source/Dependencies/JoltPhysics"]
+	path = PixieEngineCore/Source/Dependencies/JoltPhysics
+	url = https://github.com/jrouwe/JoltPhysics.git
+[submodule "Dependencies/JoltPhysics"]
+	path = Dependencies/JoltPhysics
+	url = https://github.com/jrouwe/JoltPhysics.git

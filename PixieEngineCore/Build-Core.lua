@@ -32,7 +32,7 @@ project "PixieEngineCore"
       "../Dependencies/glad/include",
       "../Dependencies/stb",
       "../Dependencies/freetype/include",
-      "../Dependencies/Jolt",
+      "../Dependencies/JoltPhysics",
    }
 
    links

@@ -26,6 +26,7 @@ void PixieEngineApp::Start() {
 		UserInput::Reset();
 		glfwPollEvents();
 		HandleUserInput();
+		PhysicsEngine::Update();
 		SceneManager::Update();
 		m_interface.Draw();
 		glfwSwapBuffers(m_mainWindow.GetGLFWWindow());
