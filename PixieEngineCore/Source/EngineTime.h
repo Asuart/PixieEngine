@@ -3,8 +3,8 @@
 
 class Time {
 public:
-	static const Float fixedDeltaTime;
-	static Float deltaTime;
+	static const float fixedDeltaTime;
+	static float deltaTime;
 	static std::chrono::milliseconds lastTime;
 
 	static void Update();

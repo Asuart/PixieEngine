@@ -1,33 +1,33 @@
 #include "pch.h"
 #include "DirectionalLightComponent.h"
 
-DirectionalLightComponent::DirectionalLightComponent(SceneObject* parent,Vec3 direction, Vec3 color, Float strength) :
+DirectionalLightComponent::DirectionalLightComponent(SceneObject* parent, glm::vec3 direction, glm::vec3 color, float strength) :
 	Component(ComponentType::DirectionalLight, parent), m_direction(glm::normalize(direction)), m_color(color), m_strength(strength) {}
 
-Vec3 DirectionalLightComponent::GetDirection() {
+glm::vec3 DirectionalLightComponent::GetDirection() const {
 	return m_direction;
 }
 
-Vec3 DirectionalLightComponent::GetEmission() {
-	return m_color * m_strength;
-}
-
-Vec3 DirectionalLightComponent::GetColor() {
-	return m_color;
-}
-
-Float DirectionalLightComponent::GetStrength() {
-	return m_strength;
-}
-
-void DirectionalLightComponent::SetDirection(Vec3 direction) {
+void DirectionalLightComponent::SetDirection(glm::vec3 direction) {
 	m_direction = glm::normalize(direction);
 }
 
-void DirectionalLightComponent::SetColor(Vec3 color) {
+glm::vec3 DirectionalLightComponent::GetEmission() const {
+	return m_color * m_strength;
+}
+
+glm::vec3 DirectionalLightComponent::GetColor() const {
+	return m_color;
+}
+
+void DirectionalLightComponent::SetColor(glm::vec3 color) {
 	m_color = color;
 }
 
-void DirectionalLightComponent::SetStrength(Float strength) {
+float DirectionalLightComponent::GetStrength() const {
+	return m_strength;
+}
+
+void DirectionalLightComponent::SetStrength(float strength) {
 	m_strength = strength;
 }

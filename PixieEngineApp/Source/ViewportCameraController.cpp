@@ -5,8 +5,8 @@ ViewportCameraController::ViewportCameraController(Camera& camera) :
 	m_camera(camera) {}
 
 bool ViewportCameraController::Update() {
-	const Float scale = 10.0f * (UserInput::GetKey(GLFW_KEY_LEFT_SHIFT) ? 0.1f : 1.0f) * Time::deltaTime;
-	const Float rotationScale = (UserInput::GetKey(GLFW_KEY_LEFT_SHIFT) ? 0.1f : 1.0f) * Time::deltaTime;
+	const float scale = 10.0f * (UserInput::GetKey(GLFW_KEY_LEFT_SHIFT) ? 0.1f : 1.0f) * Time::deltaTime;
+	const float rotationScale = (UserInput::GetKey(GLFW_KEY_LEFT_SHIFT) ? 0.1f : 1.0f) * Time::deltaTime;
 	bool moved = false;
 	Transform& transform = m_camera.GetTransform();
 	if (UserInput::GetKey(GLFW_KEY_W)) {
@@ -35,13 +35,13 @@ bool ViewportCameraController::Update() {
 	}
 	if (UserInput::GetMouseButton(GLFW_MOUSE_BUTTON_2)) {
 		if (UserInput::mouseDeltaX) {
-			transform.RotateAroundAxis(Vec3(0, 1, 0), -(Float)UserInput::mouseDeltaX * rotationScale);
-			transform.LookAt(transform.GetPosition(), transform.GetPosition() + transform.GetForward(), Vec3(0, 1, 0));
+			transform.RotateAroundAxis(glm::vec3(0, 1, 0), -(float)UserInput::mouseDeltaX * rotationScale);
+			transform.LookAt(transform.GetPosition(), transform.GetPosition() + transform.GetForward(), glm::vec3(0, 1, 0));
 			moved = true;
 		}
 		if (UserInput::mouseDeltaY) {
-			transform.RotateAroundAxis(Vec3(1, 0, 0), -(Float)UserInput::mouseDeltaY * rotationScale);
-			transform.LookAt(transform.GetPosition(), transform.GetPosition() + transform.GetForward(), Vec3(0, 1, 0));
+			transform.RotateAroundAxis(glm::vec3(1, 0, 0), -(float)UserInput::mouseDeltaY * rotationScale);
+			transform.LookAt(transform.GetPosition(), transform.GetPosition() + transform.GetForward(), glm::vec3(0, 1, 0));
 			moved = true;
 		}
 	}

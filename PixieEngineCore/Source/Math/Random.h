@@ -2,17 +2,17 @@
 #include "pch.h"
 #include "MathBase.h"
 
-Float RandomFloat();
-Float RandomFloat(Float min, Float max);
+float RandomFloat();
+float RandomFloat(float min, float max);
 
-Vec3 RandomVector();
-Vec3 RandomVector(Float min, Float max);
-Vec3 RandomUnitVector();
+glm::vec3 RandomVector();
+glm::vec3 RandomVector(float min, float max);
+glm::vec3 RandomUnitVector();
 
-Vec3 RandomInUnitSphere();
-Vec3 RandomInHemisphere(const Vec3& normal);
-Vec3 RandomInUnitDisk();
-Vec3 RandomCosineDirection();
+glm::vec3 RandomInUnitSphere();
+glm::vec3 RandomInHemisphere(const glm::vec3& normal);
+glm::vec3 RandomInUnitDisk();
+glm::vec3 RandomCosineDirection();
 
 uint64_t MixBits(uint64_t v);
 int32_t PermutationElement(uint32_t i, uint32_t l, uint32_t p);

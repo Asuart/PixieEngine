@@ -15,9 +15,9 @@ glm::ivec2 Bounds2i::Center() const {
 	return min + Diagonal() / 2;
 }
 
-Float Bounds2i::Area() const {
+float Bounds2i::Area() const {
 	glm::ivec2 diagonal = Diagonal();
-	return (Float)diagonal.x * diagonal.y;
+	return (float)diagonal.x * diagonal.y;
 }
 
 int32_t Bounds2i::MaxDimension() const {
@@ -25,17 +25,9 @@ int32_t Bounds2i::MaxDimension() const {
 	return diagonal.x >= diagonal.y ? 0 : 1;
 }
 
-glm::ivec2 Bounds2i::Lerp(Float p) const {
-	return glm::ivec2(::Lerp(p, min.x, max.x), ::Lerp(p, min.y, max.y));
-}
-
-glm::ivec2 Bounds2i::Lerp(Vec2 p) const {
-	return glm::ivec2(::Lerp(p.x, min.x, max.x), ::Lerp(p.y, min.y, max.y));
-}
-
-void Bounds2i::BoundingCircle(Vec2* center, Float* radius) const {
+void Bounds2i::BoundingCircle(glm::vec2* center, float* radius) const {
 	*center = Center();
-	*radius = glm::length(Vec2(Diagonal()) / (Float)2);
+	*radius = glm::length(glm::vec2(Diagonal()) / 2.0f);
 }
 
 bool Bounds2i::IsEmpty() const {
@@ -62,52 +54,33 @@ bool Bounds2i::operator!=(const Bounds2i& b) const {
 	return min != b.min || max != b.max;
 }
 
-Bounds2f::Bounds2f(Vec2 p) :
+Bounds2f::Bounds2f(glm::vec2 p) :
 	min(p), max(p) {}
 
-Bounds2f::Bounds2f(Vec2 p1, Vec2 p2) :
+Bounds2f::Bounds2f(glm::vec2 p1, glm::vec2 p2) :
 	min(glm::min(p1, p2)), max(glm::max(p1, p2)) {}
 
-Vec2 Bounds2f::Diagonal() const {
+glm::vec2 Bounds2f::Diagonal() const {
 	return max - min;
 }
 
-Vec2 Bounds2f::Center() const {
-	return min + Diagonal() / (Float)2;
+glm::vec2 Bounds2f::Center() const {
+	return min + Diagonal() / 2.0f;
 }
 
-Float Bounds2f::Area() const {
-	Vec2 diagonal = Diagonal();
+float Bounds2f::Area() const {
+	glm::vec2 diagonal = Diagonal();
 	return diagonal.x * diagonal.y;
 }
 
 int32_t Bounds2f::MaxDimension() const {
-	Vec2 diagonal = Diagonal();
+	glm::vec2 diagonal = Diagonal();
 	return diagonal.x >= diagonal.y ? 0 : 1;
 }
 
-Vec2 Bounds2f::Lerp(Float p) const {
-	return Vec2(::Lerp(p, min.x, max.x), ::Lerp(p, min.y, max.y));
-}
-
-Vec2 Bounds2f::Lerp(Vec2 p) const {
-	return Vec2(::Lerp(p.x, min.x, max.x), ::Lerp(p.y, min.y, max.y));
-}
-
-Vec2 Bounds2f::Offset(Vec2 p) const {
-	Vec2 o = p - min;
-	if (max.x > min.x) {
-		o.x /= max.x - min.x;
-	}
-	if (max.y > min.y) {
-		o.y /= max.y - min.y;
-	}
-	return o;
-}
-
-void Bounds2f::BoundingCircle(Vec2* center, Float* radius) const {
+void Bounds2f::BoundingCircle(glm::vec2* center, float* radius) const {
 	*center = Center();
-	*radius = glm::length(Diagonal() / (Float)2);
+	*radius = glm::length(Diagonal() / 2.0f);
 }
 
 bool Bounds2f::IsEmpty() const {
@@ -118,11 +91,11 @@ bool Bounds2f::IsDegenerate() const {
 	return min.x > max.x || min.y > max.y;
 }
 
-Vec2 Bounds2f::operator[](int32_t i) const {
+glm::vec2 Bounds2f::operator[](int32_t i) const {
 	return (i == 0) ? min : max;
 }
 
-Vec2& Bounds2f::operator[](int32_t i) {
+glm::vec2& Bounds2f::operator[](int32_t i) {
 	return (i == 0) ? min : max;
 }
 
@@ -152,27 +125,19 @@ glm::ivec3 Bounds3i::Center() const {
 	return min + Diagonal() / 2;
 }
 
-Float Bounds3i::Area() const {
+float Bounds3i::Area() const {
 	glm::ivec3 d = Diagonal();
 	return 2.0f * (d.x * d.y + d.x * d.z + d.y * d.z);
 }
 
-Float Bounds3i::Volume() const {
+float Bounds3i::Volume() const {
 	glm::ivec3 d = Diagonal();
-	return (Float)d.x * d.y * d.z;
+	return (float)d.x * d.y * d.z;
 }
 
 int32_t Bounds3i::MaxDimension() const {
 	glm::ivec3 d = Diagonal();
 	return (d.x > d.y && d.x > d.z) ? 0 : (d.y > d.z ? 1 : 2);
-}
-
-glm::ivec3 Bounds3i::Lerp(Float t) const {
-	return glm::ivec3(::Lerp(t, min.x, max.x), ::Lerp(t, min.y, max.y), ::Lerp(t, min.z, max.z));
-}
-
-glm::ivec3 Bounds3i::Lerp(Vec3 t) const {
-	return glm::ivec3(::Lerp(t.x, min.x, max.x), ::Lerp(t.y, min.y, max.y), ::Lerp(t.z, min.z, max.z));
 }
 
 glm::ivec3 Bounds3i::Offset(glm::ivec3 p) const {
@@ -189,9 +154,9 @@ glm::ivec3 Bounds3i::Offset(glm::ivec3 p) const {
 	return o;
 }
 
-void Bounds3i::BoundingSphere(Vec3* center, Float* radius) const {
-	*center = (Vec3)(min + max) / (Float)2;
-	*radius = glm::length(((Vec3)min + (Vec3)max) / (Float)2);
+void Bounds3i::BoundingSphere(glm::vec3* center, float* radius) const {
+	*center = (glm::vec3)(min + max) / 2.0f;
+	*radius = glm::length(((glm::vec3)min + (glm::vec3)max) / 2.0f);
 }
 
 bool Bounds3i::IsEmpty() const {
@@ -218,49 +183,41 @@ glm::ivec3& Bounds3i::operator[](int32_t i) {
 	return (i == 0) ? min : max;
 }
 
-Bounds3f::Bounds3f(Vec3 p) :
+Bounds3f::Bounds3f(glm::vec3 p) :
 	min(p), max(p) {}
 
-Bounds3f::Bounds3f(Vec3 p1, Vec3 p2) :
+Bounds3f::Bounds3f(glm::vec3 p1, glm::vec3 p2) :
 	min(glm::min(p1, p2)), max(glm::max(p1, p2)) {}
 
-Vec3 Bounds3f::Corner(int32_t corner) const {
-	return Vec3((*this)[(corner & 1)].x, (*this)[(corner & 2) ? 1 : 0].y, (*this)[(corner & 4) ? 1 : 0].z);
+glm::vec3 Bounds3f::Corner(int32_t corner) const {
+	return glm::vec3((*this)[(corner & 1)].x, (*this)[(corner & 2) ? 1 : 0].y, (*this)[(corner & 4) ? 1 : 0].z);
 }
 
-Vec3 Bounds3f::Diagonal() const {
+glm::vec3 Bounds3f::Diagonal() const {
 	return max - min;
 }
 
-Vec3 Bounds3f::Center() const {
-	return min + Diagonal() * (Float)0.5;
+glm::vec3 Bounds3f::Center() const {
+	return min + Diagonal() * 0.5f;
 }
 
-Float Bounds3f::Area() const {
-	Vec3 d = Diagonal();
+float Bounds3f::Area() const {
+	glm::vec3 d = Diagonal();
 	return 2.0f * (d.x * d.y + d.x * d.z + d.y * d.z);
 }
 
-Float Bounds3f::Volume() const {
-	Vec3 d = Diagonal();
+float Bounds3f::Volume() const {
+	glm::vec3 d = Diagonal();
 	return d.x * d.y * d.z;
 }
 
 int32_t Bounds3f::MaxDimension() const {
-	Vec3 d = Diagonal();
+	glm::vec3 d = Diagonal();
 	return (d.x > d.y && d.x > d.z) ? 0 : (d.y > d.z ? 1 : 2);
 }
 
-Vec3 Bounds3f::Lerp(Float t) const {
-	return Vec3(::Lerp(t, min.x, max.x), ::Lerp(t, min.y, max.y), ::Lerp(t, min.z, max.z));
-}
-
-Vec3 Bounds3f::Lerp(Vec3 t) const {
-	return Vec3(::Lerp(t.x, min.x, max.x), ::Lerp(t.y, min.y, max.y), ::Lerp(t.z, min.z, max.z));
-}
-
-Vec3 Bounds3f::Offset(Vec3 p) const {
-	Vec3 o = p - min;
+glm::vec3 Bounds3f::Offset(glm::vec3 p) const {
+	glm::vec3 o = p - min;
 	if (max.x > min.x) {
 		o.x /= max.x - min.x;
 	}
@@ -273,8 +230,8 @@ Vec3 Bounds3f::Offset(Vec3 p) const {
 	return o;
 }
 
-void Bounds3f::BoundingSphere(Vec3* center, Float* radius) const {
-	*center = (min + max) / (Float)2.0f;
+void Bounds3f::BoundingSphere(glm::vec3* center, float* radius) const {
+	*center = (min + max) / 2.0f;
 	*radius = Inside(*center, *this) ? glm::distance(*center, max) : 0;
 }
 
@@ -294,11 +251,11 @@ bool Bounds3f::operator!=(const Bounds3f& b) const {
 	return b.min != min || b.max != max;
 }
 
-Vec3 Bounds3f::operator[](int32_t i) const {
+glm::vec3 Bounds3f::operator[](int32_t i) const {
 	return (i == 0) ? min : max;
 }
 
-Vec3& Bounds3f::operator[](int32_t i) {
+glm::vec3& Bounds3f::operator[](int32_t i) {
 	return (i == 0) ? min : max;
 }
 
@@ -323,7 +280,7 @@ Bounds3f Union(const Bounds3f& b1, const Bounds3f& b2) {
 	return ret;
 }
 
-Bounds3f Union(const Bounds3f& b, Vec3 p) {
+Bounds3f Union(const Bounds3f& b, glm::vec3 p) {
 	Bounds3f ret;
 	ret.min = glm::min(b.min, p);
 	ret.max = glm::max(b.max, p);
@@ -337,6 +294,6 @@ Bounds3i Union(const Bounds3i& b1, const Bounds3i& b2) {
 	return ret;
 }
 
-bool Inside(Vec3 p, const Bounds3f& b) {
+bool Inside(glm::vec3 p, const Bounds3f& b) {
 	return (p.x >= b.min.x && p.x <= b.max.x && p.y >= b.min.y && p.y <= b.max.y && p.z >= b.min.z && p.z <= b.max.z);
 }

@@ -3,7 +3,7 @@ project "PixieEngineCore"
    language "C++"
    cppdialect "C++20"
    targetdir "Build/%{cfg.buildcfg}"
-   staticruntime "off"
+   staticruntime "on"
 
    pchheader "pch.h"
    pchsource "Source/pch.cpp"
@@ -42,7 +42,7 @@ project "PixieEngineCore"
       "Jolt.lib"
    }
 
-   libdirs { "../Dependencies/freetype/lib", "../Dependencies/JoltBinaries/" }
+   libdirs { "../Dependencies/freetype/lib" }
 
    targetdir ("../Build/" .. OutputDir .. "/%{prj.name}")
    objdir ("../Build/Intermediates/" .. OutputDir .. "/%{prj.name}")
@@ -58,15 +58,18 @@ project "PixieEngineCore"
        defines { "DEBUG" }
        runtime "Debug"
        symbols "On"
+       libdirs { "../Dependencies/JoltBinaries/Debug" }
 
    filter "configurations:Release"
        defines { "RELEASE" }
        runtime "Release"
        optimize "On"
        symbols "On"
+       libdirs { "../Dependencies/JoltBinaries/Release" }
 
    filter "configurations:Dist"
        defines { "DIST" }
        runtime "Release"
        optimize "On"
        symbols "Off"
+       libdirs { "../Dependencies/JoltBinaries/Distribution" }

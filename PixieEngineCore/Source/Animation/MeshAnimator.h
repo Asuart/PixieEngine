@@ -2,49 +2,49 @@
 #include "pch.h"
 #include "SceneObject.h"
 
-const int32_t MaxBonesPerModel = 100;
+const int32_t cMaxBonesPerModel = 256;
 
 struct KeyPosition {
-    Vec3 position = Vec3(0.0f);
-    Float timeStamp = 0.0f;
+    glm::vec3 position = glm::vec3(0.0f);
+    float timeStamp = 0.0f;
 };
 
 struct KeyRotation {
-    Quaternion orientation = Quaternion();
-    Float timeStamp = 0.0f;
+    glm::quat orientation = glm::quat();
+    float timeStamp = 0.0f;
 };
 
 struct KeyScale {
-    Vec3 scale = Vec3(1.0f);
-    Float timeStamp = 0.0f;
+    glm::vec3 scale = glm::vec3(1.0f);
+    float timeStamp = 0.0f;
 };
 
 struct BoneInfo {
     int32_t id = -1;
-    Mat4 offset = Mat4(1.0f);
+    glm::mat4 offset = glm::mat4(1.0f);
 };
 
 struct Bone {
     std::string name;
     int32_t id = -1;
-    Mat4 localTransform = Mat4(1.0f);
+    glm::mat4 localTransform = glm::mat4(1.0f);
     std::vector<KeyPosition> positions;
     std::vector<KeyRotation> rotations;
     std::vector<KeyScale> scales;
 
     Bone(const std::string& name, int32_t ID);
 
-    void Update(Float animationTime);
+    void Update(float animationTime);
 
-    int32_t GetPositionIndex(Float animationTime) const;
-    int32_t GetRotationIndex(Float animationTime) const;
-    int32_t GetScaleIndex(Float animationTime) const;
+    int32_t GetPositionIndex(float animationTime) const;
+    int32_t GetRotationIndex(float animationTime) const;
+    int32_t GetScaleIndex(float animationTime) const;
 
 private:
-    Float GetScaleFactor(Float lastTimeStamp, Float nextTimeStamp, Float animationTime);
-    Mat4 InterpolatePosition(Float animationTime);
-    Mat4 InterpolateRotation(Float animationTime);
-    Mat4 InterpolateScaling(Float animationTime);
+    float GetScaleFactor(float lastTimeStamp, float nextTimeStamp, float animationTime);
+    glm::mat4 InterpolatePosition(float animationTime);
+    glm::mat4 InterpolateRotation(float animationTime);
+    glm::mat4 InterpolateScaling(float animationTime);
 };
 
 class Animation {
@@ -71,20 +71,18 @@ private:
 
 class Animator {
 public:
-    Animator(Animation* Animation, Mat4 globalInverseTransform);
+    Animator(Animation* Animation, glm::mat4 globalInverseTransform);
 
     void PlayAnimation(Animation* pAnimation);
-    void UpdateAnimation(Float dt);
-    std::vector<Mat4>& GetFinalBoneMatrices();
-    void GetBoneMatrices(Float time, std::array<Mat4, MaxBonesPerModel>& transforms);
+    void UpdateAnimation(float dt);
+    const std::array<glm::mat4, cMaxBonesPerModel>* GetFinalBoneMatrices() const;
 
 private:
-    Mat4 m_globalInverseTransform;
-    std::vector<Mat4> finalBoneMatrices;
-    Animation* currentAnimation = nullptr;
-    Float currentTime = 0.0f;
-    Float deltaTime = 0.0f;
+    glm::mat4 m_globalInverseTransform;
+    std::array<glm::mat4, cMaxBonesPerModel> m_finalBoneMatrices = { glm::mat4(1.0f) };
+    Animation* m_currentAnimation = nullptr;
+    float m_currentTime = 0.0f;
+    float m_deltaTime = 0.0f;
 
-    void CalculateBoneTransform(SceneObject* node, Mat4 parentTransform);
-    void CalculateBoneTransform(SceneObject* node, Mat4 parentTransform, std::array<Mat4, MaxBonesPerModel>& transforms);
+    void CalculateBoneTransform(SceneObject* node, glm::mat4 parentTransform);
 };

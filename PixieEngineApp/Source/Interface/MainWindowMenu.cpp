@@ -2,6 +2,7 @@
 #include "MainWindowMenu.h"
 #include "PixieEngineApp.h"
 #include "Interface.h"
+#include "SceneGenerator.h"
 
 MainWindowMenu::MainWindowMenu(PixieEngineApp& app, Interface& inter) :
 	m_app(app), m_interface(inter) {}

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "SceneTreeWindow.h"
 #include "PixieEngineApp.h"
+#include "SceneManager.h"
 
 SceneTreeWindow::SceneTreeWindow(PixieEngineApp& app, Interface& inter) :
 	InterfaceWindow(app, inter) {}
@@ -11,8 +12,8 @@ void SceneTreeWindow::Draw() {
 		if (ImGui::IsWindowFocused()) {
 			HandleUserInput();
 		}
-		Scene* scene = SceneManager::GetScene().get();
-		if (scene) {
+		std::shared_ptr<Scene> scene = SceneManager::GetScene();
+		if (scene.get()) {
 			DrawSceneTree(scene->GetRootObject());
 		}
 	}
@@ -20,8 +21,7 @@ void SceneTreeWindow::Draw() {
 }
 
 void SceneTreeWindow::DrawSceneTree(SceneObject* object) {
-	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
-	if (object == SceneManager::GetScene().get()->GetRootObject()) flags |= ImGuiTreeNodeFlags_DefaultOpen;
+	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_DefaultOpen;
 	if (object->GetChildren().size() == 0) flags |= ImGuiTreeNodeFlags_Leaf;
 	if (object == SceneManager::GetSelectedObject()) flags |= ImGuiTreeNodeFlags_Selected;
 	bool openTreeNode = ImGui::TreeNodeEx(object->GetName().c_str(), flags);

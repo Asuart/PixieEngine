@@ -4,15 +4,14 @@
 #include "Math/Transform.h"
 
 struct DirectionCone {
-	Vec3 w = Vec3(0);
-	Float cosTheta = Infinity;
+	glm::vec3 w = glm::vec3(0);
+	float cosTheta = Infinity;
 
 	DirectionCone() = default;
-	DirectionCone(Vec3 w, Float cosTheta);
+	DirectionCone(glm::vec3 w, float cosTheta);
 	static DirectionCone EntireSphere();
 
 	bool IsEmpty() const;
 };
 
-bool Inside(const DirectionCone& d, Vec3 w);
-DirectionCone Union(const DirectionCone& a, const DirectionCone& b);
+bool Inside(const DirectionCone& d, glm::vec3 w);

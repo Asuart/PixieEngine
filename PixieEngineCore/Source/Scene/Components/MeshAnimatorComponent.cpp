@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "MeshAnimatorComponent.h"
 
-MeshAnimatorComponent::MeshAnimatorComponent(SceneObject* parent, const std::vector<Animation*>& animations, Mat4 globalInverseTransform) :
+MeshAnimatorComponent::MeshAnimatorComponent(SceneObject* parent, const std::vector<Animation*>& animations, glm::mat4 globalInverseTransform) :
 	Component(ComponentType::MeshAnimator, parent), m_animations(animations), m_animator(nullptr) {
 	if (animations.size() > 0) {
 		m_animator = new Animator(animations[0], globalInverseTransform);
@@ -18,22 +18,13 @@ void MeshAnimatorComponent::OnUpdate() {
 	UpdateAnimation(Time::deltaTime);
 }
 
-void MeshAnimatorComponent::UpdateAnimation(Float dt) {
-	if (m_animator) {
-		m_animator->UpdateAnimation(dt);
-	}
-}
-
-std::vector<Mat4> MeshAnimatorComponent::GetBoneMatrices() {
-	if (m_animator) {
-		return m_animator->GetFinalBoneMatrices();
-	}
-	return {};
-}
-
-void MeshAnimatorComponent::GetBoneMatrices(Float time, std::array<Mat4, MaxBonesPerModel>& transforms) const {
+const std::array<glm::mat4, cMaxBonesPerModel>* MeshAnimatorComponent::GetBoneMatrices() const {
 	if (!m_animator) {
-		return;
+		return nullptr;
 	}
-	m_animator->GetBoneMatrices(time, transforms);
+	return m_animator->GetFinalBoneMatrices();
+}
+
+void MeshAnimatorComponent::UpdateAnimation(float dt) {
+	m_animator->UpdateAnimation(dt);
 }

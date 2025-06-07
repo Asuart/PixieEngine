@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "PixieEngineApp.h"
-#include "OpenGLInterface.h"
+#include "SceneManager.h"
 
 PixieEngineApp::PixieEngineApp() :
 	m_interface(*this) {}
@@ -10,14 +10,11 @@ PixieEngineApp::~PixieEngineApp() {
 }
 
 void PixieEngineApp::Initialize() {
-	GlobalRenderer::Initialize();
-	ResourceManager::Initialize();
-	SceneManager::Initialize();
-	PhysicsEngine::Initialize();
 	m_interface.Initialize();
 }
 
 void PixieEngineApp::Start() {
+	SceneManager::Initialize();
 	SceneManager::Start();
 	while (!m_mainWindow.IsShouldClose()) {
 		HighPrecisionTimer::StartTimer("Total Frame Time");
@@ -32,7 +29,7 @@ void PixieEngineApp::Start() {
 		glfwSwapBuffers(m_mainWindow.GetGLFWWindow());
 		HighPrecisionTimer::StopTimer("Total Frame Time");
 	}
-	ResourceManager::FreeResources();
+	SceneManager::Free();
 }
 
 GLFWwindow* PixieEngineApp::GetGLFWWindow() {

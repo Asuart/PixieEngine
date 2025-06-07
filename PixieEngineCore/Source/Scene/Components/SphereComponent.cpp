@@ -1,18 +1,18 @@
 #include "pch.h"
 #include "SphereComponent.h"
-#include "GlobalRenderer.h"
+#include "RenderEngine.h"
 
-SphereComponent::SphereComponent(SceneObject* parent, Float radius) :
+SphereComponent::SphereComponent(SceneObject* parent, float radius) :
 	Component(ComponentType::Sphere, parent), m_radius(radius) {}
 
 void SphereComponent::Draw() const {
-	GlobalRenderer::DrawMesh(ResourceManager::GetSphereMesh());
+	RenderEngine::DrawSphere();
 }
 
-Float SphereComponent::GetRadius() const {
+float SphereComponent::GetRadius() const {
 	return m_radius;
 }
 
-void SphereComponent::SetRadius(Float radius) {
+void SphereComponent::SetRadius(float radius) {
 	m_radius = radius;
 }

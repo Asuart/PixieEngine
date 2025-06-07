@@ -2,27 +2,29 @@
 #include "pch.h"
 #include "Scene/Scene.h"
 #include "EngineTime.h"
-#include "Resources/ResourceManager.h"
-#include "Resources/TextureGenerator.h"
 #include "FrameBuffer.h"
 #include "LTC_Matrix.h"
 #include "SSAOKernel.h"
 #include "Renderer.h"
-#include "GlobalRenderer.h"
+#include "RenderEngine.h"
 
-class DefferedRenderer {
+class DefferedRenderer : public Renderer {
 public:
+	DefferedRenderer();
+
+	void DrawFrame(std::shared_ptr<Scene> scene, const Camera& camera) const override;
+	void SetResolution(glm::ivec2 resolution) override;
+	glm::ivec2 GetResolution() const override;
+	GLuint GetFrameHandle() const override;
+	AntiAliasing GetAntiAliasing() const override;
+	void SetAntiAliasing(AntiAliasing mode) override;
+
+protected:
+	const glm::ivec2 SSAONoiseResolution = { 4, 4 };
 	GBuffer m_gBuffer;
 	PostProcessingFrameBuffer<GL_RED, GL_RED, GL_FLOAT> m_ssaoBuffer;
 	PostProcessingFrameBuffer<GL_RED, GL_RED, GL_FLOAT> m_ssaoBlurBuffer;
 	FrameBuffer m_frameBuffer;
-
-	DefferedRenderer();
-
-	void DrawFrame(Scene* scene, Camera* camera);
-
-protected:
-	const glm::ivec2 SSAONoiseResolution = { 4, 4 };
 	Shader m_shader;
 	Shader m_ssaoShader;
 	Shader m_ssaoBlurShader;
@@ -32,7 +34,7 @@ protected:
 	Texture m_noiseTexture;
 	SSAOKernel<64> m_ssaoKernel;
 
-	void DrawObject(SceneObject* object, Mat4 parentTransform = Mat4(1.0f));
-	void SetupMaterial(Material* material);
-	void SetupLights(Scene* scene);
+	void DrawObject(SceneObject* object, glm::mat4 parentTransform = glm::mat4(1.0f)) const;
+	void SetupMaterial(std::shared_ptr<Material> material) const;
+	void SetupLights(std::shared_ptr<Scene> scene) const;
 };

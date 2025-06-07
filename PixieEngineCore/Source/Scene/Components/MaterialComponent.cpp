@@ -1,13 +1,13 @@
 #include "pch.h"
 #include "MaterialComponent.h"
 
-MaterialComponent::MaterialComponent(SceneObject* parent, Material* material) :
+MaterialComponent::MaterialComponent(SceneObject* parent, std::shared_ptr<Material> material) :
 	Component(ComponentType::Material, parent), m_material(material) {}
 
-Material* MaterialComponent::GetMaterial() {
+std::shared_ptr<Material> MaterialComponent::GetMaterial() const {
 	return m_material;
 }
 
-void MaterialComponent::SetMaterial(Material* _material) {
+void MaterialComponent::SetMaterial(std::shared_ptr<Material> _material) {
 	m_material = _material;
 }

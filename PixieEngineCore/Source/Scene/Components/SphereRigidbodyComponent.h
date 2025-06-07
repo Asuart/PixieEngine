@@ -5,14 +5,11 @@
 
 class SphereRigidbodyComponent : public Component {
 public:
-	SphereRigidbodyComponent(SceneObject* parent, Float radius, bool activate) :
-		Component(ComponentType::SphereRigidbody, parent) {
-		m_id = PhysicsEngine::CreateSphereBody(m_parent->GetTransform().GetPosition(), radius, activate);
-	}
+	SphereRigidbodyComponent(SceneObject* parent, float radius, bool activate);
+	~SphereRigidbodyComponent();
 
-	void OnUpdate() override {
-		m_parent->GetTransform().SetPosition(PhysicsEngine::GetBodyPosition(m_id));
-	}
+	void OnUpdate() override;
+
 protected:
 	uint32_t m_id = 0;
 };

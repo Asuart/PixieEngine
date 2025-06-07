@@ -4,13 +4,13 @@
 
 class SphereComponent : public Component {
 public:
-	SphereComponent(SceneObject* parent, Float radius);
+	SphereComponent(SceneObject* parent, float radius);
 
 	void Draw() const;
 
-	Float GetRadius() const;
-	void SetRadius(Float radius);
+	float GetRadius() const;
+	void SetRadius(float radius);
 
 protected:
-	Float m_radius;
+	float m_radius;
 };

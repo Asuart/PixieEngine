@@ -1,6 +1,6 @@
 #pragma once
 #include "Texture.h"
-#include "Buffer2D.h"
+#include "Utils/Buffer2D.h"
 
 template<class T>
 class Buffer2DTexture {
@@ -20,7 +20,6 @@ public:
 	T GetPixel(uint32_t index) const;
 	T GetPixel(glm::ivec2 coords) const;
 	void Upload();
-	T Sample(Vec2 coords) const;
 
 protected:
 	Buffer2D<T> m_buffer;
@@ -109,22 +108,16 @@ inline T Buffer2DTexture<T>::GetPixel(glm::ivec2 coords) const {
 }
 
 template<>
-inline void Buffer2DTexture<Float>::Upload() {
+inline void Buffer2DTexture<float>::Upload() {
 	m_texture.Upload(m_buffer.m_resolution, GL_R32F, GL_RED, GL_FLOAT, m_buffer.Data());
 }
 
 template<>
-inline void Buffer2DTexture<Vec3>::Upload() {
+inline void Buffer2DTexture<glm::vec3>::Upload() {
 	m_texture.Upload(m_buffer.m_resolution, GL_RGB32F, GL_RGB, GL_FLOAT, m_buffer.Data());
 }
 
 template<>
-inline void Buffer2DTexture<Vec4>::Upload() {
+inline void Buffer2DTexture<glm::vec4>::Upload() {
 	m_texture.Upload(m_buffer.m_resolution, GL_RGBA32F, GL_RGBA, GL_FLOAT, m_buffer.Data());
-}
-
-template<class T>
-inline T Buffer2DTexture<T>::Sample(Vec2 coords) const {
-	glm::ivec2 c = Vec2(m_buffer.m_resolution) * coords;
-	return GetPixel(c);
 }

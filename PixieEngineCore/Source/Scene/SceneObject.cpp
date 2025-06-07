@@ -13,15 +13,6 @@ Component* SceneObject::GetComponent(int32_t index) const {
 	return m_components[index];
 }
 
-Component* SceneObject::GetComponent(ComponentType type) const {
-	for (size_t i = 0; i < m_components.size(); i++) {
-		if (m_components[i]->type == type) {
-			return m_components[i];
-		}
-	}
-	return nullptr;
-}
-
 void SceneObject::OnStart() {
 	for (size_t i = 0; i < m_components.size(); i++) {
 		m_components[i]->OnStart();
@@ -89,27 +80,6 @@ std::vector<SceneObject*> SceneObject::FindObjects(const std::string& objectName
 			objects.push_back(m_children[i]);
 		}
 		std::vector<SceneObject*> childrenFound = m_children[i]->FindObjects(objectName);
-		objects.insert(objects.end(), childrenFound.begin(), childrenFound.end());
-	}
-	return objects;
-}
-
-SceneObject* SceneObject::FindObjectWithComponent(ComponentType type) const {
-	for (size_t i = 0; i < m_children.size(); i++) {
-		if (m_children[i]->GetComponent(type)) {
-			return m_children[i];
-		}
-	}
-	return nullptr;
-}
-
-std::vector<SceneObject*> SceneObject::FindObjectsWithComponent(ComponentType type) const {
-	std::vector<SceneObject*> objects;
-	for (size_t i = 0; i < m_children.size(); i++) {
-		if (m_children[i]->GetComponent(type)) {
-			objects.push_back(m_children[i]);
-		}
-		std::vector<SceneObject*> childrenFound = m_children[i]->FindObjectsWithComponent(type);
 		objects.insert(objects.end(), childrenFound.begin(), childrenFound.end());
 	}
 	return objects;

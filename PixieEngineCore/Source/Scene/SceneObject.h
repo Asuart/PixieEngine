@@ -1,15 +1,11 @@
 #pragma once
-#include "UID.h"
 #include "Math/Transform.h"
-#include "Component.h"
-#include "ComponentTypes.h"
+#include "Components/Component.h"
 
 class Component;
 
 class SceneObject {
 public:
-	const UID id;
-
 	void OnStart();
 	void OnUpdate();
 	void OnFixedUpdate();
@@ -20,14 +16,11 @@ public:
 	SceneObject* GetChild(int32_t index) const;
 	const std::vector<Component*>& GetComponents() const;
 	Component* GetComponent(int32_t index) const;
-	Component* GetComponent(ComponentType type) const;
 	Transform& GetTransform();
 	const Transform& GetTransform() const;
 
 	SceneObject* FindObject(const std::string& objectName) const;
 	std::vector<SceneObject*> FindObjects(const std::string& objectName) const;
-	SceneObject* FindObjectWithComponent(ComponentType type) const;
-	std::vector<SceneObject*> FindObjectsWithComponent(ComponentType type) const;
 
 protected:
 	SceneObject(const std::string& name, Transform transform = Transform());
@@ -40,17 +33,41 @@ protected:
 	std::vector<Component*> m_components;
 
 	friend class SceneManager;
+	friend class SceneReader;
 	friend class Scene;
 
 public:
 	template<typename T>
 	T* GetComponent() const {
+		uint64_t type = typeid(T).hash_code();
 		for (size_t i = 0; i < m_components.size(); i++) {
-			T* cast = dynamic_cast<T*>(m_components[i]);
-			if (cast) {
-				return cast;
+			if (type == typeid(*m_components[i]).hash_code()) {
+				return dynamic_cast<T*>(m_components[i]);
 			}
 		}
 		return nullptr;
+	}
+
+	template<typename T>
+	const SceneObject* FindObjectWithComponent() const {
+		if (GetComponent<T>()) {
+			return this;
+		}
+		for (size_t i = 0; i < m_children.size(); i++) {
+			if (const SceneObject* object = m_children[i]->FindObjectWithComponent<T>()) {
+				return object;
+			}
+		}
+		return nullptr;
+	}
+
+	template<typename T>
+	void FindObjectsWithComponent(std::vector<const SceneObject*>& objects) const {
+		if (GetComponent<T>()) {
+			objects.push_back(this);
+		}
+		for (size_t i = 0; i < m_children.size(); i++) {
+			m_children[i]->FindObjectsWithComponent<T>(objects);
+		}
 	}
 };

@@ -1,25 +1,25 @@
 #include "pch.h"
 #include "PointLightComponent.h"
 
-PointLightComponent::PointLightComponent(SceneObject* parent, Vec3 color, Float strength) :
+PointLightComponent::PointLightComponent(SceneObject* parent, glm::vec3 color, float strength) :
 	Component(ComponentType::PointLight, parent), m_color(color), m_strength(strength) {}
 
-Vec3 PointLightComponent::GetEmission() {
+glm::vec3 PointLightComponent::GetEmission() const {
 	return m_color * m_strength;
 }
 
-Vec3 PointLightComponent::GetColor() {
+glm::vec3 PointLightComponent::GetColor() const {
 	return m_color;
 }
 
-Float PointLightComponent::GetStrength() {
-	return m_strength;
-}
-
-void PointLightComponent::SetColor(Vec3 color) {
+void PointLightComponent::SetColor(glm::vec3 color) {
 	m_color = color;
 }
 
-void PointLightComponent::SetStrength(Float strength) {
+float PointLightComponent::GetStrength() const {
+	return m_strength;
+}
+
+void PointLightComponent::SetStrength(float strength) {
 	m_strength = strength;
 }

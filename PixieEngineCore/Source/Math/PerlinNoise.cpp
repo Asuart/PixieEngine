@@ -2,7 +2,7 @@
 #include "PerlinNoise.h"
 
 PerlinNoise::PerlinNoise() {
-	ranvec = new Vec3[point_count];
+	ranvec = new glm::vec3[point_count];
 	for (int32_t i = 0; i < point_count; ++i) {
 		ranvec[i] = glm::normalize(RandomVector(-1.0, 1.0));
 	}
@@ -19,10 +19,10 @@ PerlinNoise::~PerlinNoise() {
 	delete[] perm_z;
 }
 
-Float PerlinNoise::Sample(const Vec3& p) const {
-	Float u = p.x - floor(p.x);
-	Float v = p.y - floor(p.y);
-	Float w = p.z - floor(p.z);
+float PerlinNoise::Sample(const glm::vec3& p) const {
+	float u = p.x - floor(p.x);
+	float v = p.y - floor(p.y);
+	float w = p.z - floor(p.z);
 
 	u = u * u * (3 - 2 * u);
 	v = v * v * (3 - 2 * v);
@@ -31,7 +31,7 @@ Float PerlinNoise::Sample(const Vec3& p) const {
 	int32_t i = static_cast<int32_t>(floor(p.x));
 	int32_t j = static_cast<int32_t>(floor(p.y));
 	int32_t k = static_cast<int32_t>(floor(p.z));
-	Vec3 c[2][2][2];
+	glm::vec3 c[2][2][2];
 
 	for (int32_t di = 0; di < 2; di++) {
 		for (int32_t dj = 0; dj < 2; dj++) {
@@ -44,10 +44,10 @@ Float PerlinNoise::Sample(const Vec3& p) const {
 	return TrilinearInterp(c, u, v, w);
 }
 
-Float PerlinNoise::Turbulence(const Vec3& p, int32_t depth) const {
-	Float accum = 0.0;
-	Vec3 temp_p = p;
-	Float weight = 1.0;
+float PerlinNoise::Turbulence(const glm::vec3& p, int32_t depth) const {
+	float accum = 0.0;
+	glm::vec3 temp_p = p;
+	float weight = 1.0;
 
 	for (int32_t i = 0; i < depth; i++) {
 		accum += weight * Sample(temp_p);
@@ -79,16 +79,16 @@ void PerlinNoise::Permute(int32_t* p, int32_t n) {
 	}
 }
 
-Float PerlinNoise::TrilinearInterp(Vec3 c[2][2][2], Float u, Float v, Float w) {
-	Float uu = u * u * (3 - 2 * u);
-	Float vv = v * v * (3 - 2 * v);
-	Float ww = w * w * (3 - 2 * w);
-	Float accum = 0.0;
+float PerlinNoise::TrilinearInterp(glm::vec3 c[2][2][2], float u, float v, float w) {
+	float uu = u * u * (3 - 2 * u);
+	float vv = v * v * (3 - 2 * v);
+	float ww = w * w * (3 - 2 * w);
+	float accum = 0.0;
 
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < 2; j++) {
 			for (int k = 0; k < 2; k++) {
-				Vec3 weight_v(u - i, v - j, w - k);
+				glm::vec3 weight_v(u - i, v - j, w - k);
 				accum += (i * uu + (1 - i) * (1 - uu)) * (j * vv + (1 - j) * (1 - vv)) * (k * ww + (1 - k) * (1 - ww)) * dot(c[i][j][k], weight_v);
 			}
 		}

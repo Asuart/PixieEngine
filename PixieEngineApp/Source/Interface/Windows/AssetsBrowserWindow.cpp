@@ -1,14 +1,16 @@
 #include "pch.h"
 #include "AssetsBrowserWindow.h"
 #include "PixieEngineApp.h"
+#include "Resources/TextureLoader.h"
+#include "SceneManager.h"
 
 AssetsBrowserWindow::AssetsBrowserWindow(PixieEngineApp& app, Interface& inter) :
 	InterfaceWindow(app, inter) {}
 
 void AssetsBrowserWindow::Initialize() {
-	m_folderIcon = ResourceManager::LoadTexture("folder-icon.png");
-	m_parentFolderIcon = ResourceManager::LoadTexture("folder-up-icon.png");
-	m_fileIcon = ResourceManager::LoadTexture("file-icon.png");
+	m_folderIcon = TextureLoader::LoadTexture("folder-icon.png");
+	m_parentFolderIcon = TextureLoader::LoadTexture("folder-up-icon.png");
+	m_fileIcon = TextureLoader::LoadTexture("file-icon.png");
 }
 
 void AssetsBrowserWindow::Draw() {
@@ -20,12 +22,12 @@ void AssetsBrowserWindow::Draw() {
 
 		ImGui::Columns(columsCount, 0, false);
 
-		std::filesystem::path assetPath = ResourceManager::GetAssetsPath();
+		std::filesystem::path assetPath = Globals::GetAssetsPath();
 
 		if (assetPath.parent_path() != "") {
 			ImGui::ImageButton((ImTextureID)(uint64_t)m_parentFolderIcon.GetHandle(), { m_thumbnailSize, m_thumbnailSize }, { 0, 0 }, { 1, 1 });
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-				ResourceManager::SetAssetsPath(assetPath.parent_path());
+				Globals::SetAssetsPath(assetPath.parent_path());
 			}
 			ImGui::TextWrapped("../");
 			ImGui::NextColumn();
@@ -47,7 +49,7 @@ void AssetsBrowserWindow::Draw() {
 			const std::string fileName = path.filename().string();
 			ImGui::ImageButton((ImTextureID)(uint64_t)m_folderIcon.GetHandle(), { m_thumbnailSize, m_thumbnailSize }, { 0, 0 }, { 1, 1 });
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-				ResourceManager::SetAssetsPath(assetPath.string() + std::string("/") + fileName);
+				Globals::SetAssetsPath(assetPath.string() + std::string("/") + fileName);
 			}
 			ImGui::TextWrapped(fileName.c_str());
 			ImGui::NextColumn();
@@ -57,12 +59,7 @@ void AssetsBrowserWindow::Draw() {
 			const std::string fileName = path.filename().string();
 			ImGui::ImageButton((ImTextureID)(uint64_t)m_fileIcon.GetHandle(), { m_thumbnailSize, m_thumbnailSize }, { 0, 0 }, { 1, 1 });
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-				if (ResourceManager::IsValidScenePath(path)) {
-					SceneManager::LoadScene(path);
-				}
-				else if (ResourceManager::IsValidModelPath(path)) {
-					SceneManager::LoadModel(path);
-				}
+				SceneManager::LoadModel(path);
 			}
 			ImGui::TextWrapped(fileName.c_str());
 			ImGui::NextColumn();

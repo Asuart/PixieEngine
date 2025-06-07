@@ -2,18 +2,17 @@
 #include "pch.h"
 #include "MathBase.h"
 
-class Frame {
-public:
-	Vec3 x, y, z;
+struct Frame {
+	glm::vec3 x, y, z;
 
 	Frame();
-	Frame(Vec3 x, Vec3 y, Vec3 z);
-	static Frame FromXZ(Vec3 x, Vec3 z);
-	static Frame FromXY(Vec3 x, Vec3 y);
-	static Frame FromZ(Vec3 z);
-	static Frame FromX(Vec3 x);
-	static Frame FromY(Vec3 y);
+	Frame(glm::vec3 x, glm::vec3 y, glm::vec3 z);
+	static Frame FromXZ(glm::vec3 x, glm::vec3 z);
+	static Frame FromXY(glm::vec3 x, glm::vec3 y);
+	static Frame FromZ(glm::vec3 z);
+	static Frame FromX(glm::vec3 x);
+	static Frame FromY(glm::vec3 y);
 
-	Vec3 ToLocal(Vec3 v) const;
-	Vec3 FromLocal(Vec3 v) const;
+	glm::vec3 ToLocal(glm::vec3 v) const;
+	glm::vec3 FromLocal(glm::vec3 v) const;
 };

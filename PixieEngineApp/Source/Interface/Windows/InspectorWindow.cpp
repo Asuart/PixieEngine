@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "InspectorWindow.h"
 #include "PixieEngineApp.h"
+#include "SceneManager.h"
 
 InspectorWindow::InspectorWindow(PixieEngineApp& app, Interface& inter) :
 	InterfaceWindow(app, inter) {}

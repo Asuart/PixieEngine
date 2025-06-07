@@ -3,7 +3,7 @@ project "PixieEngineApp"
    language "C++"
    cppdialect "C++20"
    targetdir "Build/%{cfg.buildcfg}"
-   staticruntime "off"
+   staticruntime "on"
 
    pchheader "pch.h"
    pchsource "Source/pch.cpp"

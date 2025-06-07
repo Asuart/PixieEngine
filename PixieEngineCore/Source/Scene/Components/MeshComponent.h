@@ -1,17 +1,16 @@
 #pragma once
-#include "Mesh.h"
+#include "Resources/MeshHandle.h"
 #include "Component.h"
-#include "Material.h"
 
 class MeshComponent : public Component {
 public:
-	MeshComponent(SceneObject* parent, Mesh* mesh);
+	MeshComponent(SceneObject* parent, MeshHandle mesh);
 
-	const Mesh* GetMesh() const;
-	Mesh* GetMesh();
+	MeshHandle GetMesh() const;
+	void SetMesh(MeshHandle mesh);
 	void Draw() const;
-	void UploadMesh();
+	uint32_t GetIndicesCount() const;
 
 protected:
-	Mesh* m_mesh;
+	MeshHandle m_mesh;
 };

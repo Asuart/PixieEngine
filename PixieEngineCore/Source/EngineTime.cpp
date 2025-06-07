@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "EngineTime.h"
 
-const Float Time::fixedDeltaTime = 0.002f;
-Float Time::deltaTime = 1.0f / 60.0f;
+const float Time::fixedDeltaTime = 0.002f;
+float Time::deltaTime = 1.0f / 60.0f;
 std::chrono::milliseconds Time::lastTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 std::vector<HighPrecisionTimeMeasurement> HighPrecisionTimer::s_timers;
 
@@ -18,7 +18,8 @@ HighPrecisionTimer::HighPrecisionTimer(const std::string& name) : m_name(name) {
 
 HighPrecisionTimer::~HighPrecisionTimer() {
 	std::chrono::steady_clock::time_point end = std::chrono::high_resolution_clock::now();
-	std::cout << m_name << ": " << (end - m_start) << "\n";
+	uint64_t deltaTime = (end - m_start).count();
+	Log::Message("%s: %i", m_name, deltaTime);
 }
 
 void HighPrecisionTimer::StartTimer(const std::string& name) {

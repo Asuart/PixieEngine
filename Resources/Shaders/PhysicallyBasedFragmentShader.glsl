@@ -164,7 +164,7 @@ vec3 LTC_Evaluate(vec3 N, vec3 V, vec3 P, mat3 Minv, vec3 points[3], bool twoSid
     // Fetch the form factor for horizon clipping
     float scale = texture(LTC2, uv).w;
 
-    float sum = len*scale;
+    float sum = len * scale;
     if (!behind && !twoSided) {
         sum = 0.0;
     }
@@ -215,6 +215,8 @@ void main() {
         float dotNL = max(dot(mNormal, toLight), 0.0f);
 
 		float distance = length(pointLights[i].position - fWorldPos);
+        if(distance < 0.001f) continue;
+
 		float attenuation = 1.0f / (distance * distance);
 		vec3 radiance = pointLights[i].emission * attenuation;
 

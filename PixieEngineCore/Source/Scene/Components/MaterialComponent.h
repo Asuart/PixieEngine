@@ -1,16 +1,16 @@
 #pragma once
-#include "Material.h"
+#include "REsources/Material.h"
 #include "Component.h"
 
 class SceneObject;
 
 class MaterialComponent : public Component {
 public:
-	MaterialComponent(SceneObject* parent, Material* material);
+	MaterialComponent(SceneObject* parent, std::shared_ptr<Material> material);
 
-	Material* GetMaterial();
-	void SetMaterial(Material* material);
+	std::shared_ptr<Material> GetMaterial() const;
+	void SetMaterial(std::shared_ptr<Material> material);
 
 protected:
-	Material* m_material = nullptr;
+	std::shared_ptr<Material> m_material = nullptr;
 };

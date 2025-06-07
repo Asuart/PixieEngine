@@ -4,15 +4,15 @@
 
 class PointLightComponent : public Component {
 public:
-	PointLightComponent(SceneObject* parent, Vec3 color, Float strength);
+	PointLightComponent(SceneObject* parent, glm::vec3 color, float strength);
 
-	Vec3 GetEmission();
-	Vec3 GetColor();
-	Float GetStrength();
-	void SetColor(Vec3 color);
-	void SetStrength(Float strength);
+	glm::vec3 GetEmission() const;
+	glm::vec3 GetColor() const;
+	void SetColor(glm::vec3 color);
+	float GetStrength() const;
+	void SetStrength(float strength);
 
 protected:
-	Vec3 m_color;
-	Float m_strength;
+	glm::vec3 m_color;
+	float m_strength;
 };

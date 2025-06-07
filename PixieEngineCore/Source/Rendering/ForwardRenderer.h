@@ -2,36 +2,21 @@
 #include "pch.h"
 #include "Scene/Scene.h"
 #include "EngineTime.h"
-#include "Resources/ResourceManager.h"
-#include "GlobalRenderer.h"
+#include "RenderEngine.h"
 #include "FrameBuffer.h"
-#include "GlobalRenderer.h"
+#include "Renderer.h"
 
-enum class AntiAliasing {
-	None = 0,
-	SSAAx2,
-	SSAAx4,
-	SSAAx8,
-	MSAAx2,
-	MSAAx4,
-	MSAAx8,
-	MSAAx16,
-	FXAA,
-	COUNT,
-};
-
-std::string to_string(AntiAliasing mode);
-
-class ForwardRenderer {
+class ForwardRenderer : public Renderer {
 public:
 	ForwardRenderer();
 
-	void DrawFrame(Scene* scene, Camera* camera);
-	void SetResolution(glm::ivec2 resolution);
-	glm::ivec2 GetFrameResolution() const;
-	GLuint GetFrameHandle() const;
-	AntiAliasing GetAntiAlisingMode() const;
-	void SetAntiAlisingMode(AntiAliasing mode);
+	void DrawFrame(std::shared_ptr<Scene> scene, const Camera& camera) const override;
+	void SetResolution(glm::ivec2 resolution) override;
+	glm::ivec2 GetResolution() const override;
+	GLuint GetFrameHandle() const override;
+	AntiAliasing GetAntiAliasing() const override;
+	void SetAntiAliasing(AntiAliasing mode) override;
+
 	void SetShader(Shader shader);
 
 protected:
@@ -47,7 +32,7 @@ protected:
 	bool m_useMultisampleFramebuffer = false;
 	bool m_useFXAA = false;
 
-	void DrawObject(SceneObject* object, Mat4 parentTransform = Mat4(1.0f));
-	void SetupCamera(Camera* camera);
-	void SetupLights(Scene* scene);
+	void DrawObject(SceneObject* object, glm::mat4 parentTransform = glm::mat4(1.0f)) const;
+	void SetupCamera(const Camera& camera) const;
+	void SetupLights(std::shared_ptr<Scene> scene) const;
 };

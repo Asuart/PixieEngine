@@ -1,6 +1,5 @@
 #pragma once
 #include "pch.h"
-#include "RayTracing/Ray.h"
 #include "Math.h"
 
 struct Bounds2i {
@@ -13,11 +12,9 @@ struct Bounds2i {
 
 	glm::ivec2 Diagonal() const;
 	glm::ivec2 Center() const;
-	Float Area() const;
+	float Area() const;
 	int32_t MaxDimension() const;
-	glm::ivec2 Lerp(Float p) const;
-	glm::ivec2 Lerp(Vec2 p) const;
-	void BoundingCircle(Vec2* center, Float* radius) const;
+	void BoundingCircle(glm::vec2* center, float* radius) const;
 	bool IsEmpty() const;
 	bool IsDegenerate() const;
 
@@ -28,32 +25,29 @@ struct Bounds2i {
 };
 
 struct Bounds2f {
-	Vec2 min = Vec2(std::numeric_limits<Float>::max());
-	Vec2 max = Vec2(std::numeric_limits<Float>::lowest());
+	glm::vec2 min = glm::vec2(std::numeric_limits<float>::max());
+	glm::vec2 max = glm::vec2(std::numeric_limits<float>::lowest());
 
 	Bounds2f() = default;
-	explicit Bounds2f(Vec2 p);
-	Bounds2f(Vec2 p1, Vec2 p2);
+	explicit Bounds2f(glm::vec2 p);
+	Bounds2f(glm::vec2 p1, glm::vec2 p2);
 
-	Vec2 Diagonal() const;
-	Vec2 Center() const;
-	Float Area() const;
+	glm::vec2 Diagonal() const;
+	glm::vec2 Center() const;
+	float Area() const;
 	int32_t MaxDimension() const;
-	Vec2 Lerp(Float p) const;
-	Vec2 Lerp(Vec2 p) const;
-	Vec2 Offset(Vec2 p) const;
-	void BoundingCircle(Vec2* center, Float* radius) const;
+	glm::vec2 Offset(glm::vec2 p) const;
+	void BoundingCircle(glm::vec2* center, float* radius) const;
 	bool IsEmpty() const;
 	bool IsDegenerate() const;
 
-	Vec2 operator[](int32_t i) const;
-	Vec2& operator[](int32_t i);
+	glm::vec2 operator[](int32_t i) const;
+	glm::vec2& operator[](int32_t i);
 	bool operator==(const Bounds2f& b) const;
 	bool operator!=(const Bounds2f& b) const;
 };
 
-class Bounds3i {
-public:
+struct Bounds3i {
 	glm::ivec3 min = glm::ivec3(std::numeric_limits<int32_t>::max());
 	glm::ivec3 max = glm::ivec3(std::numeric_limits<int32_t>::lowest());
 
@@ -64,13 +58,11 @@ public:
 	glm::ivec3 Corner(int32_t corner) const;
 	glm::ivec3 Diagonal() const;
 	glm::ivec3 Center() const;
-	Float Area() const;
-	Float Volume() const;
+	float Area() const;
+	float Volume() const;
 	int32_t MaxDimension() const;
-	glm::ivec3 Lerp(Float t) const;
-	glm::ivec3 Lerp(Vec3 t) const;
 	glm::ivec3 Offset(glm::ivec3 p) const;
-	void BoundingSphere(Vec3* center, Float* radius) const;
+	void BoundingSphere(glm::vec3* center, float* radius) const;
 	bool IsEmpty() const;
 	bool IsDegenerate() const;
 
@@ -80,30 +72,27 @@ public:
 	bool operator!=(const Bounds3i& b) const;
 };
 
-class Bounds3f {
-public:
-	Vec3 min = Vec3(std::numeric_limits<Float>::max());
-	Vec3 max = Vec3(std::numeric_limits<Float>::lowest());
+struct Bounds3f {
+	glm::vec3 min = glm::vec3(std::numeric_limits<float>::max());
+	glm::vec3 max = glm::vec3(std::numeric_limits<float>::lowest());
 
 	Bounds3f() = default;
-	explicit Bounds3f(Vec3 p);
-	Bounds3f(Vec3 p1, Vec3 p2);
+	explicit Bounds3f(glm::vec3 p);
+	Bounds3f(glm::vec3 p1, glm::vec3 p2);
 
-	Vec3 Corner(int32_t corner) const;
-	Vec3 Diagonal() const;
-	Vec3 Center() const;
-	Float Area() const;
-	Float Volume() const;
+	glm::vec3 Corner(int32_t corner) const;
+	glm::vec3 Diagonal() const;
+	glm::vec3 Center() const;
+	float Area() const;
+	float Volume() const;
 	int32_t MaxDimension() const;
-	Vec3 Lerp(Float t) const;
-	Vec3 Lerp(Vec3 t) const;
-	Vec3 Offset(Vec3 p) const;
-	void BoundingSphere(Vec3* center, Float* radius) const;
+	glm::vec3 Offset(glm::vec3 p) const;
+	void BoundingSphere(glm::vec3* center, float* radius) const;
 	bool IsEmpty() const;
 	bool IsDegenerate() const;
 
-	Vec3 operator[](int32_t i) const;
-	Vec3& operator[](int32_t i);
+	glm::vec3 operator[](int32_t i) const;
+	glm::vec3& operator[](int32_t i);
 	bool operator==(const Bounds3f& b) const;
 	bool operator!=(const Bounds3f& b) const;
 };
@@ -112,5 +101,5 @@ Bounds2i Union(const Bounds2i& b1, const Bounds2i& b2);
 Bounds2f Union(const Bounds2f& b1, const Bounds2f& b2);
 Bounds3i Union(const Bounds3i& b1, const Bounds3i& b2);
 Bounds3f Union(const Bounds3f& b1, const Bounds3f& b2);
-Bounds3f Union(const Bounds3f& b, Vec3 p);
-bool Inside(Vec3 p, const Bounds3f& b);
+Bounds3f Union(const Bounds3f& b, glm::vec3 p);
+bool Inside(glm::vec3 p, const Bounds3f& b);

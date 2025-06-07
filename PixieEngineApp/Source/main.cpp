@@ -8,9 +8,17 @@ void window_size_callback(GLFWwindow* window, int32_t width, int32_t height) {
 }
 
 int32_t main(int32_t argc, char** argv) {
-	ResourceManager::SetApplicationPath(argv[0]);
-	app.Initialize();
 	glfwSetWindowSizeCallback(app.GetGLFWWindow(), window_size_callback);
+	
+	if (!PixieEngine::Initialize(argv[0])) {
+		Log::Error("Failed to initialize Pixie Engine");
+		return 1;
+	}
+
+	app.Initialize();
 	app.Start();
+
+	PixieEngine::Free();
+
 	return 0;
 }

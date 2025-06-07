@@ -2,30 +2,30 @@
 #include "ShaderGraphWindow.h"
 #include "Interface.h"
 #include "ViewportWindow.h"
+#include "Resources/ShaderManager.h"
+#include "SceneManager.h"
 
-const Float c_nodeBodyStart = 30;
-const Float c_nodeRowHeight = 24;
+const float c_nodeBodyStart = 30;
+const float c_nodeRowHeight = 24;
 
-ShaderNodeInputObject::ShaderNodeInputObject(ShaderNodeObject& _parent, ShaderNodeInput& _input, Vec2 _offset) :
+ShaderNodeInputObject::ShaderNodeInputObject(ShaderNodeObject& _parent, ShaderNodeInput& _input, glm::vec2 _offset) :
 	parent(_parent), input(_input), offset(_offset) {}
 
-ShaderNodeOutputObject::ShaderNodeOutputObject(ShaderNodeObject& _parent, ShaderNodeOutput& _output, Vec2 _offset) :
+ShaderNodeOutputObject::ShaderNodeOutputObject(ShaderNodeObject& _parent, ShaderNodeOutput& _output, glm::vec2 _offset) :
 	parent(_parent), output(_output), offset(_offset) {}
 
-VirtualShaderNodeConnectionObject::VirtualShaderNodeConnectionObject(ShaderNodeOutputObject& _from, Vec2 _to) :
+VirtualShaderNodeConnectionObject::VirtualShaderNodeConnectionObject(ShaderNodeOutputObject& _from, glm::vec2 _to) :
 	from(_from), to(_to) {
 	UpdateMesh(to);
 }
 
-void VirtualShaderNodeConnectionObject::UpdateMesh(Vec2 end) {
+void VirtualShaderNodeConnectionObject::UpdateMesh(glm::vec2 end) {
 	to = end;
-	Vec2 p0 = from.parent.position + from.offset + Vec2(0, 4);
-	Vec2 p1 = p0 + Vec2(50, 0);
-	Vec2 p3 = to;
-	Vec2 p2 = p3 - Vec2(50, 0);
-	if (mesh) delete mesh;
-	mesh = MeshGenerator::BezierMesh(BezierCurve2D(p0, p1, p2, p3), 4.0f, 32);
-	mesh->Upload();
+	glm::vec2 p0 = from.parent.position + from.offset + glm::vec2(0, 4);
+	glm::vec2 p1 = p0 + glm::vec2(50, 0);
+	glm::vec2 p3 = to;
+	glm::vec2 p2 = p3 - glm::vec2(50, 0);
+	mesh.UploadMesh(MeshGenerator::BezierMesh(BezierCurve2D(p0, p1, p2, p3), 4.0f, 32));
 }
 
 ShaderNodeConnectionObject::ShaderNodeConnectionObject(ShaderNodeConnection& _connection, ShaderNodeOutputObject& _from, ShaderNodeInputObject& _to) :
@@ -34,23 +34,21 @@ ShaderNodeConnectionObject::ShaderNodeConnectionObject(ShaderNodeConnection& _co
 }
 
 void ShaderNodeConnectionObject::UpdateMesh() {
-	Vec2 p0 = from.parent.position + from.offset + Vec2(0, 4);
-	Vec2 p1 = p0 + Vec2(50, 0);
-	Vec2 p3 = to.parent.position + to.offset + Vec2(4, 4);
-	Vec2 p2 = p3 - Vec2(50, 0);
-	if (mesh) delete mesh;
-	mesh = MeshGenerator::BezierMesh(BezierCurve2D(p0, p1, p2, p3), 4.0f, 32);
-	mesh->Upload();
+	glm::vec2 p0 = from.parent.position + from.offset + glm::vec2(0, 4);
+	glm::vec2 p1 = p0 + glm::vec2(50, 0);
+	glm::vec2 p3 = to.parent.position + to.offset + glm::vec2(4, 4);
+	glm::vec2 p2 = p3 - glm::vec2(50, 0);
+	mesh.UploadMesh(MeshGenerator::BezierMesh(BezierCurve2D(p0, p1, p2, p3), 4.0f, 32));
 }
 
-ShaderNodeObject::ShaderNodeObject(ShaderNode& _node, Vec2 _position, Vec2 _size) :
+ShaderNodeObject::ShaderNodeObject(ShaderNode& _node, glm::vec2 _position, glm::vec2 _size) :
 	node(_node), position(_position), size(_size) {
 	int32_t row = 0;
 	for (int32_t i = 0; i < node.GetInputs().size(); i++, row++) {
-		inputs.insert({ &node.GetInputs()[i], new ShaderNodeInputObject(*this, node.GetInputs()[i], Vec2(-4, c_nodeBodyStart + c_nodeRowHeight * row)) });
+		inputs.insert({ &node.GetInputs()[i], new ShaderNodeInputObject(*this, node.GetInputs()[i], glm::vec2(-4, c_nodeBodyStart + c_nodeRowHeight * row)) });
 	}
 	for (int32_t i = 0; i < node.GetOutputs().size(); i++, row++) {
-		outputs.insert({ &node.GetOutputs()[i], new ShaderNodeOutputObject(*this, node.GetOutputs()[i], Vec2(size.x - 4, c_nodeBodyStart + c_nodeRowHeight * row)) });
+		outputs.insert({ &node.GetOutputs()[i], new ShaderNodeOutputObject(*this, node.GetOutputs()[i], glm::vec2(size.x - 4, c_nodeBodyStart + c_nodeRowHeight * row)) });
 	}
 }
 ShaderNodeObject::~ShaderNodeObject() {
@@ -64,7 +62,7 @@ ShaderNodeObject::~ShaderNodeObject() {
 
 ShaderGraphObject::ShaderGraphObject(ShaderGraph& graph) {
 	for (int32_t i = 0; i < graph.GetNodes().size(); i++) {
-		m_nodes.insert({ graph.GetNodes()[i], new ShaderNodeObject(*graph.GetNodes()[i], Vec2(100 + 300 * i, 100), GetNodeSize(graph.GetNodes()[i])) });
+		m_nodes.insert({ graph.GetNodes()[i], new ShaderNodeObject(*graph.GetNodes()[i], glm::vec2(100 + 300 * i, 100), GetNodeSize(graph.GetNodes()[i])) });
 	}
 	for (int32_t i = 0; i < graph.GetConnections().size(); i++) {
 		ShaderNodeConnectionObject* connection = new ShaderNodeConnectionObject(
@@ -86,13 +84,13 @@ ShaderGraphObject::~ShaderGraphObject() {
 	}
 }
 
-Vec2 ShaderGraphObject::GetNodeSize(ShaderNode* node) {
+glm::vec2 ShaderGraphObject::GetNodeSize(ShaderNode* node) {
 	return { 200, c_nodeBodyStart + (node->GetInputs().size() + node->GetOutputs().size()) * c_nodeRowHeight};
 }
 
 ShaderGraphWindow::ShaderGraphWindow(PixieEngineApp& app, Interface& inter) :
 	InterfaceWindow(app, inter), m_frameBuffer({ 1280, 720 }), m_shaderGraphObject(m_shaderGraph) {
-	m_bezierShader = ResourceManager::LoadShader("Bezier2D");
+	m_bezierShader = ShaderManager::LoadShader("Bezier2D");
 }
 
 void ShaderGraphWindow::Draw() {
@@ -117,7 +115,7 @@ void ShaderGraphWindow::Draw() {
 		glGetIntegerv(GL_VIEWPORT, originalViewport);
 
 		std::shared_ptr<Scene> scene = SceneManager::GetScene();
-		Camera camera = Camera(Vec3(-10, 0, 0), Vec3(0, 0, 0), Vec3(0, 1, 0), glm::radians(39.6f), { 1280, 720 }, 0, 100);
+		Camera camera = Camera(glm::vec3(-10, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0), glm::radians(39.6f), 16.0f / 9.0f, 0, 100);
 
 		HighPrecisionTimer::StartTimer("Shader Graph Frame Time");
 		m_shaderGraph.Process(*scene.get(), camera);
@@ -129,7 +127,7 @@ void ShaderGraphWindow::Draw() {
 		m_frameBuffer.Clear();
 
 		GLuint id = m_shaderGraph.GetNodes().back()->GetInputTexture("Frame");
-		GlobalRenderer::DrawTextureFitted(id, { 1280, 720 }, glmViewportResolution);
+		RenderEngine::DrawTextureFitted(id, { 1280, 720 }, glmViewportResolution);
 		glClear(GL_DEPTH_BUFFER_BIT);
 
 		glDisable(GL_DEPTH_TEST);
@@ -150,17 +148,17 @@ void ShaderGraphWindow::Draw() {
 void ShaderGraphWindow::DrawNodes() {
 	for (auto& pair : m_shaderGraphObject.m_nodes) {
 		ShaderNodeObject* obj = pair.second;
-		GlobalRenderer::DrawUIBox(obj->position, obj->size, obj->baseColor, 5.0f, 0.0f, Vec4(0.0f), m_projection);
-		GlobalRenderer::DrawText(obj->node.GetName(), obj->position + Vec2(8.0f, 16.0f), 16.0f, Vec3(1.0f), m_projection);
+		RenderEngine::DrawUIBox(obj->position, obj->size, obj->baseColor, 5.0f, 0.0f, glm::vec4(0.0f), m_projection);
+		RenderEngine::DrawText(obj->node.GetName(), obj->position + glm::vec2(8.0f, 16.0f), 16.0f, glm::vec3(1.0f), m_projection);
 		for (auto& pair : obj->inputs) {
 			ShaderNodeInputObject* in = pair.second;
-			GlobalRenderer::DrawUIBox(obj->position + in->offset, { 8, 8 }, Vec4(1.0f, 0.15f, 0.3f, 1.0f), 100.0f, 0.0f, Vec4(0.0f), m_projection);
-			GlobalRenderer::DrawText(in->input.m_name, obj->position + in->offset + Vec2(12.0f, 8.0f), 14.0f, Vec3(1.0f), m_projection);
+			RenderEngine::DrawUIBox(obj->position + in->offset, { 8, 8 }, glm::vec4(1.0f, 0.15f, 0.3f, 1.0f), 100.0f, 0.0f, glm::vec4(0.0f), m_projection);
+			RenderEngine::DrawText(in->input.m_name, obj->position + in->offset + glm::vec2(12.0f, 8.0f), 14.0f, glm::vec3(1.0f), m_projection);
 		}
 		for (auto& pair : obj->outputs) {
 			ShaderNodeOutputObject* out = pair.second;
-			GlobalRenderer::DrawUIBox(obj->position + out->offset, { 8, 8 }, Vec4(1.0f, 0.15f, 0.3f, 1.0f), 100.0f, 0.0f, Vec4(0.0f), m_projection);
-			GlobalRenderer::DrawText(out->output.m_name, obj->position + out->offset + Vec2(-4.0f, 8.0f), 14.0f, Vec3(1.0f), m_projection, true);
+			RenderEngine::DrawUIBox(obj->position + out->offset, { 8, 8 }, glm::vec4(1.0f, 0.15f, 0.3f, 1.0f), 100.0f, 0.0f, glm::vec4(0.0f), m_projection);
+			RenderEngine::DrawText(out->output.m_name, obj->position + out->offset + glm::vec2(-4.0f, 8.0f), 14.0f, glm::vec3(1.0f), m_projection, true);
 		}
 	}
 }
@@ -169,11 +167,11 @@ void ShaderGraphWindow::DrawConnections() {
 	m_bezierShader.Bind();
 	m_bezierShader.SetUniformMat4f("mProjection", m_projection);
 	for (auto& pair : m_shaderGraphObject.m_connections) {
-		GlobalRenderer::DrawMesh(pair.second->mesh);
+		RenderEngine::DrawMesh(pair.second->mesh);
 	}
 	if (m_grabbedConnection) {
 		m_grabbedConnection->UpdateMesh(m_cursorPos);
-		GlobalRenderer::DrawMesh(m_grabbedConnection->mesh);
+		RenderEngine::DrawMesh(m_grabbedConnection->mesh);
 	}
 }
 
@@ -181,14 +179,14 @@ void ShaderGraphWindow::HandleUserInput() {
 	if (m_state == ShaderGraphWindowState::Default) {
 		// Move viewport
 		if (UserInput::GetMouseButton(GLFW_MOUSE_BUTTON_3)) {
-			m_viewOffset -= Vec2(UserInput::mouseDeltaX, UserInput::mouseDeltaY) * m_viewScale;
+			m_viewOffset -= glm::vec2(UserInput::mouseDeltaX, UserInput::mouseDeltaY) * m_viewScale;
 			m_viewOffset = glm::clamp(m_viewOffset, minViewOffset, maxViewOffset);
 			return;
 		}
 		// Scele viewport
 		if (UserInput::mouseScrollY) {
-			Float initilScale = m_viewScale;
-			m_viewScale -= (Float)UserInput::mouseScrollY * 0.1f;
+			float initilScale = m_viewScale;
+			m_viewScale -= (float)UserInput::mouseScrollY * 0.1f;
 			m_viewScale = glm::clamp(m_viewScale, minViewScale, maxViewScale);
 			m_viewOffset += (m_cursorViewportPosition) * (initilScale - m_viewScale);
 			return;
@@ -209,7 +207,7 @@ void ShaderGraphWindow::HandleUserInput() {
 				for (auto pair : node->inputs) {
 					ShaderNodeInputObject* input = pair.second;
 					if (!input->connection) continue;
-					Vec2 offset = m_cursorPos - node->position;
+					glm::vec2 offset = m_cursorPos - node->position;
 					if (offset.x > input->offset.x && offset.x < input->offset.x + 8 && offset.y > input->offset.y && offset.y < input->offset.y + 8) {
 						m_grabbedConnection = new VirtualShaderNodeConnectionObject(input->connection->from, m_cursorPos);
 						RemoveConnection(input->connection);
@@ -221,7 +219,7 @@ void ShaderGraphWindow::HandleUserInput() {
 				if (grabbedConnection) break;
 				for (auto pair : node->outputs) {
 					ShaderNodeOutputObject* output = pair.second;
-					Vec2 offset = m_cursorPos - node->position;
+					glm::vec2 offset = m_cursorPos - node->position;
 					if (offset.x > output->offset.x && offset.x < output->offset.x + 8 && offset.y > output->offset.y && offset.y < output->offset.y + 8) {
 						m_grabbedConnection = new VirtualShaderNodeConnectionObject(*output, m_cursorPos);
 						m_state = ShaderGraphWindowState::ConnectingNodes;
@@ -256,14 +254,14 @@ void ShaderGraphWindow::HandleUserInput() {
 	else if (m_state == ShaderGraphWindowState::ConnectingNodes) {
 		// Move viewport
 		if (UserInput::GetMouseButton(GLFW_MOUSE_BUTTON_3)) {
-			m_viewOffset -= Vec2(UserInput::mouseDeltaX, UserInput::mouseDeltaY) * m_viewScale;
+			m_viewOffset -= glm::vec2(UserInput::mouseDeltaX, UserInput::mouseDeltaY) * m_viewScale;
 			m_viewOffset = glm::clamp(m_viewOffset, minViewOffset, maxViewOffset);
 			return;
 		}
 		// Scale viewport
 		if (UserInput::mouseScrollY) {
-			Float initilScale = m_viewScale;
-			m_viewScale -= (Float)UserInput::mouseScrollY * 0.1f;
+			float initilScale = m_viewScale;
+			m_viewScale -= (float)UserInput::mouseScrollY * 0.1f;
 			m_viewScale = glm::clamp(m_viewScale, minViewScale, maxViewScale);
 			m_viewOffset += (m_cursorViewportPosition) * (initilScale - m_viewScale);
 			return;
@@ -275,7 +273,7 @@ void ShaderGraphWindow::HandleUserInput() {
 				bool connected = false;
 				for (auto pair : node->inputs) {
 					ShaderNodeInputObject* input = pair.second;
-					Vec2 offset = m_cursorPos - node->position;
+					glm::vec2 offset = m_cursorPos - node->position;
 					if (offset.x > input->offset.x && offset.x < input->offset.x + 8 && offset.y > input->offset.y && offset.y < input->offset.y + 8) {
 						Connect(m_grabbedConnection->from, *input);
 						connected = true;

@@ -7,10 +7,8 @@
 
 using namespace JPH;
 using namespace JPH::literals;
-using namespace std;
 
-Float PhysicsEngine::m_timeAlign = 0;
-
+float PhysicsEngine::m_timeAlign;
 TempAllocatorImpl* m_tempAllocator = nullptr;
 JobSystemThreadPool* m_jobSystem = nullptr;
 PhysicsSystem* m_physicsSystem = nullptr;
@@ -19,9 +17,11 @@ ObjectVsBroadPhaseLayerFilterImplementation* m_objectVsBroadphaseLayerFilter = n
 ObjectLayerPairFilterImplementation* m_objectVsObjectLayerFilter = nullptr;
 MyBodyActivationListener* m_bodyActivationListener = nullptr;
 MyContactListener* m_contactListener = nullptr;
-std::map<uint32_t, JPH::BodyID> bodiesMap;
+std::map<uint32_t, JPH::BodyID> m_bodiesMap;
 
-void PhysicsEngine::Initialize() {
+bool PhysicsEngine::Initialize() {
+	m_timeAlign = 0;
+
 	RegisterDefaultAllocator();
 	Factory::sInstance = new Factory();
 	RegisterTypes();
@@ -35,15 +35,46 @@ void PhysicsEngine::Initialize() {
 	m_objectVsObjectLayerFilter = new ObjectLayerPairFilterImplementation();
 	m_physicsSystem->Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, *m_broadPhaseLayerInterface, *m_objectVsBroadphaseLayerFilter, *m_objectVsObjectLayerFilter);
 	
-	//m_bodyActivationListener = new MyBodyActivationListener();
-	//m_contactListener = new MyContactListener();
-	//m_physicsSystem->SetBodyActivationListener(m_bodyActivationListener);
-	//m_physicsSystem->SetContactListener(m_contactListener);
+	m_bodyActivationListener = new MyBodyActivationListener();
+	m_contactListener = new MyContactListener();
+	m_physicsSystem->SetBodyActivationListener(m_bodyActivationListener);
+	m_physicsSystem->SetContactListener(m_contactListener);
 
 	m_physicsSystem->OptimizeBroadPhase();
+
+	return true;
 }
 
-uint32_t PhysicsEngine::CreateSphereBody(::Vec3 position, Float radius, bool activate) {
+void PhysicsEngine::Free() {
+	BodyInterface& bodyInterface = m_physicsSystem->GetBodyInterface();
+	for (std::pair<const uint32_t, BodyID> entry : m_bodiesMap) {
+		bodyInterface.RemoveBody(entry.second);
+		bodyInterface.DestroyBody(entry.second);
+	}
+
+	delete m_bodyActivationListener;
+	m_bodyActivationListener = nullptr;
+	delete m_contactListener;
+	m_contactListener = nullptr;
+	delete m_objectVsObjectLayerFilter;
+	m_objectVsObjectLayerFilter = nullptr;
+	delete m_objectVsBroadphaseLayerFilter;
+	m_objectVsBroadphaseLayerFilter = nullptr;
+	delete m_broadPhaseLayerInterface;
+	m_broadPhaseLayerInterface = nullptr;
+	delete m_physicsSystem;
+	m_physicsSystem = nullptr;
+	delete m_jobSystem;
+	m_jobSystem = nullptr;
+	delete m_tempAllocator;
+	m_tempAllocator = nullptr;
+
+	UnregisterTypes();
+	delete Factory::sInstance;
+	Factory::sInstance = nullptr;
+}
+
+uint32_t PhysicsEngine::CreateSphereBody(glm::vec3 position, float radius, bool activate) {
 	BodyInterface& bodyInterface = m_physicsSystem->GetBodyInterface();
 	SphereShapeSettings settings = SphereShapeSettings(radius);
 	settings.SetEmbedded();
@@ -53,14 +84,25 @@ uint32_t PhysicsEngine::CreateSphereBody(::Vec3 position, Float radius, bool act
 	Body* body = bodyInterface.CreateBody(bodySettings);
 	body->SetShapeInternal(shapeRef, false);
 	bodyInterface.AddBody(body->GetID(), EActivation::Activate);
-	bodiesMap[bodiesMap.size()] = body->GetID();
-	return bodiesMap.size() - 1;
+	m_bodiesMap[(uint32_t)m_bodiesMap.size()] = body->GetID();
+	return (uint32_t)(m_bodiesMap.size() - 1);
 }
 
-::Vec3 PhysicsEngine::GetBodyPosition(uint32_t id) {
-	BodyInterface& bodyInterface = m_physicsSystem->GetBodyInterface();
-	JPH::RVec3 pos = bodyInterface.GetPosition(bodiesMap[id]);
-	return ::Vec3(pos.GetX(), pos.GetY(), pos.GetZ());
+glm::vec3 PhysicsEngine::GetBodyPosition(uint32_t id) {
+	if (m_bodiesMap.contains(id)) {
+		BodyInterface& bodyInterface = m_physicsSystem->GetBodyInterface();
+		JPH::RVec3 pos = bodyInterface.GetPosition(m_bodiesMap[id]);
+		return glm::vec3(pos.GetX(), pos.GetY(), pos.GetZ());
+	}
+	return glm::vec3(0.0f);
+}
+
+void PhysicsEngine::DestroyBody(uint32_t id) {
+	if (m_bodiesMap.contains(id)) {
+		BodyInterface& bodyInterface = m_physicsSystem->GetBodyInterface();
+		bodyInterface.RemoveBody(m_bodiesMap[id]);
+		bodyInterface.DestroyBody(m_bodiesMap[id]);
+	}
 }
 
 void PhysicsEngine::Update() {
@@ -73,20 +115,4 @@ void PhysicsEngine::Update() {
 		const int cCollisionSteps = 1;
 		m_physicsSystem->Update(cTimeStep, cCollisionSteps, m_tempAllocator, m_jobSystem);
 	}
-}
-
-void PhysicsEngine::Free() {
-	// Remove the sphere from the physics system. Note that the sphere itself keeps all of its state and can be re-added at any time.
-	//body_interface.RemoveBody(sphere_id);
-
-	// Destroy the sphere. After this the sphere ID is no longer valid.
-	//body_interface.DestroyBody(sphere_id);
-
-	// Remove and destroy the floor
-	//body_interface.RemoveBody(floor->GetID());
-	//body_interface.DestroyBody(floor->GetID());
-
-	UnregisterTypes();
-	delete Factory::sInstance;
-	Factory::sInstance = nullptr;
 }
