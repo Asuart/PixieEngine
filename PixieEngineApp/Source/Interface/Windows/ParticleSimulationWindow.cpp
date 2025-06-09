@@ -192,10 +192,10 @@ void ParticleSimulationWindow::Draw() {
 
 		glBindVertexArray(m_vao);
 		glBindBuffer(GL_ARRAY_BUFFER, m_simulation.m_positionsBuffer);
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), 0);
+		glVertexAttribPointer(0, 2, GL_DOUBLE, GL_FALSE, sizeof(glm::dvec2), 0);
 		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, m_simulation.m_sizesBuffer);
-		glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, sizeof(float), 0);
+		glVertexAttribPointer(1, 1, GL_DOUBLE, GL_FALSE, sizeof(double), 0);
 		glEnableVertexAttribArray(1);
 		glDrawArrays(GL_POINTS, 0, m_simulation.m_numParticlesOnGPU);
 
@@ -259,13 +259,13 @@ void ParticleSimulationWindow::CreateBox(glm::vec2 position, glm::vec2 size, flo
 	for (int32_t y = 0; y < resolution.y; y++) {
 		for (int32_t x = 0; x < resolution.x; x++) {
 			if (x < resolution.x - 1) {
-				m_simulation.CreateSpring(startIndex + y * resolution.x + x, startIndex + y * resolution.x + x + 1, 100000.0f);
+				m_simulation.CreateSpring(startIndex + y * resolution.x + x, startIndex + y * resolution.x + x + 1, 1000000.0f);
 			}
 			if (y < resolution.y - 1) {
-				m_simulation.CreateSpring(startIndex + y * resolution.x + x, startIndex + (y + 1) * resolution.x + x, 100000.0f);
+				m_simulation.CreateSpring(startIndex + y * resolution.x + x, startIndex + (y + 1) * resolution.x + x, 1000000.0f);
 			}
 			if (x < resolution.x - 1 && y < resolution.y - 1) {
-				m_simulation.CreateSpring(startIndex + y * resolution.x + x, startIndex + (y + 1) * resolution.x + x + 1, 100000.0f);
+				m_simulation.CreateSpring(startIndex + y * resolution.x + x, startIndex + (y + 1) * resolution.x + x + 1, 1000000.0f);
 			}
 		}
 	}

@@ -7,7 +7,7 @@ const char* UPDATE_HASHES_SHADER_SOURCE = R"(
 layout(local_size_x = PREPROC_LOCAL_SIZE_X, local_size_y = 1, local_size_z = 1) in;
 
 layout(std430, binding = PREPROC_POSITIONS_BINDING) buffer positions_buffer {
-   vec2 positions[];
+   dvec2 positions[];
 };
 
 layout(std430, binding = PREPROC_CELL_HASHES_BINDING) buffer cell_hashes_buffer {
@@ -20,13 +20,13 @@ layout(std430, binding = PREPROC_CELL_INDEXES_BINDING) buffer cell_indexes_buffe
 
 const int cParticlesCount = PREPROC_PARTICLES_COUNT;
 const ivec2 cGridResolution = PREPROC_GRID_RESOLUTION;
-const vec2 cCellSize = PREPROC_CELL_SIZE;
+const dvec2 cCellSize = PREPROC_CELL_SIZE;
 
 void main() {
 	const uint index = gl_GlobalInvocationID.x;
 	if(index >= cParticlesCount) return;
 
-	vec2 position = positions[index];
+	dvec2 position = positions[index];
 	ivec2 cell = ivec2(position / cCellSize);
 	int hash = cell.y * cGridResolution.x + cell.x;
 	if(hash < 0 || hash >= cGridResolution.x * cGridResolution.y) {
@@ -128,17 +128,17 @@ const char* RESET_FORCES_SHADER_SOURCE = R"(
 layout(local_size_x = PREPROC_LOCAL_SIZE_X, local_size_y = 1, local_size_z = 1) in;
 
 layout(std430, binding = PREPROC_FORCES_BINDING) buffer forces_buffer {
-   vec2 forces[];
+   dvec2 forces[];
 };
 
-const float cGravity = PREPROC_GRAVITY;
+const double cGravity = PREPROC_GRAVITY;
 const int cParticlesCount = PREPROC_PARTICLES_COUNT;
-const float cTimeStep = PREPROC_TIME_STEP;
+const double cTimeStep = PREPROC_TIME_STEP;
 
 void main() {
 	const uint index = gl_GlobalInvocationID.x;
 	if(index >= cParticlesCount) return;
-	forces[index] = vec2(0, -PREPROC_GRAVITY) * cTimeStep;
+	forces[index] = dvec2(0, -PREPROC_GRAVITY) * cTimeStep;
 }
 )";
 
@@ -148,15 +148,15 @@ const char* CHECK_COLLISIONS_SHADER_SOURCE = R"(
 layout(local_size_x = PREPROC_LOCAL_SIZE_X, local_size_y = 1, local_size_z = 1) in;
 
 layout(std430, binding = PREPROC_POSITIONS_BINDING) buffer positions_buffer {
-   vec2 positions[];
+   dvec2 positions[];
 };
 
 layout(std430, binding = PREPROC_FORCES_BINDING) buffer forces_buffer {
-   vec2 forces[];
+   dvec2 forces[];
 };
 
 layout(std430, binding = PREPROC_SIZES_BINDING) buffer sizes_buffer {
-   float sizes[];
+   double sizes[];
 };
 
 layout(std430, binding = PREPROC_CELL_HASHES_BINDING) buffer cell_hashes_buffer {
@@ -172,17 +172,17 @@ layout(std430, binding = PREPROC_CELL_STARTS_BINDING) buffer hashes_starts_buffe
 };
 
 const int cParticlesCount = PREPROC_PARTICLES_COUNT;
-const float cTimeStep = PREPROC_TIME_STEP;
+const double cTimeStep = PREPROC_TIME_STEP;
 const ivec2 cGridResolution = PREPROC_GRID_RESOLUTION;
-const vec2 cCellSize = PREPROC_CELL_SIZE;
+const dvec2 cCellSize = PREPROC_CELL_SIZE;
 
 void main() {
 	const uint index = gl_GlobalInvocationID.x;
 	if(index >= cParticlesCount) return;
 
-	vec2 position = positions[index];
-	float size = sizes[index];
-	vec2 acceleration = forces[index];
+	dvec2 position = positions[index];
+	double size = sizes[index];
+	dvec2 acceleration = forces[index];
 
 	ivec2 center_cell = ivec2(position / cCellSize);
 	int neighbour_hashes[9];
@@ -215,14 +215,14 @@ void main() {
             if (node_index == index) {
                 continue;
             }
-            vec2 offset = positions[node_index] - position;
-            float distance = length(offset);
-			float minDistance = size + sizes[node_index]; 
+            dvec2 offset = positions[node_index] - position;
+            double distance = length(offset);
+			double minDistance = size + sizes[node_index]; 
             if (distance >= minDistance) {
                 continue;
             }
-            vec2 normal = normalize(offset);
-            float depth = minDistance - distance;
+            dvec2 normal = normalize(offset);
+            double depth = minDistance - distance;
             acceleration -= normal * depth * 100.0f;
         }
 	}
@@ -237,15 +237,15 @@ const char* UPDATE_SPRINGS_SHADER_SOURCE = R"(
 layout(local_size_x = PREPROC_LOCAL_SIZE_X, local_size_y = 1, local_size_z = 1) in;
 
 layout(std430, binding = PREPROC_POSITIONS_BINDING) buffer positions_buffer {
-   vec2 positions[];
+   dvec2 positions[];
 };
 
 layout(std430, binding = PREPROC_FORCES_BINDING) buffer forces_buffer {
-   vec2 forces[];
+   dvec2 forces[];
 };
 
 layout(std430, binding = PREPROC_MASSES_BINDING) buffer masses_buffer {
-   float masses[];
+   double masses[];
 };
 
 layout(std430, binding = PREPROC_SPRINGS_STARTS_BINDING) buffer springs_starts_buffer {
@@ -257,15 +257,15 @@ layout(std430, binding = PREPROC_SPRINGS_ENDS_BINDING) buffer springs_ends_buffe
 };
 
 layout(std430, binding = PREPROC_SPRINGS_LENGTHS_BINDING) buffer springs_lengths_buffer {
-   float springs_lengths[];
+   double springs_lengths[];
 };
 
 layout(std430, binding = PREPROC_SPRINGS_STRENGTHS_BINDING) buffer springs_strengths_buffer {
-   float springs_strengths[];
+   double springs_strengths[];
 };
 
 const int cParticlesCount = PREPROC_PARTICLES_COUNT;
-const float cTimeStep = PREPROC_TIME_STEP;
+const double cTimeStep = PREPROC_TIME_STEP;
 
 uniform uint uStartIndex;
 uniform uint uEndIndex;
@@ -277,11 +277,11 @@ void main() {
 	int start_index = springs_starts[index];
 	int end_index = springs_ends[index];
 
-	vec2 offset = positions[start_index] - positions[end_index];
-	float distance = length(offset);
-	vec2 normal = normalize(offset);
-	float stretch = distance - springs_lengths[index];
-	vec2 force = normal * stretch * springs_strengths[index] * cTimeStep;
+	dvec2 offset = positions[start_index] - positions[end_index];
+	double distance = length(offset);
+	dvec2 normal = normalize(offset);
+	double stretch = distance - springs_lengths[index];
+	dvec2 force = normal * stretch * springs_strengths[index] * cTimeStep;
 	forces[start_index] -= force / masses[start_index];
 	forces[end_index] += force / masses[end_index];
 }
@@ -293,31 +293,31 @@ const char* UPDATE_POSITIONS_SHADER_SOURCE = R"(
 layout(local_size_x = PREPROC_LOCAL_SIZE_X, local_size_y = 1, local_size_z = 1) in;
 
 layout(std430, binding = PREPROC_POSITIONS_BINDING) buffer positions_buffer {
-   vec2 positions[];
+   dvec2 positions[];
 };
 
 layout(std430, binding = PREPROC_LAST_POSITIONS_BINDING) buffer last_positions_buffer {
-   vec2 last_positions[];
+   dvec2 last_positions[];
 };
 
 layout(std430, binding = PREPROC_FORCES_BINDING) buffer forces_buffer {
-   vec2 forces[];
+   dvec2 forces[];
 };
 
 const int cParticlesCount = PREPROC_PARTICLES_COUNT;
-const float cVelocityDamping = PREPROC_STEP_DAMPING;
-const float cTimeStep = PREPROC_TIME_STEP;
-const vec2 cBoundsSize = PREPROC_BOUNDS_SIZE;
+const double cVelocityDamping = PREPROC_STEP_DAMPING;
+const double cTimeStep = PREPROC_TIME_STEP;
+const dvec2 cBoundsSize = PREPROC_BOUNDS_SIZE;
 
 void main() {
 	const uint index = gl_GlobalInvocationID.x;
 	if(index >= cParticlesCount) return;
 
-	vec2 acceleration = forces[index];
-	vec2 current_position = positions[index];
-	vec2 velocity = current_position - last_positions[index];
-	vec2 new_position = current_position + (velocity * cVelocityDamping + acceleration * cTimeStep);
-	vec2 last_position = current_position;
+	dvec2 acceleration = forces[index];
+	dvec2 current_position = positions[index];
+	dvec2 velocity = current_position - last_positions[index];
+	dvec2 new_position = current_position + (velocity * cVelocityDamping + acceleration * cTimeStep);
+	dvec2 last_position = current_position;
 	if(new_position.x < 0.0f) {
 		new_position.x = -new_position.x;
 		last_position.x = -current_position.x;
@@ -425,7 +425,7 @@ void ParticleSimulation2D::UploadData() {
 	if (m_positions.size() == 0) return;
 
 	// Update grid resolution
-	m_cellSize = glm::vec2(m_largestParticle, m_largestParticle) * 2.0f;
+	m_cellSize = glm::dvec2(m_largestParticle, m_largestParticle) * 2.0;
 	m_gridResolution = glm::ivec2(glm::ceil(m_bounds / m_cellSize));
 	m_cellStarts.resize(m_gridResolution.x * m_gridResolution.y);
 
@@ -482,9 +482,9 @@ void ParticleSimulation2D::Step() {
 	UpdatePositions();
 }
 
-void ParticleSimulation2D::SetBoundsSize(glm::vec2 bounds) {
+void ParticleSimulation2D::SetBoundsSize(glm::dvec2 bounds) {
 	m_bounds = bounds;
-	m_cellSize = glm::vec2(m_largestParticle, m_largestParticle) * 2.0f;
+	m_cellSize = glm::dvec2(m_largestParticle, m_largestParticle) * 2.0;
 	m_gridResolution = glm::ivec2(glm::ceil(m_bounds / m_cellSize));
 
 	m_cellStarts.resize(m_gridResolution.x * m_gridResolution.y);
@@ -496,10 +496,10 @@ void ParticleSimulation2D::SetBoundsSize(glm::vec2 bounds) {
 	CompileShaders();
 }
 
-void ParticleSimulation2D::CreateParticle(glm::vec2 position, float size, float mass) {
+void ParticleSimulation2D::CreateParticle(glm::dvec2 position, double size, double mass) {
 	m_positions.push_back(position);
 	m_lastPositions.push_back(position);
-	m_forces.push_back(glm::vec2(0, 0));
+	m_forces.push_back(glm::dvec2(0, 0));
 	m_sizes.push_back(size * 0.5f);
 	m_masses.push_back(mass);
 	m_cellHashes.push_back(-1);
@@ -509,43 +509,43 @@ void ParticleSimulation2D::CreateParticle(glm::vec2 position, float size, float 
 	}
 }
 
-void ParticleSimulation2D::CreateSpring(uint32_t p0, uint32_t p1, float strength) {
+void ParticleSimulation2D::CreateSpring(uint32_t p0, uint32_t p1, double strength) {
 	m_springsStarts.push_back(p0);
 	m_springsEnds.push_back(p1);
 	m_springsLengths.push_back(glm::length(m_positions[p0] - m_positions[p1]));
 	m_springsStrengths.push_back(strength);
 }
 
-std::vector<glm::vec2> ParticleSimulation2D::FetchPositions() const {
-	std::vector<glm::vec2> buffer(m_numParticlesOnGPU);
+std::vector<glm::dvec2> ParticleSimulation2D::FetchPositions() const {
+	std::vector<glm::dvec2> buffer(m_numParticlesOnGPU);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_positionsBuffer);
 	glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, buffer.size() * sizeof(buffer[0]), (GLvoid*)buffer.data());
 	return buffer;
 }
 
-std::vector<glm::vec2> ParticleSimulation2D::FetchLastPositions() const {
-	std::vector<glm::vec2> buffer(m_numParticlesOnGPU);
+std::vector<glm::dvec2> ParticleSimulation2D::FetchLastPositions() const {
+	std::vector<glm::dvec2> buffer(m_numParticlesOnGPU);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_lastPositionsBuffer);
 	glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, buffer.size() * sizeof(buffer[0]), (GLvoid*)buffer.data());
 	return buffer;
 }
 
-std::vector<glm::vec2> ParticleSimulation2D::FetchForces() const {
-	std::vector<glm::vec2> buffer(m_numParticlesOnGPU);
+std::vector<glm::dvec2> ParticleSimulation2D::FetchForces() const {
+	std::vector<glm::dvec2> buffer(m_numParticlesOnGPU);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_forcesBuffer);
 	glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, buffer.size() * sizeof(buffer[0]), (GLvoid*)buffer.data());
 	return buffer;
 }
 
-std::vector<float> ParticleSimulation2D::FetchMasses() const {
-	std::vector<float> buffer(m_numParticlesOnGPU);
+std::vector<double> ParticleSimulation2D::FetchMasses() const {
+	std::vector<double> buffer(m_numParticlesOnGPU);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_forcesBuffer);
 	glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, buffer.size() * sizeof(buffer[0]), (GLvoid*)buffer.data());
 	return buffer;
 }
 
-std::vector<float> ParticleSimulation2D::FetchSizes() const {
-	std::vector<float> buffer(m_numParticlesOnGPU);
+std::vector<double> ParticleSimulation2D::FetchSizes() const {
+	std::vector<double> buffer(m_numParticlesOnGPU);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_sizesBuffer);
 	glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, buffer.size() * sizeof(buffer[0]), (GLvoid*)buffer.data());
 	return buffer;
@@ -586,15 +586,15 @@ std::vector<int32_t> ParticleSimulation2D::FetchSpringsEnds() const {
 	return buffer;
 }
 
-std::vector<float> ParticleSimulation2D::FetchSpringsLengths() const {
-	std::vector<float> buffer(m_numSpringsOnGPU);
+std::vector<double> ParticleSimulation2D::FetchSpringsLengths() const {
+	std::vector<double> buffer(m_numSpringsOnGPU);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_springsLengthsBuffer);
 	glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, buffer.size() * sizeof(buffer[0]), (GLvoid*)buffer.data());
 	return buffer;
 }
 
-std::vector<float> ParticleSimulation2D::FetchSpringsStrengths() const {
-	std::vector<float> buffer(m_numSpringsOnGPU);
+std::vector<double> ParticleSimulation2D::FetchSpringsStrengths() const {
+	std::vector<double> buffer(m_numSpringsOnGPU);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_springsStrengthsBuffer);
 	glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, buffer.size() * sizeof(buffer[0]), (GLvoid*)buffer.data());
 	return buffer;
@@ -696,8 +696,8 @@ GLuint ParticleSimulation2D::CompileComputeShader(const char* computeShaderSourc
 	str = StringUtils::ReplaceAll(str, "PREPROC_SPRINGS_LENGTHS_BINDING", std::to_string(BufferBinding::SpringsLengths));
 	str = StringUtils::ReplaceAll(str, "PREPROC_SPRINGS_STRENGTHS_BINDING", std::to_string(BufferBinding::SpringsStrengths));
 	str = StringUtils::ReplaceAll(str, "PREPROC_LOCAL_SIZE_X", std::to_string(m_localWorkGroupSize));
-	str = StringUtils::ReplaceAll(str, "PREPROC_BOUNDS_SIZE", std::format("vec2({}, {})", m_bounds.x, m_bounds.y));
-	str = StringUtils::ReplaceAll(str, "PREPROC_CELL_SIZE", std::format("vec2({}, {})", m_cellSize.x, m_cellSize.y));
+	str = StringUtils::ReplaceAll(str, "PREPROC_BOUNDS_SIZE", std::format("dvec2({}, {})", m_bounds.x, m_bounds.y));
+	str = StringUtils::ReplaceAll(str, "PREPROC_CELL_SIZE", std::format("dvec2({}, {})", m_cellSize.x, m_cellSize.y));
 	str = StringUtils::ReplaceAll(str, "PREPROC_GRID_RESOLUTION", std::format("ivec2({}, {})", m_gridResolution.x, m_gridResolution.y));
 	str = StringUtils::ReplaceAll(str, "PREPROC_PARTICLES_COUNT", std::to_string(m_numParticlesOnGPU));
 	str = StringUtils::ReplaceAll(str, "PREPROC_TIME_STEP", std::to_string(m_stepDeltaTime));
@@ -766,8 +766,8 @@ void ParticleSimulation2D::ColorSprings() {
 
 	std::vector<int32_t> sortedSpringsStarts;
 	std::vector<int32_t> sortedSpringsEnds;
-	std::vector<float> sortedSpringsLengths;
-	std::vector<float> sortedSpringsStrengths;
+	std::vector<double> sortedSpringsLengths;
+	std::vector<double> sortedSpringsStrengths;
 
 	for (uint32_t colorIndex = 0; colorIndex < coloredSprings.size(); colorIndex++) {
 		for (uint32_t springIndex = 0; springIndex < coloredSprings[colorIndex].size(); springIndex++) {

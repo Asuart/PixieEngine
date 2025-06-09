@@ -4,7 +4,7 @@
 
 inline void APIENTRY openglCallbackFunction(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
 	// filter warnings
-	if (id == 131185 || id == 131218) return;
+	if (id == 131185 || id == 131218 || id == 131186) return;
 
 	std::cout << "---------------------opengl-callback-start------------\n";
 	std::cout << "message: " << message << "\n";
