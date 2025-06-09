@@ -79,7 +79,7 @@ public:
 
 private:
     glm::mat4 m_globalInverseTransform;
-    std::array<glm::mat4, cMaxBonesPerModel> m_finalBoneMatrices = { glm::mat4(1.0f) };
+    std::array<glm::mat4, cMaxBonesPerModel> m_finalBoneMatrices;
     Animation* m_currentAnimation = nullptr;
     float m_currentTime = 0.0f;
     float m_deltaTime = 0.0f;

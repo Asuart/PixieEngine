@@ -15,7 +15,7 @@ Shader ShaderManager::LoadShader(const std::string& vertexName, const std::strin
 	return CompileShader(vertShaderSrc, fragShaderSrc);
 }
 
-Shader ShaderManager::CompileShader(const char* vertShaderSrc, const char* fragShaderSrc) {
+Shader ShaderManager::CompileShader(const char* vertShaderSrc, const char* fragShaderSrc, const char* geometryShaderSrc) {
 	GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
 	GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
 
@@ -44,9 +44,27 @@ Shader ShaderManager::CompileShader(const char* vertShaderSrc, const char* fragS
 		Log::Error(&shaderError[0]);
 	}
 
+	GLuint geometryShader = 0;
+	if (geometryShaderSrc) {
+		geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
+		glShaderSource(geometryShader, 1, &geometryShaderSrc, NULL);
+		glCompileShader(geometryShader);
+
+		glGetShaderiv(geometryShader, GL_COMPILE_STATUS, &result);
+		glGetShaderiv(geometryShader, GL_INFO_LOG_LENGTH, &logLength);
+		if (logLength) {
+			std::vector<char> shaderError((logLength > 1) ? logLength : 1);
+			glGetShaderInfoLog(geometryShader, logLength, NULL, &shaderError[0]);
+			Log::Error(&shaderError[0]);
+		}
+	}
+
 	GLuint program = glCreateProgram();
 	glAttachShader(program, vertShader);
 	glAttachShader(program, fragShader);
+	if (geometryShaderSrc) {
+		glAttachShader(program, geometryShader);
+	}
 	glLinkProgram(program);
 
 	glGetProgramiv(program, GL_LINK_STATUS, &result);

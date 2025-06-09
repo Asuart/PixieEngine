@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "SceneGenerator.h"
 #include "Resources/TextureGenerator.h"
+#include "Resources/TextureLoader.h"
 
 void SceneGenerator::CreateScene(GeneratedScene type) {
 	switch (type) {
@@ -9,6 +10,7 @@ void SceneGenerator::CreateScene(GeneratedScene type) {
 	case GeneratedScene::SmallAndBigSpheres: CreateSmallAndBigSpheresScene(); break;
 	case GeneratedScene::TestMaterials: CreateTestMaterialsScene(); break;
 	case GeneratedScene::RandomizedSpheres: CreateRandomizedSpheresScene(); break;
+	case GeneratedScene::SpheresArray: CreateSpheresArrayScene(); break;
 	default: CreateEmptyScene(); break;
 	}
 }
@@ -88,6 +90,24 @@ void SceneGenerator::CreateRandomizedSpheresScene() {
 	CreateSphere(scene, glm::vec3(4.0f, 1.0f, 0.0f), 1.0f, CreateMetalMaterial(glm::vec3(0.7f, 0.6f, 0.5f), 0.0f));
 
 	CreateCamera(scene, glm::vec3(13.0f, 2.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), { 1280, 720 }, glm::radians(20.0f));
+}
+
+void SceneGenerator::CreateSpheresArrayScene() {
+	std::shared_ptr<Scene> scene = SceneManager::CreateScene("Spheres Array Scene");
+
+	for (int32_t y = -2; y <= 2; y++) {
+		for (int32_t x = -2; x <= 2; x++) {
+			std::shared_ptr<Material> defaultMaterial = CreateDiffuseMaterial({ 0.8f, 0.8f, 0.8f });
+			defaultMaterial->m_roughness = (x + 2) * 0.25f;
+			defaultMaterial->m_metallic = (y + 2) * 0.25f;
+			CreateSphere(scene, glm::vec3(x * 3.0f, y * 3.0f, 0.0f), 1.0f, defaultMaterial);
+		}
+	}
+
+	CreateDirectionalLight(scene, glm::vec3(1.0f), 2.0f, LookAt(glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+
+	scene->SetSkybox(TextureLoader::LoadSkybox("kloppenheim_01_puresky_4k.hdr"));
+
 }
 
 SceneObject* SceneGenerator::CreateSphere(std::shared_ptr<Scene> scene, glm::vec3 position, float radius, std::shared_ptr<Material> material, bool active) {

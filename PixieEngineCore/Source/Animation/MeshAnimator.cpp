@@ -112,7 +112,9 @@ std::map<std::string, BoneInfo>& Animation::GetBoneIDMap() {
 }
 
 Animator::Animator(Animation* animation, glm::mat4 globalInverseTransform) :
-    m_globalInverseTransform(globalInverseTransform), m_currentAnimation(animation) {}
+    m_globalInverseTransform(globalInverseTransform), m_currentAnimation(animation) {
+    std::fill(m_finalBoneMatrices.begin(), m_finalBoneMatrices.end(), glm::mat4(1.0f));
+}
 
 void Animator::UpdateAnimation(float dt) {
     m_deltaTime = dt;
@@ -129,6 +131,7 @@ void Animator::PlayAnimation(Animation* animation) {
 }
 
 void Animator::CalculateBoneTransform(SceneObject* node, glm::mat4 parentTransform) {
+    return;
     std::string nodeName = node->GetName();
     glm::mat4 nodeTransform = node->GetTransform().GetMatrix();
 

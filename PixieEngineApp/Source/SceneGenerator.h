@@ -14,6 +14,7 @@ enum class GeneratedScene : int32_t {
 	SmallAndBigSpheres,
 	TestMaterials,
 	RandomizedSpheres,
+	SpheresArray,
 };
 
 class SceneGenerator {
@@ -26,6 +27,7 @@ public:
 	static void CreateSmallAndBigSpheresScene();
 	static void CreateTestMaterialsScene();
 	static void CreateRandomizedSpheresScene();
+	static void CreateSpheresArrayScene();
 
 	static SceneObject* CreateSphere(std::shared_ptr<Scene> scene, glm::vec3 position, float radius, std::shared_ptr<Material> material, bool active = true);
 	static SceneObject* CreatePointLight(std::shared_ptr<Scene> scene, glm::vec3 position, glm::vec3 color, float strength);

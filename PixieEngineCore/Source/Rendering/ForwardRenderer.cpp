@@ -138,7 +138,10 @@ void ForwardRenderer::DrawObject(SceneObject* object, glm::mat4 parentTransform)
 			mesh->Draw();
 		}
 		else {
-			DebugLog::Warning("Trying to render mesh without set material");
+			std::shared_ptr<Material> material = std::make_shared<Material>();
+			m_defaultShader.SetMaterial(material);
+			mesh->Draw();
+			//DebugLog::Warning("Trying to render mesh without set material");
 		}
 	}
 	if (const SphereComponent* sphere = object->GetComponent<SphereComponent>()) {

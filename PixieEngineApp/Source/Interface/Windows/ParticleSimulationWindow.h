@@ -14,8 +14,16 @@ protected:
 	FrameBuffer m_frameBuffer;
 	FrameBuffer m_fittedFrameBuffer;
 	ParticleSimulation2D m_simulation;
-	GLuint m_program;
+	Shader m_particlesProgram;
+	Shader m_cellProgram;
 	GLuint m_vao;
 	glm::mat4 m_view;
 	glm::mat4 m_projection;
+
+	void InitSimulationRandomPosition(int32_t numParticles);
+	void InitSimulationRandomPositionAndSize(int32_t numParticles, float minSize, float maxSize);
+	void InitSimulationBox();
+	void InitSimulationTwoBoxes();
+
+	void CreateBox(glm::vec2 position, glm::vec2 size, float particleSize);
 };

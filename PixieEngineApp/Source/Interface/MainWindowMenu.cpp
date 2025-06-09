@@ -31,6 +31,9 @@ void MainWindowMenu::Draw() {
 			if (ImGui::MenuItem("Randomized Spheres")) {
 				SceneGenerator::CreateScene(GeneratedScene::RandomizedSpheres);
 			}
+			if (ImGui::MenuItem("Spheres Array")) {
+				SceneGenerator::CreateScene(GeneratedScene::SpheresArray);
+			}
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("Create Object")) {

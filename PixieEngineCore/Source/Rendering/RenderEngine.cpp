@@ -92,6 +92,7 @@ bool RenderEngine::Initialize() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_MULTISAMPLE);
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 	m_quadShader = ShaderManager::LoadShader("TextureViewerQuad");
 	m_textShader = ShaderManager::LoadShader("Text");
