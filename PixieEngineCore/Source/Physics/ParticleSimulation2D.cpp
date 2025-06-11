@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "ParticleSimulation2D.h"
 
-const char* UPDATE_HASHES_SHADER_SOURCE = R"(
+static const char* UPDATE_HASHES_SHADER_SOURCE = R"(
 #version 430 core
 
 layout(local_size_x = PREPROC_LOCAL_SIZE_X, local_size_y = 1, local_size_z = 1) in;
@@ -37,7 +37,7 @@ void main() {
 }
 )";
 
-const char* SORT_HASHES_SHADER_SOURCE = R"(
+static const char* SORT_HASHES_SHADER_SOURCE = R"(
 #version 430 core
 
 layout(local_size_x = PREPROC_LOCAL_SIZE_X, local_size_y = 1, local_size_z = 1) in;
@@ -78,7 +78,7 @@ void main() {
 }
 )";
 
-const char* RESET_HASHES_STARTS_SHADER_SOURCE = R"(
+static const char* RESET_HASHES_STARTS_SHADER_SOURCE = R"(
 #version 430 core
 
 layout(local_size_x = PREPROC_LOCAL_SIZE_X, local_size_y = 1, local_size_z = 1) in;
@@ -96,7 +96,7 @@ void main() {
 }
 )";
 
-const char* UPDATE_HASHES_STARTS_SHADER_SOURCE = R"(
+static const char* UPDATE_HASHES_STARTS_SHADER_SOURCE = R"(
 #version 430 core
 
 layout(local_size_x = PREPROC_LOCAL_SIZE_X, local_size_y = 1, local_size_z = 1) in;
@@ -122,7 +122,7 @@ void main() {
 }
 )";
 
-const char* RESET_FORCES_SHADER_SOURCE = R"(
+static const char* RESET_FORCES_SHADER_SOURCE = R"(
 #version 430 core
 
 layout(local_size_x = PREPROC_LOCAL_SIZE_X, local_size_y = 1, local_size_z = 1) in;
@@ -142,7 +142,7 @@ void main() {
 }
 )";
 
-const char* CHECK_COLLISIONS_SHADER_SOURCE = R"(
+static const char* CHECK_COLLISIONS_SHADER_SOURCE = R"(
 #version 430 core
 
 layout(local_size_x = PREPROC_LOCAL_SIZE_X, local_size_y = 1, local_size_z = 1) in;
@@ -231,7 +231,7 @@ void main() {
 }
 )";
 
-const char* UPDATE_SPRINGS_SHADER_SOURCE = R"(
+static const char* UPDATE_SPRINGS_SHADER_SOURCE = R"(
 #version 430 core
 
 layout(local_size_x = PREPROC_LOCAL_SIZE_X, local_size_y = 1, local_size_z = 1) in;
@@ -287,7 +287,7 @@ void main() {
 }
 )";
 
-const char* UPDATE_POSITIONS_SHADER_SOURCE = R"(
+static const char* UPDATE_POSITIONS_SHADER_SOURCE = R"(
 #version 430 core
 
 layout(local_size_x = PREPROC_LOCAL_SIZE_X, local_size_y = 1, local_size_z = 1) in;

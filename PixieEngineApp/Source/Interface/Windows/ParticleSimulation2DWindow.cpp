@@ -1,9 +1,9 @@
 #include "pch.h"
-#include "ParticleSimulationWindow.h"
+#include "ParticleSimulation2DWindow.h"
 #include "PixieEngineApp.h"
 #include "SceneManager.h"
 
-const char* PARTICLE_VERTEX_SHADER_SOURCE = R"(
+static const char* PARTICLE_VERTEX_SHADER_SOURCE = R"(
 #version 330 core
 
 layout(location = 0) in vec2 pos;
@@ -24,7 +24,7 @@ void main() {
 }
 )";
 
-const char* PARTICLE_GEOMETRY_SHADER_SOURCE = R"(
+static const char* PARTICLE_GEOMETRY_SHADER_SOURCE = R"(
 #version 330 core
 
 layout (points) in;
@@ -58,7 +58,7 @@ void main() {
 }  
 )";
 
-const char* PARTICLE_FRAGMENT_SHADER_SOURCE = R"(
+static const char* PARTICLE_FRAGMENT_SHADER_SOURCE = R"(
 #version 330 core
 
 in vec2 texCoords; 
@@ -78,7 +78,7 @@ void main() {
 }
 )";
 
-const char* CELL_VERTEX_SHADER_SOURCE = R"(
+static const char* CELL_VERTEX_SHADER_SOURCE = R"(
 #version 330 core
 
 layout(location = 0) in vec3 pos;
@@ -91,7 +91,7 @@ void main() {
 }
 )";
 
-const char* CELL_FRAGMENT_SHADER_SOURCE = R"(
+static const char* CELL_FRAGMENT_SHADER_SOURCE = R"(
 #version 330 core
 
 out vec4 FragColor;
@@ -101,55 +101,7 @@ void main() {
 }
 )";
 
-GLuint CompileShader(const char* vertShaderSrc, const char* fragShaderSrc) {
-	GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
-	GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
-
-	GLint result = GL_FALSE;
-	int32_t logLength;
-
-	glShaderSource(vertShader, 1, &vertShaderSrc, NULL);
-	glCompileShader(vertShader);
-
-	glGetShaderiv(vertShader, GL_COMPILE_STATUS, &result);
-	glGetShaderiv(vertShader, GL_INFO_LOG_LENGTH, &logLength);
-	std::vector<char> vertShaderError((logLength > 1) ? logLength : 1);
-	glGetShaderInfoLog(vertShader, logLength, NULL, &vertShaderError[0]);
-	if (logLength) {
-		std::cout << &vertShaderError[0] << std::endl;
-	}
-
-	glShaderSource(fragShader, 1, &fragShaderSrc, NULL);
-	glCompileShader(fragShader);
-
-	glGetShaderiv(fragShader, GL_COMPILE_STATUS, &result);
-	glGetShaderiv(fragShader, GL_INFO_LOG_LENGTH, &logLength);
-	std::vector<char> fragShaderError((logLength > 1) ? logLength : 1);
-	glGetShaderInfoLog(fragShader, logLength, NULL, &fragShaderError[0]);
-	if (logLength) {
-		std::cout << &fragShaderError[0] << std::endl;
-	}
-
-	GLuint program = glCreateProgram();
-	glAttachShader(program, vertShader);
-	glAttachShader(program, fragShader);
-	glLinkProgram(program);
-
-	glGetProgramiv(program, GL_LINK_STATUS, &result);
-	glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
-	std::vector<char> programError((logLength > 1) ? logLength : 1);
-	glGetProgramInfoLog(program, logLength, NULL, &programError[0]);
-	if (logLength) {
-		std::cout << &programError[0] << std::endl;
-	}
-
-	glDeleteShader(vertShader);
-	glDeleteShader(fragShader);
-
-	return program;
-}
-
-ParticleSimulationWindow::ParticleSimulationWindow(PixieEngineApp& app, Interface& inter) :
+ParticleSimulation2DWindow::ParticleSimulation2DWindow(PixieEngineApp& app, Interface& inter) :
 	InterfaceWindow(app, inter), m_frameBuffer({ 1200, 1200 }), m_fittedFrameBuffer({1280, 720}) {
 
 	InitSimulationTwoBoxes();
@@ -166,7 +118,7 @@ ParticleSimulationWindow::ParticleSimulationWindow(PixieEngineApp& app, Interfac
 	glBindVertexArray(m_vao);
 }
 
-void ParticleSimulationWindow::Draw() {
+void ParticleSimulation2DWindow::Draw() {
 	ImGui::SetNextWindowSize(ImVec2(400, 400));
 	if (ImGui::Begin("Particle Simulation", 0)) {
 
@@ -219,32 +171,32 @@ void ParticleSimulationWindow::Draw() {
 	ImGui::End();
 }
 
-void ParticleSimulationWindow::InitSimulationRandomPosition(int32_t numParticles) {
+void ParticleSimulation2DWindow::InitSimulationRandomPosition(int32_t numParticles) {
 	for (int32_t i = 0; i < numParticles; i++) {
 		m_simulation.CreateParticle({ RandomFloat(50, 150), RandomFloat(50, 150) }, 1.0f, 1.0f);
 	}
 	m_simulation.Init();
 }
 
-void ParticleSimulationWindow::InitSimulationRandomPositionAndSize(int32_t numParticles, float minSize, float maxSize) {
+void ParticleSimulation2DWindow::InitSimulationRandomPositionAndSize(int32_t numParticles, float minSize, float maxSize) {
 	for (int32_t i = 0; i < numParticles; i++) {
 		m_simulation.CreateParticle({ RandomFloat(50, 150), RandomFloat(50, 150) }, RandomFloat(minSize, maxSize), 1.0f);
 	}
 	m_simulation.Init();
 }
 
-void ParticleSimulationWindow::InitSimulationBox() {
+void ParticleSimulation2DWindow::InitSimulationBox() {
 	CreateBox({ 100.0f, 100.0f }, { 50.0f, 50.0f }, 5.0f);
 	m_simulation.Init();
 }
 
-void ParticleSimulationWindow::InitSimulationTwoBoxes() {
+void ParticleSimulation2DWindow::InitSimulationTwoBoxes() {
 	CreateBox({ 100.0f, 50.0f }, { 50.0f, 50.0f }, 2.0f);
 	CreateBox({ 125.0f, 150.0f }, { 50.0f, 50.0f }, 2.0f);
 	m_simulation.Init();
 }
 
-void ParticleSimulationWindow::CreateBox(glm::vec2 position, glm::vec2 size, float particleSize) {
+void ParticleSimulation2DWindow::CreateBox(glm::vec2 position, glm::vec2 size, float particleSize) {
 	glm::ivec2 resolution = size / particleSize;
 	glm::vec2 step = size / glm::vec2(resolution);
 	glm::vec2 pointCenterOffset = glm::vec2(particleSize, particleSize) * 0.5f;

@@ -4,9 +4,9 @@
 #include "ComponentRenderer.h"
 #include "Physics/ParticleSimulation2D.h"
 
-class ParticleSimulationWindow : public InterfaceWindow {
+class ParticleSimulation2DWindow : public InterfaceWindow {
 public:
-	ParticleSimulationWindow(PixieEngineApp& app, Interface& inter);
+	ParticleSimulation2DWindow(PixieEngineApp& app, Interface& inter);
 
 	void Draw() override;
 
