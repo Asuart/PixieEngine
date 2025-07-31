@@ -12,17 +12,12 @@ bool SceneManager::m_playing;
 bool SceneManager::m_paused;
 
 bool SceneManager::Initialize() {
-	m_currentScenePath = "../Assets/Scenes/default-min.obj";
+	m_currentScenePath = "";
 	m_virtualScene = nullptr;
 	m_selectedObject = nullptr;
 
 	m_currentScene = std::make_shared<Scene>("New Scene");
 	m_activeScene = m_currentScene;
-
-	m_activeScene->m_skybox = TextureLoader::LoadSkybox("kloppenheim_01_puresky_4k.hdr");
-
-
-	LoadModel(m_currentScenePath);
 
 	return true;
 }

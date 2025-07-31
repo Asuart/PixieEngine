@@ -2,18 +2,20 @@
 #include "ModelLoader.h"
 #include "TextureLoader.h"
 #include "Log.h"
+#include "Globals.h"
 
 void ModelLoader::LoadModel(std::shared_ptr<Scene> currentScene, const std::filesystem::path& filePath) {
-	Log::Message("Loading model from file: %s", filePath.string().c_str());
+	std::filesystem::path fullPath = Globals::GetAssetsPath().string() + filePath.string();
+	Log::Message("Loading model from file: %s", fullPath.string().c_str());
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(filePath.string(), aiProcess_Triangulate | aiProcess_FlipUVs);
+	const aiScene* scene = importer.ReadFile(fullPath.string(), aiProcess_Triangulate | aiProcess_FlipUVs);
 	if (!scene || (scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) || !scene->mRootNode) {
 		Log::Error("ASSIMP: %s", importer.GetErrorString());
 		return;
 	}
 
 	std::map<std::string, BoneInfo> boneInfoMap;
-	SceneObject* rootObject = ProcessAssimpNode(currentScene, filePath, scene, scene->mRootNode, boneInfoMap);
+	SceneObject* rootObject = ProcessAssimpNode(currentScene, fullPath, scene, scene->mRootNode, boneInfoMap);
 
 	std::vector<Animation*> animations;
 	for (uint32_t i = 0; i < scene->mNumAnimations; i++) {

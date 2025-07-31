@@ -1,6 +1,7 @@
 #pragma once
 #include "Interface/Interface.h"
 #include "PixieEngineMainWindow.h"
+#include "Resources/TextureLoader.h"
 
 class PixieEngineEditor {
 public:

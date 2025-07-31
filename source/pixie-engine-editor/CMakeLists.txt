@@ -23,7 +23,10 @@ if (MSVC)
 endif()
 
 set(SHADER_SOURCE_DIR "${CMAKE_SOURCE_DIR}/resources/")
-set(SHADER_DESTINATION_DIR "${CMAKE_CURRENT_BINARY_DIR}/resources/")
+set(SHADER_DESTINATION_DIR "$<TARGET_FILE_DIR:PixieEngineEditor>/resources/")
+
+message("source: ${SHADER_SOURCE_DIR}")
+message("destination: ${SHADER_DESTINATION_DIR}")
 
 add_custom_command(
     TARGET PixieEngineEditor
@@ -31,5 +34,5 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different 
     "${SHADER_SOURCE_DIR}" 
     "${SHADER_DESTINATION_DIR}"
-    COMMENT "Copying REsources"
+    COMMENT "Copying Resources"
 )

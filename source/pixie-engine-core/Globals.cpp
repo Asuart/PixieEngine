@@ -3,7 +3,7 @@
 
 std::filesystem::path Globals::m_applicationPath = "";
 std::filesystem::path Globals::m_currentFilePath = "";
-std::filesystem::path Globals::m_assetsPath = "../Assets/Scenes";
+std::filesystem::path Globals::m_assetsPath = "/resources/scenes/";
 
 void Globals::SetApplicationPath(const std::filesystem::path& path) {
 	m_applicationPath = path;
@@ -18,7 +18,7 @@ std::filesystem::path Globals::GetApplicationDirectory() {
 }
 
 std::filesystem::path Globals::GetAssetsPath() {
-	return m_assetsPath;
+	return GetApplicationDirectory().string() + m_assetsPath.string();
 }
 
 void Globals::SetAssetsPath(const std::filesystem::path& path) {

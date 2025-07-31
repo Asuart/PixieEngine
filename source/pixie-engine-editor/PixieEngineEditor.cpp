@@ -6,14 +6,17 @@ PixieEngineEditor::PixieEngineEditor(PixieEngineMainWindow* window) :
 	m_mainWindow(window), m_interface(*this) {}
 
 PixieEngineEditor::~PixieEngineEditor() {
+	SceneManager::Free();
 }
 
 void PixieEngineEditor::Initialize() {
 	m_interface.Initialize();
+	SceneManager::Initialize();
+	SceneManager::GetScene()->SetSkybox(TextureLoader::LoadSkybox("kloppenheim_01_puresky_4k.hdr"));
+	SceneManager::LoadModel("cornell-box/cornell-box.obj");
 }
 
 void PixieEngineEditor::Start() {
-	SceneManager::Initialize();
 	SceneManager::Start();
 	while (!m_mainWindow->ShouldClose()) {
 		HighPrecisionTimer::StartTimer("Total Frame Time");
@@ -27,7 +30,6 @@ void PixieEngineEditor::Start() {
 
 		HighPrecisionTimer::StopTimer("Total Frame Time");
 	}
-	SceneManager::Free();
 }
 
 void PixieEngineEditor::Close() {
