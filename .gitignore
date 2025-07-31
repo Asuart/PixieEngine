@@ -1,6 +1,5 @@
 # Directories
 .vs/
-Binaries/
 build/
 scenes/*
 assets/*
@@ -15,6 +14,3 @@ x64/
 Makefile
 settings.ini
 imgui.ini
-
-# Exclude
-!dependencies/binaries
