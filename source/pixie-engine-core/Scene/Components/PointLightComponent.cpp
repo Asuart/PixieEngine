@@ -1,8 +1,11 @@
 #include "pch.h"
 #include "PointLightComponent.h"
 
+namespace PixieEngine {
+
 PointLightComponent::PointLightComponent(SceneObject* parent, glm::vec3 color, float strength) :
-	Component(ComponentType::PointLight, parent), m_color(color), m_strength(strength) {}
+	Component(ComponentType::PointLight, parent), m_color(color), m_strength(strength) {
+}
 
 glm::vec3 PointLightComponent::GetEmission() const {
 	return m_color * m_strength;
@@ -22,4 +25,6 @@ float PointLightComponent::GetStrength() const {
 
 void PointLightComponent::SetStrength(float strength) {
 	m_strength = strength;
+}
+
 }

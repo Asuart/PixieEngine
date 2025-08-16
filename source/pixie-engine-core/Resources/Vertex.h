@@ -1,6 +1,8 @@
 #pragma once
 #include "pch.h"
 
+namespace PixieEngine {
+
 static const uint32_t cMaxBonesPerVertex = 4;
 
 struct Vertex {
@@ -14,3 +16,5 @@ struct Vertex {
 
 	bool AddWeight(int32_t boneID, float weigt, bool overrideSmallest = true);
 };
+
+}

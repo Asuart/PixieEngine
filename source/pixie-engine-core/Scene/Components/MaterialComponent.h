@@ -1,8 +1,8 @@
 #pragma once
-#include "REsources/Material.h"
+#include "Resources/Material.h"
 #include "Component.h"
 
-class SceneObject;
+namespace PixieEngine {
 
 class MaterialComponent : public Component {
 public:
@@ -14,3 +14,5 @@ public:
 protected:
 	std::shared_ptr<Material> m_material = nullptr;
 };
+
+}

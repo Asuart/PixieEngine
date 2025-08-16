@@ -1,8 +1,11 @@
 #include "pch.h"
 #include "DiffuseAreaLightComponent.h"
 
+namespace PixieEngine {
+
 DiffuseAreaLightComponent::DiffuseAreaLightComponent(SceneObject* parent, MeshHandle meshHandle, Mesh mesh, glm::vec3 color, float strength) :
-	Component(ComponentType::DiffuseAreaLight, parent), m_meshHandle(meshHandle), m_mesh(mesh), m_color(color), m_strength(strength) {}
+	Component(ComponentType::DiffuseAreaLight, parent), m_meshHandle(meshHandle), m_mesh(mesh), m_color(color), m_strength(strength) {
+}
 
 void DiffuseAreaLightComponent::OnStart() {}
 
@@ -40,4 +43,6 @@ const Mesh& DiffuseAreaLightComponent::GetMesh() const {
 
 void DiffuseAreaLightComponent::SetMesh(const Mesh& mesh) {
 	m_mesh = mesh;
+}
+
 }

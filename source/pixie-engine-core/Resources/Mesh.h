@@ -3,6 +3,8 @@
 #include "Vertex.h"
 #include "Math/Bounds.h"
 
+namespace PixieEngine {
+
 struct Mesh {
 	std::vector<Vertex> m_vertices;
 	std::vector<int32_t> m_indices;
@@ -13,3 +15,5 @@ struct Mesh {
 	glm::vec3 GetCenter() const;
 	Bounds3f GetBounds() const;
 };
+
+}

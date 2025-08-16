@@ -1,10 +1,12 @@
 #pragma once
 #include "pch.h"
 #include "Scene/Scene.h"
-#include "EngineTime.h"
+#include "Time/EngineTime.h"
 #include "RenderEngine.h"
 #include "FrameBuffer.h"
 #include "Renderer.h"
+
+namespace PixieEngine {
 
 class ForwardRenderer : public Renderer {
 public:
@@ -36,3 +38,5 @@ protected:
 	void SetupCamera(const Camera& camera) const;
 	void SetupLights(std::shared_ptr<Scene> scene) const;
 };
+
+}

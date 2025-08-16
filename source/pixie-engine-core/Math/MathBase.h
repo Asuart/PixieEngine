@@ -1,6 +1,8 @@
 #pragma once
 #include "pch.h"
 
+namespace PixieEngine {
+
 static constexpr float Pi = 3.14159265358979323846f;
 static constexpr float TwoPi = Pi * 2.0f;
 static constexpr float InvPi = 0.31830988618379067154f;
@@ -144,4 +146,6 @@ inline float IntegrateEdge(glm::vec3 v1, glm::vec3 v2, glm::vec3 N) {
 	float v = a / b;
 	float theta_sintheta = (x > 0.0f) ? v : 0.5f * (1.0f / sqrt(glm::max(1.0f - x * x, 1e-7f))) - v;
 	return glm::dot(glm::cross(v1, v2) * theta_sintheta, N);
+}
+
 }

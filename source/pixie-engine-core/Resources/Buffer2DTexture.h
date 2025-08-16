@@ -2,6 +2,8 @@
 #include "Texture.h"
 #include "Utils/Buffer2D.h"
 
+namespace PixieEngine {
+
 template<class T>
 class Buffer2DTexture {
 public:
@@ -28,7 +30,8 @@ protected:
 
 template<class T>
 inline Buffer2DTexture<T>::Buffer2DTexture(glm::ivec2 resolution) :
-	m_buffer(resolution), m_texture(resolution) {}
+	m_buffer(resolution), m_texture(resolution) {
+}
 
 template<class T>
 inline Buffer2DTexture<T>::Buffer2DTexture(const Buffer2D<T>& buffer) :
@@ -120,4 +123,6 @@ inline void Buffer2DTexture<glm::vec3>::Upload() {
 template<>
 inline void Buffer2DTexture<glm::vec4>::Upload() {
 	m_texture.Upload(m_buffer.m_resolution, GL_RGBA32F, GL_RGBA, GL_FLOAT, m_buffer.Data());
+}
+
 }

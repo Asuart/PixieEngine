@@ -15,3 +15,5 @@ add_library(stb INTERFACE
 set_target_properties(stb PROPERTIES LINKER_LANGUAGE CXX)
 
 target_include_directories(stb INTERFACE ${stb_SOURCE_DIR})
+
+set_target_properties(stb PROPERTIES FOLDER stb)

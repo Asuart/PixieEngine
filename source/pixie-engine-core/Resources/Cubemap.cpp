@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Cubemap.h"
 
+namespace PixieEngine {
+
 std::map<GLuint, std::atomic<uint32_t>> Cubemap::s_counters;
 
 Cubemap::Cubemap(glm::ivec2 resolution, TextureWrap wrapS, TextureWrap wrapT, TextureWrap wrapR, TextureFiltering minFilter, TextureFiltering magFilter) {
@@ -87,4 +89,6 @@ void Cubemap::SetMagFilter(TextureFiltering magFilter) const {
 	glBindTexture(GL_TEXTURE_2D, m_id);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glCastTextureFiltering(magFilter));
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 }

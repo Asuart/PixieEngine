@@ -2,6 +2,8 @@
 #include "pch.h"
 #include "Scene/SceneObject.h"
 
+namespace PixieEngine {
+
 const int32_t cMaxBonesPerModel = 256;
 
 struct KeyPosition {
@@ -86,3 +88,5 @@ private:
 
     void CalculateBoneTransform(SceneObject* node, glm::mat4 parentTransform);
 };
+
+}

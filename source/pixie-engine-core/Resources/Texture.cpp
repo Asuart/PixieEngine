@@ -1,9 +1,9 @@
 #include "pch.h"
 #include "Texture.h"
 
-constexpr glm::vec4 defaultTextureData(1.0f, 1.0f, 1.0f, 1.0f);
+namespace PixieEngine {
 
-std::map<GLuint, std::atomic<uint32_t>> Texture::s_counters;
+constexpr glm::vec4 defaultTextureData(1.0f, 1.0f, 1.0f, 1.0f);
 
 Texture::Texture() {
 	glGenTextures(1, &m_id);
@@ -143,4 +143,6 @@ void Texture::SetMagFilter(TextureFiltering magFilter) const {
 	glBindTexture(GL_TEXTURE_2D, m_id);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glCastTextureFiltering(magFilter));
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 }

@@ -2,6 +2,8 @@
 #include "pch.h"
 #include "Math/MathBase.h"
 
+namespace PixieEngine {
+
 inline bool IntersectAtmosphere(glm::vec3 origin, glm::vec3 direction, float atmosphereRadius, float* t0 = nullptr, float* t1 = nullptr) {
     if (origin == glm::vec3(0) || direction == glm::vec3(0) || atmosphereRadius) {
         return false;
@@ -20,7 +22,8 @@ inline bool IntersectAtmosphere(glm::vec3 origin, glm::vec3 direction, float atm
 class Atmosphere {
 public:
     Atmosphere(glm::vec3 sd = glm::vec3(0, 1, 0), float er = 6360e3, float ar = 6420e3, float hr = 7994, float hm = 1200) :
-        sunDirection(sd), earthRadius(er), atmosphereRadius(ar), Hr(hr), Hm(hm) {}
+        sunDirection(sd), earthRadius(er), atmosphereRadius(ar), Hr(hr), Hm(hm) {
+    }
 
     glm::vec3 ComputeIncidentLight(const glm::vec3& orig, const glm::vec3& dir, float tmin, float tmax) const {
         float t0, t1;
@@ -83,11 +86,11 @@ public:
         return (sumR * betaR * phaseR + sumM * betaM * phaseM) * 20.0f;
     }
 
-    glm::vec3 sunDirection;   
-    float earthRadius;       
-    float atmosphereRadius;  
-    float Hr;                
-    float Hm;                
+    glm::vec3 sunDirection;
+    float earthRadius;
+    float atmosphereRadius;
+    float Hr;
+    float Hm;
 
     static const glm::vec3 betaR;
     static const glm::vec3 betaM;
@@ -95,3 +98,5 @@ public:
 
 const glm::vec3 Atmosphere::betaR(3.8e-6f, 13.5e-6f, 33.1e-6f);
 const glm::vec3 Atmosphere::betaM(21e-6f);
+
+}

@@ -2,9 +2,9 @@
 #include "ForwardRenderer.h"
 #include "LTC_Matrix.h"
 #include "Resources/MarchingCubes.h"
-#include "Log.h"
+#include "Debug/Log.h"
 
-MarchingCubesTerrain* m_terrain;
+namespace PixieEngine {
 
 ForwardRenderer::ForwardRenderer() :
 	m_frameBuffer({ 1280, 720 }),
@@ -14,8 +14,6 @@ ForwardRenderer::ForwardRenderer() :
 	m_LTC2Texture({ 64, 64 }, GL_RGBA, GL_RGBA, GL_FLOAT, (void*)LTC2, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge, TextureFiltering::Linear, TextureFiltering::Linear) {
 	m_defaultShader = ShaderManager::LoadShader("PhysicallyBased");
 	m_fxaaShader = ShaderManager::LoadShader("FXAA");
-
-	m_terrain = new MarchingCubesTerrain();
 }
 
 void ForwardRenderer::DrawFrame(std::shared_ptr<Scene> scene, const Camera& camera) const {
@@ -40,14 +38,9 @@ void ForwardRenderer::DrawFrame(std::shared_ptr<Scene> scene, const Camera& came
 	m_defaultShader.Bind();
 	SetupCamera(camera);
 	SetupLights(scene);
+
 	DrawObject(scene->GetRootObject());
-	for (int32_t x = 0; x < MarchingCubesTerrain::cSize; x++) {
-		for (int32_t y = 0; y < MarchingCubesTerrain::cSize; y++) {
-			for (int32_t z = 0; z < MarchingCubesTerrain::cSize; z++) {
-				RenderEngine::DrawMesh(m_terrain->GetChunk({ x, y, z }).mesh);
-			}
-		}
-	}
+
 	RenderEngine::DrawSkybox(camera, scene->GetSkybox().m_cubemapTexture.GetHandle());
 
 	if (m_useMultisampleFramebuffer) {
@@ -99,13 +92,13 @@ void ForwardRenderer::SetAntiAliasing(AntiAliasing mode) {
 	m_useFXAA = false;
 	switch (m_antiAliasing) {
 	case AntiAliasing::SSAAx2:
-		m_ssaaScale = 2; 
+		m_ssaaScale = 2;
 		break;
 	case AntiAliasing::SSAAx4:
-		m_ssaaScale = 4; 
+		m_ssaaScale = 4;
 		break;
 	case AntiAliasing::SSAAx8:
-		m_ssaaScale = 8; 
+		m_ssaaScale = 8;
 		break;
 	case AntiAliasing::MSAAx2:
 		m_useMultisampleFramebuffer = true;
@@ -123,8 +116,8 @@ void ForwardRenderer::SetAntiAliasing(AntiAliasing mode) {
 		m_useMultisampleFramebuffer = true;
 		m_msFrameBuffer.SetSampleCount(16);
 		break;
-	case AntiAliasing::FXAA: 
-		m_useFXAA = true; 
+	case AntiAliasing::FXAA:
+		m_useFXAA = true;
 		break;
 	default: break;
 	}
@@ -218,4 +211,6 @@ void ForwardRenderer::SetupLights(std::shared_ptr<Scene> scene) const {
 	m_defaultShader.SetTexture("brdfLUTMap", RenderEngine::GetBRDFLUTHandle(), 7);
 	m_defaultShader.SetCubeMap("irradianceMap", scene->GetSkybox().m_lightmapTexture.GetHandle(), 8);
 	m_defaultShader.SetCubeMap("prefilterMap", scene->GetSkybox().m_prefilteredTexture.GetHandle(), 9);
+}
+
 }

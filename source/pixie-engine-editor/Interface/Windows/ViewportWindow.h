@@ -32,7 +32,6 @@ protected:
 	Camera m_viewportCamera;
 	ViewportCameraController m_cameraController;
 	RenderMode m_renderMode = RenderMode::Forward;
-	MarchingCubesTerrain* m_terrain = nullptr;
 
 	void ResetRenderer();
 

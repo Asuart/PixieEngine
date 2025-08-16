@@ -1,11 +1,13 @@
 #include "pch.h"
 #include "ModelLoader.h"
 #include "TextureLoader.h"
-#include "Log.h"
-#include "Globals.h"
+#include "Debug/Log.h"
+#include "EngineConfig.h"
+
+namespace PixieEngine {
 
 void ModelLoader::LoadModel(std::shared_ptr<Scene> currentScene, const std::filesystem::path& filePath) {
-	std::filesystem::path fullPath = Globals::GetAssetsPath().string() + filePath.string();
+	std::filesystem::path fullPath = EngineConfig::GetAssetsPath().string() + filePath.string();
 	Log::Message("Loading model from file: %s", fullPath.string().c_str());
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(fullPath.string(), aiProcess_Triangulate | aiProcess_FlipUVs);
@@ -236,22 +238,22 @@ std::shared_ptr<Material> ModelLoader::ProcessAssimpMaterial(const std::filesyst
 	std::vector<Texture> diffuseMaps = ProcessAssimpMaterialTextures(filePath, aiMaterial, aiTextureType_DIFFUSE, "texture_diffuse");
 	std::vector<Texture> specularMaps = ProcessAssimpMaterialTextures(filePath, aiMaterial, aiTextureType_SPECULAR, "texture_specular");
 
-	if (isnan(glmEmissionColor.r) || isnan(glmEmissionColor.y) || isnan(glmEmissionColor.z)) {
+	if (glm::isnan(glmEmissionColor.r) || glm::isnan(glmEmissionColor.y) || glm::isnan(glmEmissionColor.z)) {
 		glmEmissionColor = glm::vec3(0);
 	}
-	if (isnan(emissionInt)) {
+	if (glm::isnan(emissionInt)) {
 		emissionInt = 0.0f;
 	}
-	if (isnan(roughness)) {
+	if (glm::isnan(roughness)) {
 		roughness = 1.0f;
 	}
-	if (isnan(metallic)) {
+	if (glm::isnan(metallic)) {
 		metallic = 0.0f;
 	}
-	if (isnan(opacity)) {
+	if (glm::isnan(opacity)) {
 		opacity = 0.0f;
 	}
-	if (isnan(eta)) {
+	if (glm::isnan(eta)) {
 		eta = 1.0f;
 	}
 
@@ -295,4 +297,6 @@ glm::vec3 ModelLoader::GetGLMVec(const aiVector3D& vec) {
 
 glm::quat ModelLoader::GetGLMQuat(const aiQuaternion& pOrientation) {
 	return glm::quat(pOrientation.w, pOrientation.x, pOrientation.y, pOrientation.z);
+}
+
 }

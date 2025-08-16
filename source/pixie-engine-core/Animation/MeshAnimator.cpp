@@ -1,8 +1,11 @@
 #include "pch.h"
 #include "MeshAnimator.h"
 
+namespace PixieEngine {
+
 Bone::Bone(const std::string& name, int32_t ID)
-    : name(name), id(ID), localTransform(1.0f) { }
+    : name(name), id(ID), localTransform(1.0f) {
+}
 
 void Bone::Update(float animationTime) {
     glm::mat4 translation = InterpolatePosition(animationTime);
@@ -83,7 +86,8 @@ glm::mat4 Bone::InterpolateScaling(float animationTime) {
 }
 
 Animation::Animation(float duration, int32_t ticksPerSecond, const std::vector<Bone>& bones, const std::map<std::string, BoneInfo>& boneInfoMap, SceneObject* rootObject)
-    : duration(duration), ticksPerSecond(ticksPerSecond), bones(bones), boneInfoMap(boneInfoMap), rootNode(rootObject) {}
+    : duration(duration), ticksPerSecond(ticksPerSecond), bones(bones), boneInfoMap(boneInfoMap), rootNode(rootObject) {
+}
 
 
 Animation::~Animation() {}
@@ -159,4 +163,6 @@ void Animator::CalculateBoneTransform(SceneObject* node, glm::mat4 parentTransfo
 
 const std::array<glm::mat4, cMaxBonesPerModel>* Animator::GetFinalBoneMatrices() const {
     return &m_finalBoneMatrices;
+}
+
 }

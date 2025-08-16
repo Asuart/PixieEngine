@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Vertex.h"
 
+namespace PixieEngine {
+
 Vertex::Vertex(const glm::vec3& p, const glm::vec3& n, const glm::vec2& uv) :
 	position(p), normal(n), uv(uv) {
 	std::fill(boneIDs.begin(), boneIDs.end(), -1);
@@ -36,4 +38,6 @@ bool Vertex::AddWeight(int32_t boneID, float weight, bool overrideSmallest) {
 		return true;
 	}
 	return false;
+}
+
 }

@@ -5,6 +5,8 @@
 #include "Skybox.h"
 #include "Scene/Components/Components.h"
 
+namespace PixieEngine {
+
 class Scene {
 public:
 	Scene() = default;
@@ -81,3 +83,5 @@ public:
 
 	friend class SceneManager;
 };
+
+}

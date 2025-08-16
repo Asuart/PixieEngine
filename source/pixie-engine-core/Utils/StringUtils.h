@@ -1,6 +1,8 @@
 #pragma once
 #include "pch.h"
 
+namespace PixieEngine {
+
 class StringUtils {
 public:
     static std::string TrimLeft(const std::string& str);
@@ -11,3 +13,5 @@ public:
 
     static float ToFloat(const std::string& str);
 };
+
+}

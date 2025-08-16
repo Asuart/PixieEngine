@@ -1,10 +1,10 @@
 #pragma once
 #include "pch.h"
 
+namespace PixieEngine {
+
 class UserInput {
 public:
-	static SDL_Window* window;
-
 	static bool buttonPressed;
 	static int32_t key;
 	static int32_t scancode;
@@ -29,5 +29,10 @@ public:
 	static int32_t GetKey(int32_t keyCode);
 	static int32_t GetMouseButton(int32_t mouseButton);
 
+protected:
+	static SDL_Window* window;
+
 	static void SetInputWindow(SDL_Window* window);
 };
+
+}

@@ -2,6 +2,8 @@
 #include "pch.h"
 #include "Math/Random.h"
 
+namespace PixieEngine {
+
 template<uint32_t size>
 struct SSAOKernel {
 	std::array<glm::vec3, size> vectors;
@@ -27,3 +29,5 @@ protected:
 		return a + f * (b - a);
 	}
 };
+
+}

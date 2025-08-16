@@ -1,12 +1,14 @@
 #pragma once
 #include "pch.h"
 #include "Scene/Scene.h"
-#include "EngineTime.h"
+#include "Time/EngineTime.h"
 #include "FrameBuffer.h"
 #include "LTC_Matrix.h"
 #include "SSAOKernel.h"
 #include "Renderer.h"
 #include "RenderEngine.h"
+
+namespace PixieEngine {
 
 class DefferedRenderer : public Renderer {
 public:
@@ -38,3 +40,5 @@ protected:
 	void SetupMaterial(std::shared_ptr<Material> material) const;
 	void SetupLights(std::shared_ptr<Scene> scene) const;
 };
+
+}

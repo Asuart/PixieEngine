@@ -4,11 +4,10 @@ file(GLOB_RECURSE editor_source_list "*.c" "*.cpp" "*.h" "*.hpp" )
 add_executable(PixieEngineEditor ${editor_source_list})
 
 target_link_libraries(PixieEngineEditor PUBLIC PixieEngineCore)
-target_link_libraries(PixieEngineEditor PUBLIC imgui)
+target_link_libraries(PixieEngineEditor PUBLIC PixieEngineUI)
 
 target_include_directories(PixieEngineEditor PUBLIC "${CMAKE_SOURCE_DIR}/source/pixie-engine-editor/")
 target_include_directories(PixieEngineEditor PUBLIC "${imgui_SOURCE_DIR}/")
-target_include_directories(PixieEngineEditor PUBLIC "${imgui_SOURCE_DIR}/backends/")
 
 foreach(_source IN ITEMS ${editor_source_list})
     get_filename_component(_source_path "${_source}" PATH)
@@ -24,9 +23,6 @@ endif()
 
 set(SHADER_SOURCE_DIR "${CMAKE_SOURCE_DIR}/resources/")
 set(SHADER_DESTINATION_DIR "$<TARGET_FILE_DIR:PixieEngineEditor>/resources/")
-
-message("source: ${SHADER_SOURCE_DIR}")
-message("destination: ${SHADER_DESTINATION_DIR}")
 
 add_custom_command(
     TARGET PixieEngineEditor

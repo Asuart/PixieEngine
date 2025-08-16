@@ -2,6 +2,8 @@
 #include "Resources/MeshHandle.h"
 #include "Component.h"
 
+namespace PixieEngine {
+
 class MeshComponent : public Component {
 public:
 	MeshComponent(SceneObject* parent, MeshHandle mesh);
@@ -14,3 +16,5 @@ public:
 protected:
 	MeshHandle m_mesh;
 };
+
+}

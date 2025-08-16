@@ -27,9 +27,11 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <glad/glad.h>
+#include <vulkan/vulkan.h>
 
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
+#include <SDL_vulkan.h>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>

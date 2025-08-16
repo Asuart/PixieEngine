@@ -3,6 +3,8 @@
 #include "Resources/Texture.h"
 #include "Resources/MultisampleTexture.h"
 
+namespace PixieEngine {
+
 struct FrameBuffer {
 	FrameBuffer(glm::ivec2 resolution);
 	~FrameBuffer();
@@ -124,3 +126,5 @@ struct PostProcessingFrameBuffer {
 	GLuint m_texture;
 	glm::ivec2 m_resolution;
 };
+
+}

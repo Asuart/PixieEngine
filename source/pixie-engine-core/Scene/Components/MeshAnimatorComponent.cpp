@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "MeshAnimatorComponent.h"
 
+namespace PixieEngine {
+
 MeshAnimatorComponent::MeshAnimatorComponent(SceneObject* parent, const std::vector<Animation*>& animations, glm::mat4 globalInverseTransform) :
 	Component(ComponentType::MeshAnimator, parent), m_animations(animations), m_animator(nullptr) {
 	if (animations.size() > 0) {
@@ -27,4 +29,6 @@ const std::array<glm::mat4, cMaxBonesPerModel>* MeshAnimatorComponent::GetBoneMa
 
 void MeshAnimatorComponent::UpdateAnimation(float dt) {
 	m_animator->UpdateAnimation(dt);
+}
+
 }

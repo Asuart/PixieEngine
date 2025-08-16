@@ -1,7 +1,9 @@
 #include "pch.h"
 #include "DefferedRenderer.h"
 #include "Resources/TextureGenerator.h"
-#include "Log.h"
+#include "Debug/Log.h"
+
+namespace PixieEngine {
 
 DefferedRenderer::DefferedRenderer() :
 	m_gBuffer({ 1280, 720 }), m_frameBuffer({ 1280, 720 }),
@@ -173,3 +175,5 @@ AntiAliasing DefferedRenderer::GetAntiAliasing() const {
 }
 
 void DefferedRenderer::SetAntiAliasing(AntiAliasing) {}
+
+}

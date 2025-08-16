@@ -2,6 +2,8 @@
 #include "MeshGenerator.h"
 #include "Math/MathBase.h"
 
+namespace PixieEngine {
+
 Mesh MeshGenerator::BezierMesh(const BezierCurve2D& curve, float width, uint32_t subdivisions) {
 	float hw = width * 0.5f;
 	float stepsCount = (float)subdivisions + 1;
@@ -178,4 +180,6 @@ Mesh MeshGenerator::SphereFromOctahedron(float radius, uint32_t subdivisions) {
 	}
 
 	return Mesh(vertices, indices);
+}
+
 }

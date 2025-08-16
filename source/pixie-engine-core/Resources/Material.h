@@ -2,6 +2,8 @@
 #include "pch.h"
 #include "Texture.h"
 
+namespace PixieEngine {
+
 struct Material {
 	std::string m_name;
 	glm::vec3 m_albedo;
@@ -19,3 +21,5 @@ struct Material {
 
 	Material(const std::string& name = "Unnamed Material", glm::vec3 albedo = glm::vec3(0.8f), glm::vec3 emissionColor = glm::vec3(1.0f), float emissionStrength = 0.0f, float roughness = 1.0f, float metallic = 0.0f, float transparency = 0.0f, float refraction = 1.0f);
 };
+
+}

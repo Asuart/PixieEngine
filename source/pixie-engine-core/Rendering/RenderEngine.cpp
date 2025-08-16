@@ -1,56 +1,10 @@
 #include "pch.h"
 #include "RenderEngine.h"
 #include "Resources/MeshGenerator.h"
-#include "Log.h"
+#include "Debug/Log.h"
+#include "Debug/OpenGLCallbacks.h"
 
-inline void APIENTRY openglCallbackFunction(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
-	// filter warnings
-	if (id == 131185 || id == 131218 || id == 131186) return;
-
-	std::cout << "---------------------opengl-callback-start------------\n";
-	std::cout << "message: " << message << "\n";
-	std::cout << "type: ";
-	switch (type) {
-	case GL_DEBUG_TYPE_ERROR:
-		std::cout << "ERROR";
-		break;
-	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-		std::cout << "DEPRECATED_BEHAVIOR";
-		break;
-	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-		std::cout << "UNDEFINED_BEHAVIOR";
-		break;
-	case GL_DEBUG_TYPE_PORTABILITY:
-		std::cout << "PORTABILITY";
-		break;
-	case GL_DEBUG_TYPE_PERFORMANCE:
-		std::cout << "PERFORMANCE";
-		break;
-	case GL_DEBUG_TYPE_OTHER:
-		std::cout << "OTHER";
-		break;
-	default:
-		std::cout << "UNDEFINED";
-	}
-	std::cout << "\n";
-
-	std::cout << "id: " << id << "\n";
-	std::cout << "severity: ";
-	switch (severity) {
-	case GL_DEBUG_SEVERITY_LOW:
-		std::cout << "LOW";
-		break;
-	case GL_DEBUG_SEVERITY_MEDIUM:
-		std::cout << "MEDIUM";
-		break;
-	case GL_DEBUG_SEVERITY_HIGH:
-		std::cout << "HIGH";
-		break;
-	default:
-		std::cout << "UNDEFINED";
-	}
-	std::cout << "\n---------------------opengl-callback-end--------------\n";
-}
+namespace PixieEngine {
 
 Shader RenderEngine::m_quadShader;
 Shader RenderEngine::m_textShader;
@@ -69,6 +23,10 @@ MeshHandle* RenderEngine::m_sphereMesh;
 std::map<char, FontCharacter> RenderEngine::m_characters;
 uint32_t RenderEngine::m_defaultFontSize;
 
+RenderAPI RenderEngine::GetRenderAPI() {
+	return m_renderAPI;
+}
+
 void RenderEngine::DrawMesh(const MeshHandle& mesh) {
 	if (mesh.m_vao == 0 || mesh.m_indicesCount == 0) return;
 	glBindVertexArray(mesh.m_vao);
@@ -82,47 +40,58 @@ void RenderEngine::DrawMeshWireframe(const MeshHandle& mesh) {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
-bool RenderEngine::Initialize() {
-	if (!gladLoadGL()) {
-		Log::Error("GLAD initialization failed");
-		exit(2);
+bool RenderEngine::Initialize(RenderAPI api) {
+	m_renderAPI = api;
+
+	if (api == RenderAPI::Vulkan) {
+
 	}
+	else if (api == RenderAPI::OpenGL) {
+		if (!gladLoadGL()) {
+			Log::Error("GLAD initialization failed");
+			exit(2);
+		}
 
-	glEnable(GL_DEBUG_OUTPUT);
-	glDebugMessageCallback(openglCallbackFunction, 0);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_MULTISAMPLE);
-	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+		glEnable(GL_DEBUG_OUTPUT);
+		glDebugMessageCallback(openglCallbackFunction, 0);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_MULTISAMPLE);
+		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
-	m_quadShader = ShaderManager::LoadShader("TextureViewerQuad");
-	m_textShader = ShaderManager::LoadShader("Text");
-	m_uiBoxShader = ShaderManager::LoadShader("UIBox");
-	m_skyboxShader = ShaderManager::LoadShader("Skybox");
-	m_cubemapConvolutionShader = ShaderManager::LoadShader("CubemapConvolution");
-	m_equirectangularToCubemapShader = ShaderManager::LoadShader("EquirectangularToCubemap");
-	m_prefilterShader = ShaderManager::LoadShader("Prefilter");
-	m_brdfLUTShader = ShaderManager::LoadShader("BRDFLookUpTexture");
+		m_quadShader = ShaderManager::LoadShader("TextureViewerQuad");
+		m_textShader = ShaderManager::LoadShader("Text");
+		m_uiBoxShader = ShaderManager::LoadShader("UIBox");
+		m_skyboxShader = ShaderManager::LoadShader("Skybox");
+		m_cubemapConvolutionShader = ShaderManager::LoadShader("CubemapConvolution");
+		m_equirectangularToCubemapShader = ShaderManager::LoadShader("EquirectangularToCubemap");
+		m_prefilterShader = ShaderManager::LoadShader("Prefilter");
+		m_brdfLUTShader = ShaderManager::LoadShader("BRDFLookUpTexture");
 
-	m_quadMesh = new MeshHandle(MeshGenerator::Quad({ 0.0f, 0.0f }, { 1.0f, 1.0f }));
-	m_cubeMesh = new MeshHandle(MeshGenerator::Cube());
-	m_sphereMesh = new MeshHandle(MeshGenerator::SphereFromOctahedron(1.0f, 6));
+		m_quadMesh = new MeshHandle(MeshGenerator::Quad({ 0.0f, 0.0f }, { 1.0f, 1.0f }));
+		m_cubeMesh = new MeshHandle(MeshGenerator::Cube());
+		m_sphereMesh = new MeshHandle(MeshGenerator::SphereFromOctahedron(1.0f, 6));
 
-	glGenVertexArrays(1, &m_textVAO);
-	glGenBuffers(1, &m_textVBO);
-	glBindVertexArray(m_textVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, m_textVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+		glGenVertexArrays(1, &m_textVAO);
+		glGenBuffers(1, &m_textVBO);
+		glBindVertexArray(m_textVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, m_textVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
 
-	m_brdfLUT = new Texture({ 512, 512 }, GL_RG16F, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge, TextureFiltering::Linear, TextureFiltering::Linear);
-	DrawBRDFLookUpTexture({ 512, 512 }, m_brdfLUT->GetHandle());
+		m_brdfLUT = new Texture({ 512, 512 }, GL_RG16F, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge, TextureFiltering::Linear, TextureFiltering::Linear);
+		DrawBRDFLookUpTexture({ 512, 512 }, m_brdfLUT->GetHandle());
 
-	m_defaultFontSize = 64;
-	m_characters = FontLoader::LoadDefaultFont(m_defaultFontSize);
+		m_defaultFontSize = 64;
+		m_characters = FontLoader::LoadDefaultFont(m_defaultFontSize);
+	}
+	else {
+		Log::Error("Failed to initialize render engine. Unhandled render API.");
+		return false;
+	}
 
 	return true;
 }
@@ -366,4 +335,6 @@ void RenderEngine::DrawBRDFLookUpTexture(glm::ivec2 resolution, GLuint texture) 
 
 GLuint RenderEngine::GetBRDFLUTHandle() {
 	return m_brdfLUT->GetHandle();
+}
+
 }

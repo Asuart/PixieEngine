@@ -1,11 +1,15 @@
 #include "pch.h"
 #include "Bounds.h"
 
+namespace PixieEngine {
+
 Bounds2i::Bounds2i(glm::ivec2 p) :
-	min(p), max(p) {}
+	min(p), max(p) {
+}
 
 Bounds2i::Bounds2i(glm::ivec2 p1, glm::ivec2 p2) :
-	min(glm::min(p1, p2)), max(glm::max(p1, p2)) {}
+	min(glm::min(p1, p2)), max(glm::max(p1, p2)) {
+}
 
 glm::ivec2 Bounds2i::Diagonal() const {
 	return max - min;
@@ -55,10 +59,12 @@ bool Bounds2i::operator!=(const Bounds2i& b) const {
 }
 
 Bounds2f::Bounds2f(glm::vec2 p) :
-	min(p), max(p) {}
+	min(p), max(p) {
+}
 
 Bounds2f::Bounds2f(glm::vec2 p1, glm::vec2 p2) :
-	min(glm::min(p1, p2)), max(glm::max(p1, p2)) {}
+	min(glm::min(p1, p2)), max(glm::max(p1, p2)) {
+}
 
 glm::vec2 Bounds2f::Diagonal() const {
 	return max - min;
@@ -108,10 +114,12 @@ bool Bounds2f::operator!=(const Bounds2f& b) const {
 }
 
 Bounds3i::Bounds3i(glm::ivec3 p) :
-	min(p), max(p) {}
+	min(p), max(p) {
+}
 
 Bounds3i::Bounds3i(glm::ivec3 p1, glm::ivec3 p2) :
-	min(glm::min(p1, p2)), max(glm::max(p1, p2)) {}
+	min(glm::min(p1, p2)), max(glm::max(p1, p2)) {
+}
 
 glm::ivec3 Bounds3i::Corner(int32_t corner) const {
 	return glm::ivec3((*this)[(corner & 1)].x, (*this)[(corner & 2) ? 1 : 0].y, (*this)[(corner & 4) ? 1 : 0].z);
@@ -184,10 +192,12 @@ glm::ivec3& Bounds3i::operator[](int32_t i) {
 }
 
 Bounds3f::Bounds3f(glm::vec3 p) :
-	min(p), max(p) {}
+	min(p), max(p) {
+}
 
 Bounds3f::Bounds3f(glm::vec3 p1, glm::vec3 p2) :
-	min(glm::min(p1, p2)), max(glm::max(p1, p2)) {}
+	min(glm::min(p1, p2)), max(glm::max(p1, p2)) {
+}
 
 glm::vec3 Bounds3f::Corner(int32_t corner) const {
 	return glm::vec3((*this)[(corner & 1)].x, (*this)[(corner & 2) ? 1 : 0].y, (*this)[(corner & 4) ? 1 : 0].z);
@@ -296,4 +306,6 @@ Bounds3i Union(const Bounds3i& b1, const Bounds3i& b2) {
 
 bool Inside(glm::vec3 p, const Bounds3f& b) {
 	return (p.x >= b.min.x && p.x <= b.max.x && p.y >= b.min.y && p.y <= b.max.y && p.z >= b.min.z && p.z <= b.max.z);
+}
+
 }

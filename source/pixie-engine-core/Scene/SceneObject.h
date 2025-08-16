@@ -2,6 +2,8 @@
 #include "Math/Transform.h"
 #include "Components/Component.h"
 
+namespace PixieEngine {
+
 class Component;
 
 class SceneObject {
@@ -71,3 +73,5 @@ public:
 		}
 	}
 };
+
+}

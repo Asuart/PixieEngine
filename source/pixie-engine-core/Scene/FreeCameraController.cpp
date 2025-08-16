@@ -1,10 +1,14 @@
 #include "pch.h"
-#include "ViewportCameraController.h"
+#include "FreeCameraController.h"
+#include "Time/EngineTime.h"
 
-ViewportCameraController::ViewportCameraController(Camera& camera, float moveSpeed) :
-	m_camera(camera), m_moveSpeed(moveSpeed) {}
+namespace PixieEngine {
 
-bool ViewportCameraController::Update() {
+FreeCameraController::FreeCameraController(Camera& camera, float moveSpeed) :
+	m_camera(camera), m_moveSpeed(moveSpeed) {
+}
+
+bool FreeCameraController::HandleUserInput() {
 	const float scale = 10.0f * (UserInput::GetKey(SDLK_LSHIFT) ? 0.1f : 1.0f) * Time::deltaTime * m_moveSpeed;
 	const float rotationScale = (UserInput::GetKey(SDLK_LSHIFT) ? 0.1f : 1.0f) * Time::deltaTime;
 	bool moved = false;
@@ -46,4 +50,6 @@ bool ViewportCameraController::Update() {
 		}
 	}
 	return moved;
+}
+
 }

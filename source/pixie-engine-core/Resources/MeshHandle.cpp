@@ -2,6 +2,8 @@
 #include "MeshHandle.h"
 #include "Rendering/RenderEngine.h"
 
+namespace PixieEngine {
+
 std::map<GLuint, std::atomic<uint32_t>> MeshHandle::s_counters;
 
 MeshHandle::MeshHandle(const Mesh& mesh) {
@@ -84,4 +86,6 @@ void MeshHandle::Draw() {
 
 uint32_t MeshHandle::GetIndicesCount() const {
 	return m_indicesCount;
+}
+
 }

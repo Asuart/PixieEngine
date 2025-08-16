@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "PerlinNoise.h"
 
+namespace PixieEngine {
+
 PerlinNoise::PerlinNoise() {
 	ranvec = new glm::vec3[point_count];
 	for (int32_t i = 0; i < point_count; ++i) {
@@ -94,4 +96,6 @@ float PerlinNoise::TrilinearInterp(glm::vec3 c[2][2][2], float u, float v, float
 		}
 	}
 	return accum;
+}
+
 }

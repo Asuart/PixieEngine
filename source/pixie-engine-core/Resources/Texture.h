@@ -2,6 +2,8 @@
 #include "pch.h"
 #include "TextureUtils.h"
 
+namespace PixieEngine {
+
 class Texture {
 public:
 	Texture();
@@ -31,5 +33,7 @@ protected:
 	glm::uvec2 m_resolution = { 1, 1 };
 	GLint m_internalFormat = GL_RGBA;
 
-	static std::map<GLuint, std::atomic<uint32_t>> s_counters;
+	inline static std::map<GLuint, std::atomic<uint32_t>> s_counters;
 };
+
+}

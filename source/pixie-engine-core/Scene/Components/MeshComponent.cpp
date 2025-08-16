@@ -2,8 +2,11 @@
 #include "MeshComponent.h"
 #include "Rendering/RenderEngine.h"
 
+namespace PixieEngine {
+
 MeshComponent::MeshComponent(SceneObject* parent, MeshHandle mesh) :
-	Component(ComponentType::Mesh, parent), m_mesh(mesh) {}
+	Component(ComponentType::Mesh, parent), m_mesh(mesh) {
+}
 
 MeshHandle MeshComponent::GetMesh() const {
 	return m_mesh;
@@ -19,4 +22,6 @@ void MeshComponent::Draw() const {
 
 uint32_t MeshComponent::GetIndicesCount() const {
 	return m_mesh.GetIndicesCount();
+}
+
 }

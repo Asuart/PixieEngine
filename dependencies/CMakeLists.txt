@@ -41,3 +41,10 @@ FetchContent_Declare(
   GIT_TAG f58f558c120e9b32c217290b80bad1a0729fbb2c
 )
 add_subdirectory(stb)
+
+FetchContent_Declare(
+  glslang
+  GIT_REPOSITORY "https://github.com/KhronosGroup/glslang.git"
+  GIT_TAG 15.4.0
+)
+add_subdirectory(glslang)

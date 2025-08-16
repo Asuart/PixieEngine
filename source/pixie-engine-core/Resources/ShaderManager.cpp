@@ -1,14 +1,16 @@
 #include "pch.h"
 #include "ShaderManager.h"
-#include "Log.h"
-#include "Globals.h"
+#include "Debug/Log.h"
+#include "EngineConfig.h"
+
+namespace PixieEngine {
 
 Shader ShaderManager::LoadShader(const std::string& name) {
 	return LoadShader(name + std::string("VertexShader.glsl"), name + std::string("FragmentShader.glsl"));
 }
 
 Shader ShaderManager::LoadShader(const std::string& vertexName, const std::string& fragmentName) {
-	const std::string shadersPath = Globals::GetApplicationDirectory().string() + std::string("/Resources/Shaders/");
+	const std::string shadersPath = EngineConfig::GetApplicationDirectory().string() + std::string("/Resources/Shaders/");
 	std::string vertShaderStr = FileReader::ReadFileAsString(shadersPath + vertexName);
 	std::string fragShaderStr = FileReader::ReadFileAsString(shadersPath + fragmentName);
 	const char* vertShaderSrc = vertShaderStr.c_str();
@@ -84,7 +86,7 @@ Shader ShaderManager::CompileShader(const char* vertShaderSrc, const char* fragS
 }
 
 ComputeShader ShaderManager::LoadComputeShader(const std::string& computePath) {
-	const std::string shadersPath = Globals::GetApplicationDirectory().string() + std::string("/Resources/Shaders/");
+	const std::string shadersPath = EngineConfig::GetApplicationDirectory().string() + std::string("/Resources/Shaders/");
 	std::string computeShaderStr = FileReader::ReadFileAsString(shadersPath + computePath);
 	return CompileComputeShader(computeShaderStr.c_str());
 }
@@ -117,4 +119,6 @@ ComputeShader ShaderManager::CompileComputeShader(const char* computeShaderSrc) 
 	}
 
 	return ComputeShader(rayProgram);
+}
+
 }

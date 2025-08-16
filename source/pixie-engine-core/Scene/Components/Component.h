@@ -1,6 +1,8 @@
 #pragma once
 #include "Scene/SceneObject.h"
 
+namespace PixieEngine {
+
 class SceneObject;
 
 enum class ComponentType : uint32_t {
@@ -18,7 +20,7 @@ enum class ComponentType : uint32_t {
 class Component {
 public:
 	Component() = delete;
-	
+
 	SceneObject* GetParent();
 
 	virtual void OnStart();
@@ -33,3 +35,5 @@ protected:
 
 	friend class Scene;
 };
+
+}

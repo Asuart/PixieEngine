@@ -2,6 +2,8 @@
 #include "pch.h"
 #include "TextureUtils.h"
 
+namespace PixieEngine {
+
 class Cubemap {
 public:
 	Cubemap(glm::ivec2 resolution, TextureWrap wrapS = TextureWrap::ClampToEdge, TextureWrap wrapT = TextureWrap::ClampToEdge, TextureWrap wrapR = TextureWrap::ClampToEdge, TextureFiltering minFilter = TextureFiltering::Linear, TextureFiltering magFilter = TextureFiltering::Linear);
@@ -27,3 +29,5 @@ protected:
 
 	static std::map<GLuint, std::atomic<uint32_t>> s_counters;
 };
+
+}

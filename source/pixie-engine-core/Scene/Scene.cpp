@@ -1,8 +1,11 @@
 #include "pch.h"
 #include "Scene.h"
 
+namespace PixieEngine {
+
 Scene::Scene(const std::string& name) :
-	m_name(name) {}
+	m_name(name) {
+}
 
 Scene::~Scene() {
 	delete m_rootObject;
@@ -156,4 +159,6 @@ void Scene::RemoveComponent(Component* component) {
 		}
 	}
 	delete component;
+}
+
 }

@@ -2,6 +2,8 @@
 #include "pch.h"
 #include "MathBase.h"
 
+namespace PixieEngine {
+
 float RandomFloat();
 float RandomFloat(float min, float max);
 
@@ -88,4 +90,6 @@ inline float RNG::Uniform<float>() {
 template <>
 inline double RNG::Uniform<double>() {
 	return std::min<double>(DoubleOneMinusEpsilon, Uniform<uint64_t>() * 0x1p-64);
+}
+
 }

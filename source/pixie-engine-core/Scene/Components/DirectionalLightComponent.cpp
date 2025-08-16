@@ -1,8 +1,11 @@
 #include "pch.h"
 #include "DirectionalLightComponent.h"
 
+namespace PixieEngine {
+
 DirectionalLightComponent::DirectionalLightComponent(SceneObject* parent, glm::vec3 direction, glm::vec3 color, float strength) :
-	Component(ComponentType::DirectionalLight, parent), m_direction(glm::normalize(direction)), m_color(color), m_strength(strength) {}
+	Component(ComponentType::DirectionalLight, parent), m_direction(glm::normalize(direction)), m_color(color), m_strength(strength) {
+}
 
 glm::vec3 DirectionalLightComponent::GetDirection() const {
 	return m_direction;
@@ -30,4 +33,6 @@ float DirectionalLightComponent::GetStrength() const {
 
 void DirectionalLightComponent::SetStrength(float strength) {
 	m_strength = strength;
+}
+
 }

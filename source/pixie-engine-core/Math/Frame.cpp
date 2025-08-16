@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Frame.h"
 
+namespace PixieEngine {
+
 Frame::Frame() : x(1, 0, 0), y(0, 1, 0), z(0, 0, 1) {}
 
 Frame::Frame(glm::vec3 x, glm::vec3 y, glm::vec3 z) : x(x), y(y), z(z) {}
@@ -37,4 +39,6 @@ glm::vec3 Frame::ToLocal(glm::vec3 v) const {
 
 glm::vec3 Frame::FromLocal(glm::vec3 v) const {
 	return v.x * x + v.y * y + v.z * z;
+}
+
 }

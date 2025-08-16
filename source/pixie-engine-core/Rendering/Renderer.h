@@ -4,6 +4,8 @@
 #include "Scene/Camera.h"
 #include "AntiAliasigUtils.h"
 
+namespace PixieEngine {
+
 class Renderer {
 public:
 	virtual void DrawFrame(std::shared_ptr<Scene> scene, const Camera& camera) const = 0;
@@ -13,3 +15,5 @@ public:
 	virtual AntiAliasing GetAntiAliasing() const = 0;
 	virtual void SetAntiAliasing(AntiAliasing mode) = 0;
 };
+
+}

@@ -2,6 +2,8 @@
 #include "pch.h"
 #include "MathBase.h"
 
+namespace PixieEngine {
+
 struct Frame {
 	glm::vec3 x, y, z;
 
@@ -16,3 +18,5 @@ struct Frame {
 	glm::vec3 ToLocal(glm::vec3 v) const;
 	glm::vec3 FromLocal(glm::vec3 v) const;
 };
+
+}

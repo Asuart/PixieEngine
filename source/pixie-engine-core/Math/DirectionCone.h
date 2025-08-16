@@ -3,6 +3,8 @@
 #include "Math/MathBase.h"
 #include "Math/Transform.h"
 
+namespace PixieEngine {
+
 struct DirectionCone {
 	glm::vec3 w = glm::vec3(0);
 	float cosTheta = Infinity;
@@ -15,3 +17,5 @@ struct DirectionCone {
 };
 
 bool Inside(const DirectionCone& d, glm::vec3 w);
+
+}

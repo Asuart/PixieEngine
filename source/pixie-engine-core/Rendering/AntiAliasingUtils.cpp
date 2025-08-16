@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "AntiAliasigUtils.h"
 
+namespace PixieEngine {
+
 std::string to_string(AntiAliasing mode) {
 	switch (mode) {
 	case AntiAliasing::None: return "None";
@@ -14,4 +16,6 @@ std::string to_string(AntiAliasing mode) {
 	case AntiAliasing::FXAA: return "FXAA";
 	default: return "Undefined";
 	}
+}
+
 }

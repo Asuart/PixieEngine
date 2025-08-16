@@ -2,6 +2,8 @@
 #include "pch.h"
 #include "Resources/Cubemap.h"
 
+namespace PixieEngine {
+
 class Skybox {
 public:
 	Cubemap m_cubemapTexture;
@@ -11,3 +13,5 @@ public:
 	Skybox();
 	Skybox(Cubemap cubemapTexture, Cubemap lightmapTexture, Cubemap prefilteredTexture);
 };
+
+}

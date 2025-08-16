@@ -1,8 +1,11 @@
 #include "pch.h"
 #include "Mesh.h"
 
+namespace PixieEngine {
+
 Mesh::Mesh(const std::vector<Vertex>& _vertices, const std::vector<int32_t>& _indices) :
-	m_vertices(_vertices), m_indices(_indices) {}
+	m_vertices(_vertices), m_indices(_indices) {
+}
 
 glm::vec3 Mesh::GetCenter() const {
 	glm::vec3 center = glm::vec3(0);
@@ -23,4 +26,6 @@ Bounds3f Mesh::GetBounds() const {
 		max = glm::max(max, v.position);
 	}
 	return Bounds3f(min, max);
+}
+
 }

@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "UserInput.h"
 
+namespace PixieEngine {
+
 SDL_Window* UserInput::window = nullptr;
 
 bool UserInput::buttonPressed = false;
@@ -76,4 +78,6 @@ void UserInput::SetInputWindow(SDL_Window* _window) {
 	//glfwSetCursorPosCallback(window, cursor_position_callback);
 	//glfwSetMouseButtonCallback(window, mouse_button_callback);
 	//glfwSetScrollCallback(window, scroll_callback);
+}
+
 }

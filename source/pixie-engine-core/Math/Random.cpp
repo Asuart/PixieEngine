@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Random.h"
 
+namespace PixieEngine {
+
 static std::random_device rd;
 static std::mt19937 gen(rd());
 static std::uniform_real_distribution<> dist(0, 1);
@@ -95,11 +97,11 @@ int32_t PermutationElement(uint32_t i, uint32_t l, uint32_t p) {
 
 RNG::RNG() : m_state(PCG32_DEFAULT_STATE), m_inc(PCG32_DEFAULT_STREAM) {}
 
-RNG::RNG(uint64_t seqIndex, uint64_t seed) { 
-	SetSequence(seqIndex, seed); 
+RNG::RNG(uint64_t seqIndex, uint64_t seed) {
+	SetSequence(seqIndex, seed);
 }
 
-RNG::RNG(uint64_t seqIndex) { 
+RNG::RNG(uint64_t seqIndex) {
 	SetSequence(seqIndex);
 }
 
@@ -128,4 +130,6 @@ void RNG::Advance(int64_t idelta) {
 		delta /= 2;
 	}
 	m_state = accMult * m_state + accPlus;
+}
+
 }

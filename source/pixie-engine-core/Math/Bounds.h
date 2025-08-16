@@ -2,6 +2,8 @@
 #include "pch.h"
 #include "Math.h"
 
+namespace PixieEngine {
+
 struct Bounds2i {
 	glm::ivec2 min = glm::ivec2(std::numeric_limits<int32_t>::max());
 	glm::ivec2 max = glm::ivec2(std::numeric_limits<int32_t>::lowest());
@@ -103,3 +105,5 @@ Bounds3i Union(const Bounds3i& b1, const Bounds3i& b2);
 Bounds3f Union(const Bounds3f& b1, const Bounds3f& b2);
 Bounds3f Union(const Bounds3f& b, glm::vec3 p);
 bool Inside(glm::vec3 p, const Bounds3f& b);
+
+}

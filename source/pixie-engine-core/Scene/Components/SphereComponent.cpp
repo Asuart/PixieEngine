@@ -2,8 +2,11 @@
 #include "SphereComponent.h"
 #include "Rendering/RenderEngine.h"
 
+namespace PixieEngine {
+
 SphereComponent::SphereComponent(SceneObject* parent, float radius) :
-	Component(ComponentType::Sphere, parent), m_radius(radius) {}
+	Component(ComponentType::Sphere, parent), m_radius(radius) {
+}
 
 void SphereComponent::Draw() const {
 	RenderEngine::DrawSphere();
@@ -15,4 +18,6 @@ float SphereComponent::GetRadius() const {
 
 void SphereComponent::SetRadius(float radius) {
 	m_radius = radius;
+}
+
 }

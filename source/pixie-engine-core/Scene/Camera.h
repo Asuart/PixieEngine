@@ -3,6 +3,8 @@
 #include "Math/MathBase.h"
 #include "Math/Transform.h"
 
+namespace PixieEngine {
+
 class Camera {
 public:
 	Camera(glm::vec3 lookFrom, glm::vec3 lookAt, glm::vec3 up, float fovy, float aspect, float _near = 0.01f, float _far = 1000.0);
@@ -38,3 +40,5 @@ protected:
 
 	void UpdateProjection();
 };
+
+}

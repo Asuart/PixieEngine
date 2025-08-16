@@ -1,6 +1,8 @@
 #pragma once
 #include "pch.h"
 
+namespace PixieEngine {
+
 enum class AntiAliasing {
 	None = 0,
 	SSAAx2,
@@ -15,3 +17,5 @@ enum class AntiAliasing {
 };
 
 std::string to_string(AntiAliasing mode);
+
+}

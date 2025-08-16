@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "FileReader.h"
-#include "Log.h"
+#include "Debug/Log.h"
+
+namespace PixieEngine {
 
 std::string FileReader::ReadFileAsString(const std::filesystem::path& filePath) {
 	std::ifstream t(filePath);
@@ -10,4 +12,6 @@ std::string FileReader::ReadFileAsString(const std::filesystem::path& filePath) 
 	}
 	std::string file((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
 	return file;
+}
+
 }

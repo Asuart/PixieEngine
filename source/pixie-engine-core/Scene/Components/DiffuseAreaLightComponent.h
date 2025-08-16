@@ -2,6 +2,8 @@
 #include "Component.h"
 #include "MeshComponent.h"
 
+namespace PixieEngine {
+
 class DiffuseAreaLightComponent : public Component {
 public:
 public:
@@ -25,3 +27,5 @@ protected:
 	glm::vec3 m_color;
 	float m_strength;
 };
+
+}

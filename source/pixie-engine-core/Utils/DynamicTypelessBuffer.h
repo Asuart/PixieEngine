@@ -1,12 +1,14 @@
 #pragma once
 #include "pch.h"
 
-class DynamicTypelessBuffer {
+namespace PixieEngine {
+
+class TypelessBuffer {
 public:
-	DynamicTypelessBuffer(size_t initialSize = 0) : m_buffer(initialSize) {}
+	TypelessBuffer(size_t initialSize = 0) : m_buffer(initialSize) {}
 
 	template<typename T>
-	DynamicTypelessBuffer(std::vector<T> v) {
+	TypelessBuffer(std::vector<T> v) {
 		int32_t size = sizeof(T);
 		m_buffer.reserve(size * v.size());
 		for (size_t i = 0; i < v.size(); i++) {
@@ -52,3 +54,5 @@ public:
 private:
 	std::vector<uint8_t> m_buffer;
 };
+
+}

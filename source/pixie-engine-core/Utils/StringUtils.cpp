@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "StringUtils.h"
 
+namespace PixieEngine {
+
 std::string StringUtils::TrimLeft(const std::string& str) {
     std::string s = str;
     s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
@@ -53,4 +55,6 @@ float StringUtils::ToFloat(const std::string& str) {
     catch (std::exception e) {
         return 0.0f;
     }
+}
+
 }

@@ -4,6 +4,8 @@
 #include "Resources/Mesh.h"
 #include "Math/Bounds.h"
 
+namespace PixieEngine {
+
 class MeshBVH {
 public:
 	struct BVHNode {
@@ -14,10 +16,12 @@ public:
 		uint8_t leaf = 0;
 
 		BVHNode(int32_t start, int16_t objetsCount, int8_t axis) :
-			secondChildOffset(start), numObjects(objetsCount), axis(axis) {}
+			secondChildOffset(start), numObjects(objetsCount), axis(axis) {
+		}
 
 		BVHNode(glm::vec3 pMin, glm::vec3 pMax, int8_t axis) :
-			bounds(pMin, pMax), axis(axis) {}
+			bounds(pMin, pMax), axis(axis) {
+		}
 	};
 
 	struct BVHLeaf {
@@ -25,7 +29,8 @@ public:
 		int32_t index;
 
 		BVHLeaf(Bounds3f bounds, int32_t index) :
-			bounds(bounds), index(index) {}
+			bounds(bounds), index(index) {
+		}
 	};
 
 	MeshBVH(const Mesh& mesh) :
@@ -252,3 +257,5 @@ public:
 		return true;
 	}
 };
+
+}

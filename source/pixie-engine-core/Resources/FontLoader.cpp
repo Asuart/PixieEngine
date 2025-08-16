@@ -1,11 +1,13 @@
 #include "pch.h"
 #include "FontLoader.h"
-#include "Log.h"
-#include "Globals.h"
+#include "Debug/Log.h"
+#include "EngineConfig.h"
+
+namespace PixieEngine {
 
 std::map<char, FontCharacter> FontLoader::LoadDefaultFont(uint64_t fontSize) {
 	std::map<char, FontCharacter> characters = {};
-	const std::string fontsPath = Globals::GetApplicationDirectory().string() + std::string("/Resources/Fonts/");
+	const std::string fontsPath = EngineConfig::GetApplicationDirectory().string() + std::string("/Resources/Fonts/");
 	FT_Library ft;
 	if (FT_Init_FreeType(&ft)) {
 		Log::Error("FREETYPE: Could not init FreeType Library");
@@ -51,4 +53,6 @@ std::map<char, FontCharacter> FontLoader::LoadDefaultFont(uint64_t fontSize) {
 	FT_Done_FreeType(ft);
 
 	return characters;
+}
+
 }

@@ -4,6 +4,8 @@
 #include "Buffer2DTexture.h"
 #include "Scene/Skybox.h"
 
+namespace PixieEngine {
+
 class TextureLoader {
 public:
 	static Texture LoadTextureFloat(const std::filesystem::path& filePath);
@@ -15,3 +17,5 @@ public:
 	static Buffer2DTexture<glm::vec4> LoadBuffer2DTextureRGBA(const std::filesystem::path& filePath);
 	static Skybox LoadSkybox(const std::filesystem::path& path);
 };
+
+}

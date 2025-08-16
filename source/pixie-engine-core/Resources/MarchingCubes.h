@@ -5,6 +5,8 @@
 #include "Mesh.h"
 #include "MeshHandle.h"
 
+namespace PixieEngine {
+
 static const int32_t triangulationTable[256][5][3] = {
 	{ { -1, -1, -1 }, { -1, -1, -1 }, { -1, -1, -1 }, { -1, -1, -1 }, { -1, -1, -1 } },
 	{ { 8, 0, 3 }, { -1, -1, -1 }, { -1, -1, -1 }, { -1, -1, -1 }, { -1, -1, -1 } },
@@ -429,3 +431,5 @@ protected:
 		return position;
 	}
 };
+
+}

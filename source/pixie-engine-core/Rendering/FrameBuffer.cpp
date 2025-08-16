@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "FrameBuffer.h"
 
+namespace PixieEngine {
+
 /*
 	FrameBuffer
 */
@@ -271,4 +273,6 @@ void GBuffer::BindTextures() const {
 
 void GBuffer::Unbind() const {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 }

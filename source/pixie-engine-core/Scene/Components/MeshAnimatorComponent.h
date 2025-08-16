@@ -2,7 +2,9 @@
 #include "pch.h"
 #include "Component.h"
 #include "Animation/MeshAnimator.h"
-#include "EngineTime.h"
+#include "Time/EngineTime.h"
+
+namespace PixieEngine {
 
 class MeshAnimatorComponent : public Component {
 public:
@@ -19,3 +21,5 @@ protected:
 
 	void UpdateAnimation(float deltaTime);
 };
+
+}

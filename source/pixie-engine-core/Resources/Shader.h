@@ -2,12 +2,15 @@
 #include "pch.h"
 #include "Material.h"
 
+namespace PixieEngine {
+
 class ShaderBase {
 protected:
 	GLuint m_programID = 0;
 
 	ShaderBase(GLuint programID) :
-		m_programID(programID) {};
+		m_programID(programID) {
+	};
 
 public:
 	inline void Free() {
@@ -15,12 +18,12 @@ public:
 		m_programID = 0;
 	}
 
-	inline GLuint GetProgramID() const { 
-		return m_programID; 
+	inline GLuint GetProgramID() const {
+		return m_programID;
 	}
 
-	inline void SetProgramID(GLuint programID) { 
-		m_programID = programID; 
+	inline void SetProgramID(GLuint programID) {
+		m_programID = programID;
 	}
 
 	inline void Bind() const {
@@ -138,12 +141,16 @@ public:
 
 class Shader : public ShaderBase {
 public:
-	explicit Shader(GLuint programID = 0) : 
-		ShaderBase(programID) {}
+	explicit Shader(GLuint programID = 0) :
+		ShaderBase(programID) {
+	}
 };
 
 class ComputeShader : public ShaderBase {
 public:
 	explicit ComputeShader(GLuint programID = 0) :
-		ShaderBase(programID) {}
+		ShaderBase(programID) {
+	}
 };
+
+}

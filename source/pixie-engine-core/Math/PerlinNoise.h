@@ -1,6 +1,8 @@
 #pragma once
 #include "Random.h"
 
+namespace PixieEngine {
+
 class PerlinNoise {
 public:
     PerlinNoise();
@@ -20,3 +22,5 @@ private:
     static void Permute(int32_t* p, int32_t n);
     static float TrilinearInterp(glm::vec3 c[2][2][2], float u, float v, float w);
 };
+
+}

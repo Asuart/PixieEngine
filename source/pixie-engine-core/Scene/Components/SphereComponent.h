@@ -2,6 +2,8 @@
 #include "pch.h"
 #include "Component.h"
 
+namespace PixieEngine {
+
 class SphereComponent : public Component {
 public:
 	SphereComponent(SceneObject* parent, float radius);
@@ -14,3 +16,5 @@ public:
 protected:
 	float m_radius;
 };
+
+}

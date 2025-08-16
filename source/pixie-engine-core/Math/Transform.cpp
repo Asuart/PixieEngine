@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Transform.h"
 
+namespace PixieEngine {
+
 struct Decomposition {
 	glm::vec3 scale;
 	glm::quat orientation;
@@ -24,10 +26,12 @@ Transform::Transform(const glm::vec3& position, const glm::quat& rotation, const
 };
 
 Transform::Transform(const glm::mat4& m) :
-	m_transform(m), m_inverseTransform(glm::inverse(m)) {}
+	m_transform(m), m_inverseTransform(glm::inverse(m)) {
+}
 
 Transform::Transform(const glm::mat4& m, const glm::mat4& mInv) :
-	m_transform(m), m_inverseTransform(mInv) {}
+	m_transform(m), m_inverseTransform(mInv) {
+}
 
 const glm::mat4& Transform::GetMatrix() const {
 	return m_transform;
@@ -90,7 +94,7 @@ void Transform::Set(const glm::vec3& position, const glm::quat& rotation, const 
 }
 
 void Transform::LookAt(glm::vec3 pos, glm::vec3 look, glm::vec3 up) {
-	m_inverseTransform = glm::lookAt(pos, look, up) ;
+	m_inverseTransform = glm::lookAt(pos, look, up);
 	m_transform = glm::inverse(m_inverseTransform);
 }
 
@@ -308,4 +312,6 @@ Transform LookAt(glm::vec3 from, glm::vec3 to, glm::vec3 up) {
 	Transform t;
 	t.LookAt(from, to, up);
 	return t;
+}
+
 }

@@ -1,12 +1,14 @@
+#pragma once
 #include "pch.h"
 #include "Rendering/RenderEngine.h"
-#include "PixieEngineMainWindow.h"
-#include "Log.h"
+#include "Windowing/MainWindowOpenGL.h"
+#include "Windowing/MainWindowVulkan.h"
 
-class PixieEngine {
-public:
-	PixieEngine() = delete;
+namespace PixieEngine {
 
-	static PixieEngineMainWindow* Initialize(const std::string& rootPath);
-	static void Free();
-};
+bool Initialize(const std::string& rootPath);
+void Free();
+
+MainWindow* CreateMainWindow(const std::string& windowName, RenderAPI renderAPI);
+
+}

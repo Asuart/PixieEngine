@@ -2,6 +2,8 @@
 #include "pch.h"
 #include "Component.h"
 
+namespace PixieEngine {
+
 class DirectionalLightComponent : public Component {
 public:
 	DirectionalLightComponent(SceneObject* parent, glm::vec3 direction, glm::vec3 color, float strength);
@@ -19,3 +21,5 @@ protected:
 	glm::vec3 m_color;
 	float m_strength;
 };
+
+}

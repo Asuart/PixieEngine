@@ -1,6 +1,9 @@
 #pragma once
 #include "pch.h"
 #include <cstdio>
+#include <string>
+
+namespace PixieEngine {
 
 class Log {
 public:
@@ -37,3 +40,5 @@ public:
 		printf((error + "\n").c_str(), args...);
 	}
 };
+
+}

@@ -1,14 +1,16 @@
 #include "pch.h"
 #include "TextureLoader.h"
 #include "TextureGenerator.h"
-#include "Globals.h"
-#include "Log.h"
+#include "EngineConfig.h"
+#include "Debug/Log.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+namespace PixieEngine {
+
 Texture TextureLoader::LoadTexture(const std::filesystem::path& filePath) {
-	std::filesystem::path fullPath = Globals::GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
+	std::filesystem::path fullPath = EngineConfig::GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
 	Log::Message("Loading texture: %s", filePath.string().c_str());
 
 	int32_t width, height, nrChannels;
@@ -44,7 +46,7 @@ Texture TextureLoader::LoadTexture(const std::filesystem::path& filePath) {
 }
 
 Texture TextureLoader::LoadTextureFloat(const std::filesystem::path& filePath) {
-	std::filesystem::path fullPath = Globals::GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
+	std::filesystem::path fullPath = EngineConfig::GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
 	Log::Message("Loading texture: %s", filePath.string().c_str());
 	int32_t width, height, nrChannels;
 	uint8_t* data = stbi_load(filePath.string().c_str(), &width, &height, &nrChannels, 1);
@@ -61,7 +63,7 @@ Texture TextureLoader::LoadTextureFloat(const std::filesystem::path& filePath) {
 }
 
 Texture TextureLoader::LoadTextureRGB(const std::filesystem::path& filePath) {
-	std::filesystem::path fullPath = Globals::GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
+	std::filesystem::path fullPath = EngineConfig::GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
 	Log::Message("Loading texture: %s", filePath.string().c_str());
 	int32_t width, height, nrChannels;
 	uint8_t* data = stbi_load(filePath.string().c_str(), &width, &height, &nrChannels, 3);
@@ -78,7 +80,7 @@ Texture TextureLoader::LoadTextureRGB(const std::filesystem::path& filePath) {
 }
 
 Texture TextureLoader::LoadTextureRGBA(const std::filesystem::path& filePath) {
-	std::filesystem::path fullPath = Globals::GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
+	std::filesystem::path fullPath = EngineConfig::GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
 	Log::Message("Loading texture: %s", filePath.string().c_str());
 	int32_t width, height, nrChannels;
 	uint8_t* data = stbi_load(filePath.string().c_str(), &width, &height, &nrChannels, 4);
@@ -99,7 +101,7 @@ Buffer2DTexture<float> TextureLoader::LoadBuffer2DTextureFloat(const std::filesy
 	int32_t width, height, nrChannels;
 	float* data = stbi_loadf(filePath.string().c_str(), &width, &height, &nrChannels, 1);
 	if (!data) {
-		std::filesystem::path fullPath = Globals::GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
+		std::filesystem::path fullPath = EngineConfig::GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
 		data = stbi_loadf(fullPath.string().c_str(), &width, &height, &nrChannels, 1);
 		if (!data) {
 			Log::Error("Failed to load texture");
@@ -119,7 +121,7 @@ Buffer2DTexture<glm::vec3> TextureLoader::LoadBuffer2DTextureRGB(const std::file
 	int32_t width, height, nrChannels;
 	float* data = stbi_loadf(filePath.string().c_str(), &width, &height, &nrChannels, 3);
 	if (!data) {
-		std::filesystem::path fullPath = Globals::GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
+		std::filesystem::path fullPath = EngineConfig::GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
 		data = stbi_loadf(fullPath.string().c_str(), &width, &height, &nrChannels, 3);
 		if (!data) {
 			Log::Error("Failed to load texture");
@@ -139,7 +141,7 @@ Buffer2DTexture<glm::vec4> TextureLoader::LoadBuffer2DTextureRGBA(const std::fil
 	int32_t width, height, nrChannels;
 	float* data = stbi_loadf(filePath.string().c_str(), &width, &height, &nrChannels, 4);
 	if (!data) {
-		std::filesystem::path fullPath = Globals::GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
+		std::filesystem::path fullPath = EngineConfig::GetApplicationDirectory().string() + std::string("/Resources/Textures/") + filePath.string();
 		data = stbi_loadf(fullPath.string().c_str(), &width, &height, &nrChannels, 4);
 		if (!data) {
 			Log::Error("Failed to load texture");
@@ -155,6 +157,8 @@ Buffer2DTexture<glm::vec4> TextureLoader::LoadBuffer2DTextureRGBA(const std::fil
 }
 
 Skybox TextureLoader::LoadSkybox(const std::filesystem::path& path) {
-	Buffer2DTexture<glm::vec3> sphericalMap = LoadBuffer2DTextureRGB(Globals::GetApplicationDirectory().string() + std::string("/Resources/Skymaps/") + path.string());
+	Buffer2DTexture<glm::vec3> sphericalMap = LoadBuffer2DTextureRGB(EngineConfig::GetApplicationDirectory().string() + std::string("/Resources/Skymaps/") + path.string());
 	return TextureGenerator::TextureSkybox(sphericalMap, { 512, 512 }, { 32, 32 }, { 128, 128 });
+}
+
 }

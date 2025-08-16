@@ -2,6 +2,8 @@
 #include "pch.h"
 #include "Mesh.h"
 
+namespace PixieEngine {
+
 class MeshHandle {
 public:
 	MeshHandle() = default;
@@ -26,3 +28,5 @@ protected:
 
 	friend class RenderEngine;
 };
+
+}

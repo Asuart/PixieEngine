@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "MultisampleTexture.h"
 
+namespace PixieEngine {
+
 std::map<GLuint, std::atomic<uint32_t>> MSTexture::s_counters;
 
 MSTexture::MSTexture(glm::uvec2 resolution, uint32_t samples, GLint internalFormat, bool fixedSampleLocations) :
@@ -70,4 +72,6 @@ GLint MSTexture::GetInternalFormat() const {
 
 glm::uvec2 MSTexture::GetResolution() const {
 	return m_resolution;
+}
+
 }

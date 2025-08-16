@@ -1,7 +1,6 @@
 #pragma once
-#include "pch.h"
-#include "Globals.h"
-#include "EngineTime.h"
+#include "EngineConfig.h"
+#include "Time/EngineTime.h"
 #include "Scene/Scene.h"
 #include "Scene/Components/Components.h"
 #include "Rendering/FrameBuffer.h"
@@ -10,6 +9,6 @@
 #include "Rendering/DefferedRenderer.h"
 #include "Math/BezierCurves.h"
 #include "PixieEngine.h"
-#include "UserInput.h"
+#include "UserInput/UserInput.h"
 #include "Resources/Texture.h"
 #include "Resources/Material.h"

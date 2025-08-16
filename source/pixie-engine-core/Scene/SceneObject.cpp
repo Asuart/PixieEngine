@@ -1,9 +1,11 @@
 #include "pch.h"
 #include "SceneObject.h"
 
-SceneObject::SceneObject(const std::string& name, Transform transform) :
-	m_name(name), m_localTransform(transform), m_parent(nullptr) {}
+namespace PixieEngine {
 
+SceneObject::SceneObject(const std::string& name, Transform transform) :
+	m_name(name), m_localTransform(transform), m_parent(nullptr) {
+}
 
 const std::vector<Component*>& SceneObject::GetComponents() const {
 	return m_components;
@@ -83,4 +85,6 @@ std::vector<SceneObject*> SceneObject::FindObjects(const std::string& objectName
 		objects.insert(objects.end(), childrenFound.begin(), childrenFound.end());
 	}
 	return objects;
+}
+
 }

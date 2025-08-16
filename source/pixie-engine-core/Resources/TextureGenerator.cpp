@@ -2,6 +2,8 @@
 #include "TextureGenerator.h"
 #include "Rendering/RenderEngine.h"
 
+namespace PixieEngine {
+
 Texture TextureGenerator::SSAONoiseTexture(glm::ivec2 resolution) {
 	std::vector<glm::vec3> ssaoNoise(resolution.x * resolution.y);
 	for (int32_t i = 0; i < resolution.x * resolution.y; i++) {
@@ -36,4 +38,6 @@ Skybox TextureGenerator::GradientSkybox(glm::vec3 upColor, glm::vec3 botColor, g
 	}
 	sphericalMap.Upload();
 	return Skybox(resolution, irradianceResolution, prefilterResolution);
+}
+
 }

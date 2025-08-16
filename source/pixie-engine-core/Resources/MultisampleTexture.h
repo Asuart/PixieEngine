@@ -2,6 +2,8 @@
 #include "pch.h"
 #include "TextureUtils.h"
 
+namespace PixieEngine {
+
 class MSTexture {
 public:
 	MSTexture(glm::uvec2 resolution, uint32_t samples, GLint internalFormat = GL_RGBA, bool fixedSampleLocations = false);
@@ -26,3 +28,5 @@ protected:
 
 	static std::map<GLuint, std::atomic<uint32_t>> s_counters;
 };
+
+}

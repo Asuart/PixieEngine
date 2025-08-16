@@ -1,9 +1,11 @@
 #pragma once
 
+namespace PixieEngine {
+
 // LTC1 is the inverse M
 // LTC2 is for (GGX normf, fresnelf, 0(unused)f, sphere for horizon-clipping)
 
-static const float LTC1[] = {
+inline const float LTC1[] = {
 	1.0f, 0.0f, 0.0f, 2e-05f,
 	1.0f, 0.0f, 0.0f, 0.000503905f,
 	1.0f, 0.0f, 0.0f, 0.00201562f,
@@ -4102,7 +4104,7 @@ static const float LTC1[] = {
 	0.996389f, -0.0808124f, 0.0489007f, 1.6577f,
 };
 
-static const float LTC2[] = {
+inline const float LTC2[] = {
 	1.0f, 0.0f, 0.0f, 0.0f,
 	1.0f, 7.91421e-31f, 0.0f, 0.0f,
 	1.0f, 1.04392e-24f, 0.0f, 0.0f,
@@ -8200,3 +8202,5 @@ static const float LTC2[] = {
 	0.93222f, 0.0484975f, 0.0f, 0.984127f,
 	0.932164f, 0.0471899f, 0.0f, 1.0f,
 };
+
+}

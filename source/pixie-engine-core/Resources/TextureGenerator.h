@@ -5,6 +5,8 @@
 #include "Scene/Skybox.h"
 #include "Buffer2DTexture.h"
 
+namespace PixieEngine {
+
 class TextureGenerator {
 public:
 	static Texture SSAONoiseTexture(glm::ivec2 resolution);
@@ -13,3 +15,5 @@ public:
 	static Skybox SolidColorSkybox(glm::vec3 color, glm::ivec2 resolution = { 1, 1 }, glm::ivec2 irradianceResolution = { 1, 1 }, glm::ivec2 prefilterResolution = { 1, 1 });
 	static Skybox GradientSkybox(glm::vec3 upColor, glm::vec3 botColor, glm::ivec2 resolution = { 32, 32 }, glm::ivec2 irradianceResolution = { 32, 32 }, glm::ivec2 prefilterResolution = { 32, 32 });
 };
+
+}

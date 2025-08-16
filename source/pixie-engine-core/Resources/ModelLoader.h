@@ -2,6 +2,8 @@
 #include "pch.h"
 #include "Scene/Scene.h"
 
+namespace PixieEngine {
+
 class ModelLoader {
 public:
 	static void LoadModel(std::shared_ptr<Scene> scene, const std::filesystem::path& filePath);
@@ -20,3 +22,5 @@ protected:
 	static glm::vec3 GetGLMVec(const aiVector3D& vec);
 	static glm::quat GetGLMQuat(const aiQuaternion& pOrientation);
 };
+
+}

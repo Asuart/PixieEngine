@@ -2,6 +2,8 @@
 #include "Math.h"
 #include "Bounds.h"
 
+namespace PixieEngine {
+
 class Transform {
 public:
 	Transform() = default;
@@ -65,3 +67,5 @@ Transform RotateFromTo(glm::vec3 from, glm::vec3 to);
 Transform RotateAroundAxis(float sinTheta, float cosTheta, glm::vec3 axis);
 Transform RotateAroundAxis(float theta, glm::vec3 axis);
 Transform LookAt(glm::vec3 from, glm::vec3 to, glm::vec3 up);
+
+}

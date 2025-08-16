@@ -1,5 +1,6 @@
 #pragma once
 #include "pch.h"
+#include "RenderAPI.h"
 #include "FrameBuffer.h"
 #include "Scene/Camera.h"
 #include "Resources/Cubemap.h"
@@ -7,10 +8,14 @@
 #include "Resources/FontLoader.h"
 #include "Resources/MeshHandle.h"
 
+namespace PixieEngine {
+
 class RenderEngine {
 public:
-	static bool Initialize();
+	static bool Initialize(RenderAPI api);
 	static void Free();
+
+	static RenderAPI GetRenderAPI();
 
 	// Draw scene
 	static void DrawMesh(const MeshHandle& mesh);
@@ -56,4 +61,8 @@ protected:
 	static MeshHandle* m_sphereMesh;
 	static std::map<char, FontCharacter> m_characters;
 	static uint32_t m_defaultFontSize;
+
+	inline static RenderAPI m_renderAPI = RenderAPI::Undefined;
 };
+
+}

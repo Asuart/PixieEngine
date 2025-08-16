@@ -2,6 +2,8 @@
 #include "pch.h"
 #include "Component.h"
 
+namespace PixieEngine {
+
 class PointLightComponent : public Component {
 public:
 	PointLightComponent(SceneObject* parent, glm::vec3 color, float strength);
@@ -16,3 +18,5 @@ protected:
 	glm::vec3 m_color;
 	float m_strength;
 };
+
+}
