@@ -48,6 +48,9 @@ public:
 	void Start() {
 		m_switchingRenderAPI = true;
 		auto renderAPISelectCallback = [&](PixieEngine::RenderAPI api) {
+			if (api == m_renderAPI) {
+				return;
+			}
 			m_renderAPI = api;
 			m_switchingRenderAPI = true;
 			m_mainWindow->Close();
@@ -63,7 +66,7 @@ public:
 				exit(1);
 			}
 
-			m_ui = new PixieEngine::UI(m_mainWindow, false);
+			m_ui = new PixieEngine::UI(m_mainWindow, true);
 			m_ui->AddWindow(new PixieEngine::DemoWindow());
 			m_ui->AddWindow(new RenderAPISelect(renderAPISelectCallback));
 
@@ -71,20 +74,20 @@ public:
 
 			delete m_ui;
 			delete m_mainWindow;
-			PixieEngine::Free();
 		}
 	}
 
 protected:
-	PixieEngine::RenderAPI m_renderAPI = PixieEngine::RenderAPI::Vulkan;
+	PixieEngine::RenderAPI m_renderAPI = PixieEngine::RenderAPI::OpenGL;
 	bool m_switchingRenderAPI = true;
 	PixieEngine::MainWindow* m_mainWindow = nullptr;
 	PixieEngine::UI* m_ui = nullptr;
 
 	void MainLoop() {
 		while (!m_mainWindow->ShouldClose()) {
-			m_mainWindow->Clear();
+			m_mainWindow->StartFrame();
 			m_ui->Draw();
+			m_mainWindow->EndFrame();
 			m_mainWindow->SwapBuffers();
 
 			while (std::optional<PixieEngine::Event> event = m_mainWindow->PollEvent()) {
@@ -100,6 +103,8 @@ int32_t main(int32_t argc, char** argv) {
 
 	PixieEngineApplication app;
 	app.Start();
+
+	PixieEngine::Free();
 
     return 0;
 }

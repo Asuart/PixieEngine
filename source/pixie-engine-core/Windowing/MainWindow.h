@@ -11,7 +11,8 @@ public:
 	MainWindow() = delete;
 	virtual ~MainWindow() {};
 
-	virtual void Clear() = 0;
+	virtual void StartFrame() {};
+	virtual void EndFrame() {};
 
 	void HandleEvent(const Event& event);
 	void SwapBuffers();

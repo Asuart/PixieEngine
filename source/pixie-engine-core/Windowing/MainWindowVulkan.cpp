@@ -220,6 +220,8 @@ MainWindowVulkan::MainWindowVulkan(const std::string& name, glm::ivec2 resolutio
 }
 
 MainWindowVulkan::~MainWindowVulkan() {
+	vkDeviceWaitIdle(m_vkDevice);
+
 	vkDestroySemaphore(m_vkDevice, m_vkImageAvailableSemaphore, nullptr);
 	vkDestroySemaphore(m_vkDevice, m_vkRenderFinishedSemaphore, nullptr);
 	vkDestroyFence(m_vkDevice, m_vkInFlightFence, nullptr);
@@ -258,16 +260,65 @@ void MainWindowVulkan::InitSDL() {
 	}
 }
 
-void MainWindowVulkan::Clear() {
+void MainWindowVulkan::StartFrame() {
 	vkWaitForFences(m_vkDevice, 1, &m_vkInFlightFence, VK_TRUE, UINT64_MAX);
 	vkResetFences(m_vkDevice, 1, &m_vkInFlightFence);
 
-	uint32_t imageIndex;
-	vkAcquireNextImageKHR(m_vkDevice, m_vkSwapChain, UINT64_MAX, m_vkImageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+	vkAcquireNextImageKHR(m_vkDevice, m_vkSwapChain, UINT64_MAX, m_vkImageAvailableSemaphore, VK_NULL_HANDLE, &m_imageIndex);
 
 	vkResetCommandBuffer(m_vkCommandBuffer, 0);
 
-	RecordCommandBuffer(m_vkCommandBuffer, imageIndex);
+	//RecordCommandBuffer(m_vkCommandBuffer, m_imageIndex);
+
+	VkCommandBufferBeginInfo beginInfo{};
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	beginInfo.flags = 0;
+	beginInfo.pInheritanceInfo = nullptr;
+
+	if (vkBeginCommandBuffer(m_vkCommandBuffer, &beginInfo) != VK_SUCCESS) {
+		Log::Error("Failed to begin recording command buffer.");
+		exit(1);
+	}
+
+	VkClearValue clearColor = { {{0.0f, 0.0f, 0.0f, 1.0f}} };
+
+	VkRenderPassBeginInfo renderPassInfo{};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderPassInfo.renderPass = m_vkRenderPass;
+	renderPassInfo.framebuffer = m_vkSwapChainFramebuffers[m_imageIndex];
+	renderPassInfo.renderArea.offset = { 0, 0 };
+	renderPassInfo.renderArea.extent = m_vkSwapChainExtent;
+	renderPassInfo.clearValueCount = 1;
+	renderPassInfo.pClearValues = &clearColor;
+
+	vkCmdBeginRenderPass(m_vkCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	vkCmdBindPipeline(m_vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_vkPipeline);
+
+	VkViewport viewport{};
+	viewport.x = 0.0f;
+	viewport.y = 0.0f;
+	viewport.width = static_cast<float>(m_vkSwapChainExtent.width);
+	viewport.height = static_cast<float>(m_vkSwapChainExtent.height);
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
+	vkCmdSetViewport(m_vkCommandBuffer, 0, 1, &viewport);
+
+	VkRect2D scissor{};
+	scissor.offset = { 0, 0 };
+	scissor.extent = m_vkSwapChainExtent;
+	vkCmdSetScissor(m_vkCommandBuffer, 0, 1, &scissor);
+
+	//vkCmdDraw(m_vkCommandBuffer, 3, 1, 0, 0);
+}
+
+void MainWindowVulkan::EndFrame() {
+	vkCmdEndRenderPass(m_vkCommandBuffer);
+
+	if (vkEndCommandBuffer(m_vkCommandBuffer) != VK_SUCCESS) {
+		Log::Error("Failed to record command buffer.");
+		exit(1);
+	}
 
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -296,7 +347,7 @@ void MainWindowVulkan::Clear() {
 	VkSwapchainKHR swapChains[] = { m_vkSwapChain };
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = swapChains;
-	presentInfo.pImageIndices = &imageIndex;
+	presentInfo.pImageIndices = &m_imageIndex;
 	presentInfo.pResults = nullptr;
 
 	vkQueuePresentKHR(m_vkPresentQueue, &presentInfo);
@@ -419,7 +470,7 @@ SwapChainSupportDetails MainWindowVulkan::QuerySwapChainSupport(VkPhysicalDevice
 
 VkSurfaceFormatKHR MainWindowVulkan::ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
 	for (const auto& availableFormat : availableFormats) {
-		if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+		if (availableFormat.format == VK_FORMAT_R8G8B8A8_UNORM && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
 			return availableFormat;
 		}
 	}

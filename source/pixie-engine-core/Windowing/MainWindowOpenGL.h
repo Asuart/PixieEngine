@@ -9,7 +9,8 @@ public:
 	MainWindowOpenGL(const std::string& name, glm::ivec2 resolution);
 	~MainWindowOpenGL();
 
-	virtual void Clear() override;
+	virtual void StartFrame() override;
+	virtual void EndFrame() override;
 
 	SDL_GLContext GetOpenGLContext() const;
 

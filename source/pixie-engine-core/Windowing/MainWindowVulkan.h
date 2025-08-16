@@ -24,7 +24,16 @@ public:
 	MainWindowVulkan(const std::string& name, glm::ivec2 resolution);
 	~MainWindowVulkan();
 
-	virtual void Clear() override;
+
+	virtual void StartFrame() override;
+	virtual void EndFrame() override;
+
+	inline const VkInstance& GetInstance() { return m_vkInstance; }
+	inline const VkDevice& GetDevice() { return m_vkDevice; }
+	inline const VkPhysicalDevice& GetPhysicalDevice() { return m_vkPhysicalDevice; }
+	inline const VkQueue& GetQueue() { return m_vkPresentQueue; }
+	inline const VkRenderPass& GetRenderPass() { return m_vkRenderPass; }
+	inline const VkCommandBuffer& GetCommandBuffer() { return m_vkCommandBuffer; }
 
 protected:
 	VkApplicationInfo m_vkAppInfo;
@@ -47,6 +56,8 @@ protected:
 	VkSemaphore m_vkImageAvailableSemaphore;
 	VkSemaphore m_vkRenderFinishedSemaphore;
 	VkFence m_vkInFlightFence;
+
+	uint32_t m_imageIndex;
 
 	void InitSDL();
 
