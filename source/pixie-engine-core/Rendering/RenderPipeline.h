@@ -6,7 +6,7 @@
 
 namespace PixieEngine {
 
-class Renderer {
+class RenderPipeline {
 public:
 	virtual void DrawFrame(std::shared_ptr<Scene> scene, const Camera& camera) const = 0;
 	virtual void SetResolution(glm::ivec2 resolution) = 0;

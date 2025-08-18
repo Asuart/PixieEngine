@@ -4,13 +4,13 @@
 #include "Time/EngineTime.h"
 #include "RenderEngine.h"
 #include "FrameBuffer.h"
-#include "Renderer.h"
+#include "RenderPipeline.h"
 
 namespace PixieEngine {
 
-class ForwardRenderer : public Renderer {
+class ForwardRenderPipeline : public RenderPipeline {
 public:
-	ForwardRenderer();
+	ForwardRenderPipeline();
 
 	void DrawFrame(std::shared_ptr<Scene> scene, const Camera& camera) const override;
 	void SetResolution(glm::ivec2 resolution) override;

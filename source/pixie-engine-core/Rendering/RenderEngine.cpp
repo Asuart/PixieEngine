@@ -3,90 +3,30 @@
 #include "Resources/MeshGenerator.h"
 #include "Debug/Log.h"
 #include "Debug/OpenGLCallbacks.h"
+#include "Rendering/OpenGL/RendererOpenGL.h"
+#include "Rendering/Vulkan/RendererVulkan.h"
 
 namespace PixieEngine {
 
-Shader RenderEngine::m_quadShader;
-Shader RenderEngine::m_textShader;
-Shader RenderEngine::m_uiBoxShader;
-Shader RenderEngine::m_skyboxShader;
-Shader RenderEngine::m_equirectangularToCubemapShader;
-Shader RenderEngine::m_cubemapConvolutionShader;
-Shader RenderEngine::m_prefilterShader;
-Shader RenderEngine::m_brdfLUTShader;
-GLuint RenderEngine::m_textVAO;
-GLuint RenderEngine::m_textVBO;
-Texture* RenderEngine::m_brdfLUT;
-MeshHandle* RenderEngine::m_quadMesh;
-MeshHandle* RenderEngine::m_cubeMesh;
-MeshHandle* RenderEngine::m_sphereMesh;
-std::map<char, FontCharacter> RenderEngine::m_characters;
-uint32_t RenderEngine::m_defaultFontSize;
-
 RenderAPI RenderEngine::GetRenderAPI() {
-	return m_renderAPI;
+	return s_renderAPI;
 }
 
-void RenderEngine::DrawMesh(const MeshHandle& mesh) {
-	if (mesh.m_vao == 0 || mesh.m_indicesCount == 0) return;
-	glBindVertexArray(mesh.m_vao);
-	glDrawElements(GL_TRIANGLES, mesh.m_indicesCount, GL_UNSIGNED_INT, NULL);
-	glBindVertexArray(0);
+RendererBase* RenderEngine::GetRenderer() {
+	return s_renderer;
 }
 
-void RenderEngine::DrawMeshWireframe(const MeshHandle& mesh) {
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	DrawMesh(mesh);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+void RenderEngine::DrawMesh(MeshHandle mesh) {
+	s_renderer->DrawMesh(mesh);
 }
 
 bool RenderEngine::Initialize(RenderAPI api) {
-	m_renderAPI = api;
-
+	s_renderAPI = api;
 	if (api == RenderAPI::Vulkan) {
-
+		s_renderer = new RendererVulkan();
 	}
 	else if (api == RenderAPI::OpenGL) {
-		if (!gladLoadGL()) {
-			Log::Error("GLAD initialization failed");
-			exit(2);
-		}
-
-		glEnable(GL_DEBUG_OUTPUT);
-		glDebugMessageCallback(openglCallbackFunction, 0);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_MULTISAMPLE);
-		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-
-		m_quadShader = ShaderManager::LoadShader("TextureViewerQuad");
-		m_textShader = ShaderManager::LoadShader("Text");
-		m_uiBoxShader = ShaderManager::LoadShader("UIBox");
-		m_skyboxShader = ShaderManager::LoadShader("Skybox");
-		m_cubemapConvolutionShader = ShaderManager::LoadShader("CubemapConvolution");
-		m_equirectangularToCubemapShader = ShaderManager::LoadShader("EquirectangularToCubemap");
-		m_prefilterShader = ShaderManager::LoadShader("Prefilter");
-		m_brdfLUTShader = ShaderManager::LoadShader("BRDFLookUpTexture");
-
-		m_quadMesh = new MeshHandle(MeshGenerator::Quad({ 0.0f, 0.0f }, { 1.0f, 1.0f }));
-		m_cubeMesh = new MeshHandle(MeshGenerator::Cube());
-		m_sphereMesh = new MeshHandle(MeshGenerator::SphereFromOctahedron(1.0f, 6));
-
-		glGenVertexArrays(1, &m_textVAO);
-		glGenBuffers(1, &m_textVBO);
-		glBindVertexArray(m_textVAO);
-		glBindBuffer(GL_ARRAY_BUFFER, m_textVBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-
-		m_brdfLUT = new Texture({ 512, 512 }, GL_RG16F, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge, TextureFiltering::Linear, TextureFiltering::Linear);
-		DrawBRDFLookUpTexture({ 512, 512 }, m_brdfLUT->GetHandle());
-
-		m_defaultFontSize = 64;
-		m_characters = FontLoader::LoadDefaultFont(m_defaultFontSize);
+		s_renderer = new RendererOpenGL();
 	}
 	else {
 		Log::Error("Failed to initialize render engine. Unhandled render API.");
@@ -97,54 +37,11 @@ bool RenderEngine::Initialize(RenderAPI api) {
 }
 
 void RenderEngine::Free() {
-	m_quadShader.Free();
-	m_textShader.Free();
-	m_uiBoxShader.Free();
-	m_skyboxShader.Free();
-	m_equirectangularToCubemapShader.Free();
-	m_cubemapConvolutionShader.Free();
-	m_prefilterShader.Free();
-	m_brdfLUTShader.Free();
-
-	delete m_brdfLUT;
-	delete m_quadMesh;
-	delete m_cubeMesh;
-	delete m_sphereMesh;
-
-	glDeleteVertexArrays(1, &m_textVAO);
-	m_textVAO = 0;
-	glDeleteBuffers(1, &m_textVBO);
-	m_textVBO = 0;
-
-	m_characters.clear();
-}
-
-void RenderEngine::DrawSkybox(const Camera& camera, GLuint skyboxTexture) {
-	glDepthFunc(GL_LEQUAL);
-	m_skyboxShader.Bind();
-	m_skyboxShader.SetUniformMat4f("mProjection", camera.GetProjectionMatrix());
-	m_skyboxShader.SetUniformMat4f("mView", camera.GetViewMatrix());
-	m_skyboxShader.SetCubeMap("environmentMap", skyboxTexture, 0);
-	DrawCube();
-}
-
-void RenderEngine::DrawQuad() {
-	DrawMesh(*m_quadMesh);
-}
-
-void RenderEngine::DrawCube() {
-	DrawMesh(*m_cubeMesh);
-}
-
-void RenderEngine::DrawSphere() {
-	DrawMesh(*m_sphereMesh);
+	delete s_renderer;
+	s_renderer = nullptr;
 }
 
 void RenderEngine::DrawTextureFitted(GLuint id, glm::ivec2 textureResolution, glm::ivec2 viewportResolution) {
-	DrawAccumulatorTextureFitted(id, 1, textureResolution, viewportResolution);
-}
-
-void RenderEngine::DrawAccumulatorTextureFitted(GLuint id, int32_t samples, glm::ivec2 textureResolution, glm::ivec2 viewportResolution) {
 	glm::vec2 pos(0.0f, 0.0f), size(1.0f, 1.0f);
 	float textureAspect = Aspect(textureResolution);
 	float viewportAspect = Aspect(viewportResolution);
@@ -156,18 +53,13 @@ void RenderEngine::DrawAccumulatorTextureFitted(GLuint id, int32_t samples, glm:
 		size.y = viewportAspect / textureAspect;
 		pos.y = (1.0f - size.y) * 0.5f;
 	}
-	DrawAccumulatorTexture(id, samples, pos, size);
+	DrawTexture(id, pos, size);
 }
 
 void RenderEngine::DrawTexture(GLuint id, glm::vec2 pos, glm::vec2 size) {
-	DrawAccumulatorTexture(id, 1, pos, size);
-}
-
-void RenderEngine::DrawAccumulatorTexture(GLuint id, int32_t samples, glm::vec2 pos, glm::vec2 size) {
 	m_quadShader.Bind();
 	m_quadShader.SetUniform2f("uPos", pos);
 	m_quadShader.SetUniform2f("uSize", size);
-	m_quadShader.SetUniform1f("uSamples", (float)samples);
 	m_quadShader.SetTexture("ourTexture", id, 2);
 	DrawQuad();
 }
@@ -208,18 +100,6 @@ void RenderEngine::DrawText(const std::string& text, glm::vec2 position, float f
 
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void RenderEngine::DrawUIBox(glm::vec2 position, glm::vec2 size, glm::vec4 baseColor, float borderRadius, float borderWidth, glm::vec4 borderColor, glm::mat4 projection) {
-	m_uiBoxShader.Bind();
-	m_uiBoxShader.SetUniform2f("uPos", position);
-	m_uiBoxShader.SetUniform2f("uSize", size);
-	m_uiBoxShader.SetUniform2i("uBoxPixelSize", glm::ivec2(size));
-	m_uiBoxShader.SetUniform1f("uBorderRadius", borderRadius);
-	m_uiBoxShader.SetUniform4f("uBaseColor", baseColor);
-	m_uiBoxShader.SetUniformMat4f("mProjection", projection);
-	DrawQuad();
-	m_uiBoxShader.Unbind();
 }
 
 void RenderEngine::DrawCubeMap(const Texture& equirectangularTexture, glm::ivec2 cubemapResolution, const Cubemap& cubemapTexture, glm::ivec2 lighmapResolution, const Cubemap& lightmapTextrue, glm::ivec2 prefilterResolution, const Cubemap& prefilterTexture) {
@@ -331,10 +211,6 @@ void RenderEngine::DrawBRDFLookUpTexture(glm::ivec2 resolution, GLuint texture) 
 
 	// Restore original viewport
 	glViewport(originalViewport[0], originalViewport[1], originalViewport[2], originalViewport[3]);
-}
-
-GLuint RenderEngine::GetBRDFLUTHandle() {
-	return m_brdfLUT->GetHandle();
 }
 
 }
