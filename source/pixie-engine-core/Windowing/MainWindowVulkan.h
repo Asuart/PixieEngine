@@ -9,9 +9,6 @@ public:
 	MainWindowVulkan(const std::string& name, glm::ivec2 resolution);
 	~MainWindowVulkan();
 
-	void StartFrame() override;
-	void EndFrame() override;
-
 protected:
 	uint32_t m_imageIndex;
 

@@ -4,7 +4,7 @@
 namespace PixieEngine {
 
 struct SSBOHandle {
-	GLuint id = 0;
+	uint32_t id = 0;
 	int32_t size = 0;
 };
 

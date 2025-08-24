@@ -14,7 +14,8 @@ enum class ComponentType : uint32_t {
 	Mesh,
 	PointLight,
 	Sphere,
-	SphereRigidbody
+	SphereRigidbody,
+	COUNT
 };
 
 class Component {

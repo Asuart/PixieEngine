@@ -8,10 +8,6 @@ SphereComponent::SphereComponent(SceneObject* parent, float radius) :
 	Component(ComponentType::Sphere, parent), m_radius(radius) {
 }
 
-void SphereComponent::Draw() const {
-	RenderEngine::DrawSphere();
-}
-
 float SphereComponent::GetRadius() const {
 	return m_radius;
 }

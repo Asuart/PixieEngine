@@ -1,5 +1,6 @@
 #pragma once
 #include "pch.h"
+#include <glad/glad.h>
 
 namespace PixieEngine {
 
@@ -7,8 +8,12 @@ struct ShaderProgramOpenGL {
 	GLuint id;
 };
 
-ShaderProgramOpenGL CompileShaderOpenGL(const std::string& vertexShaderSource, const std::string& framgentShaderSource);
+struct ComputeShaderProgramOpenGL {
+	GLuint id;
+};
 
-ShaderProgramOpenGL CompileComputeShaderOpenGL(const std::string& computeShaderSource);
+ShaderProgramOpenGL CompileShaderOpenGL(const char* vertexShaderSource, const char* framgentShaderSource, const char* geometryShaderSource);
+
+ComputeShaderProgramOpenGL CompileComputeShaderOpenGL(const char* computeShaderSource);
 
 }

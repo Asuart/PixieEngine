@@ -8,8 +8,6 @@ class SphereComponent : public Component {
 public:
 	SphereComponent(SceneObject* parent, float radius);
 
-	void Draw() const;
-
 	float GetRadius() const;
 	void SetRadius(float radius);
 

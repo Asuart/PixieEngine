@@ -1,12 +1,12 @@
 #include "pch.h"
-#include "ForwardRenderer.h"
+#include "ForwardRenderPipeline.h"
 #include "LTC_Matrix.h"
 #include "Resources/MarchingCubes.h"
 #include "Debug/Log.h"
 
 namespace PixieEngine {
 
-ForwardRenderer::ForwardRenderer() :
+ForwardRenderPipeline::ForwardRenderPipeline() :
 	m_frameBuffer({ 1280, 720 }),
 	m_fxaaFrameBuffer({ 1280, 720 }),
 	m_msFrameBuffer({ 1280, 720 }, 1),
@@ -14,9 +14,50 @@ ForwardRenderer::ForwardRenderer() :
 	m_LTC2Texture({ 64, 64 }, GL_RGBA, GL_RGBA, GL_FLOAT, (void*)LTC2, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge, TextureFiltering::Linear, TextureFiltering::Linear) {
 	m_defaultShader = ShaderManager::LoadShader("PhysicallyBased");
 	m_fxaaShader = ShaderManager::LoadShader("FXAA");
+
+
+
+
+	m_quadShader = ShaderManager::LoadShader("TextureViewerQuad");
+	m_textShader = ShaderManager::LoadShader("Text");
+	m_uiBoxShader = ShaderManager::LoadShader("UIBox");
+	m_skyboxShader = ShaderManager::LoadShader("Skybox");
+	m_cubemapConvolutionShader = ShaderManager::LoadShader("CubemapConvolution");
+	m_equirectangularToCubemapShader = ShaderManager::LoadShader("EquirectangularToCubemap");
+	m_prefilterShader = ShaderManager::LoadShader("Prefilter");
+	m_brdfLUTShader = ShaderManager::LoadShader("BRDFLookUpTexture");
+
+	m_quadMesh = new MeshHandle(MeshGenerator::Quad({ 0.0f, 0.0f }, { 1.0f, 1.0f }));
+	m_cubeMesh = new MeshHandle(MeshGenerator::Cube());
+	m_sphereMesh = new MeshHandle(MeshGenerator::SphereFromOctahedron(1.0f, 6));
+
+	m_brdfLUT = new Texture({ 512, 512 }, GL_RG16F, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge, TextureFiltering::Linear, TextureFiltering::Linear);
+	DrawBRDFLookUpTexture({ 512, 512 }, m_brdfLUT->GetHandle());
+
+	m_defaultFontSize = 64;
+	m_characters = FontLoader::LoadDefaultFont(m_defaultFontSize);
+
 }
 
-void ForwardRenderer::DrawFrame(std::shared_ptr<Scene> scene, const Camera& camera) const {
+ForwardRenderPipeline::~ForwardRenderPipeline() {
+	m_quadShader.Free();
+	m_textShader.Free();
+	m_uiBoxShader.Free();
+	m_skyboxShader.Free();
+	m_equirectangularToCubemapShader.Free();
+	m_cubemapConvolutionShader.Free();
+	m_prefilterShader.Free();
+	m_brdfLUTShader.Free();
+
+	delete m_brdfLUT;
+	delete m_quadMesh;
+	delete m_cubeMesh;
+	delete m_sphereMesh;
+
+	m_characters.clear();
+}
+
+void ForwardRenderPipeline::DrawFrame(std::shared_ptr<Scene> scene, const Camera& camera) const {
 	GLint originalViewport[4];
 	glGetIntegerv(GL_VIEWPORT, originalViewport);
 
@@ -62,17 +103,17 @@ void ForwardRenderer::DrawFrame(std::shared_ptr<Scene> scene, const Camera& came
 	glViewport(originalViewport[0], originalViewport[1], originalViewport[2], originalViewport[3]);
 }
 
-void ForwardRenderer::SetResolution(glm::ivec2 resolution) {
+void ForwardRenderPipeline::SetResolution(glm::ivec2 resolution) {
 	m_frameBuffer.Resize(resolution * m_ssaaScale);
 	m_fxaaFrameBuffer.Resize(resolution);
 	m_msFrameBuffer.Resize(resolution);
 }
 
-glm::ivec2 ForwardRenderer::GetResolution() const {
+glm::ivec2 ForwardRenderPipeline::GetResolution() const {
 	return m_frameBuffer.GetResolution();
 }
 
-GLuint ForwardRenderer::GetFrameHandle() const {
+GLuint ForwardRenderPipeline::GetFrameHandle() const {
 	if (m_useFXAA) {
 		return m_fxaaFrameBuffer.GetColorHandle();
 	}
@@ -81,11 +122,11 @@ GLuint ForwardRenderer::GetFrameHandle() const {
 	}
 }
 
-AntiAliasing ForwardRenderer::GetAntiAliasing() const {
+AntiAliasing ForwardRenderPipeline::GetAntiAliasing() const {
 	return m_antiAliasing;
 }
 
-void ForwardRenderer::SetAntiAliasing(AntiAliasing mode) {
+void ForwardRenderPipeline::SetAntiAliasing(AntiAliasing mode) {
 	m_ssaaScale = 1;
 	m_useMultisampleFramebuffer = false;
 	m_antiAliasing = mode;
@@ -123,11 +164,11 @@ void ForwardRenderer::SetAntiAliasing(AntiAliasing mode) {
 	}
 }
 
-void ForwardRenderer::SetShader(Shader shader) {
+void ForwardRenderPipeline::SetShader(Shader shader) {
 	m_defaultShader = shader;
 }
 
-void ForwardRenderer::DrawObject(SceneObject* object, glm::mat4 parentTransform) const {
+void ForwardRenderPipeline::DrawObject(SceneObject* object, glm::mat4 parentTransform) const {
 	if (!object) return;
 
 	glm::mat4 objectTransform = parentTransform * object->GetTransform().GetMatrix();
@@ -166,13 +207,13 @@ void ForwardRenderer::DrawObject(SceneObject* object, glm::mat4 parentTransform)
 	}
 }
 
-void ForwardRenderer::SetupCamera(const Camera& camera) const {
+void ForwardRenderPipeline::SetupCamera(const Camera& camera) const {
 	m_defaultShader.SetUniform3f("uCameraPos", camera.GetTransform().GetPosition());
 	m_defaultShader.SetUniformMat4f("mView", camera.GetViewMatrix());
 	m_defaultShader.SetUniformMat4f("mProjection", camera.GetProjectionMatrix());
 }
 
-void ForwardRenderer::SetupLights(std::shared_ptr<Scene> scene) const {
+void ForwardRenderPipeline::SetupLights(std::shared_ptr<Scene> scene) const {
 	// Point lights
 	const size_t MaxPointLights = 32;
 	int32_t nPointLights = 0;

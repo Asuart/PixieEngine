@@ -1,5 +1,8 @@
 #pragma once
 #include "pch.h"
+#include "Mesh.h"
+#include "Rendering/MeshHandle.h"
+#include "Rendering/TextureHandle.h"
 #include "Scene/Scene.h"
 
 namespace PixieEngine {
@@ -14,13 +17,7 @@ protected:
 	static std::vector<Bone> ProcessAssimpAnimation(const aiAnimation* animation, std::map<std::string, BoneInfo>& boneInfoMap);
 	static Mesh ProcessAssimpMesh(const aiMesh* mesh, std::map<std::string, BoneInfo>& boneInfoMap);
 	static std::shared_ptr<Material> ProcessAssimpMaterial(const std::filesystem::path& filePath, const aiMaterial* material);
-	static std::vector<Texture> ProcessAssimpMaterialTextures(const std::filesystem::path& filePath, const aiMaterial* material, aiTextureType type, const std::string& name);
-
-	// Assimp to GLM conversion helpers
-	static glm::mat4 ConvertMatrixToGLMFormat(const aiMatrix4x4& from);
-	static glm::vec2 GetGLMVec(const aiVector2D& vec);
-	static glm::vec3 GetGLMVec(const aiVector3D& vec);
-	static glm::quat GetGLMQuat(const aiQuaternion& pOrientation);
+	static std::vector<TextureHandle> ProcessAssimpMaterialTextures(const std::filesystem::path& filePath, const aiMaterial* material, aiTextureType type, const std::string& name);
 };
 
 }

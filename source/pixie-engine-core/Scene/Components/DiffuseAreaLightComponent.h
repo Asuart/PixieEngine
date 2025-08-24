@@ -1,6 +1,7 @@
 #pragma once
 #include "Component.h"
-#include "MeshComponent.h"
+#include "Resources/Mesh.h"
+#include "Rendering/MeshHandle.h"
 
 namespace PixieEngine {
 

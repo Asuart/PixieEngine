@@ -1,13 +1,13 @@
 #include "pch.h"
-#include "FrameBuffer.h"
+#include "FrameBufferOpenGL.h"
 
 namespace PixieEngine {
 
 /*
-	FrameBuffer
+	FrameBufferOpenGL
 */
 
-FrameBuffer::FrameBuffer(glm::ivec2 resolution) :
+FrameBufferOpenGL::FrameBufferOpenGL(glm::ivec2 resolution) :
 	m_resolution(resolution) {
 	glGenFramebuffers(1, &m_frameBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer);
@@ -34,13 +34,13 @@ FrameBuffer::FrameBuffer(glm::ivec2 resolution) :
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-FrameBuffer::~FrameBuffer() {
+FrameBufferOpenGL::~FrameBufferOpenGL() {
 	glDeleteFramebuffers(1, &m_frameBuffer);
 	glDeleteTextures(1, &m_texture);
 	glDeleteTextures(1, &m_depth);
 }
 
-void FrameBuffer::Resize(glm::ivec2 resolution) {
+void FrameBufferOpenGL::Resize(glm::ivec2 resolution) {
 	if (m_resolution == resolution) {
 		return;
 	}
@@ -52,35 +52,35 @@ void FrameBuffer::Resize(glm::ivec2 resolution) {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-glm::ivec2 FrameBuffer::GetResolution() const {
+glm::ivec2 FrameBufferOpenGL::GetResolution() const {
 	return m_resolution;
 }
 
-GLuint FrameBuffer::GetBufferHandle() const {
+GLuint FrameBufferOpenGL::GetBufferHandle() const {
 	return m_frameBuffer;
 }
 
-GLuint FrameBuffer::GetColorHandle() const {
+GLuint FrameBufferOpenGL::GetColorHandle() const {
 	return m_texture;
 }
 
-GLuint FrameBuffer::GetDepthHandle() const {
+GLuint FrameBufferOpenGL::GetDepthHandle() const {
 	return m_depth;
 }
 
-void FrameBuffer::ResizeViewport() const {
+void FrameBufferOpenGL::ResizeViewport() const {
 	glViewport(0, 0, m_resolution.x, m_resolution.y);
 }
 
-void FrameBuffer::Clear() const {
+void FrameBufferOpenGL::Clear() const {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void FrameBuffer::Bind() const {
+void FrameBufferOpenGL::Bind() const {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer);
 }
 
-void FrameBuffer::Unbind() const {
+void FrameBufferOpenGL::Unbind() const {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -88,7 +88,7 @@ void FrameBuffer::Unbind() const {
 	MultisampleFrameBuffer
 */
 
-MultisampleFrameBuffer::MultisampleFrameBuffer(glm::ivec2 resolution, int32_t samples) :
+MultisampleFrameBufferOpenGL::MultisampleFrameBufferOpenGL(glm::ivec2 resolution, int32_t samples) :
 	m_resolution(resolution), m_samples(samples), m_texture(resolution, samples, GL_RGBA) {
 	glGenFramebuffers(1, &m_frameBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer);
@@ -110,18 +110,18 @@ MultisampleFrameBuffer::MultisampleFrameBuffer(glm::ivec2 resolution, int32_t sa
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-MultisampleFrameBuffer::~MultisampleFrameBuffer() {
+MultisampleFrameBufferOpenGL::~MultisampleFrameBufferOpenGL() {
 	glDeleteFramebuffers(1, &m_frameBuffer);
 	glDeleteTextures(1, &m_depth);
 }
 
-void MultisampleFrameBuffer::Blit(const FrameBuffer& target) const {
+void MultisampleFrameBufferOpenGL::Blit(const FrameBufferOpenGL& target) const {
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_frameBuffer);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, target.GetBufferHandle());
 	glBlitFramebuffer(0, 0, m_resolution.x, m_resolution.y, 0, 0, target.GetResolution().x, target.GetResolution().y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 }
 
-void MultisampleFrameBuffer::Resize(glm::ivec2 resolution) {
+void MultisampleFrameBufferOpenGL::Resize(glm::ivec2 resolution) {
 	if (m_resolution == resolution) {
 		return;
 	}
@@ -132,44 +132,44 @@ void MultisampleFrameBuffer::Resize(glm::ivec2 resolution) {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-glm::ivec2 MultisampleFrameBuffer::GetResolution() const {
+glm::ivec2 MultisampleFrameBufferOpenGL::GetResolution() const {
 	return m_resolution;
 }
 
-void MultisampleFrameBuffer::SetSampleCount(int32_t samples) {
+void MultisampleFrameBufferOpenGL::SetSampleCount(int32_t samples) {
 	m_samples = samples;
 	m_texture.SetSampleCount(samples);
 }
 
-int32_t MultisampleFrameBuffer::GetSampleCount() const {
+int32_t MultisampleFrameBufferOpenGL::GetSampleCount() const {
 	return m_samples;
 }
 
-GLuint MultisampleFrameBuffer::GetBufferHandle() const {
+GLuint MultisampleFrameBufferOpenGL::GetBufferHandle() const {
 	return m_frameBuffer;
 }
 
-GLuint MultisampleFrameBuffer::GetColorHandle() const {
+GLuint MultisampleFrameBufferOpenGL::GetColorHandle() const {
 	return m_texture.GetHandle();
 }
 
-GLuint MultisampleFrameBuffer::GetDepthHandle() const {
+GLuint MultisampleFrameBufferOpenGL::GetDepthHandle() const {
 	return m_depth;
 }
 
-void MultisampleFrameBuffer::ResizeViewport() const {
+void MultisampleFrameBufferOpenGL::ResizeViewport() const {
 	glViewport(0, 0, m_resolution.x, m_resolution.y);
 }
 
-void MultisampleFrameBuffer::Clear() const {
+void MultisampleFrameBufferOpenGL::Clear() const {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void MultisampleFrameBuffer::Bind() const {
+void MultisampleFrameBufferOpenGL::Bind() const {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer);
 }
 
-void MultisampleFrameBuffer::Unbind() const {
+void MultisampleFrameBufferOpenGL::Unbind() const {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -177,7 +177,7 @@ void MultisampleFrameBuffer::Unbind() const {
 	GBuffer
 */
 
-GBuffer::GBuffer(glm::ivec2 resolution) :
+GBufferOpenGL::GBufferOpenGL(glm::ivec2 resolution) :
 	m_resolution(resolution) {
 	glGenFramebuffers(1, &m_frameBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer);
@@ -225,7 +225,7 @@ GBuffer::GBuffer(glm::ivec2 resolution) :
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-GBuffer::~GBuffer() {
+GBufferOpenGL::~GBufferOpenGL() {
 	glDeleteFramebuffers(1, &m_frameBuffer);
 	glDeleteTextures(1, &m_albedoSpec);
 	glDeleteTextures(1, &m_positionRoughness);
@@ -233,7 +233,7 @@ GBuffer::~GBuffer() {
 	glDeleteTextures(1, &m_depth);
 }
 
-void GBuffer::Resize(glm::ivec2 resolution) {
+void GBufferOpenGL::Resize(glm::ivec2 resolution) {
 	if (m_resolution == resolution) {
 		return;
 	}
@@ -249,20 +249,20 @@ void GBuffer::Resize(glm::ivec2 resolution) {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void GBuffer::ResizeViewport() const {
+void GBufferOpenGL::ResizeViewport() const {
 	glViewport(0, 0, m_resolution.x, m_resolution.y);
 }
 
-void GBuffer::Clear() const {
+void GBufferOpenGL::Clear() const {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void GBuffer::Bind() const {
+void GBufferOpenGL::Bind() const {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer);
 	BindTextures();
 }
 
-void GBuffer::BindTextures() const {
+void GBufferOpenGL::BindTextures() const {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_albedoSpec);
 	glActiveTexture(GL_TEXTURE1);
@@ -271,7 +271,7 @@ void GBuffer::BindTextures() const {
 	glBindTexture(GL_TEXTURE_2D, m_normalMetallic);
 }
 
-void GBuffer::Unbind() const {
+void GBufferOpenGL::Unbind() const {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 

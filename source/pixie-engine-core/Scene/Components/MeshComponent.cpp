@@ -16,12 +16,4 @@ void MeshComponent::SetMesh(MeshHandle mesh) {
 	m_mesh = mesh;
 }
 
-void MeshComponent::Draw() const {
-	RenderEngine::DrawMesh(m_mesh);
-}
-
-uint32_t MeshComponent::GetIndicesCount() const {
-	return m_mesh.GetIndicesCount();
-}
-
 }

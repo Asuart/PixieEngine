@@ -1,6 +1,7 @@
 #pragma once
 #include "pch.h"
 #include "Rendering/RendererBase.h"
+#include <vulkan/vulkan.h>
 
 namespace PixieEngine {
 
@@ -21,11 +22,17 @@ struct SwapChainSupportDetails {
 
 class RendererVulkan : public RendererBase {
 public:
+	RendererVulkan();
+	~RendererVulkan();
+
 	void StartFrame() override;
 	void EndFrame() override;
-	void DrawScene(std::shared_ptr<Scene> scene, const Camera& camera) override;
 
 	ShaderHandle CreateShader(const std::string& vertexShaderSource, const std::string fragmentShaderShource) override;
+	MeshHandle LoadMesh(const Mesh& mesh) override;
+	TextureHandle LoadTexture(const Buffer2D<float>& texture) override;
+	TextureHandle LoadTexture(const Buffer2D<glm::vec3>& texture) override;
+	TextureHandle LoadTexture(const Buffer2D<glm::vec4>& texture) override;
 
 	void CheckAvailableExtensions();
 	bool CheckValidationLayerSupport();
@@ -67,25 +74,6 @@ public:
 	VkSemaphore m_vkImageAvailableSemaphore;
 	VkSemaphore m_vkRenderFinishedSemaphore;
 	VkFence m_vkInFlightFence;
-
-
-
-	static Shader m_quadShader;
-	static Shader m_textShader;
-	static Shader m_uiBoxShader;
-	static Shader m_equirectangularToCubemapShader;
-	static Shader m_cubemapConvolutionShader;
-	static Shader m_prefilterShader;
-	static Shader m_brdfLUTShader;
-	static Shader m_skyboxShader;
-	static GLuint m_textVAO;
-	static GLuint m_textVBO;
-	static Texture* m_brdfLUT;
-	static MeshHandle* m_quadMesh;
-	static MeshHandle* m_cubeMesh;
-	static MeshHandle* m_sphereMesh;
-	static std::map<char, FontCharacter> m_characters;
-	static uint32_t m_defaultFontSize;
 };
 
 }

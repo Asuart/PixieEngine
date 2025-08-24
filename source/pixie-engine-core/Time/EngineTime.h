@@ -10,7 +10,7 @@ public:
 	}
 
 	inline static const float fixedDeltaTime = 0.002f;
-	inline static float deltaTime = 1.0f / 60.0f;
+	inline static float deltaTime = 0.0f;
 	inline static std::chrono::milliseconds lastTime = Time::GetCurrentTime();
 
 	static void Update();

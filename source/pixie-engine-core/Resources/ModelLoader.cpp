@@ -3,8 +3,34 @@
 #include "TextureLoader.h"
 #include "Debug/Log.h"
 #include "EngineConfig.h"
+#include "Rendering/RenderEngine.h"
 
 namespace PixieEngine {
+
+// Assimp to GLM conversion helpers
+
+inline glm::mat4 ConvertMatrixToGLMFormat(const aiMatrix4x4& from) {
+	glm::mat4 to;
+	to[0][0] = from.a1; to[1][0] = from.a2; to[2][0] = from.a3; to[3][0] = from.a4;
+	to[0][1] = from.b1; to[1][1] = from.b2; to[2][1] = from.b3; to[3][1] = from.b4;
+	to[0][2] = from.c1; to[1][2] = from.c2; to[2][2] = from.c3; to[3][2] = from.c4;
+	to[0][3] = from.d1; to[1][3] = from.d2; to[2][3] = from.d3; to[3][3] = from.d4;
+	return to;
+}
+
+inline glm::vec2 GetGLMVec(const aiVector2D& vec) {
+	return glm::vec2(vec.x, vec.y);
+}
+
+inline glm::vec3 GetGLMVec(const aiVector3D& vec) {
+	return glm::vec3(vec.x, vec.y, vec.z);
+}
+
+inline glm::quat GetGLMQuat(const aiQuaternion& pOrientation) {
+	return glm::quat(pOrientation.w, pOrientation.x, pOrientation.y, pOrientation.z);
+}
+
+// ModelLoader implementation
 
 void ModelLoader::LoadModel(std::shared_ptr<Scene> currentScene, const std::filesystem::path& filePath) {
 	std::filesystem::path fullPath = EngineConfig::GetAssetsPath().string() + filePath.string();
@@ -87,7 +113,7 @@ SceneObject* ModelLoader::ProcessAssimpNode(std::shared_ptr<Scene> currentScene,
 	if (node->mNumMeshes == 1) {
 		aiMesh* aiMesh = scene->mMeshes[node->mMeshes[0]];
 		Mesh mesh = ProcessAssimpMesh(aiMesh, boneInfoMap);
-		MeshHandle meshHandle(mesh);
+		MeshHandle meshHandle = RenderEngine::LoadMesh(mesh);
 		currentScene->CreateComponent<MeshComponent>(nodeObject, meshHandle);
 		std::shared_ptr<Material> material = nullptr;
 		if (aiMesh->mMaterialIndex >= 0) {
@@ -97,8 +123,8 @@ SceneObject* ModelLoader::ProcessAssimpNode(std::shared_ptr<Scene> currentScene,
 			material = std::make_shared<Material>("Default Material");
 		}
 		currentScene->CreateComponent<MaterialComponent>(nodeObject, material);
-		if (material->m_emissionColor != glm::vec3(0) && material->m_emissionStrength != 0.0f) {
-			currentScene->CreateComponent<DiffuseAreaLightComponent>(nodeObject, meshHandle, mesh, material->m_emissionColor, material->m_emissionStrength);
+		if (material->emissionColor != glm::vec3(0) && material->emissionStrength != 0.0f) {
+			currentScene->CreateComponent<DiffuseAreaLightComponent>(nodeObject, meshHandle, mesh, material->emissionColor, material->emissionStrength);
 		}
 	}
 	else {
@@ -106,7 +132,7 @@ SceneObject* ModelLoader::ProcessAssimpNode(std::shared_ptr<Scene> currentScene,
 			SceneObject* child = currentScene->CreateObject("mesh holder", nodeObject);
 			aiMesh* aiMesh = scene->mMeshes[node->mMeshes[meshIndex]];
 			Mesh mesh = ProcessAssimpMesh(aiMesh, boneInfoMap);
-			MeshHandle meshHandle(mesh);
+			MeshHandle meshHandle = RenderEngine::LoadMesh(mesh);
 			currentScene->CreateComponent<MeshComponent>(child, meshHandle);
 			std::shared_ptr<Material> material = nullptr;
 			if (aiMesh->mMaterialIndex >= 0) {
@@ -235,8 +261,8 @@ std::shared_ptr<Material> ModelLoader::ProcessAssimpMaterial(const std::filesyst
 	glmEmissionColor /= emissionNormaizer;
 	emissionInt = emissionNormaizer * (emissionInt ? emissionInt : 1.0f);
 
-	std::vector<Texture> diffuseMaps = ProcessAssimpMaterialTextures(filePath, aiMaterial, aiTextureType_DIFFUSE, "texture_diffuse");
-	std::vector<Texture> specularMaps = ProcessAssimpMaterialTextures(filePath, aiMaterial, aiTextureType_SPECULAR, "texture_specular");
+	std::vector<TextureHandle> diffuseMaps = ProcessAssimpMaterialTextures(filePath, aiMaterial, aiTextureType_DIFFUSE, "texture_diffuse");
+	std::vector<TextureHandle> specularMaps = ProcessAssimpMaterialTextures(filePath, aiMaterial, aiTextureType_SPECULAR, "texture_specular");
 
 	if (glm::isnan(glmEmissionColor.r) || glm::isnan(glmEmissionColor.y) || glm::isnan(glmEmissionColor.z)) {
 		glmEmissionColor = glm::vec3(0);
@@ -260,43 +286,23 @@ std::shared_ptr<Material> ModelLoader::ProcessAssimpMaterial(const std::filesyst
 	glm::vec3 albedo = glm::vec3(color.r, color.g, color.b);
 	std::shared_ptr<Material> material = std::make_shared<Material>(materialName, albedo, glmEmissionColor, emissionInt, roughness, metallic, 1.0f - opacity, eta);
 	if (diffuseMaps.size() > 0) {
-		material->m_albedoTexture = diffuseMaps[0];
+		material->albedoTexture = diffuseMaps[0];
 	}
 
 	return material;
 }
 
-std::vector<Texture> ModelLoader::ProcessAssimpMaterialTextures(const std::filesystem::path& filePath, const aiMaterial* material, aiTextureType type, const std::string&) {
-	std::vector<Texture> textures;
+std::vector<TextureHandle> ModelLoader::ProcessAssimpMaterialTextures(const std::filesystem::path& filePath, const aiMaterial* material, aiTextureType type, const std::string&) {
+	std::vector<TextureHandle> textures;
 	for (uint32_t i = 0; i < material->GetTextureCount(type); i++) {
 		aiString str;
 		material->GetTexture(type, i, &str);
 		std::filesystem::path texturePath = filePath.parent_path().string() + "/" + str.C_Str();
-		textures.push_back(TextureLoader::LoadTextureRGB(texturePath));
+		const Buffer2D<glm::vec3> texture = TextureLoader::LoadTextureRGB(texturePath);
+		TextureHandle textureHandle = RenderEngine::LoadTexture(texture);
+		textures.push_back(textureHandle);
 	}
 	return textures;
-}
-
-
-glm::mat4 ModelLoader::ConvertMatrixToGLMFormat(const aiMatrix4x4& from) {
-	glm::mat4 to;
-	to[0][0] = from.a1; to[1][0] = from.a2; to[2][0] = from.a3; to[3][0] = from.a4;
-	to[0][1] = from.b1; to[1][1] = from.b2; to[2][1] = from.b3; to[3][1] = from.b4;
-	to[0][2] = from.c1; to[1][2] = from.c2; to[2][2] = from.c3; to[3][2] = from.c4;
-	to[0][3] = from.d1; to[1][3] = from.d2; to[2][3] = from.d3; to[3][3] = from.d4;
-	return to;
-}
-
-glm::vec2 ModelLoader::GetGLMVec(const aiVector2D& vec) {
-	return glm::vec2(vec.x, vec.y);
-}
-
-glm::vec3 ModelLoader::GetGLMVec(const aiVector3D& vec) {
-	return glm::vec3(vec.x, vec.y, vec.z);
-}
-
-glm::quat ModelLoader::GetGLMQuat(const aiQuaternion& pOrientation) {
-	return glm::quat(pOrientation.w, pOrientation.x, pOrientation.y, pOrientation.z);
 }
 
 }

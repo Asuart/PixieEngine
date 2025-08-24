@@ -1,6 +1,6 @@
 #pragma once
-#include "Resources/MeshHandle.h"
 #include "Component.h"
+#include "Rendering/MeshHandle.h"
 
 namespace PixieEngine {
 
@@ -10,8 +10,6 @@ public:
 
 	MeshHandle GetMesh() const;
 	void SetMesh(MeshHandle mesh);
-	void Draw() const;
-	uint32_t GetIndicesCount() const;
 
 protected:
 	MeshHandle m_mesh;

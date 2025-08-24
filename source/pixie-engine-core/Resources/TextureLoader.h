@@ -1,21 +1,15 @@
 #pragma once
 #include "pch.h"
-#include "Texture.h"
-#include "Buffer2DTexture.h"
+#include "Utils/Buffer2D.h"
 #include "Scene/Skybox.h"
 
 namespace PixieEngine {
 
 class TextureLoader {
 public:
-	static Texture LoadTextureFloat(const std::filesystem::path& filePath);
-	static Texture LoadTexture(const std::filesystem::path& filePath);
-	static Texture LoadTextureRGB(const std::filesystem::path& filePath);
-	static Texture LoadTextureRGBA(const std::filesystem::path& filePath);
-	static Buffer2DTexture<float> LoadBuffer2DTextureFloat(const std::filesystem::path& filePath);
-	static Buffer2DTexture<glm::vec3> LoadBuffer2DTextureRGB(const std::filesystem::path& filePath);
-	static Buffer2DTexture<glm::vec4> LoadBuffer2DTextureRGBA(const std::filesystem::path& filePath);
-	static Skybox LoadSkybox(const std::filesystem::path& path);
+	static Buffer2D<float> LoadTextureFloat(const std::filesystem::path& filePath);
+	static Buffer2D<glm::vec3> LoadTextureRGB(const std::filesystem::path& filePath);
+	static Buffer2D<glm::vec4> LoadTextureRGBA(const std::filesystem::path& filePath);
 };
 
 }

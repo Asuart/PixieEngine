@@ -10,11 +10,6 @@ bool PixieEngine::Initialize(const std::string& rootPath) {
 }
 
 MainWindow* PixieEngine::CreateMainWindow(const std::string& windowName, RenderAPI renderAPI) {
-	RenderAPI currentRenderAPI = RenderEngine::GetRenderAPI();
-	if (currentRenderAPI != RenderAPI::Undefined) {
-		// TODO: reload resources to support new render API
-	}
-
 	if (renderAPI == RenderAPI::OpenGL) {
 		MainWindow* window = new MainWindowOpenGL(windowName, { 1280, 720 });
 		if (!RenderEngine::Initialize(renderAPI)) {
@@ -33,7 +28,9 @@ MainWindow* PixieEngine::CreateMainWindow(const std::string& windowName, RenderA
 		}
 		return window;
 	}
+
 	Log::Error("Unhandled Render API");
+
 	return nullptr;
 }
 

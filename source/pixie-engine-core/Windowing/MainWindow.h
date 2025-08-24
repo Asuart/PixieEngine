@@ -1,8 +1,10 @@
 #pragma once 
 #include "pch.h"
+#include "SDL.h"
 #include "Debug/Log.h"
 #include "UserInput/UserInput.h"
 #include "Event.h"
+#include "Rendering/RenderEngine.h"
 
 namespace PixieEngine {
 
@@ -10,9 +12,6 @@ class MainWindow {
 public:
 	MainWindow() = delete;
 	virtual ~MainWindow() {};
-
-	virtual void StartFrame() {};
-	virtual void EndFrame() {};
 
 	void HandleEvent(const Event& event);
 	void SwapBuffers();

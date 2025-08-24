@@ -1,10 +1,10 @@
 #pragma once
 #include "pch.h"
+#include "glad/glad.h"
 
 namespace PixieEngine {
 
-inline void APIENTRY openglCallbackFunction(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
-	// filter warnings
+inline void APIENTRY OpenglCallbackHandler(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
 	if (id == 131185 || id == 131218 || id == 131186) return;
 
 	std::cout << "---------------------opengl-callback-start------------\n";

@@ -1,25 +1,11 @@
 #pragma once
 #include "pch.h"
+#include "glad/glad.h"
+#include "Rendering/TextureEnums.h"
 
 namespace PixieEngine {
 
-enum class TextureWrap {
-	Reapeat = 0,
-	MirroredRepeat,
-	ClampToEdge,
-	ClampToBorder,
-};
-
-enum class TextureFiltering {
-	Nearest,
-	Linear,
-	NearestMipmapNearest,
-	LinearMipmapNearest,
-	NearestMipmapLinear,
-	LinearMipmapLinear,
-};
-
-constexpr GLint glCastTextureWrap(TextureWrap wrap) {
+constexpr GLint CastTextureWrapOpenGL(TextureWrap wrap) {
 	switch (wrap) {
 	case TextureWrap::Reapeat: return GL_REPEAT;
 	case TextureWrap::MirroredRepeat: return GL_MIRRORED_REPEAT;
@@ -29,7 +15,7 @@ constexpr GLint glCastTextureWrap(TextureWrap wrap) {
 	}
 }
 
-constexpr GLint glCastTextureFiltering(TextureFiltering filtering) {
+constexpr GLint CastTextureFilteringOpenGL(TextureFiltering filtering) {
 	switch (filtering) {
 	case TextureFiltering::Linear: return GL_LINEAR;
 	case TextureFiltering::Nearest: return GL_NEAREST;
@@ -40,5 +26,10 @@ constexpr GLint glCastTextureFiltering(TextureFiltering filtering) {
 	default: return GL_LINEAR;
 	}
 }
+
+struct TextureOpenGL {
+	GLuint id;
+	GLint internalFormat;
+};
 
 }
